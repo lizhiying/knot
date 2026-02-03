@@ -24,3 +24,7 @@ models/*
 # IDEs
 .vscode/
 .idea/
+
+# Large Binaries
+knot-app/bin/llama/
+knot-app/bin/onnxruntime/
