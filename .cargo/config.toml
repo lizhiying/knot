@@ -1,0 +1,16 @@
+# ONNX Runtime 动态库路径配置
+# 使用绝对路径确保能正确加载
+
+[env]
+# macOS ARM64 (Apple Silicon) - 当前激活
+ORT_DYLIB_PATH = "/Users/lizhiying/Projects/knot/source/knot-workspaces/knot-app/bin/onnxruntime/macos-arm64/libonnxruntime.dylib"
+
+# 其他平台（根据需要取消注释）:
+# macOS x64 (Intel)
+# ORT_DYLIB_PATH = "/path/to/knot-workspaces/knot-app/bin/onnxruntime/macos-x64/libonnxruntime.dylib"
+
+# Windows x64
+# ORT_DYLIB_PATH = "C:\\path\\to\\knot-workspaces\\knot-app\\bin\\onnxruntime\\windows-x64\\onnxruntime.dll"
+
+# Linux x64
+# ORT_DYLIB_PATH = "/path/to/knot-workspaces/knot-app/bin/onnxruntime/linux-x64/libonnxruntime.so"

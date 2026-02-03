@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "pageindex-rs",
+    "knot-app/src-tauri",
+    "undoc",
+]
+resolver = "2"
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
