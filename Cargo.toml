@@ -2,7 +2,7 @@
 members = [
     "pageindex-rs",
     "knot-app/src-tauri",
-    "undoc",
+    "undoc", "knot-core", "knot-cli",
 ]
 resolver = "2"
 

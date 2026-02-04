@@ -32,6 +32,21 @@ graph TD
 
 ### 方案详解
 
+#### 0. 里程碑一补充需求（本轮新增）
+
+以下内容需要纳入里程碑一的需求与设计基线：
+
+1. **索引管道与查询管道分离**：索引写入与检索只读分离，避免锁竞争与状态交叉。
+2. **LanceDB 表设计前置规划**：为未来扩展预留字段（如 `chunk_hash`、`node_path`、`workspace_id`/`file_type` 等）。
+3. **避免“先删后插”全量更新**：改为节点级增量更新（基于 `node_id` + `content_hash`）。
+4. **Parent-Child 上下文拼接策略收敛**：限制 breadcrumbs 长度，避免上下文爆炸与噪声污染。
+5. **混合检索权重动态化**：根据 query 类型动态调整 `Vector/Keyword` 权重。
+6. **Rerank 阈值动态化**：基于分布或 Top1/Top2 差值，动态决定是否拒答。
+7. **增加“索引版本号”字段**：用于索引策略或 Embedding 模型升级时的快速重建与兼容。
+8. **轻量缓存 Embedding**：基于 `chunk_hash` 复用向量，减少重复计算。
+9. **pageindex-rs 输出增强**：必须包含 `node_id` 与 `content_hash`。
+10. **统一 Schema 文件**：将向量记录与元数据 Schema 固化在单独文件中，避免未来迁移成本。
+
 #### 1. 存储层选型：LanceDB (关键决策)
 
 **需求对应：** 3 (万级文档性能), 7 (普通电脑运行)
@@ -57,6 +72,7 @@ CREATE TABLE file_registry (
     file_path TEXT PRIMARY KEY,
     last_modified INTEGER,
     content_hash TEXT, --文件的指纹 (Blake3/SHA256)
+    index_version TEXT, -- 索引版本号
     parse_status TEXT, -- 'indexed', 'failed', 'pending'
     indexed_at INTEGER
 );
@@ -71,7 +87,9 @@ CREATE TABLE file_registry (
 4. **增量检查**：
 * 计算当前文件的 Hash。
 * 如果 `Hash == SQLite.content_hash`，跳过（即使修改时间变了，内容没变也不重算）。
-* 如果不同，调用 `pageindex-rs` 重新生成，并**覆盖** LanceDB 中该文件的旧数据。
+* 如果不同，调用 `pageindex-rs` 重新生成。
+* **节点级更新**：依据 `node_id + content_hash` 做差分，只更新变化节点，避免“先删后插”全量更新。
+* 如果 `index_version` 变更，执行全量重建（或后台重建）。
 
 
 
@@ -87,16 +105,21 @@ CREATE TABLE file_registry (
 ```rust
 // 存入 LanceDB 的结构
 struct VectorRecord {
-    id: String,           // Node ID
+    id: String,           // Node ID (node_id)
+    node_path: String,    // file_path + node_id 组合主键
     file_path: String,
+    workspace_id: String, // 预留（多工作区/多库）
+    file_type: String,    // 预留（用于分区或过滤）
     vector: Vec<f32>,     // 节点的 Embedding
     text: String,         // 节点的 Content
+    chunk_hash: String,   // 节点内容 Hash，用于缓存与增量更新
     
     // 关键：利用 pageindex-rs 的树结构增强上下文
     breadcrumbs: String,  // 如 "用户手册 > 第3章 > 故障排除"
     root_summary: String, // 根节点的摘要 (如果有)
     level: u32,
     score: f32,           // 预留给搜索结果
+    index_version: String // 索引版本号
 }
 
 ```
@@ -104,6 +127,7 @@ struct VectorRecord {
 * **叶子节点 (Leaf Nodes)**：必须存。这是最细节的信息。
 * **中层节点 (Section Nodes)**：如果 Token 数适中，也存。
 * **Context Injection**：在存入向量库之前，将 `breadcrumbs` (面包屑导航)拼接到 `text` 前面。这样 LLM 知道这段话属于哪个章节，极大提高准确率。
+* **上下文收敛策略**：若 breadcrumbs 过长，只保留最后 2-3 层；若节点文本已包含标题信息，可跳过拼接。
 
 #### 4. 检索与生成 (Retrieval & Generation)
 
@@ -114,14 +138,16 @@ struct VectorRecord {
 
 * **Vector Search**: LanceDB 提供。
 * **Full-Text Search (FTS)**: Tantivy (Rust 的 Lucene) 或者 LanceDB 自带的 FTS 功能。
-* **策略**: `Final_Score = (Vector_Score * 0.7) + (Keyword_Score * 0.3)`
+* **策略**: 动态权重。例如：  
+  - 常规自然语言：`0.7/0.3`  
+  - 包含错误码/ID/函数名等：`0.4/0.6`
 
 **步骤 B: 结果重排序 (Rerank) - *提升准确率的关键***
 向量搜索出来的 Top 50 可能包含很多似是而非的内容。
 
 * 在本地引入一个极轻量的 **Cross-Encoder** (如 `bge-reranker-v2-m3` 的量化版)。
 * 对 Top 50 进行打分，取 Top 5 给 LLM。
-* **如果 Top 1 的分数低于某个阈值（例如 0.6），直接回答“未找到相关信息”，防止幻觉。**
+* **动态拒答阈值**：基于得分分布或 Top1/Top2 差值决定是否拒答，避免固定阈值失真。
 
 **步骤 C: 构建 Prompt**
 
@@ -187,9 +213,11 @@ impl KnotIndexer {
         // 3. 扁平化树结构为 Records (Chunks)
         let records = self.flatten_tree_to_records(tree_root, &path);
 
-        // 4. 更新 LanceDB (先删后插，保证数据一致性)
-        self.lance_table.delete(&format!("file_path = '{}'", path.display())).await?;
-        self.lance_table.add(records).await?;
+        // 4. 更新 LanceDB（节点级增量）
+        // 4.1 计算差分：基于 node_id + chunk_hash
+        // 4.2 只删除/更新变化节点，减少 I/O
+        // 4.3 若 index_version 变更，触发全量重建
+        self.lance_table.upsert(records).await?;
 
         // 5. 更新 SQLite 状态
         self.update_file_status(&path, &current_hash).await?;
@@ -268,6 +296,10 @@ impl KnotRetriever {
 
 4. **Tauri 交互优化**:
 * 搜索时，先立刻返回 LanceDB 的搜索结果（由高分到低分排列），界面上显示“正在阅读文档...”，然后再流式输出 LLM 的总结。这样用户感觉不到延迟。
+
+5. **Embedding 轻量缓存**:
+* 以 `chunk_hash` 作为 key 缓存 embedding，避免重复计算。
+* 缓存可放在 SQLite 或轻量 KV 中，命中则直接复用向量。
 
 
 

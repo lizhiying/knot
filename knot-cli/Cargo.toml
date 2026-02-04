@@ -1,0 +1,10 @@
+[package]
+name = "knot-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+knot-core = { path = "../knot-core" }
+tokio = { version = "1", features = ["full"] }
+anyhow = "1.0"
+clap = { version = "4", features = ["derive"] }
