@@ -14,6 +14,7 @@ impl LlamaSidecar {
         model_path: &str,
         bin_dir: &Path,
         mmproj_path: Option<&str>,
+        port: u16,
     ) -> Result<Self> {
         // 根据平台选择正确的二进制文件
         #[cfg(target_os = "macos")]
@@ -25,14 +26,14 @@ impl LlamaSidecar {
 
         let bin_path = bin_dir.join("llama").join(server_name);
 
-        println!("[LLM] Starting server from {:?}", bin_path);
+        println!("[LLM] Starting server from {:?} on port {}", bin_path, port);
 
         let mut cmd = Command::new(&bin_path);
         cmd.arg("--model")
             .arg(model_path)
             .arg("--mmap") // Critical for lazy loading
             .arg("--port")
-            .arg("8080")
+            .arg(port.to_string())
             .arg("--n-gpu-layers")
             .arg("99") // Try to offload all
             .arg("-c") // Limit context to avoid OOM

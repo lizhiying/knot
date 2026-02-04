@@ -52,13 +52,72 @@ async fn open_doc_parser_window(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+async fn ensure_parsing_llm(state: AppState) -> Result<(), String> {
+    // Check if already running
+    {
+        let guard = state.parsing_llm.read().await;
+        if guard.is_some() {
+            return Ok(());
+        }
+    }
+
+    println!("[LazyLoad] Starting Parsing LLM (OCRFlux)...");
+    let _ = state.thread_safe_embedding.clone(); // Valid clone check
+
+    // Prepare paths
+    let models_dir = get_models_dir();
+    let bin_dir = get_bin_dir();
+    let parsing_model_path = models_dir.join("OCRFlux-3B.Q4_K_M.gguf");
+    let parsing_mmproj_path = models_dir.join("OCRFlux-3B.mmproj-Q8_0.gguf");
+
+    let parsing_mmproj_arg = if parsing_mmproj_path.exists() {
+        Some(parsing_mmproj_path.to_str().unwrap_or("").to_string())
+    } else {
+        Some(parsing_model_path.to_str().unwrap_or("").to_string())
+    };
+
+    let parsing_llm_store = state.parsing_llm.clone();
+    let parsing_client_store = state.parsing_client.clone();
+
+    // Use spawn_blocking for IO/Process operations
+    let result = tokio::task::spawn_blocking(move || {
+        LlamaSidecar::spawn_with_mmap(
+            parsing_model_path.to_str().unwrap_or(""),
+            &bin_dir,
+            parsing_mmproj_arg.as_deref(),
+            8080,
+        )
+    })
+    .await
+    .map_err(|e| format!("JoinError: {}", e))?;
+
+    match result {
+        Ok(sidecar) => {
+            // Update State
+            let mut guard = parsing_llm_store.write().await;
+            *guard = Some(sidecar);
+
+            let client = Arc::new(LlamaClient::new(8080));
+            let mut client_guard = parsing_client_store.write().await;
+            *client_guard = Some(client);
+
+            println!("[LazyLoad] ✓ Parsing LLM Started.");
+            Ok(())
+        }
+        Err(e) => Err(format!("Failed to spawn Parsing LLM: {}", e)),
+    }
+}
+
 /// Tauri 命令：解析文件（支持 Markdown 和 PDF）
-#[tauri::command]
+#[tauri::command] // re-add annotation
 async fn parse_file(
     app: tauri::AppHandle,
     path: String,
     state: State<'_, AppState>,
 ) -> Result<PageNode, String> {
+    // Lazy Load Parsing LLM
+    ensure_parsing_llm(state.inner().clone()).await?;
+
     let file_path = Path::new(&path);
 
     if !file_path.exists() {
@@ -95,8 +154,8 @@ async fn parse_file(
     let embedding_provider_guard = state.thread_safe_embedding.read().await;
     let embedding_provider = embedding_provider_guard.as_ref().map(|p| p.as_ref());
 
-    // 2. 获取 LLM Provider
-    let llm_provider_guard = state.llm_client.read().await;
+    // 2. 获取 LLM Provider (Parsing Client)
+    let llm_provider_guard = state.parsing_client.read().await;
     let llm_provider = llm_provider_guard.as_ref().map(|p| p.as_ref());
 
     // 注入 LLM Provider (PDF 解析可能需要)
@@ -135,8 +194,10 @@ async fn parse_file(
 pub struct AppState {
     pub embedding: Arc<RwLock<Option<EmbeddingEngine>>>,
     pub thread_safe_embedding: Arc<RwLock<Option<Arc<ThreadSafeEmbeddingEngine>>>>,
-    pub llm: Arc<RwLock<Option<LlamaSidecar>>>,
-    pub llm_client: Arc<RwLock<Option<Arc<LlamaClient>>>>,
+    pub parsing_llm: Arc<RwLock<Option<LlamaSidecar>>>,
+    pub parsing_client: Arc<RwLock<Option<Arc<LlamaClient>>>>,
+    pub chat_llm: Arc<RwLock<Option<LlamaSidecar>>>,
+    pub chat_client: Arc<RwLock<Option<Arc<LlamaClient>>>>,
 }
 
 fn main() {
@@ -150,20 +211,32 @@ fn main() {
             let embedding: Arc<RwLock<Option<EmbeddingEngine>>> = Arc::new(RwLock::new(None));
             let thread_safe_embedding: Arc<RwLock<Option<Arc<ThreadSafeEmbeddingEngine>>>> =
                 Arc::new(RwLock::new(None));
-            let llm: Arc<RwLock<Option<LlamaSidecar>>> = Arc::new(RwLock::new(None));
-            let llm_client: Arc<RwLock<Option<Arc<LlamaClient>>>> = Arc::new(RwLock::new(None));
+
+            let parsing_llm: Arc<RwLock<Option<LlamaSidecar>>> = Arc::new(RwLock::new(None));
+            let parsing_client: Arc<RwLock<Option<Arc<LlamaClient>>>> = Arc::new(RwLock::new(None));
+
+            let chat_llm: Arc<RwLock<Option<LlamaSidecar>>> = Arc::new(RwLock::new(None));
+            let chat_client: Arc<RwLock<Option<Arc<LlamaClient>>>> = Arc::new(RwLock::new(None));
 
             app.manage(AppState {
                 embedding: embedding.clone(),
                 thread_safe_embedding: thread_safe_embedding.clone(),
-                llm: llm.clone(),
-                llm_client: llm_client.clone(),
+                parsing_llm: parsing_llm.clone(),
+                parsing_client: parsing_client.clone(),
+                chat_llm: chat_llm.clone(),
+                chat_client: chat_client.clone(),
             });
 
             // 保留旧的 EngineManager
+            // 保留旧的 EngineManager (Parsing LLM as default for manager if needed, or remove Manager if unused)
+            // Wait, EngineManager definition in `knot-core` might need update if I change AppState usage.
+            // But `app.manage` stores struct by Type. EngineManager struct is distinct.
+            // Assuming EngineManager uses `llm` field which is `Arc<RwLock<Option<LlamaSidecar>>>`.
+            // I'll map `parsing_llm` to it.
+
             app.manage(EngineManager {
                 embedding: embedding.clone(),
-                llm: llm.clone(),
+                llm: parsing_llm.clone(),
             });
 
             // 异步加载 Embedding Engine
@@ -202,58 +275,71 @@ fn main() {
                 }
             });
 
-            // 异步加载 LLM Sidecar
-            let llm_clone = llm.clone();
-            let llm_client_clone = llm_client.clone();
-            let llm_model_path = models_dir.join("OCRFlux-3B.Q4_K_M.gguf");
-            // Define separate mmproj path for OCRFlux (split GGUF)
-            let mmproj_path_check = models_dir.join("OCRFlux-3B.mmproj-Q8_0.gguf");
+            // 异步加载 Parsing LLM moved to lazy load (start on demand)
+            // See ensure_parsing_llm helper
 
-            let final_mmproj_arg = if mmproj_path_check.exists() {
-                Some(mmproj_path_check.to_str().unwrap_or("").to_string())
-            } else {
-                // Fallback: Assume unified GGUF, pass model path as mmproj
-                Some(llm_model_path.to_str().unwrap_or("").to_string())
-            };
+            // 异步加载 Chat LLM (Qwen3-0.6B) @ Port 8081
 
-            let llm_bin_dir = bin_dir.clone();
+            // 异步加载 Chat LLM (Qwen3-0.6B) @ Port 8081
+            let chat_llm_clone = chat_llm.clone();
+            let chat_client_clone = chat_client.clone();
+
+            // Chat Model Paths
+            let chat_model_path = models_dir.join("Qwen3-0.6B-Q8_0.gguf");
+
+            let bin_dir_clone2 = bin_dir.clone();
             std::thread::spawn(move || {
-                println!("[Engine] Loading LLM model from {:?}...", llm_model_path);
+                println!(
+                    "[Engine] Loading Chat LLM (Qwen3) from {:?}...",
+                    chat_model_path
+                );
+                // Qwen3 usually doesn't need mmproj (Text only).
                 match LlamaSidecar::spawn_with_mmap(
-                    llm_model_path.to_str().unwrap_or(""),
-                    &llm_bin_dir,
-                    final_mmproj_arg.as_deref(),
+                    chat_model_path.to_str().unwrap_or(""),
+                    &bin_dir_clone2,
+                    None,
+                    8081,
                 ) {
                     Ok(sidecar) => {
                         tokio::runtime::Runtime::new().unwrap().block_on(async {
-                            let mut guard = llm_clone.write().await;
+                            let mut guard = chat_llm_clone.write().await;
                             *guard = Some(sidecar);
 
-                            // 初始化 LlamaClient
-                            let client = Arc::new(LlamaClient::new(8080));
-                            let mut client_guard = llm_client_clone.write().await;
+                            let client = Arc::new(LlamaClient::new(8081));
+                            let mut client_guard = chat_client_clone.write().await;
                             *client_guard = Some(client);
                         });
-                        println!("[Engine] ✓ LLM sidecar started successfully (Qwen3-0.6B)");
+                        println!("[Engine] ✓ Chat LLM (Qwen3) started on port 8081");
                     }
                     Err(e) => {
-                        eprintln!("[Engine] ✗ Failed to start LLM sidecar: {}", e);
+                        eprintln!("[Engine] ✗ Failed to start Chat LLM: {}", e);
                     }
                 }
             });
 
             // 监听 Ctrl+C 信号以清理子进程 (开发模式下常用)
-            let llm_signal = Arc::downgrade(&llm);
+            let parsing_signal = Arc::downgrade(&parsing_llm);
+            let chat_signal = Arc::downgrade(&chat_llm);
+
             std::thread::spawn(move || {
                 let rt = tokio::runtime::Runtime::new().unwrap();
                 rt.block_on(async {
                     if let Ok(_) = tokio::signal::ctrl_c().await {
                         println!("[App] Received Ctrl+C, cleaning up...");
-                        if let Some(llm) = llm_signal.upgrade() {
+                        // Kill Parsing LLM
+                        if let Some(llm) = parsing_signal.upgrade() {
                             let mut guard = llm.write().await;
                             if guard.is_some() {
-                                println!("[App] Killing LLM sidecar (Signal)...");
-                                *guard = None; // 触发 Drop
+                                println!("[App] Killing Parsing LLM...");
+                                *guard = None;
+                            }
+                        }
+                        // Kill Chat LLM
+                        if let Some(llm) = chat_signal.upgrade() {
+                            let mut guard = llm.write().await;
+                            if guard.is_some() {
+                                println!("[App] Killing Chat LLM...");
+                                *guard = None;
                             }
                         }
                         std::process::exit(0);
@@ -307,38 +393,34 @@ fn main() {
         .expect("error while building tauri application")
         .run(|app_handle, event| {
             match event {
-                tauri::RunEvent::ExitRequested { .. } => {
-                    println!("[App] RunEvent::ExitRequested received.");
+                tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit => {
+                    println!("[App] RunEvent::Exit/ExitRequested received.");
                     let state = app_handle.state::<AppState>();
-                    let llm = state.llm.clone();
 
-                    match llm.try_write() {
+                    // Kill Parsing LLM
+                    let parsing_llm = state.parsing_llm.clone();
+                    match parsing_llm.try_write() {
                         Ok(mut guard) => {
                             if guard.is_some() {
-                                println!("[App] Killing LLM sidecar (ExitRequested)...");
-                                *guard = None; // 这会触发 LlamaSidecar 的 drop，杀死子进程
+                                println!("[App] Killing Parsing LLM...");
+                                *guard = None;
                             }
                         }
                         Err(e) => {
-                            eprintln!("[App] Failed to acquire lock for cleanup: {}", e);
+                            eprintln!("[App] Failed to acquire lock for Parsing cleanup: {}", e)
                         }
                     };
-                }
-                tauri::RunEvent::Exit => {
-                    println!("[App] RunEvent::Exit received. App is terminating.");
-                    let state = app_handle.state::<AppState>();
-                    let llm = state.llm.clone();
 
-                    match llm.try_write() {
+                    // Kill Chat LLM
+                    let chat_llm = state.chat_llm.clone();
+                    match chat_llm.try_write() {
                         Ok(mut guard) => {
                             if guard.is_some() {
-                                println!("[App] Killing LLM sidecar (Exit)...");
-                                *guard = None; // 这会触发 LlamaSidecar 的 drop，杀死子进程
+                                println!("[App] Killing Chat LLM...");
+                                *guard = None;
                             }
                         }
-                        Err(e) => {
-                            eprintln!("[App] Failed to acquire lock for cleanup at Exit: {}", e);
-                        }
+                        Err(e) => eprintln!("[App] Failed to acquire lock for Chat cleanup: {}", e),
                     };
                 }
                 tauri::RunEvent::Reopen { .. } => {
@@ -588,12 +670,12 @@ async fn rag_query(
         });
     }
 
-    // 4. Call LLM
+    // 4. Call LLM (Chat Client)
     let llm_client = {
-        let guard = state.llm_client.read().await;
+        let guard = state.chat_client.read().await;
         guard.clone()
     }
-    .ok_or("LLM Engine not ready")?;
+    .ok_or("Chat LLM (Qwen3) not ready")?;
 
     let prompt = format!(
         "<|im_start|>system\n你是一个专业的知识库助手。请根据以下参考文档回答问题。\n\n**回答要求**：\n1. 请 **综合** 参考文档中的信息，用自然流畅的语言生成一段 **完整详细** 的回答。\n2. **不要** 仅仅摘录原文片段，请进行归纳和润色。\n3. 如果参考文档中没有答案，请说“我无法在现有文档中找到答案”。\n<|im_end|>\n<|im_start|>user\n参考文档：\n{}\n\n用户问题: {}<|im_end|>\n<|im_start|>assistant\n",
