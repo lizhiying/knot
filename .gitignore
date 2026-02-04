@@ -28,3 +28,7 @@ models/*
 # Large Binaries
 knot-app/bin/llama/
 knot-app/bin/onnxruntime/
+
+# LanceDB Data
+*.lance/
+knot_index.lance/
