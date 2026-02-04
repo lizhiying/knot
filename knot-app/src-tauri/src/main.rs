@@ -285,7 +285,7 @@ fn main() {
             let chat_client_clone = chat_client.clone();
 
             // Chat Model Paths
-            let chat_model_path = models_dir.join("qwen2.5-3b-instruct-q4_k_m.gguf");
+            let chat_model_path = models_dir.join("Qwen3-1.7B-Q4_K_M.gguf");
 
             let bin_dir_clone2 = bin_dir.clone();
             std::thread::spawn(move || {
@@ -678,7 +678,7 @@ async fn rag_query(
     .ok_or("Chat LLM (Qwen3) not ready")?;
 
     let prompt = format!(
-        "<|im_start|>system\n你是一个智能助手。请根据参考文档回答用户问题。\n\n**回答原则**：\n1. **开门见山**：直接把文档中找到的关键信息（如日期、地点、结论）放在第一句。\n2. **时间排序**：涉及多个日期时，严格按时间先后排序。\n3. **准确理解**：\n   - “A -> B”表示从 A 前往 B。\n   - **特别注意**：当用户问“什么时候去某地”时，优先回答**抵达**或**前往**该地的日期（行程第一天），而不仅在该地游玩的日期。\n4. **去除客套**：不要使用“根据参考文档…”等前缀。\n5. **详细展开**：在核心答案之后，引用文档细节进行说明。\n<|im_end|>\n<|im_start|>user\n参考文档：\n{}\n\n用户问题: {}<|im_end|>\n<|im_start|>assistant\n",
+        "<|im_start|>system\n你是一个智能助手。请根据参考文档回答用户问题。\n\n**回答原则**：\n1. **开门见山**：直接把文档中找到的关键信息（如日期、地点、结论）放在第一句。例如直接说：“行程安排在 2.17 (周二)。”\n2. **去除客套**：不要使用“根据参考文档…”、“综上所述…”等前缀。\n3. **详细展开**：在核心答案之后，引用文档细节进行说明。\n4. 只有当文档完全不包含相关信息时，才说“无法找到答案”。\n<|im_end|>\n<|im_start|>user\n参考文档：\n{}\n\n用户问题: {}<|im_end|>\n<|im_start|>assistant\n",
         context_str, query
     );
 
