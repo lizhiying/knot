@@ -278,14 +278,14 @@ fn main() {
             // 异步加载 Parsing LLM moved to lazy load (start on demand)
             // See ensure_parsing_llm helper
 
-            // 异步加载 Chat LLM (Qwen3-0.6B) @ Port 8081
+            // 异步加载 Chat LLM (Qwen2.5-3B) @ Port 8081
 
-            // 异步加载 Chat LLM (Qwen3-0.6B) @ Port 8081
+            // 异步加载 Chat LLM (Qwen2.5-3B) @ Port 8081
             let chat_llm_clone = chat_llm.clone();
             let chat_client_clone = chat_client.clone();
 
             // Chat Model Paths
-            let chat_model_path = models_dir.join("Qwen3-0.6B-Q8_0.gguf");
+            let chat_model_path = models_dir.join("qwen2.5-3b-instruct-q4_k_m.gguf");
 
             let bin_dir_clone2 = bin_dir.clone();
             std::thread::spawn(move || {
