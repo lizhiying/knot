@@ -596,7 +596,7 @@ async fn rag_query(
     .ok_or("LLM Engine not ready")?;
 
     let prompt = format!(
-        "<|im_start|>system\n你是一个专业的知识库助手。请根据以下参考文档，综合相关信息，详细回答用户的问题。\n如果参考文档中没有答案，请直接说“我无法在现有文档中找到答案”。不要编造信息。<|im_end|>\n<|im_start|>user\n参考文档：\n{}\n\n用户问题: {}<|im_end|>\n<|im_start|>assistant\n",
+        "<|im_start|>system\n你是一个专业的知识库助手。请根据以下参考文档回答问题。\n\n**回答要求**：\n1. 请 **综合** 参考文档中的信息，用自然流畅的语言生成一段 **完整详细** 的回答。\n2. **不要** 仅仅摘录原文片段，请进行归纳和润色。\n3. 如果参考文档中没有答案，请说“我无法在现有文档中找到答案”。\n<|im_end|>\n<|im_start|>user\n参考文档：\n{}\n\n用户问题: {}<|im_end|>\n<|im_start|>assistant\n",
         context_str, query
     );
 
