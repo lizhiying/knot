@@ -231,7 +231,8 @@ impl LlmProvider for LlamaClient {
         let body = json!({
             "prompt": formatted_prompt,
             "n_predict": 2048,
-            "temperature": 0.7,
+            "probability": 0.0, // optional
+            "temperature": 0.1,
             "stop": ["<|im_end|>"]
         });
 
