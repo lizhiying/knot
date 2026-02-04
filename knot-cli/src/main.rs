@@ -56,6 +56,7 @@ async fn main() -> Result<()> {
             }
 
             store.add_records(records).await?;
+            store.create_fts_index().await?;
             println!("Indexing complete. Data saved to {}", db_path);
         }
         Commands::Query { text } => {
@@ -64,9 +65,10 @@ async fn main() -> Result<()> {
 
             // For now, use a mock embedding (random/zero) for query too
             // In reality this should match the embedding model used for indexing
+            // In reality this should match the embedding model used for indexing
             let query_vec = vec![0.0; 384];
 
-            let results = store.search(query_vec).await?;
+            let results = store.search(query_vec, &text).await?;
             println!("Found {} results:", results.len());
             for (i, res) in results.iter().enumerate() {
                 println!("[{}] {} (Score: {:.4})", i + 1, res.file_path, res.score);

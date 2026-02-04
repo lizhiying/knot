@@ -1,8 +1,9 @@
 use crate::mock_embedding::MockEmbeddingProvider;
 use crate::store::VectorRecord;
 use anyhow::Result;
+use futures::stream::{self, StreamExt};
 use pageindex_rs::{IndexDispatcher, PageIndexConfig, PageNode};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use walkdir::WalkDir;
 
 pub struct KnotIndexer {
@@ -27,59 +28,99 @@ impl KnotIndexer {
     }
 
     pub async fn index_directory(&self, path: &Path) -> Result<(Vec<VectorRecord>, Vec<String>)> {
-        let mut records = Vec::new();
-        let mut seen_files = std::collections::HashSet::new();
+        let entries: Vec<_> = WalkDir::new(path)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .collect();
 
-        for entry in WalkDir::new(path).into_iter().filter_map(|e| e.ok()) {
-            if entry.file_type().is_file() {
-                let file_path = entry.path();
-                // Simple filter: only md/txt
-                if let Some(ext) = file_path.extension() {
-                    if ext == "md" || ext == "txt" {
-                        let path_str = file_path.to_string_lossy().to_string();
-                        seen_files.insert(path_str.clone());
+        let mut results = stream::iter(entries)
+            .map(|entry| {
+                let registry = self.registry.clone();
+                let indexer_ref = self; // Since &self is Copy? No. &self is shared ref.
+                                        // We need to pass references or clone needed data.
+                                        // self.index_file is async and takes &self.
+                                        // But self needs to be static or Arc?
+                                        // self is &KnotIndexer. If index_directory takes &self, the lifetime of &self outlives the future?
+                                        // Yes, because we await the stream.
+                async move {
+                    let mut records = Vec::new();
+                    let mut files_seen = Vec::new();
 
-                        // Check hash if registry exists
-                        let content = std::fs::read(file_path)?;
-                        let hash = hex::encode(blake3::hash(&content).as_bytes());
-                        let modified = entry.metadata()?.modified()?.elapsed()?.as_secs() as i64;
+                    if entry.file_type().is_file() {
+                        let file_path = entry.path();
+                        if let Some(ext) = file_path.extension() {
+                            if ext == "md" || ext == "txt" {
+                                let path_str = file_path.to_string_lossy().to_string();
+                                files_seen.push(path_str.clone());
 
-                        let should_index = if let Some(reg) = &self.registry {
-                            if let Ok(Some(stored_hash)) = reg.get_file_hash(&path_str).await {
-                                if stored_hash != hash {
-                                    println!(
-                                        "Hash mismatch: stored={} current={}",
-                                        stored_hash, hash
-                                    );
-                                    true
-                                } else {
-                                    false
+                                let mut should_index = true;
+                                let mut hash = String::new();
+                                let mut modified = 0;
+
+                                // content read might block, but it's file io.
+                                if let Ok(content) = std::fs::read(file_path) {
+                                    hash = hex::encode(blake3::hash(&content).as_bytes());
+                                    if let Ok(meta) = entry.metadata() {
+                                        if let Ok(m) = meta.modified() {
+                                            if let Ok(el) = m.elapsed() {
+                                                modified = el.as_secs() as i64;
+                                            }
+                                        }
+                                    }
+
+                                    if let Some(reg) = &registry {
+                                        if let Ok(Some(stored_hash)) =
+                                            reg.get_file_hash(&path_str).await
+                                        {
+                                            if stored_hash == hash {
+                                                should_index = false;
+                                                println!("Skipping unchanged: {:?}", file_path);
+                                            } else {
+                                                println!("Start Indexing: {:?}", file_path);
+                                            }
+                                        } else {
+                                            println!("Start Indexing (New): {:?}", file_path);
+                                        }
+                                    }
                                 }
-                            } else {
-                                println!("Hash not found in registry for {}", path_str);
-                                true
-                            }
-                        } else {
-                            println!("Registry not initialized");
-                            true
-                        };
 
-                        if should_index {
-                            println!("Indexing: {:?}", file_path);
-                            if let Ok(file_records) = self.index_file(file_path).await {
-                                records.extend(file_records);
-                                // Update registry
-                                if let Some(reg) = &self.registry {
-                                    let _ = reg.update_file(&path_str, &hash, modified).await;
+                                if should_index {
+                                    // index_file is on self.
+                                    // rust async closure capture issue.
+                                    // self must be valid.
+                                    // Since we are in &self method, and we await stream, it should be fine?
+                                    // Compiler might complain self not 'static.
+                                    // But indexer_ref has lifetime 'a.
+                                    // We need to verify if this compiles.
+                                    // If not, KnotIndexer usually wrapped in Arc in main.
+                                    // But here it's &self.
+
+                                    // Let's try.
+                                    if let Ok(file_records) =
+                                        indexer_ref.index_file(file_path).await
+                                    {
+                                        records.extend(file_records);
+                                        if let Some(reg) = &registry {
+                                            let _ =
+                                                reg.update_file(&path_str, &hash, modified).await;
+                                        }
+                                    }
                                 }
-                            } else {
-                                eprintln!("Failed to index {:?}", file_path);
                             }
-                        } else {
-                            println!("Skipping unchanged: {:?}", file_path);
                         }
                     }
+                    (records, files_seen)
                 }
+            })
+            .buffer_unordered(8); // Concurrency
+
+        let mut final_records = Vec::new();
+        let mut seen_files = std::collections::HashSet::new();
+
+        while let Some((recs, files)) = results.next().await {
+            final_records.extend(recs);
+            for f in files {
+                seen_files.insert(f);
             }
         }
 
@@ -89,7 +130,6 @@ impl KnotIndexer {
             if let Ok(all_files) = reg.get_all_files().await {
                 let path_prefix = path.to_string_lossy().to_string();
                 for tracked_file in all_files {
-                    // Check if tracked file belongs to indexed directory and is not seen
                     if tracked_file.starts_with(&path_prefix) && !seen_files.contains(&tracked_file)
                     {
                         println!("Detected deleted file: {}", tracked_file);
@@ -100,7 +140,7 @@ impl KnotIndexer {
             }
         }
 
-        Ok((records, deleted_files))
+        Ok((final_records, deleted_files))
     }
 
     pub async fn index_file(&self, path: &Path) -> Result<Vec<VectorRecord>> {

@@ -21,6 +21,11 @@ impl KnotStore {
         })
     }
 
+    pub async fn create_fts_index(&self) -> Result<()> {
+        // Placeholder
+        Ok(())
+    }
+
     pub async fn add_records(&self, records: Vec<VectorRecord>) -> Result<()> {
         if records.is_empty() {
             return Ok(());
@@ -28,19 +33,12 @@ impl KnotStore {
 
         let schema = self.get_schema();
         let batch = self.create_record_batch(records, schema.clone())?;
-
-        // Check if table exists
         let table_names = self.conn.table_names().execute().await?;
         let table_exists = table_names.contains(&self.table_name);
-
-        // Wrap batch in iterator
         let reader = RecordBatchIterator::new(vec![Ok(batch)].into_iter(), schema.clone());
 
         if table_exists {
             let table = self.conn.open_table(&self.table_name).execute().await?;
-            // Add often requires matching schema. If schema changed, verify compatibility or merge.
-            // For iteration 2, we assume schema evolution is handled by creating new table or compatible change.
-            // LanceDB 0.10 supports schema evolution for nullable columns.
             table.add(Box::new(reader)).execute().await?;
         } else {
             self.conn
@@ -48,7 +46,6 @@ impl KnotStore {
                 .execute()
                 .await?;
         }
-
         Ok(())
     }
 
@@ -63,7 +60,11 @@ impl KnotStore {
         Ok(())
     }
 
-    pub async fn search(&self, query_vector: Vec<f32>) -> Result<Vec<SearchResult>> {
+    pub async fn search(
+        &self,
+        query_vector: Vec<f32>,
+        query_text: &str,
+    ) -> Result<Vec<SearchResult>> {
         let table_names = self.conn.table_names().execute().await?;
         if !table_names.contains(&self.table_name) {
             return Ok(vec![]);
@@ -71,16 +72,53 @@ impl KnotStore {
 
         let table = self.conn.open_table(&self.table_name).execute().await?;
 
-        let query = table.query().nearest_to(query_vector)?;
+        // 1. Retrieve Candidate Set (Vector Search)
+        // Fetch more results (e.g. 50) to allow for reranking.
+        let vec_query = table.query().nearest_to(query_vector)?;
+        let vec_results_stream = vec_query.limit(50).execute().await?;
+        let vec_results_batches: Vec<RecordBatch> = vec_results_stream.try_collect().await?;
+        let mut candidates = self.batches_to_results(vec_results_batches);
 
-        let results_stream = query.limit(5).execute().await?;
+        if query_text.is_empty() {
+            return Ok(candidates.into_iter().take(10).collect());
+        }
 
-        let results: Vec<RecordBatch> = results_stream.try_collect().await?;
+        // 2. Keyword Boosting (Hybrid / Reranking Logic)
+        let keywords: Vec<&str> = query_text.split_whitespace().collect();
 
-        // Convert RecordBatch to SearchResult
+        for candidate in &mut candidates {
+            let mut keyword_matches = 0;
+            let content_lower = candidate.text.to_lowercase();
+
+            for kw in &keywords {
+                if content_lower.contains(&kw.to_lowercase()) {
+                    keyword_matches += 1;
+                }
+            }
+
+            // Boost score:
+            let boost = (keyword_matches as f32) * 100.0; // Strong boost
+            candidate.score += boost;
+        }
+
+        // 3. Assign base rank score
+        for (i, candidate) in candidates.iter_mut().enumerate() {
+            candidate.score += (50 - i) as f32; // Rank Score
+        }
+
+        // 4. Sort
+        candidates.sort_by(|a, b| {
+            b.score
+                .partial_cmp(&a.score)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        Ok(candidates.into_iter().take(10).collect())
+    }
+
+    fn batches_to_results(&self, batches: Vec<RecordBatch>) -> Vec<SearchResult> {
         let mut search_results = Vec::new();
-
-        for batch in results {
+        for batch in batches {
             let ids = batch
                 .column(0)
                 .as_any()
@@ -97,16 +135,12 @@ impl KnotStore {
                 .downcast_ref::<StringArray>()
                 .unwrap();
 
-            // Optional columns (indices 4, 5)
-            // Need to check schema or use column_by_name to be safe
             let num_cols = batch.num_columns();
-
             let parent_ids = if num_cols > 4 {
                 batch.column(4).as_any().downcast_ref::<StringArray>()
             } else {
                 None
             };
-
             let breadcrumbs_col = if num_cols > 5 {
                 batch.column(5).as_any().downcast_ref::<StringArray>()
             } else {
@@ -127,8 +161,7 @@ impl KnotStore {
                 });
             }
         }
-
-        Ok(search_results)
+        search_results
     }
 
     fn get_schema(&self) -> Arc<Schema> {
@@ -144,9 +177,8 @@ impl KnotStore {
                 false,
             ),
             Field::new("file_path", DataType::Utf8, false),
-            // New fields for Iteration 2
-            Field::new("parent_id", DataType::Utf8, true), // Nullable
-            Field::new("breadcrumbs", DataType::Utf8, true), // Nullable
+            Field::new("parent_id", DataType::Utf8, true),
+            Field::new("breadcrumbs", DataType::Utf8, true),
         ]))
     }
 
@@ -158,11 +190,9 @@ impl KnotStore {
         let ids: Vec<String> = records.iter().map(|r| r.id.clone()).collect();
         let texts: Vec<String> = records.iter().map(|r| r.text.clone()).collect();
         let paths: Vec<String> = records.iter().map(|r| r.file_path.clone()).collect();
-
         let parent_ids: Vec<Option<String>> = records.iter().map(|r| r.parent_id.clone()).collect();
         let breadcrumbs: Vec<Option<String>> =
             records.iter().map(|r| r.breadcrumbs.clone()).collect();
-
         let vectors_flat: Vec<Option<Vec<Option<f32>>>> = records
             .iter()
             .map(|r| Some(r.vector.iter().map(|v| Some(*v)).collect()))
@@ -171,11 +201,8 @@ impl KnotStore {
         let id_array = StringArray::from(ids);
         let text_array = StringArray::from(texts);
         let path_array = StringArray::from(paths);
-
-        // Handle nullable arrays
         let parent_id_array = StringArray::from(parent_ids);
         let breadcrumbs_array = StringArray::from(breadcrumbs);
-
         let vector_array =
             FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(vectors_flat, 384);
 
@@ -208,7 +235,7 @@ pub struct SearchResult {
     pub id: String,
     pub text: String,
     pub file_path: String,
-    pub score: f32,
+    pub score: f32, // Reranking score
     pub parent_id: Option<String>,
     pub breadcrumbs: Option<String>,
 }

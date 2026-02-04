@@ -1,7 +1,7 @@
 use anyhow::Result;
 use sqlx::{sqlite::SqlitePoolOptions, Pool, Row, Sqlite};
-use std::path::Path;
 
+#[derive(Clone)]
 pub struct FileRegistry {
     pool: Pool<Sqlite>,
 }
