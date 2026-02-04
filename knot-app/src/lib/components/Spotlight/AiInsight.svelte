@@ -1,4 +1,6 @@
 <script>
+    import { marked } from "marked";
+
     /**
      * AI 洞察区域组件
      */
@@ -23,6 +25,19 @@
             }
         })(),
     );
+
+    // Render Markdown
+    let htmlContent = $state("");
+
+    $effect(() => {
+        if (content) {
+            Promise.resolve(marked.parse(content)).then((res) => {
+                htmlContent = res;
+            });
+        } else {
+            htmlContent = "";
+        }
+    });
 </script>
 
 <div class="w-[62%] flex flex-col">
@@ -47,8 +62,10 @@
 
         <!-- 洞察内容 -->
         {#if !isThinking && content}
-            <div class="markdown-content text-[14px]">
-                {@html content}
+            <div
+                class="markdown-content text-[14px] prose prose-sm dark:prose-invert max-w-none"
+            >
+                {@html htmlContent}
             </div>
         {/if}
 
