@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 # 核心：通过路径引用本地库，开启所有特性
 pageindex-rs = { path = "../../pageindex-rs", features = ["office", "vision"] }
+knot-core = { path = "../../knot-core" }
 
 # 应用层特有的推理引擎依赖
 ort = { version = "2.0.0-rc.9", features = ["load-dynamic"] }

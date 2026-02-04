@@ -13,8 +13,11 @@ pub struct KnotStore {
 }
 
 impl KnotStore {
-    pub async fn new(path: &str) -> Result<Self> {
-        let conn = connect(path).execute().await?;
+    pub async fn new(data_dir: &str) -> Result<Self> {
+        let path = std::path::Path::new(data_dir).join("knot_index.lance");
+        let path_str = path.to_string_lossy().to_string();
+
+        let conn = connect(&path_str).execute().await?;
         Ok(Self {
             conn,
             table_name: "vectors".to_string(),

@@ -13,12 +13,11 @@ pub struct KnotIndexer {
 }
 
 impl KnotIndexer {
-    pub async fn new(db_url: Option<String>) -> Self {
-        let registry = if let Some(url) = db_url {
-            crate::registry::FileRegistry::new(&url).await.ok()
-        } else {
-            None
-        };
+    pub async fn new(data_dir: &str) -> Self {
+        let db_path = std::path::Path::new(data_dir).join("knot.db");
+        let db_url = format!("sqlite://{}?mode=rwc", db_path.to_string_lossy());
+
+        let registry = crate::registry::FileRegistry::new(&db_url).await.ok();
 
         Self {
             dispatcher: IndexDispatcher::new(),

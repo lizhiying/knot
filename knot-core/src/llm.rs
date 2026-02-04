@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 pub struct LlamaSidecar {
     process: Option<Child>,
-    is_running: Arc<AtomicBool>,
+    _is_running: Arc<AtomicBool>,
 }
 
 impl LlamaSidecar {
@@ -50,7 +50,7 @@ impl LlamaSidecar {
 
         Ok(Self {
             process: Some(child),
-            is_running: Arc::new(AtomicBool::new(true)),
+            _is_running: Arc::new(AtomicBool::new(true)),
         })
     }
 }
@@ -97,7 +97,7 @@ impl PriorityGate {
         }
     }
 
-    async fn lock_high(&self) -> MutexGuard<()> {
+    async fn lock_high(&self) -> MutexGuard<'_, ()> {
         // Increment waiting count to signal Low priority tasks to yield
         self.hp_waiting.fetch_add(1, Ordering::SeqCst);
         let guard = self.lock.lock().await;
@@ -105,7 +105,7 @@ impl PriorityGate {
         guard
     }
 
-    async fn lock_low(&self) -> MutexGuard<()> {
+    async fn lock_low(&self) -> MutexGuard<'_, ()> {
         loop {
             // 1. Yield if High Priority tasks are waiting
             if self.hp_waiting.load(Ordering::SeqCst) > 0 {
@@ -114,23 +114,9 @@ impl PriorityGate {
             }
 
             // 2. Try to acquire lock
-            // We use standard lock().await.
-            // But if a High task comes in *while* we are waiting for this lock (because another Low task holds it),
-            // we will eventually get it.
-            // Problem: If queue is Low1 (Running), Low2 (Waiting), High (Waiting).
-            // Tokio Mutex is fair-ish. High might wait behind Low2.
-            // To strictly help High, we should check hp_waiting again AFTER acquiring.
-
-            // To avoid blocking High for too long in the queue, we ideally want 'try_lock' or similar,
-            // but Tokio Mutex is just a queue.
-            // However, by checking `hp_waiting` BEFORE entering the queue (locking),
-            // we ensure that if High is already present, we don't enter the queue.
-
             let guard = self.lock.lock().await;
 
             // 3. Double check (Cooperative Yield)
-            // If High arrived while we were waiting to get the lock (or just acquired it),
-            // we yield to let High take the lock next.
             if self.hp_waiting.load(Ordering::SeqCst) > 0 {
                 drop(guard);
                 sleep(Duration::from_millis(10)).await;

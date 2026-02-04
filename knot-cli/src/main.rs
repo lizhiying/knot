@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use knot_core::{KnotIndexer, KnotStore};
+use knot_core::index::KnotIndexer;
+use knot_core::store::KnotStore;
 use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
@@ -9,6 +10,10 @@ use std::path::{Path, PathBuf};
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+
+    /// Path to data directory (where knot.db and index are stored)
+    #[arg(long, default_value = ".")]
+    data_dir: String,
 }
 
 #[derive(Subcommand)]
@@ -36,18 +41,18 @@ enum Commands {
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
-    let db_path = "knot_index.lance";
+    let data_dir = cli.data_dir;
 
     match cli.command {
         Commands::Index { input } => {
-            println!("Indexing directory: {:?}", input);
+            println!("Indexing directory: {:?} into {}", input, data_dir);
             // Use sqlite registry for incremental updates
-            let indexer = KnotIndexer::new(Some("sqlite:knot.db?mode=rwc".to_string())).await;
+            let indexer = KnotIndexer::new(&data_dir).await;
             let (records, deleted_files) = indexer.index_directory(&input).await?;
             println!("Found {} vectors to add.", records.len());
             println!("Found {} files to delete.", deleted_files.len());
 
-            let store = KnotStore::new(db_path).await?;
+            let store = KnotStore::new(&data_dir).await?;
 
             // Handle deletions
             for del_path in deleted_files {
@@ -57,14 +62,13 @@ async fn main() -> Result<()> {
 
             store.add_records(records).await?;
             store.create_fts_index().await?;
-            println!("Indexing complete. Data saved to {}", db_path);
+            println!("Indexing complete. Data saved to {}", data_dir);
         }
         Commands::Query { text } => {
             println!("Querying: {}", text);
-            let store = KnotStore::new(db_path).await?;
+            let store = KnotStore::new(&data_dir).await?;
 
             // For now, use a mock embedding (random/zero) for query too
-            // In reality this should match the embedding model used for indexing
             // In reality this should match the embedding model used for indexing
             let query_vec = vec![0.0; 384];
 
@@ -88,14 +92,14 @@ async fn main() -> Result<()> {
             let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
             watcher.watch(&input, RecursiveMode::Recursive)?;
 
-            let indexer = KnotIndexer::new(Some("sqlite:knot.db?mode=rwc".to_string())).await;
+            let indexer = KnotIndexer::new(&data_dir).await;
 
             // Simple blocking loop for watch events
             // In a real app, this should handle async better.
             for res in rx {
                 match res {
                     Ok(event) => {
-                        let store = KnotStore::new(db_path).await?;
+                        let store = KnotStore::new(&data_dir).await?;
                         match event.kind {
                             notify::EventKind::Create(_) | notify::EventKind::Modify(_) => {
                                 for path in event.paths {

@@ -1,8 +1,6 @@
-mod engine;
-
-use engine::embedding::{EmbeddingEngine, ThreadSafeEmbeddingEngine};
-use engine::llm::{LlamaClient, LlamaSidecar};
-use engine::EngineManager;
+use knot_core::embedding::{EmbeddingEngine, ThreadSafeEmbeddingEngine};
+use knot_core::llm::{LlamaClient, LlamaSidecar};
+use knot_core::manager::EngineManager;
 use pageindex_rs::{IndexDispatcher, PageIndexConfig, PageNode};
 use std::env;
 use std::path::{Path, PathBuf};
