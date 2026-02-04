@@ -57,4 +57,30 @@
             <span class="thinking-cursor"></span>
         {/if}
     </div>
+
+    <!-- Follow-up Input -->
+    {#if !isThinking && content}
+        <div
+            class="p-4 border-t border-[var(--border-color)] bg-[var(--bg-primary)]/50 backdrop-blur-sm"
+        >
+            <div class="relative flex items-center">
+                <span
+                    class="absolute left-3 material-symbols-outlined text-[18px] opacity-40"
+                    >chat_bubble</span
+                >
+                <input
+                    type="text"
+                    placeholder="Ask a follow-up..."
+                    class="w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[var(--accent-primary)] transition-colors opacity-80 hover:opacity-100"
+                    onkeydown={(e) => {
+                        if (e.key === "Enter") {
+                            // TODO: Emit follow-up event
+                            console.log("Follow up:", e.target.value);
+                            e.target.value = "";
+                        }
+                    }}
+                />
+            </div>
+        </div>
+    {/if}
 </div>

@@ -7,6 +7,8 @@ use lancedb::query::{ExecutableQuery, QueryBase};
 use lancedb::{connect, Connection};
 use std::sync::Arc;
 
+const EMBEDDING_DIM: i32 = 512;
+
 pub struct KnotStore {
     conn: Connection,
     table_name: String,
@@ -175,7 +177,7 @@ impl KnotStore {
                 "vector",
                 DataType::FixedSizeList(
                     Arc::new(Field::new("item", DataType::Float32, true)),
-                    384, // Dimension size
+                    EMBEDDING_DIM, // Dimension size
                 ),
                 false,
             ),
@@ -206,8 +208,10 @@ impl KnotStore {
         let path_array = StringArray::from(paths);
         let parent_id_array = StringArray::from(parent_ids);
         let breadcrumbs_array = StringArray::from(breadcrumbs);
-        let vector_array =
-            FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(vectors_flat, 384);
+        let vector_array = FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(
+            vectors_flat,
+            EMBEDDING_DIM,
+        );
 
         Ok(RecordBatch::try_new(
             schema,

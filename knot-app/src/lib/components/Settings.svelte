@@ -7,7 +7,15 @@
     } from "@tauri-apps/plugin-global-shortcut";
     import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 
+    import { invoke } from "@tauri-apps/api/core";
+    import { open } from "@tauri-apps/plugin-dialog";
+    import { listen } from "@tauri-apps/api/event";
+
     let activeTab = $state("general"); // Default to general for testing
+
+    // Data Dir State
+    let dataDir = $state("");
+    let indexingStatus = $state("");
 
     // Global Shortcut State
     let shortcutKey = $state("");
@@ -120,6 +128,26 @@
         }
     }
 
+    async function selectDataDir() {
+        try {
+            const selected = await open({
+                directory: true,
+                multiple: false,
+                title: "Select Document Folder",
+            });
+
+            if (selected) {
+                // Save and Trigger Indexing
+                // Assuming backend updates config and starts indexing
+                await invoke("set_data_dir", { path: selected });
+                dataDir = selected;
+                // indexingStatus = "Starting..."; // Backend will emit events
+            }
+        } catch (err) {
+            console.error("Failed to set data dir:", err);
+        }
+    }
+
     function handleKeyDown(e) {
         if (!isRecording) return;
         e.preventDefault();
@@ -144,6 +172,21 @@
     onMount(async () => {
         theme.init();
 
+        // Load Config
+        try {
+            const config = await invoke("get_app_config");
+            if (config.data_dir) {
+                dataDir = config.data_dir;
+            }
+        } catch (e) {
+            console.error("Failed to load config:", e);
+        }
+
+        // Listen for indexing status
+        const unlisten = await listen("indexing-status", (event) => {
+            indexingStatus = event.payload;
+        });
+
         // Load saved shortcut
         const saved = localStorage.getItem("knot_global_shortcut");
         if (saved) {
@@ -161,6 +204,10 @@
                 console.error("Failed to restore shortcut:", e);
             }
         }
+
+        return () => {
+            unlisten();
+        };
     });
 </script>
 
@@ -315,6 +362,56 @@
             {:else if activeTab === "general"}
                 <div class="mb-8">
                     <h3 class="text-base font-semibold mb-4 pb-1">General</h3>
+
+                    <!-- Document Directory Section -->
+                    <div
+                        class="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] p-6 mb-6"
+                    >
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3
+                                    class="font-medium text-sm text-[var(--text-primary)]"
+                                >
+                                    Document Directory
+                                </h3>
+                                <p
+                                    class="text-[var(--text-secondary)] text-xs mt-1"
+                                >
+                                    Select the folder containing your markdown
+                                    notes/documents.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-3">
+                            <input
+                                type="text"
+                                class="flex-1 px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-sm text-[var(--text-primary)] focus:outline-none opacity-70 cursor-not-allowed"
+                                value={dataDir}
+                                readonly
+                                placeholder="No directory selected"
+                            />
+                            <button
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-[var(--accent-primary)] text-white hover:brightness-110 shadow-sm"
+                                onclick={selectDataDir}
+                            >
+                                Change
+                            </button>
+                        </div>
+                        {#if indexingStatus}
+                            <div class="mt-2 text-xs flex items-center gap-2">
+                                <span
+                                    class="w-1.5 h-1.5 rounded-full {indexingStatus ===
+                                    'ready'
+                                        ? 'bg-green-500'
+                                        : 'bg-yellow-500 animate-pulse'}"
+                                ></span>
+                                <span
+                                    class="text-[var(--text-secondary)] capitalize"
+                                    >{indexingStatus}</span
+                                >
+                            </div>
+                        {/if}
+                    </div>
 
                     <div
                         class="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] p-6"

@@ -131,6 +131,7 @@ async fn parse_file(
 }
 
 /// 应用状态
+#[derive(Clone)]
 pub struct AppState {
     pub embedding: Arc<RwLock<Option<EmbeddingEngine>>>,
     pub thread_safe_embedding: Arc<RwLock<Option<Arc<ThreadSafeEmbeddingEngine>>>>,
@@ -295,7 +296,13 @@ fn main() {
             println!("[App] Application started, engines loading in background...");
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![parse_file, open_doc_parser_window])
+        .invoke_handler(tauri::generate_handler![
+            parse_file,
+            open_doc_parser_window,
+            get_app_config,
+            set_data_dir,
+            rag_query
+        ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| {
@@ -344,4 +351,258 @@ fn main() {
                 _ => {}
             }
         });
+}
+
+// --- Configuration ---
+
+#[derive(serde::Serialize, serde::Deserialize, Default, Clone, Debug)]
+struct AppConfig {
+    data_dir: Option<String>,
+}
+
+fn get_config_path(app: &tauri::AppHandle) -> PathBuf {
+    app.path()
+        .app_config_dir()
+        .unwrap_or(PathBuf::from("."))
+        .join("config.json")
+}
+
+fn load_config(app: &tauri::AppHandle) -> AppConfig {
+    let path = get_config_path(app);
+    if path.exists() {
+        if let Ok(content) = std::fs::read_to_string(path) {
+            if let Ok(config) = serde_json::from_str(&content) {
+                return config;
+            }
+        }
+    }
+    AppConfig::default()
+}
+
+fn save_config(app: &tauri::AppHandle, config: &AppConfig) -> Result<(), String> {
+    let path = get_config_path(app);
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    let content = serde_json::to_string_pretty(config).map_err(|e| e.to_string())?;
+    std::fs::write(path, content).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+// --- Commands ---
+
+#[tauri::command]
+async fn get_app_config(app: tauri::AppHandle) -> Result<AppConfig, String> {
+    Ok(load_config(&app))
+}
+
+#[tauri::command]
+async fn set_data_dir(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    path: String,
+) -> Result<(), String> {
+    let mut config = load_config(&app);
+    config.data_dir = Some(path.clone());
+    save_config(&app, &config)?;
+
+    // Trigger indexing in background
+    let app_clone = app.clone();
+    let state_clone = state.inner().clone(); // AppState needs to be Clone
+
+    // Cloning Arcs manually since AppState might not derive Clone
+    let thread_safe_embedding = state.thread_safe_embedding.clone();
+
+    tauri::async_runtime::spawn(async move {
+        start_background_indexing(app_clone, thread_safe_embedding, path).await;
+    });
+
+    Ok(())
+}
+
+async fn start_background_indexing(
+    app: tauri::AppHandle,
+    embedding_store: Arc<RwLock<Option<Arc<ThreadSafeEmbeddingEngine>>>>,
+    data_dir: String,
+) {
+    use knot_core::index::KnotIndexer;
+    use knot_core::store::KnotStore;
+
+    println!("[Indexer] Starting background indexing for: {}", data_dir);
+    let _ = app.emit("indexing-status", "starting");
+
+    // 1. Get Embedding Engine (Wait loop logic could be better, here just check)
+    let embedding_provider = {
+        let guard = embedding_store.read().await;
+        guard.clone()
+    };
+
+    if embedding_provider.is_none() {
+        println!("[Indexer] Error: Embedding Engine not loaded yet.");
+        let _ = app.emit("indexing-status", "error: engine not loaded");
+        return;
+    }
+    let embedding_provider = embedding_provider.unwrap();
+
+    // 2. Init Indexer with REAL provider
+    // Cast Arc<ThreadSafeEmbeddingEngine> to Arc<dyn EmbeddingProvider>
+    // ThreadSafeEmbeddingEngine implements EmbeddingProvider.
+    // However, Arc<Struct> does not automatically CoerceUnsized to Arc<dyn Trait> in all contexts easily without explicit cast.
+    let provider_dyn: Arc<dyn pageindex_rs::EmbeddingProvider + Send + Sync> = embedding_provider;
+
+    let indexer = KnotIndexer::new(&data_dir, Some(provider_dyn)).await;
+    let _ = app.emit("indexing-status", "scanning");
+
+    // 3. Scan & Index
+    let input_path = std::path::Path::new(&data_dir); // Wait, data_dir is where we STORE index.
+                                                      // We need SOURCE directory.
+                                                      // The user request said: "Select Datadir in Settings... Select after save, start parsing and saving index."
+                                                      // Usually "Datadir" means where DB is. "Source" means where docs are.
+                                                      // For "Personal Wiki" apps, usually we open a "Vault" (Source Dir) and store index inside `.knot` folder IN it.
+                                                      // OR we select a Source Dir, and store index in AppData.
+                                                      // The user said: "Select Datadir... start parsing". This implies Datadir IS the Source Dir.
+                                                      // And we should probably store index in `.knot` inside it, or in global AppData?
+                                                      // "knot_index.lance" in data_dir.
+                                                      // If I pick my notes dir as data_dir, putting `knot_index.lance` there pollutes it?
+                                                      // User request: "Select Datadir... start parsing".
+                                                      // I will assume input path = data_dir. And I will store index in `${data_dir}/.knot_rag`.
+                                                      // Or just make `KnotIndexer` usage clearer.
+                                                      // `KnotIndexer::new(data_dir)`: expects data_dir to be where valid DB goes.
+                                                      // If user selects `~/Documents/Notes`, and I pass that as `data_dir`:
+                                                      // DB goes to `~/Documents/Notes/knot.db`.
+                                                      // Index goes to `~/Documents/Notes/knot_index.lance`.
+                                                      // This is "acceptable" for a workspace-based app (VSCode style `.vscode` or similar).
+                                                      // I will use that approach for now as it makes "portable vaults" possible.
+
+    match indexer.index_directory(&input_path).await {
+        Ok((records, deleted)) => {
+            println!("[Indexer] Found {} new/modified records.", records.len());
+            let _ = app.emit("indexing-status", "saving");
+
+            if !records.is_empty() || !deleted.is_empty() {
+                match KnotStore::new(&data_dir).await {
+                    Ok(store) => {
+                        for del in deleted {
+                            let _ = store.delete_file(&del).await;
+                        }
+                        if !records.is_empty() {
+                            if let Err(e) = store.add_records(records).await {
+                                eprintln!("[Indexer] Store Add Error: {}", e);
+                            } else {
+                                let _ = store.create_fts_index().await;
+                            }
+                        }
+                    }
+                    Err(e) => eprintln!("[Indexer] Store Init Error: {}", e),
+                }
+            }
+            println!("[Indexer] Complete.");
+            let _ = app.emit("indexing-status", "ready");
+        }
+        Err(e) => {
+            eprintln!("[Indexer] Failed: {}", e);
+            let _ = app.emit("indexing-status", format!("error: {}", e));
+        }
+    }
+}
+
+// --- RAG Commands ---
+
+#[derive(serde::Serialize)]
+struct RagResponse {
+    answer: String,
+    sources: Vec<HybridSearchResultDisplay>,
+}
+
+#[derive(serde::Serialize)]
+struct HybridSearchResultDisplay {
+    file_path: String,
+    score: f32,
+    context: Option<String>,
+    text: String,
+}
+
+#[tauri::command]
+async fn rag_query(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    query: String,
+) -> Result<RagResponse, String> {
+    use knot_core::store::KnotStore;
+    use pageindex_rs::LlmProvider;
+
+    // 1. Get Data Dir
+    let config = load_config(&app);
+    let data_dir = config.data_dir.ok_or("请先在设置中选择文档目录")?;
+
+    // 2. Search Context
+    let store = KnotStore::new(&data_dir).await.map_err(|e| e.to_string())?;
+
+    // Use Mock embedding for query vector for now OR implementation needed?
+    // We NEED the embedding vector for the query to perform vector search!
+    // KnotStore::search takes `query_vec: Vec<f32>` and `query_text: &str`.
+    // So we MUST generate embedding for `query`.
+    // We have `state.thread_safe_embedding`.
+
+    let embedding_provider = {
+        let guard = state.thread_safe_embedding.read().await;
+        guard.clone()
+    }
+    .ok_or("Embedding Engine not ready")?;
+
+    // Generate Query Embedding
+    use pageindex_rs::EmbeddingProvider;
+    let query_vec = embedding_provider
+        .generate_embedding(&query)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let search_results = store
+        .search(query_vec, &query)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    // 3. Format Context
+    let mut context_str = String::new();
+    let mut display_sources = Vec::new();
+
+    for (i, res) in search_results.iter().take(5).enumerate() {
+        let context_line = res.breadcrumbs.clone().unwrap_or_default();
+        context_str.push_str(&format!(
+            "[{}] File: {}\nContext: {}\nContent: {}\n\n",
+            i + 1,
+            res.file_path,
+            context_line,
+            res.text
+        ));
+
+        display_sources.push(HybridSearchResultDisplay {
+            file_path: res.file_path.clone(),
+            score: res.score,
+            context: res.breadcrumbs.clone(),
+            text: res.text.clone(),
+        });
+    }
+
+    // 4. Call LLM
+    let llm_client = {
+        let guard = state.llm_client.read().await;
+        guard.clone()
+    }
+    .ok_or("LLM Engine not ready")?;
+
+    let prompt = format!(
+        "Based on the following context, answer the user's question. If the answer is not in the context, say so.\n\nContext:\n{}\n\nQuestion: {}",
+        context_str, query
+    );
+
+    let answer = llm_client
+        .generate_content(&prompt)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(RagResponse {
+        answer,
+        sources: display_sources,
+    })
 }

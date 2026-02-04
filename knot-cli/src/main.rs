@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         Commands::Index { input } => {
             println!("Indexing directory: {:?} into {}", input, data_dir);
             // Use sqlite registry for incremental updates
-            let indexer = KnotIndexer::new(&data_dir).await;
+            let indexer = KnotIndexer::new(&data_dir, None).await;
             let (records, deleted_files) = indexer.index_directory(&input).await?;
             println!("Found {} vectors to add.", records.len());
             println!("Found {} files to delete.", deleted_files.len());
@@ -92,7 +92,7 @@ async fn main() -> Result<()> {
             let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
             watcher.watch(&input, RecursiveMode::Recursive)?;
 
-            let indexer = KnotIndexer::new(&data_dir).await;
+            let indexer = KnotIndexer::new(&data_dir, None).await;
 
             // Simple blocking loop for watch events
             // In a real app, this should handle async better.

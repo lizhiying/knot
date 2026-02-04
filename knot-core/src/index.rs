@@ -6,22 +6,32 @@ use pageindex_rs::{IndexDispatcher, PageIndexConfig, PageNode};
 use std::path::Path;
 use walkdir::WalkDir;
 
+use pageindex_rs::EmbeddingProvider;
+use std::sync::Arc;
+
 pub struct KnotIndexer {
     dispatcher: IndexDispatcher,
-    embedding_provider: MockEmbeddingProvider,
+    embedding_provider: Arc<dyn EmbeddingProvider + Send + Sync>,
     registry: Option<crate::registry::FileRegistry>,
 }
 
 impl KnotIndexer {
-    pub async fn new(data_dir: &str) -> Self {
+    pub async fn new(
+        data_dir: &str,
+        provider: Option<Arc<dyn EmbeddingProvider + Send + Sync>>,
+    ) -> Self {
         let db_path = std::path::Path::new(data_dir).join("knot.db");
         let db_url = format!("sqlite://{}?mode=rwc", db_path.to_string_lossy());
 
         let registry = crate::registry::FileRegistry::new(&db_url).await.ok();
 
+        let embedding_provider = provider.unwrap_or_else(|| {
+            Arc::new(MockEmbeddingProvider) as Arc<dyn EmbeddingProvider + Send + Sync>
+        });
+
         Self {
             dispatcher: IndexDispatcher::new(),
-            embedding_provider: MockEmbeddingProvider,
+            embedding_provider,
             registry,
         }
     }
@@ -143,8 +153,9 @@ impl KnotIndexer {
     }
 
     pub async fn index_file(&self, path: &Path) -> Result<Vec<VectorRecord>> {
-        // Setup config with mock embedding
-        let mut config = PageIndexConfig::new().with_embedding_provider(&self.embedding_provider);
+        // Setup config with embedding provider
+        let mut config =
+            PageIndexConfig::new().with_embedding_provider(self.embedding_provider.as_ref());
         config.min_token_threshold = 0;
 
         // Parse file

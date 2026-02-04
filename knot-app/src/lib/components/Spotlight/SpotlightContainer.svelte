@@ -17,6 +17,7 @@
     } from "$lib/stores/navigation.svelte.js";
     import DocParser from "./../DocParser.svelte";
     import Settings from "./../Settings.svelte";
+    import { invoke } from "@tauri-apps/api/core";
 
     const { getCurrentWebviewWindow } = window.__TAURI__.webviewWindow;
 
@@ -98,6 +99,7 @@
     // 搜索处理
     async function handleSearch(query) {
         if (isStreaming) return;
+        if (!query.trim()) return;
 
         // 切换到加载状态
         isLoading = true;
@@ -111,7 +113,7 @@
 
         // 显示思考状态
         insightState = {
-            status: "Analyzing local context...",
+            status: "Searching & Analyzing...",
             statusType: "analyzing",
             isThinking: true,
             content: "",
@@ -119,35 +121,55 @@
         };
         searchResults = [];
 
-        // 模拟分析延迟
-        await new Promise((r) => setTimeout(r, 1200));
+        try {
+            // Call Backend
+            console.log("[Spotlight] Invoking rag_query:", query);
+            const response = await invoke("rag_query", { query: query });
+            console.log("[Spotlight] Response:", response);
 
-        // 显示结果
-        searchResults = MOCK_DATA.results;
+            // Map Sources
+            searchResults = response.sources.map((s, idx) => ({
+                id: idx + 1,
+                title: s.file_path.split("/").pop() || s.file_path, // approximate title
+                score: s.score,
+                snippet: s.text,
+                path: s.context || s.file_path,
+            }));
 
-        // 开始流式输出
-        isLoading = false;
-        // searchIconName = "chat_bubble";
-        insightState = {
-            status: "Synthesizing Insight",
-            statusType: "analyzing",
-            isThinking: false,
-            content: "",
-            showCursor: true,
-        };
+            // 显示结果
+            isLoading = false;
 
-        // 模拟流式输出
-        isStreaming = true;
-        await streamResponse(MOCK_DATA.response);
-        isStreaming = false;
+            insightState = {
+                status: "Synthesizing Insight",
+                statusType: "analyzing",
+                isThinking: false,
+                content: "",
+                showCursor: true,
+            };
 
-        // 完成状态
-        insightState = {
-            ...insightState,
-            status: "Insight Complete",
-            statusType: "complete",
-            showCursor: false,
-        };
+            // 模拟流式输出 (Backend currently returns full string)
+            isStreaming = true;
+            await streamResponse(response.answer); // Reuse existing simulation for UX
+            isStreaming = false;
+
+            // 完成状态
+            insightState = {
+                ...insightState,
+                status: "Insight Complete",
+                statusType: "complete",
+                showCursor: false,
+            };
+        } catch (err) {
+            console.error("[Spotlight] Search Failed:", err);
+            isLoading = false;
+            insightState = {
+                status: "Error occurred",
+                statusType: "error",
+                isThinking: false,
+                content: `Failed to search: ${err}`,
+                showCursor: false,
+            };
+        }
     }
 
     // 流式输出模拟
@@ -361,8 +383,8 @@
             class:hidden={!isMainContentVisible}
         >
             {#if navigation.view === VIEW_SEARCH}
-                <!-- Scrollable Search Results -->
-                <div class="flex-1 overflow-y-auto min-h-0 relative">
+                <!-- Fixed Height Search Results Container -->
+                <div class="flex-1 overflow-hidden min-h-0 relative h-full">
                     <ResultsPanel
                         visible={showResults}
                         results={searchResults}
