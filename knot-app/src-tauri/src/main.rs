@@ -568,9 +568,13 @@ async fn rag_query(
 
     for (i, res) in search_results.iter().take(5).enumerate() {
         let context_line = res.breadcrumbs.clone().unwrap_or_default();
+        // 按照 milestone1.md 的格式构建参考文档片段
+        // [1] (匹配度: 98%) 文件: {path} - 章节: {breadcrumbs}
+        // 内容: {content}
         context_str.push_str(&format!(
-            "[{}] File: {}\nContext: {}\nContent: {}\n\n",
+            "[{}] (匹配度: {:.0}%) 文件: {} - 章节: {}\n内容: {}\n\n",
             i + 1,
+            res.score, // Simple formatting of the score
             res.file_path,
             context_line,
             res.text
@@ -592,7 +596,7 @@ async fn rag_query(
     .ok_or("LLM Engine not ready")?;
 
     let prompt = format!(
-        "Based on the following context, answer the user's question. If the answer is not in the context, say so.\n\nContext:\n{}\n\nQuestion: {}",
+        "你是一个专业的知识库助手。请根据以下参考文档回答问题。\n如果参考文档中没有答案，请直接说“我无法在现有文档中找到答案”。不要编造信息。\n\n参考文档：\n{}\n\n用户问题: {}",
         context_str, query
     );
 
