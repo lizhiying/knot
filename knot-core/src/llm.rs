@@ -215,15 +215,22 @@ impl LlmProvider for LlamaClient {
             "[LlamaClient] Generating content for prompt (len: {})...",
             prompt.len()
         );
-        let formatted_prompt = format!(
-            "<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n{}\n<|im_end|>\n<|im_start|>assistant\n",
-            prompt
-        );
+
+        let formatted_prompt = if prompt.trim().starts_with("<|im_start|>") {
+            println!("[LlamaClient] Using RAW PROMPT (ChatML detected)");
+            prompt.to_string()
+        } else {
+            println!("[LlamaClient] Using WRAPPED PROMPT (Default)");
+            format!(
+                "<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n{}\n<|im_end|>\n<|im_start|>assistant\n",
+                prompt
+            )
+        };
 
         let body = json!({
             "prompt": formatted_prompt,
             "n_predict": 2048,
-            "temperature": 0.1,
+            "temperature": 0.7,
             "stop": ["<|im_end|>"]
         });
 
