@@ -43,9 +43,6 @@
     ],
     "resources": [
       "../bin/**/*",
-      "../../models/OCRFlux-3B.Q4_K_M.gguf",
-      "../../models/OCRFlux-3B.mmproj-Q8_0.gguf",
-      "../../models/Qwen3-1.7B-Q4_K_M.gguf",
       "../../models/bge-small-zh-v1.5.onnx",
       "../../models/bge-small-zh-v1.5-tokenizer.json"
     ]

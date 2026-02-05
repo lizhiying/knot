@@ -364,6 +364,16 @@ fn main() {
 
             let bin_dir_clone2 = bin_dir.clone();
             std::thread::spawn(move || {
+                // HOT RELOAD LOGIC:
+                // Check if model exists. If not, we do nothing and wait for "reload_models" command.
+                if !chat_model_path.exists() {
+                    println!(
+                        "[Engine] Chat LLM model missing at {:?}. Waiting for download...",
+                        chat_model_path
+                    );
+                    return;
+                }
+
                 println!(
                     "[Engine] Loading Chat LLM (Qwen3) from {:?}...",
                     chat_model_path
@@ -466,7 +476,8 @@ fn main() {
             check_model_status,
             download_model,
             get_detected_region,
-            start_download_queue
+            start_download_queue,
+            reload_models
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -813,4 +824,96 @@ async fn download_model(
 async fn get_detected_region() -> Result<Region, String> {
     // Return auto-detected region
     Ok(ModelSourceConfig::new().region)
+}
+
+#[tauri::command]
+async fn start_download_queue(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    region: Option<Region>,
+) -> Result<(), String> {
+    let qm = &state.queue_manager;
+
+    // Clear previous
+    qm.clear_queue().await;
+
+    if let Some(r) = region {
+        qm.set_region(r).await;
+    }
+
+    // Add files in order: OCR Main -> OCR mmproj -> LLM
+    qm.add_to_queue("OCRFlux-3B.Q4_K_M.gguf".to_string()).await;
+    qm.add_to_queue("OCRFlux-3B.mmproj-f16.gguf".to_string())
+        .await;
+    qm.add_to_queue("Qwen3-1.7B-Q4_K_M.gguf".to_string()).await;
+
+    // Trigger async processing
+    let app_handle = app.clone();
+    let qm_clone = qm.clone(); // Arc clone
+
+    tauri::async_runtime::spawn(async move {
+        match qm_clone.process_queue(app_handle.clone()).await {
+            Ok(_) => println!("[Queue] Finished processing."),
+            Err(e) => eprintln!("[Queue] processing failed: {}", e),
+        }
+    });
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn reload_models(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+    println!("[Command] Reloading models...");
+
+    // 1. Try Reload Parsing LLM (OCR)
+    let _ = ensure_parsing_llm(&app, state.inner().clone()).await;
+
+    // 2. Try Reload Chat LLM (Qwen)
+    // Check if running
+    let need_reload_chat = {
+        let guard = state.chat_llm.read().await;
+        guard.is_none()
+    };
+
+    if need_reload_chat {
+        println!("[Reload] Chat LLM not running, trying to start...");
+        let manager = ModelPathManager::new(&app);
+        let chat_model_path = manager.get_model_path("Qwen3-1.7B-Q4_K_M.gguf");
+
+        if chat_model_path.exists() {
+            let bin_dir = get_bin_dir(&app);
+            let chat_llm_store = state.chat_llm.clone();
+            let chat_client_store = state.chat_client.clone();
+
+            let result = tokio::task::spawn_blocking(move || {
+                LlamaSidecar::spawn_with_mmap(
+                    chat_model_path.to_str().unwrap_or(""),
+                    &bin_dir,
+                    None,
+                    8081,
+                )
+            })
+            .await
+            .map_err(|e| e.to_string())?;
+
+            match result {
+                Ok(sidecar) => {
+                    let mut guard = chat_llm_store.write().await;
+                    *guard = Some(sidecar);
+
+                    let client = Arc::new(LlamaClient::new(8081));
+                    let mut c_guard = chat_client_store.write().await;
+                    *c_guard = Some(client);
+                    println!("[Reload] ✓ Chat LLM Started.");
+                }
+                Err(e) => eprintln!("[Reload] Failed to start Chat LLM: {}", e),
+            }
+        } else {
+            println!("[Reload] Chat model still missing.");
+        }
+    } else {
+        println!("[Reload] Chat LLM already running.");
+    }
+
+    Ok(())
 }
