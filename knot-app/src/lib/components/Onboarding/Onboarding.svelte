@@ -46,15 +46,28 @@
             statusMessage = "Setup complete!";
             // Double check if model exists now
             invoke("check_model_status", { filename: CORE_MODEL }).then(
-                (exists) => {
+                async (exists) => {
                     if (exists) {
+                        statusMessage = "Initializing inference engine...";
                         try {
+                            // Notify backend to start LLM process now that models exist
+                            await invoke("reload_models");
+
                             const win =
                                 window.__TAURI__.webviewWindow.getCurrentWebviewWindow();
                             win.setSize(new LogicalSize(896, 153)).then(() => {
                                 onComplete();
                             });
                         } catch (e) {
+                            console.error(
+                                "Failed to reload models or resize",
+                                e,
+                            );
+                            statusMessage = "Initialization failed: " + e;
+                            // Still try to complete if it's just a resize error, but maybe not if reload failed?
+                            // If reload failed, search won't work. unique error handling?
+                            // For now, let's assume if reload fails, we stay on onboarding or let them through but search will fail.
+                            // Let's let them through to not block them forever, they can retry in settings.
                             onComplete();
                         }
                     } else {
