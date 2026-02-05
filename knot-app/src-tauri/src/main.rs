@@ -9,22 +9,44 @@ use tauri::{Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder};
 use tokio::sync::RwLock;
 
 /// 获取 models 目录的绝对路径
-fn get_models_dir() -> PathBuf {
-    let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    PathBuf::from(manifest_dir)
-        .parent()
-        .and_then(|p| p.parent())
-        .map(|p| p.join("models"))
-        .unwrap_or_else(|| PathBuf::from("models"))
+/// 获取资源路径 (优先使用 Resource Path, 否则回退到 Dev Path)
+fn resolve_resource(app: &tauri::AppHandle, name: &str, dev_fallback_depth: usize) -> PathBuf {
+    // 1. Try bundled resource path
+    if let Ok(res_dir) = app.path().resource_dir() {
+        let p = res_dir.join(name);
+        if p.exists() {
+            println!("[Path] Found bundled resource: {:?}", p);
+            return p;
+        }
+
+        // Try _up_ flattening (Tauri bundles ../ as _up_)
+        let mut p_up = res_dir.clone();
+        for _ in 0..dev_fallback_depth {
+            p_up = p_up.join("_up_");
+        }
+        p_up = p_up.join(name);
+        if p_up.exists() {
+            println!("[Path] Found bundled resource (flattened): {:?}", p_up);
+            return p_up;
+        }
+    }
+
+    // 2. Fallback to Cargo Manifest (Dev mode)
+    let mut p = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    for _ in 0..dev_fallback_depth {
+        p.pop();
+    }
+    p = p.join(name);
+    println!("[Path] Using dev resource: {:?}", p);
+    p
 }
 
-/// 获取 bin 目录的绝对路径
-fn get_bin_dir() -> PathBuf {
-    let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    PathBuf::from(manifest_dir)
-        .parent()
-        .map(|p| p.join("bin"))
-        .unwrap_or_else(|| PathBuf::from("bin"))
+fn get_models_dir(app: &tauri::AppHandle) -> PathBuf {
+    resolve_resource(app, "models", 2)
+}
+
+fn get_bin_dir(app: &tauri::AppHandle) -> PathBuf {
+    resolve_resource(app, "bin", 1)
 }
 
 /// Tauri 命令：打开 Doc Parser 窗口
@@ -52,7 +74,7 @@ async fn open_doc_parser_window(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
-async fn ensure_parsing_llm(state: AppState) -> Result<(), String> {
+async fn ensure_parsing_llm(app: &tauri::AppHandle, state: AppState) -> Result<(), String> {
     // Check if already running
     {
         let guard = state.parsing_llm.read().await;
@@ -65,8 +87,9 @@ async fn ensure_parsing_llm(state: AppState) -> Result<(), String> {
     let _ = state.thread_safe_embedding.clone(); // Valid clone check
 
     // Prepare paths
-    let models_dir = get_models_dir();
-    let bin_dir = get_bin_dir();
+    // Prepare paths
+    let models_dir = get_models_dir(app);
+    let bin_dir = get_bin_dir(app);
     let parsing_model_path = models_dir.join("OCRFlux-3B.Q4_K_M.gguf");
     let parsing_mmproj_path = models_dir.join("OCRFlux-3B.mmproj-Q8_0.gguf");
 
@@ -116,7 +139,7 @@ async fn parse_file(
     state: State<'_, AppState>,
 ) -> Result<PageNode, String> {
     // Lazy Load Parsing LLM
-    ensure_parsing_llm(state.inner().clone()).await?;
+    ensure_parsing_llm(&app, state.inner().clone()).await?;
 
     let file_path = Path::new(&path);
 
@@ -201,8 +224,7 @@ pub struct AppState {
 }
 
 fn main() {
-    let models_dir = get_models_dir();
-    let bin_dir = get_bin_dir();
+    // Moved path resolution to setup
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -217,6 +239,10 @@ fn main() {
 
             let chat_llm: Arc<RwLock<Option<LlamaSidecar>>> = Arc::new(RwLock::new(None));
             let chat_client: Arc<RwLock<Option<Arc<LlamaClient>>>> = Arc::new(RwLock::new(None));
+
+            let app_handle = app.handle();
+            let models_dir = get_models_dir(&app_handle);
+            let bin_dir = get_bin_dir(&app_handle);
 
             app.manage(AppState {
                 embedding: embedding.clone(),
