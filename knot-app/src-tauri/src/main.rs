@@ -8,6 +8,11 @@ use std::sync::Arc;
 use tauri::{Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder};
 use tokio::sync::RwLock;
 
+mod models;
+use models::config::{ModelSourceConfig, Region};
+use models::downloader::Downloader;
+use models::manager::ModelPathManager;
+
 /// 获取 models 目录的绝对路径
 /// 获取资源路径 (优先使用 Resource Path, 否则回退到 Dev Path)
 fn resolve_resource(app: &tauri::AppHandle, name: &str, dev_fallback_depth: usize) -> PathBuf {
@@ -86,17 +91,32 @@ async fn ensure_parsing_llm(app: &tauri::AppHandle, state: AppState) -> Result<(
     println!("[LazyLoad] Starting Parsing LLM (OCRFlux)...");
     let _ = state.thread_safe_embedding.clone(); // Valid clone check
 
-    // Prepare paths
-    // Prepare paths
-    let models_dir = get_models_dir(app);
+    // Prepare paths via ModelPathManager
+    let manager = ModelPathManager::new(app);
     let bin_dir = get_bin_dir(app);
-    let parsing_model_path = models_dir.join("OCRFlux-3B.Q4_K_M.gguf");
-    let parsing_mmproj_path = models_dir.join("OCRFlux-3B.mmproj-Q8_0.gguf");
+
+    // 使用 ModelPathManager 查找模型，不再硬编码 models_dir
+    let parsing_model_path = manager.get_model_path("OCRFlux-3B.Q4_K_M.gguf");
+    let parsing_mmproj_path = manager.get_model_path("OCRFlux-3B.mmproj-f16.gguf"); // 注意文件名根据 milestone 修正
+                                                                                    // 兼容旧名字 fallback
+    let parsing_mmproj_path = if parsing_mmproj_path.exists() {
+        parsing_mmproj_path
+    } else {
+        manager.get_model_path("OCRFlux-3B.mmproj-Q8_0.gguf")
+    };
+
+    if !parsing_model_path.exists() {
+        return Err(format!(
+            "Parsing model not found at {:?}",
+            parsing_model_path
+        ));
+    }
 
     let parsing_mmproj_arg = if parsing_mmproj_path.exists() {
         Some(parsing_mmproj_path.to_str().unwrap_or("").to_string())
     } else {
-        Some(parsing_model_path.to_str().unwrap_or("").to_string())
+        // 如果 Projector 没找到，可能无法运行 Vision 任务，但先尝试
+        None
     };
 
     let parsing_llm_store = state.parsing_llm.clone();
@@ -213,6 +233,8 @@ async fn parse_file(
 }
 
 /// 应用状态
+use models::queue::QueueManager;
+
 #[derive(Clone)]
 pub struct AppState {
     pub embedding: Arc<RwLock<Option<EmbeddingEngine>>>,
@@ -221,6 +243,7 @@ pub struct AppState {
     pub parsing_client: Arc<RwLock<Option<Arc<LlamaClient>>>>,
     pub chat_llm: Arc<RwLock<Option<LlamaSidecar>>>,
     pub chat_client: Arc<RwLock<Option<Arc<LlamaClient>>>>,
+    pub queue_manager: Arc<QueueManager>,
 }
 
 fn main() {
@@ -272,6 +295,8 @@ fn main() {
                 }
             }
 
+            let queue_manager = Arc::new(QueueManager::new());
+
             app.manage(AppState {
                 embedding: embedding.clone(),
                 thread_safe_embedding: thread_safe_embedding.clone(),
@@ -279,6 +304,7 @@ fn main() {
                 parsing_client: parsing_client.clone(),
                 chat_llm: chat_llm.clone(),
                 chat_client: chat_client.clone(),
+                queue_manager: queue_manager.clone(),
             });
 
             // 保留旧的 EngineManager
@@ -436,7 +462,11 @@ fn main() {
             open_doc_parser_window,
             get_app_config,
             set_data_dir,
-            rag_query
+            rag_query,
+            check_model_status,
+            download_model,
+            get_detected_region,
+            start_download_queue
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -747,4 +777,40 @@ async fn rag_query(
         answer,
         sources: display_sources,
     })
+}
+
+// --- Model Management Commands ---
+
+#[tauri::command]
+async fn check_model_status(app: tauri::AppHandle, filename: String) -> Result<bool, String> {
+    let manager = ModelPathManager::new(&app);
+    Ok(manager.get_model_path(&filename).exists())
+}
+
+#[tauri::command]
+async fn download_model(
+    app: tauri::AppHandle,
+    filename: String,
+    region: Option<Region>, // Optional override
+) -> Result<(), String> {
+    let manager = ModelPathManager::new(&app);
+    let target_path = manager.get_download_target_path(&filename);
+
+    let mut config = ModelSourceConfig::new();
+    if let Some(r) = region {
+        config.region = r;
+    }
+
+    let url = config.get_url(&filename);
+
+    println!("[Command] Downloading {:?} from {}", filename, url);
+    Downloader::download_file(&app, &url, &target_path, &filename).await?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_detected_region() -> Result<Region, String> {
+    // Return auto-detected region
+    Ok(ModelSourceConfig::new().region)
 }

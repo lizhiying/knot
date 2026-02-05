@@ -21,12 +21,12 @@ Scope:
     *   "Download OCR" 按钮 (点击即开始下载)。
 
 Tasks:
-- [ ] 后端: 实现 `ModelPathManager` 和此逻辑 <!-- id: 1 -->
-- [ ] 后端: 实现 `Downloader` (reqwest) <!-- id: 2 -->
-- [ ] 后端: 实现 `ModelSourceConfig` (Region Detection) <!-- id: 3 -->
-- [ ] 后端: 修改 OCR 引擎加载路径逻辑 <!-- id: 4 -->
-- [ ] 前端: 实现模型管理面板 UI <!-- id: 5 -->
-- [ ] 前端: 集成下载按钮与后端 Command <!-- id: 6 -->
+- [x] 后端: 实现 `ModelPathManager` 和此逻辑 <!-- id: 1 -->
+- [x] 后端: 实现 `Downloader` (reqwest) <!-- id: 2 -->
+- [x] 后端: 实现 `ModelSourceConfig` (Region Detection) <!-- id: 3 -->
+- [x] 后端: 修改 OCR 引擎加载路径逻辑 <!-- id: 4 -->
+- [x] 前端: 实现模型管理面板 UI <!-- id: 5 -->
+- [x] 前端: 集成下载按钮与后端 Command <!-- id: 6 -->
 
 Exit criteria:
 - 点击下载能成功将 `OCRFlux-3B.Q4_K_M.gguf` 下载到 `AppData`。

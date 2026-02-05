@@ -10,6 +10,7 @@
     import { invoke } from "@tauri-apps/api/core";
     import { open } from "@tauri-apps/plugin-dialog";
     import { listen } from "@tauri-apps/api/event";
+    import ModelManager from "./ModelManager.svelte";
 
     let activeTab = $state("general"); // Default to general for testing
 
@@ -26,6 +27,7 @@
     // ... existing tabs const ...
     const tabs = [
         { id: "general", label: "General", icon: "settings" },
+        { id: "models", label: "Models", icon: "download" },
         { id: "theme", label: "Appearance", icon: "palette" },
         { id: "about", label: "About", icon: "info" },
     ];
@@ -359,6 +361,8 @@
                         </div>
                     </div>
                 </div>
+            {:else if activeTab === "models"}
+                <ModelManager />
             {:else if activeTab === "general"}
                 <div class="mb-8">
                     <h3 class="text-base font-semibold mb-4 pb-1">General</h3>
