@@ -14,6 +14,7 @@ export const VIEW_SETTINGS = 'settings';
 class NavigationState {
     current = $state(PAGE_HOME);
     activeView = $state(VIEW_SEARCH);
+    settingsTab = $state('general');
 
     get page() {
         return this.current;
@@ -21,6 +22,10 @@ class NavigationState {
 
     get view() {
         return this.activeView;
+    }
+
+    get activeSettingsTab() {
+        return this.settingsTab;
     }
 
     navigateTo(page) {
@@ -31,6 +36,11 @@ class NavigationState {
     setActiveView(view) {
         console.log('[Navigation] Setting active view to:', view);
         this.activeView = view;
+    }
+
+    setSettingsTab(tab) {
+        console.log('[Navigation] Setting settings tab to:', tab);
+        this.settingsTab = tab;
     }
 }
 
@@ -44,6 +54,10 @@ export function navigateTo(page) {
 
 export function setActiveView(view) {
     navigation.setActiveView(view);
+}
+
+export function setSettingsTab(tab) {
+    navigation.setSettingsTab(tab);
 }
 
 // 便捷函数获取当前页面

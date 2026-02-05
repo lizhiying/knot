@@ -580,7 +580,8 @@ async fn set_data_dir(
 
     // Trigger indexing in background
     let app_clone = app.clone();
-    let state_clone = state.inner().clone(); // AppState needs to be Clone
+    let app_clone = app.clone();
+    // state_clone removed (unused)
 
     // Cloning Arcs manually since AppState might not derive Clone
     let thread_safe_embedding = state.thread_safe_embedding.clone();

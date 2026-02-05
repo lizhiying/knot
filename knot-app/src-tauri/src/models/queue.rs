@@ -4,7 +4,7 @@ use super::manager::ModelPathManager;
 use std::collections::VecDeque;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter};
 use tokio::sync::Mutex;
 
 #[derive(Clone, serde::Serialize)]

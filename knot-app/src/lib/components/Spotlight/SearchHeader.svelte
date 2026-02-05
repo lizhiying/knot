@@ -12,6 +12,7 @@
         placeholder = "What can I help you find today?",
         onSearch = () => {},
         value = $bindable(""),
+        disabled = false,
     } = $props();
 
     // let inputValue = $state(""); // Removed local state
@@ -106,17 +107,24 @@
     >
         <span
             class="invisible row-start-1 col-start-1 whitespace-pre text-2xl font-light tracking-tight px-0"
-            aria-hidden="true">{value || placeholder}</span
+            aria-hidden="true"
+            >{value ||
+                (disabled
+                    ? "Core model missing - Please download in Settings"
+                    : placeholder)}</span
         >
         <input
             bind:this={inputRef}
             bind:value
             type="text"
-            class="row-start-1 col-start-1 w-full bg-transparent border-none outline-none text-2xl text-[var(--text-primary)] placeholder-[var(--text-muted)] font-light tracking-tight px-0"
-            {placeholder}
+            class="row-start-1 col-start-1 w-full bg-transparent border-none outline-none text-2xl text-[var(--text-primary)] placeholder-[var(--text-muted)] font-light tracking-tight px-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder={disabled
+                ? "Core model missing - Please download in Settings"
+                : placeholder}
             autocomplete="off"
             spellcheck="false"
             onkeydown={handleKeydown}
+            {disabled}
         />
     </div>
 

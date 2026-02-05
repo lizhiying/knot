@@ -18,6 +18,7 @@
     import DocParser from "./../DocParser.svelte";
     import Settings from "./../Settings.svelte";
     import { invoke } from "@tauri-apps/api/core";
+    import { onMount } from "svelte";
 
     const { getCurrentWebviewWindow } = window.__TAURI__.webviewWindow;
 
@@ -32,6 +33,7 @@
     let searchResults = $state([]);
     let highlightedCardId = $state(null);
     let searchQuery = $state("");
+    let isModelReady = $state(false);
 
     let isMainContentVisible = $state(false);
 
@@ -97,6 +99,35 @@
     };
 
     // 搜索处理
+    async function checkModelsAndRedirect() {
+        try {
+            // Check Qwen (Chat) - Essential for Search
+            const qwenExists = await invoke("check_model_status", {
+                filename: "Qwen3-1.7B-Q4_K_M.gguf",
+            });
+            if (!qwenExists) {
+                console.log(
+                    "[Spotlight] Core model missing. Redirecting to settings...",
+                );
+                navigation.setSettingsTab("models");
+                navigation.setActiveView(VIEW_SETTINGS);
+                isMainContentVisible = true;
+                isModelReady = false;
+                return false;
+            }
+            isModelReady = true;
+            return true;
+        } catch (e) {
+            console.error("Failed to check models:", e);
+            return true; // fail safe
+        }
+    }
+
+    onMount(() => {
+        // Startup check
+        checkModelsAndRedirect();
+    });
+
     async function handleSearch(query) {
         if (isStreaming) return;
         if (!query.trim()) return;
@@ -162,6 +193,21 @@
         } catch (err) {
             console.error("[Spotlight] Search Failed:", err);
             isLoading = false;
+
+            // Check if error is related to missing models/engine not ready
+            const errorStr = err.toString();
+            if (
+                errorStr.includes("not ready") ||
+                errorStr.includes("LLM") ||
+                errorStr.includes("Model")
+            ) {
+                // Redirect to models
+                navigation.setSettingsTab("models");
+                navigation.setActiveView(VIEW_SETTINGS);
+                // Do NOT show error state, just redirect
+                return;
+            }
+
             insightState = {
                 status: "Error occurred",
                 statusType: "error",
@@ -374,6 +420,7 @@
             iconName={searchIconName}
             onSearch={handleSearch}
             bind:value={searchQuery}
+            disabled={!isModelReady}
         />
 
         <!-- Main Content Area -->

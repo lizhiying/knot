@@ -4033,6 +4033,7 @@ dependencies = [
  "async-trait",
  "base64 0.21.7",
  "fs2",
+ "futures-util",
  "knot-core",
  "ndarray 0.16.1",
  "ort",

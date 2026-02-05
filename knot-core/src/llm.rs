@@ -26,6 +26,9 @@ impl LlamaSidecar {
 
         let bin_path = bin_dir.join("llama").join(server_name);
 
+        // CLEANUP: Check for zombie processes on the target port
+        cleanup_process_on_port(port);
+
         println!("[LLM] Starting server from {:?} on port {}", bin_path, port);
 
         let mut cmd = Command::new(&bin_path);
@@ -142,6 +145,41 @@ impl LlamaClient {
             base_url: format!("http://127.0.0.1:{}", port),
             client: reqwest::Client::new(),
             gate: Arc::new(PriorityGate::new()),
+        }
+    }
+}
+
+fn cleanup_process_on_port(port: u16) {
+    #[cfg(unix)]
+    {
+        use std::process::Command;
+        // lsof -t -i:PORT
+        // -t: terse output (PID only)
+        // -i:PORT: select internet files on PORT
+        let output = Command::new("lsof")
+            .arg("-t")
+            .arg(format!("-i:{}", port))
+            .output();
+
+        match output {
+            Ok(output) => {
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                for line in stdout.lines() {
+                    if let Ok(pid) = line.trim().parse::<i32>() {
+                        println!(
+                            "[LLM] Found process occupying port {}: PID {}. Killing...",
+                            port, pid
+                        );
+                        // kill -9 PID
+                        let _ = Command::new("kill").arg("-9").arg(pid.to_string()).output();
+                    }
+                }
+            }
+            Err(e) => {
+                // lsof might not be installed or permission error.
+                // We just log warning, don't crash.
+                println!("[LLM] Warning: Failed to check for zombie processes: {}", e);
+            }
         }
     }
 }

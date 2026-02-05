@@ -11,8 +11,7 @@
     import { open } from "@tauri-apps/plugin-dialog";
     import { listen } from "@tauri-apps/api/event";
     import ModelManager from "./ModelManager.svelte";
-
-    let activeTab = $state("general"); // Default to general for testing
+    import { navigation } from "$lib/stores/navigation.svelte.js";
 
     // Data Dir State
     let dataDir = $state("");
@@ -224,11 +223,11 @@
         <div class="flex flex-col gap-1 p-4">
             {#each tabs as tab}
                 <button
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors {activeTab ===
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors {navigation.settingsTab ===
                     tab.id
                         ? 'bg-[var(--bg-card)] text-[var(--accent-primary)] shadow-sm'
                         : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)]'}"
-                    onclick={() => (activeTab = tab.id)}
+                    onclick={() => (navigation.settingsTab = tab.id)}
                 >
                     <span class="material-symbols-outlined text-[18px]"
                         >{tab.icon}</span
@@ -242,7 +241,7 @@
     <!-- Content -->
     <div class="flex-1 overflow-y-auto bg-[var(--bg-primary)]">
         <div class="mx-auto p-6">
-            {#if activeTab === "theme"}
+            {#if navigation.settingsTab === "theme"}
                 <!-- ... theme content ... -->
                 <div class="mb-8">
                     <h3 class="text-base font-semibold mb-4 pb-1">
@@ -361,9 +360,9 @@
                         </div>
                     </div>
                 </div>
-            {:else if activeTab === "models"}
+            {:else if navigation.settingsTab === "models"}
                 <ModelManager />
-            {:else if activeTab === "general"}
+            {:else if navigation.settingsTab === "general"}
                 <div class="mb-8">
                     <h3 class="text-base font-semibold mb-4 pb-1">General</h3>
 
@@ -490,7 +489,7 @@
                         {/if}
                     </div>
                 </div>
-            {:else if activeTab === "about"}
+            {:else if navigation.settingsTab === "about"}
                 <div class="mb-8">
                     <h3 class="text-base font-semibold mb-4 pb-1">About</h3>
                     <div
