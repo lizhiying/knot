@@ -360,7 +360,9 @@ fn main() {
             let chat_client_clone = chat_client.clone();
 
             // Chat Model Paths
-            let chat_model_path = models_dir.join("Qwen3-1.7B-Q4_K_M.gguf");
+            // Chat Model Paths
+            let manager = ModelPathManager::new(&app_handle);
+            let chat_model_path = manager.get_model_path("Qwen3-1.7B-Q4_K_M.gguf");
 
             let bin_dir_clone2 = bin_dir.clone();
             std::thread::spawn(move || {
@@ -704,12 +706,16 @@ async fn rag_query(
     use knot_core::store::KnotStore;
     use pageindex_rs::LlmProvider;
 
+    println!("[rag_query] Starting query: {}", query);
+
     // 1. Get Data Dir
     let config = load_config(&app);
     let data_dir = config.data_dir.ok_or("请先在设置中选择文档目录")?;
+    println!("[rag_query] Data dir: {}", data_dir);
 
     // 2. Search Context
     let store = KnotStore::new(&data_dir).await.map_err(|e| e.to_string())?;
+    println!("[rag_query] Store initialized");
 
     // Use Mock embedding for query vector for now OR implementation needed?
     // We NEED the embedding vector for the query to perform vector search!
@@ -717,23 +723,31 @@ async fn rag_query(
     // So we MUST generate embedding for `query`.
     // We have `state.thread_safe_embedding`.
 
+    println!("[rag_query] Acquiring embedding lock...");
     let embedding_provider = {
         let guard = state.thread_safe_embedding.read().await;
+        println!("[rag_query] Embedding lock acquired");
         guard.clone()
     }
     .ok_or("Embedding Engine not ready")?;
 
     // Generate Query Embedding
     use pageindex_rs::EmbeddingProvider;
+    println!("[rag_query] Generating embedding...");
     let query_vec = embedding_provider
         .generate_embedding(&query)
         .await
         .map_err(|e| e.to_string())?;
+    println!("[rag_query] Embedding generated");
 
     let search_results = store
         .search(query_vec, &query)
         .await
         .map_err(|e| e.to_string())?;
+    println!(
+        "[rag_query] Search complete. Found {} results",
+        search_results.len()
+    );
 
     // 3. Format Context
     let mut context_str = String::new();
