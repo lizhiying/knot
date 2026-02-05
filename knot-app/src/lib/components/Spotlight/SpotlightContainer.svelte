@@ -33,7 +33,7 @@
     let searchResults = $state([]);
     let highlightedCardId = $state(null);
     let searchQuery = $state("");
-    let isModelReady = $state(false);
+    let isModelReady = $state(true);
 
     let isMainContentVisible = $state(false);
 
@@ -99,33 +99,8 @@
     };
 
     // 搜索处理
-    async function checkModelsAndRedirect() {
-        try {
-            // Check Qwen (Chat) - Essential for Search
-            const qwenExists = await invoke("check_model_status", {
-                filename: "Qwen3-1.7B-Q4_K_M.gguf",
-            });
-            if (!qwenExists) {
-                console.log(
-                    "[Spotlight] Core model missing. Redirecting to settings...",
-                );
-                navigation.setSettingsTab("models");
-                navigation.setActiveView(VIEW_SETTINGS);
-                isMainContentVisible = true;
-                isModelReady = false;
-                return false;
-            }
-            isModelReady = true;
-            return true;
-        } catch (e) {
-            console.error("Failed to check models:", e);
-            return true; // fail safe
-        }
-    }
-
     onMount(() => {
-        // Startup check
-        checkModelsAndRedirect();
+        // Startup check removed (handled by HomePage/Onboarding)
     });
 
     async function handleSearch(query) {
