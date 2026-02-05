@@ -244,6 +244,34 @@ fn main() {
             let models_dir = get_models_dir(&app_handle);
             let bin_dir = get_bin_dir(&app_handle);
 
+            // Configure ORT Library Path
+            // ort 2.0+ needs to know where the dylib is if it's not in standard paths
+            #[cfg(target_os = "macos")]
+            {
+                let arch = std::env::consts::ARCH; // "aarch64" or "x86_64"
+                let ort_lib_path = if arch == "aarch64" {
+                    bin_dir
+                        .join("onnxruntime")
+                        .join("macos-arm64")
+                        .join("libonnxruntime.dylib")
+                } else {
+                    bin_dir
+                        .join("onnxruntime")
+                        .join("macos-x64")
+                        .join("libonnxruntime.dylib")
+                };
+
+                if ort_lib_path.exists() {
+                    println!("[ORT] Setting ORT_DYLIB_PATH to: {:?}", ort_lib_path);
+                    std::env::set_var("ORT_DYLIB_PATH", ort_lib_path);
+                } else {
+                    println!(
+                        "[ORT] Warning: bundled onnxruntime dylib not found at {:?}",
+                        ort_lib_path
+                    );
+                }
+            }
+
             app.manage(AppState {
                 embedding: embedding.clone(),
                 thread_safe_embedding: thread_safe_embedding.clone(),
@@ -254,12 +282,6 @@ fn main() {
             });
 
             // 保留旧的 EngineManager
-            // 保留旧的 EngineManager (Parsing LLM as default for manager if needed, or remove Manager if unused)
-            // Wait, EngineManager definition in `knot-core` might need update if I change AppState usage.
-            // But `app.manage` stores struct by Type. EngineManager struct is distinct.
-            // Assuming EngineManager uses `llm` field which is `Arc<RwLock<Option<LlamaSidecar>>>`.
-            // I'll map `parsing_llm` to it.
-
             app.manage(EngineManager {
                 embedding: embedding.clone(),
                 llm: parsing_llm.clone(),
@@ -274,6 +296,7 @@ fn main() {
                     "[Engine] Loading embedding model from {:?}...",
                     embedding_model_path
                 );
+                // Ensure ORT setup propagated to this thread context if needed (env vars are process global so OK)
                 match EmbeddingEngine::init_onnx(embedding_model_path.to_str().unwrap_or("")) {
                     Ok(engine) => {
                         tokio::runtime::Runtime::new().unwrap().block_on(async {
