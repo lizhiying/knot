@@ -149,6 +149,30 @@
         }
     }
 
+    async function resetIndex() {
+        if (
+            !confirm(
+                "Are you sure you want to clear the index? This will delete all indexed data and require a full re-scan.",
+            )
+        )
+            return;
+        try {
+            await invoke("reset_index");
+            indexingStatus =
+                "Index cleared. Re-indexing will start shortly or on restart.";
+            // Optionally force re-set data dir to trigger immediate re-index if logic supports it
+            // But reset_index just deletes files.
+            // If we want to trigger re-index, we might need to call set_data_dir again or similar.
+            // For now, prompt user.
+            alert(
+                "Index cleared successfully. Please restart the application to rebuild the index.",
+            );
+        } catch (err) {
+            console.error("Failed to reset index:", err);
+            alert("Failed to reset index: " + err);
+        }
+    }
+
     function handleKeyDown(e) {
         if (!isRecording) return;
         e.preventDefault();
@@ -414,6 +438,35 @@
                                 >
                             </div>
                         {/if}
+                    </div>
+
+                    <!-- Index Management Section -->
+                    <div
+                        class="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] p-6 mb-6"
+                    >
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3
+                                    class="font-medium text-sm text-[var(--text-primary)]"
+                                >
+                                    Index Management
+                                </h3>
+                                <p
+                                    class="text-[var(--text-secondary)] text-xs mt-1"
+                                >
+                                    Clear the index if you encounter issues or
+                                    want to force a full re-scan.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-red-500/10 text-red-500 hover:bg-red-500/20 shadow-sm border border-red-500/20"
+                                onclick={resetIndex}
+                            >
+                                Clear Index
+                            </button>
+                        </div>
                     </div>
 
                     <div

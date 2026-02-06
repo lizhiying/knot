@@ -17,11 +17,10 @@ pub struct KnotIndexer {
 
 impl KnotIndexer {
     pub async fn new(
-        data_dir: &str,
+        db_path: &str,
         provider: Option<Arc<dyn EmbeddingProvider + Send + Sync>>,
     ) -> Self {
-        let db_path = std::path::Path::new(data_dir).join("knot.db");
-        let db_url = format!("sqlite://{}?mode=rwc", db_path.to_string_lossy());
+        let db_url = format!("sqlite://{}?mode=rwc", db_path);
 
         let registry = crate::registry::FileRegistry::new(&db_url).await.ok();
 
@@ -158,14 +157,17 @@ impl KnotIndexer {
             PageIndexConfig::new().with_embedding_provider(self.embedding_provider.as_ref());
         config.min_token_threshold = 0;
 
+        // Ensure absolute path
+        let abs_path = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+
         // Parse file
-        let mut root_node = self.dispatcher.index_file(path, &config).await?;
+        let mut root_node = self.dispatcher.index_file(&abs_path, &config).await?;
 
         // Manually generate embeddings for nodes if missing
         self.enrich_node(&mut root_node).await?;
 
         // Flatten to records
-        Ok(self.flatten_tree(root_node, path))
+        Ok(self.flatten_tree(root_node, &abs_path))
     }
 
     async fn enrich_node(&self, node: &mut PageNode) -> Result<()> {

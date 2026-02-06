@@ -54,39 +54,31 @@ fn get_bin_dir(app: &tauri::AppHandle) -> PathBuf {
     resolve_resource(app, "bin", 1)
 }
 
-fn get_index_path(app: &tauri::AppHandle, data_dir: &str) -> PathBuf {
+fn get_index_base_dir(app: &tauri::AppHandle, data_dir: &str) -> PathBuf {
     // 1. Get base ~/.knot/indexes
-    // Use models_dir parent as ~/.knot base, or standard home location
-    // Here we assume models_dir is ~/.knot/models or inside resource dir.
-    // Let's use standard home dir ~/.knot logic for stable storage
     let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
     let base = Path::new(&home).join(".knot").join("indexes");
 
     // 2. Hash absolute path of data_dir
     let abs_path = std::fs::canonicalize(data_dir).unwrap_or(PathBuf::from(data_dir));
     let path_str = abs_path.to_string_lossy();
-    // use md5::{Md5, Digest}; // Assuming md-5 crate structure.
-    // Actually typically: let hash = md5::compute(bytes); is for `md5` crate.
-    // The user added `md-5` crate which implements `RustCrypto` traits.
-    // So usage is:
+
     use md5::{Digest, Md5};
     let mut hasher = Md5::new();
     hasher.update(path_str.as_bytes());
     let hash = hasher.finalize();
     let hash_hex = format!("{:x}", hash);
 
-    let index_dir = base.join(hash_hex).join("knot_index.lance");
+    let index_base_dir = base.join(hash_hex);
 
-    // Ensure parent dir exists
-    if let Some(p) = index_dir.parent() {
+    // Ensure directory exists
+    if let Some(p) = index_base_dir.parent() {
         let _ = std::fs::create_dir_all(p);
     }
+    // Also ensure the base dir itself exists
+    let _ = std::fs::create_dir_all(&index_base_dir);
 
-    println!(
-        "[App] Resolved index path for '{}' -> {:?}",
-        data_dir, index_dir
-    );
-    index_dir
+    index_base_dir
 }
 
 /// Tauri 命令：打开 Doc Parser 窗口
@@ -530,12 +522,16 @@ fn main() {
                             "[App] Found configured data_dir: {}. Starting background indexing...",
                             dir
                         );
-                        let index_path = get_index_path(&app_handle_for_index, &dir);
+                        let base_dir = get_index_base_dir(&app_handle_for_index, &dir);
+                        let index_path = base_dir.join("knot_index.lance");
+                        let db_path = base_dir.join("knot.db");
+
                         start_background_indexing(
                             app_handle_for_index,
                             thread_safe_embedding_for_index,
                             dir,
                             index_path.to_string_lossy().to_string(),
+                            db_path.to_string_lossy().to_string(),
                         )
                         .await;
                     }
@@ -556,7 +552,8 @@ fn main() {
             get_detected_region,
             start_download_queue,
             reload_models,
-            stop_parsing_llm
+            stop_parsing_llm,
+            reset_index
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -648,6 +645,21 @@ async fn get_app_config(app: tauri::AppHandle) -> Result<AppConfig, String> {
 }
 
 #[tauri::command]
+async fn reset_index(app: tauri::AppHandle) -> Result<(), String> {
+    let config = load_config(&app);
+    let data_dir = config.data_dir.ok_or("Data directory not set")?;
+
+    let base_dir = get_index_base_dir(&app, &data_dir);
+    println!("[Command] Resetting index. Deleting: {:?}", base_dir);
+
+    if base_dir.exists() {
+        std::fs::remove_dir_all(&base_dir).map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
 async fn set_data_dir(
     app: tauri::AppHandle,
     state: State<'_, AppState>,
@@ -665,11 +677,22 @@ async fn set_data_dir(
     let thread_safe_embedding = state.thread_safe_embedding.clone();
 
     // Get index path
-    let index_path = get_index_path(&app_clone, &path);
+    let base_dir = get_index_base_dir(&app_clone, &path);
+    let index_path = base_dir.join("knot_index.lance");
+    let db_path = base_dir.join("knot.db");
+
     let index_path_str = index_path.to_string_lossy().to_string();
+    let db_path_str = db_path.to_string_lossy().to_string();
 
     tauri::async_runtime::spawn(async move {
-        start_background_indexing(app_clone, thread_safe_embedding, path, index_path_str).await;
+        start_background_indexing(
+            app_clone,
+            thread_safe_embedding,
+            path,
+            index_path_str,
+            db_path_str,
+        )
+        .await;
     });
 
     Ok(())
@@ -680,6 +703,7 @@ async fn start_background_indexing(
     embedding_store: Arc<RwLock<Option<Arc<ThreadSafeEmbeddingEngine>>>>,
     data_dir: String,
     index_path: String,
+    db_path: String,
 ) {
     use knot_core::index::KnotIndexer;
     use knot_core::store::KnotStore;
@@ -707,7 +731,7 @@ async fn start_background_indexing(
     // However, Arc<Struct> does not automatically CoerceUnsized to Arc<dyn Trait> in all contexts easily without explicit cast.
     let provider_dyn: Arc<dyn pageindex_rs::EmbeddingProvider + Send + Sync> = embedding_provider;
 
-    let indexer = KnotIndexer::new(&data_dir, Some(provider_dyn)).await;
+    let indexer = KnotIndexer::new(&db_path, Some(provider_dyn)).await;
     let _ = app.emit("indexing-status", "scanning");
 
     // 3. Scan & Index (Initial Pass)
@@ -892,7 +916,8 @@ async fn rag_query(
     let data_dir = config.data_dir.ok_or("Data directory not set")?;
 
     // Resolve external index path
-    let index_path = get_index_path(&app, &data_dir);
+    let base_dir = get_index_base_dir(&app, &data_dir);
+    let index_path = base_dir.join("knot_index.lance");
     let index_path_str = index_path.to_string_lossy().to_string();
 
     let store = knot_core::store::KnotStore::new(&index_path_str)
