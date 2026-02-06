@@ -4035,6 +4035,7 @@ dependencies = [
  "fs2",
  "futures-util",
  "knot-core",
+ "md-5",
  "ndarray 0.16.1",
  "ort",
  "pageindex-rs",

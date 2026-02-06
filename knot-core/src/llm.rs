@@ -206,44 +206,69 @@ impl LlmProvider for LlamaClient {
             "stop": ["<|im_end|>"]
         });
 
-        let res = self
-            .client
-            .post(format!("{}/completion", self.base_url))
-            .json(&body)
-            .send()
-            .await
-            .map_err(|e| {
-                println!("[LlamaClient] Request failed: {}", e);
-                PageIndexError::ParseError(format!("LLM Request failed: {}", e))
-            })?;
+        let mut attempts = 0;
+        let max_attempts = 60;
 
-        if !res.status().is_success() {
-            println!("[LlamaClient] Error status: {}", res.status());
-            return Err(PageIndexError::ParseError(format!(
-                "LLM Error status: {}",
-                res.status()
-            )));
+        loop {
+            let res = self
+                .client
+                .post(format!("{}/completion", self.base_url))
+                .json(&body)
+                .send()
+                .await;
+
+            match res {
+                Ok(response) => {
+                    if response.status().is_success() {
+                        let json: serde_json::Value = response.json().await.map_err(|e| {
+                            PageIndexError::ParseError(format!("Invalid response JSON: {}", e))
+                        })?;
+
+                        let content = json["content"].as_str().ok_or_else(|| {
+                            PageIndexError::ParseError("Missing content in response".to_string())
+                        })?;
+
+                        // 过滤掉 <think>...</think> 内容
+                        let cleaned_content = if let Some(end_idx) = content.find("</think>") {
+                            &content[end_idx + 8..]
+                        } else if content.starts_with("<think>") {
+                            &content[7..]
+                        } else {
+                            content
+                        };
+                        return Ok(cleaned_content.trim().to_string());
+                    } else if response.status().as_u16() == 503 {
+                        attempts += 1;
+                        if attempts >= max_attempts {
+                            println!("[LlamaClient] Error status: {}", response.status());
+                            return Err(PageIndexError::ParseError(format!(
+                                "LLM Error status: {} (Timeout)",
+                                response.status()
+                            )));
+                        }
+                        println!(
+                            "[LlamaClient] Model loading (503), retrying {}/{}...",
+                            attempts, max_attempts
+                        );
+                        sleep(Duration::from_secs(1)).await;
+                        continue;
+                    } else {
+                        println!("[LlamaClient] Error status: {}", response.status());
+                        return Err(PageIndexError::ParseError(format!(
+                            "LLM Error status: {}",
+                            response.status()
+                        )));
+                    }
+                }
+                Err(e) => {
+                    println!("[LlamaClient] Request failed: {}", e);
+                    return Err(PageIndexError::ParseError(format!(
+                        "LLM Request failed: {}",
+                        e
+                    )));
+                }
+            }
         }
-
-        let json: serde_json::Value = res
-            .json()
-            .await
-            .map_err(|e| PageIndexError::ParseError(format!("Invalid response JSON: {}", e)))?;
-
-        let content = json["content"]
-            .as_str()
-            .ok_or_else(|| PageIndexError::ParseError("Missing content in response".to_string()))?;
-
-        // 过滤掉 <think>...</think> 内容
-        let cleaned_content = if let Some(end_idx) = content.find("</think>") {
-            &content[end_idx + 8..]
-        } else if content.starts_with("<think>") {
-            &content[7..]
-        } else {
-            content
-        };
-
-        Ok(cleaned_content.trim().to_string())
     }
 
     async fn generate_content(&self, prompt: &str) -> Result<String, PageIndexError> {
@@ -274,44 +299,70 @@ impl LlmProvider for LlamaClient {
             "stop": ["<|im_end|>"]
         });
 
-        let res = self
-            .client
-            .post(format!("{}/completion", self.base_url))
-            .json(&body)
-            .send()
-            .await
-            .map_err(|e| {
-                println!("[LlamaClient] Request failed: {}", e);
-                PageIndexError::ParseError(format!("LLM Request failed: {}", e))
-            })?;
+        let mut attempts = 0;
+        let max_attempts = 60;
 
-        if !res.status().is_success() {
-            println!("[LlamaClient] Error status: {}", res.status());
-            return Err(PageIndexError::ParseError(format!(
-                "LLM Error status: {}",
-                res.status()
-            )));
+        loop {
+            let res = self
+                .client
+                .post(format!("{}/completion", self.base_url))
+                .json(&body)
+                .send()
+                .await;
+
+            match res {
+                Ok(response) => {
+                    if response.status().is_success() {
+                        let json: serde_json::Value = response.json().await.map_err(|e| {
+                            PageIndexError::ParseError(format!("Invalid response JSON: {}", e))
+                        })?;
+
+                        let content = json["content"].as_str().ok_or_else(|| {
+                            PageIndexError::ParseError("Missing content in response".to_string())
+                        })?;
+
+                        // 过滤掉 <think>...</think> 内容
+                        let cleaned_content = if let Some(end_idx) = content.find("</think>") {
+                            &content[end_idx + 8..] // +8 for length of "</think>"
+                        } else if content.starts_with("<think>") {
+                            &content[7..]
+                        } else {
+                            content
+                        };
+
+                        return Ok(cleaned_content.trim().to_string());
+                    } else if response.status().as_u16() == 503 {
+                        attempts += 1;
+                        if attempts >= max_attempts {
+                            println!("[LlamaClient] Error status: {}", response.status());
+                            return Err(PageIndexError::ParseError(format!(
+                                "LLM Error status: {} (Timeout)",
+                                response.status()
+                            )));
+                        }
+                        println!(
+                            "[LlamaClient] Model loading (503), retrying {}/{}...",
+                            attempts, max_attempts
+                        );
+                        sleep(Duration::from_secs(1)).await;
+                        continue;
+                    } else {
+                        println!("[LlamaClient] Error status: {}", response.status());
+                        return Err(PageIndexError::ParseError(format!(
+                            "LLM Error status: {}",
+                            response.status()
+                        )));
+                    }
+                }
+                Err(e) => {
+                    println!("[LlamaClient] Request failed: {}", e);
+                    return Err(PageIndexError::ParseError(format!(
+                        "LLM Request failed: {}",
+                        e
+                    )));
+                }
+            }
         }
-
-        let json: serde_json::Value = res
-            .json()
-            .await
-            .map_err(|e| PageIndexError::ParseError(format!("Invalid response JSON: {}", e)))?;
-
-        let content = json["content"]
-            .as_str()
-            .ok_or_else(|| PageIndexError::ParseError("Missing content in response".to_string()))?;
-
-        // 过滤掉 <think>...</think> 内容
-        let cleaned_content = if let Some(end_idx) = content.find("</think>") {
-            &content[end_idx + 8..] // +8 for length of "</think>"
-        } else if content.starts_with("<think>") {
-            &content[7..]
-        } else {
-            content
-        };
-
-        Ok(cleaned_content.trim().to_string())
     }
 
     async fn generate_content_with_image(
@@ -375,35 +426,71 @@ impl LlmProvider for LlamaClient {
             "stream": false
         });
 
-        let res = self
-            .client
-            .post(format!("{}/v1/chat/completions", self.base_url))
-            .json(&body)
-            .send()
-            .await
-            .map_err(|e| {
-                println!("[LlamaClient] Request failed: {}", e);
-                PageIndexError::ParseError(format!("LLM Request failed: {}", e))
-            })?;
+        let mut attempts = 0;
+        let max_attempts = 60; // Wait up to 60s for model load
 
-        if !res.status().is_success() {
-            let error_text = res.text().await.unwrap_or_default();
-            println!("[LlamaClient] Error status: {} | Body: {}", 0, error_text);
-            return Err(PageIndexError::ParseError(format!(
-                "LLM Error: {}",
-                error_text
-            )));
+        loop {
+            let res = self
+                .client
+                .post(format!("{}/v1/chat/completions", self.base_url))
+                .json(&body)
+                .send()
+                .await;
+
+            match res {
+                Ok(response) => {
+                    if response.status().is_success() {
+                        let json: serde_json::Value = response.json().await.map_err(|e| {
+                            PageIndexError::ParseError(format!("Invalid response JSON: {}", e))
+                        })?;
+
+                        let content = json["choices"][0]["message"]["content"]
+                            .as_str()
+                            .ok_or_else(|| {
+                                PageIndexError::ParseError(
+                                    "Missing content in response".to_string(),
+                                )
+                            })?;
+
+                        return Ok(content.trim().to_string());
+                    } else if response.status().as_u16() == 503 {
+                        // Model loading, retry
+                        attempts += 1;
+                        if attempts >= max_attempts {
+                            let error_text = response.text().await.unwrap_or_default();
+                            println!("[LlamaClient] Error status: 503 | Body: {}", error_text);
+                            return Err(PageIndexError::ParseError(format!(
+                                "LLM Error: Service Unavailable (Model Loading Timeout): {}",
+                                error_text
+                            )));
+                        }
+                        println!(
+                            "[LlamaClient] Model loading (503), retrying {}/{}...",
+                            attempts, max_attempts
+                        );
+                        sleep(Duration::from_secs(1)).await;
+                        continue;
+                    } else {
+                        let status = response.status();
+                        let error_text = response.text().await.unwrap_or_default();
+                        println!(
+                            "[LlamaClient] Error status: {} | Body: {}",
+                            status, error_text
+                        );
+                        return Err(PageIndexError::ParseError(format!(
+                            "LLM Error: {}",
+                            error_text
+                        )));
+                    }
+                }
+                Err(e) => {
+                    println!("[LlamaClient] Request failed: {}", e);
+                    return Err(PageIndexError::ParseError(format!(
+                        "LLM Request failed: {}",
+                        e
+                    )));
+                }
+            }
         }
-
-        let json: serde_json::Value = res
-            .json()
-            .await
-            .map_err(|e| PageIndexError::ParseError(format!("Invalid response JSON: {}", e)))?;
-
-        let content = json["choices"][0]["message"]["content"]
-            .as_str()
-            .ok_or_else(|| PageIndexError::ParseError("Missing content in response".to_string()))?;
-
-        Ok(content.trim().to_string())
     }
 }

@@ -89,6 +89,20 @@
             parseMetadata = result.metadata;
         } catch (err) {
             console.error("解析失败:", err);
+            // Show explicit error dialog
+            try {
+                // Assuming tauri-plugin-dialog is available as 'message' from window.__TAURI__.dialog?
+                // Checks imports: const { open } = window.__TAURI__.dialog.
+                // Need to import message.
+                const { message } = window.__TAURI__.dialog;
+                await message(`解析失败: ${err}`, {
+                    title: "Error",
+                    kind: "error",
+                });
+            } catch (e) {
+                alert(`解析失败: ${err}`);
+            }
+
             treeContent = `<div class="empty-state"><span class="material-symbols-outlined">error</span><p>解析失败: ${err}</p></div>`;
             renderContent = `<div class="empty-state"><span class="material-symbols-outlined">error</span><p>解析失败</p></div>`;
         } finally {
@@ -99,6 +113,13 @@
                 showProgress = false;
                 progressPercent = 0;
             }, 500);
+
+            // Stop the engine to free resources
+            try {
+                await invoke("stop_parsing_llm");
+            } catch (e) {
+                console.error("Failed to stop LLM:", e);
+            }
         }
     }
 

@@ -169,8 +169,6 @@ impl KnotIndexer {
     }
 
     async fn enrich_node(&self, node: &mut PageNode) -> Result<()> {
-        use pageindex_rs::EmbeddingProvider; // Trait must be in scope
-
         if node.embedding.is_none() && !node.content.is_empty() {
             let vec = self
                 .embedding_provider

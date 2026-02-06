@@ -25,3 +25,25 @@ Root (PDF 文件名)
 **需求 (Requirement)**:
 需要优化下载逻辑，支持 **并发下载 (Concurrent Download)** 所有的模型文件。
 如果技术上可行，最好支持 **多线程下载 (Multi-threaded Download)** 单个文件以进一步提升速度。
+
+## 3. 索引与服务配置优化 (Indexing & Service Configuration Optimization)
+
+**已完成 (Completed)**:
+
+1.  **修复文件监控死循环 (Fix File Watcher Infinite Loop)**:
+    - 问题：索引数据库 `knot_index.lance` 位于监控目录下，导致“写入索引 -> 触发监控 -> 再次索引”的死循环。
+    - 解决：在文件监控层级直接过滤掉 `knot_index.lance` 目录及隐藏文件/目录（以 `.` 开头）。
+
+2.  **索引存储外置 (Externalize Index Storage)**:
+    - 问题：在用户文档目录下生成 `knot_index.lance` 会污染用户空间，且可能与同步软件冲突。
+    - 解决：
+        - 将索引统一移至 `~/.knot/indexes/<Path-MD5-Hash>/knot_index.lance`。
+        - 使用源目录绝对路径的 MD5 哈希作为文件夹名，确保跨磁盘同名目录（如 `/Vol1/test` 和 `/Vol2/test`）的索引隔离。
+        - 实现了 `get_index_path` 逻辑，支持不同 Workspace 自动切换对应索引。
+
+3.  **服务端口调整 (Prevert Port Conflicts)**:
+    - 问题：原默认端口 1420 (Tauri), 8080 (Parsing), 8081 (Chat) 为常用端口，易与其他开发工具冲突。
+    - 解决：更改为不常用端口：
+        - Frontend (Tauri): `14420`
+        - Parsing LLM (OCRFlux): `18080`
+        - Chat LLM (Qwen): `18081`

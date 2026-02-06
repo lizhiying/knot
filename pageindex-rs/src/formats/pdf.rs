@@ -25,6 +25,7 @@ impl PdfParser {
     /// This isolates non-Send Pdfium types from async await points
     fn load_and_render_pages(&self, path: &Path) -> Result<Vec<Vec<u8>>, PageIndexError> {
         // 1. Init PDFium
+        // 1. Init PDFium
         let pdfium = Pdfium::new(
             Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./")) // try local first
                 .or_else(|_| Pdfium::bind_to_system_library())
@@ -62,19 +63,23 @@ impl PdfParser {
                 PageIndexError::VisionError(format!("Failed to render PDF page: {}", e))
             })?;
 
-            let image = bitmap
-                .as_image() // Returns DynamicImage (from pdfium_render::image re-export if compatible, or just image crate if versions align)
-                .to_rgba8(); // Convert to RGBA buffer
+            let img = bitmap.as_image();
 
-            // Convert to JPEG bytes (faster, smaller)
-            let mut jpeg_data = Cursor::new(Vec::new());
-            DynamicImage::ImageRgba8(image)
-                .write_to(&mut jpeg_data, ImageFormat::Jpeg)
+            // Convert to RGB8 (drop alpha) because JPEG doesn't support RGBA
+            let rgb_img = img.to_rgb8();
+
+            let mut bytes: Vec<u8> = Vec::new();
+            // Create cursor to write to buffer
+            let mut cursor = Cursor::new(&mut bytes);
+
+            // Use write_to with standard ImageFormat enum
+            rgb_img
+                .write_to(&mut cursor, ImageFormat::Jpeg)
                 .map_err(|e| {
                     PageIndexError::VisionError(format!("Failed to encode image to JPEG: {}", e))
                 })?;
 
-            page_images.push(jpeg_data.into_inner());
+            page_images.push(bytes);
         }
 
         Ok(page_images)

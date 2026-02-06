@@ -4,7 +4,7 @@
   "identifier": "com.knot.app",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:14420",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
   },

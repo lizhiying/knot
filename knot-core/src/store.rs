@@ -15,8 +15,8 @@ pub struct KnotStore {
 }
 
 impl KnotStore {
-    pub async fn new(data_dir: &str) -> Result<Self> {
-        let path = std::path::Path::new(data_dir).join("knot_index.lance");
+    pub async fn new(index_path: &str) -> Result<Self> {
+        let path = std::path::Path::new(index_path);
         let path_str = path.to_string_lossy().to_string();
 
         let conn = connect(&path_str).execute().await?;
@@ -60,6 +60,26 @@ impl KnotStore {
             let table = self.conn.open_table(&self.table_name).execute().await?;
             table
                 .delete(&format!("file_path = '{}'", file_path))
+                .await?;
+        }
+        Ok(())
+    }
+
+    pub async fn delete_folder(&self, folder_path: &str) -> Result<()> {
+        let table_names = self.conn.table_names().execute().await?;
+        if table_names.contains(&self.table_name) {
+            let table = self.conn.open_table(&self.table_name).execute().await?;
+            // Delete all files that start with the folder path
+            // Note: Add trailing slash to ensure we don't delete similar prefixes (e.g. /tmp/test1 vs /tmp/test)
+            // But we must handle if folder_path already has slash or not.
+            let path_prefix = if folder_path.ends_with('/') || folder_path.ends_with('\\') {
+                folder_path.to_string()
+            } else {
+                format!("{}/", folder_path)
+            };
+
+            table
+                .delete(&format!("file_path LIKE '{}%'", path_prefix))
                 .await?;
         }
         Ok(())

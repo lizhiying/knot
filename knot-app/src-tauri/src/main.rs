@@ -54,6 +54,41 @@ fn get_bin_dir(app: &tauri::AppHandle) -> PathBuf {
     resolve_resource(app, "bin", 1)
 }
 
+fn get_index_path(app: &tauri::AppHandle, data_dir: &str) -> PathBuf {
+    // 1. Get base ~/.knot/indexes
+    // Use models_dir parent as ~/.knot base, or standard home location
+    // Here we assume models_dir is ~/.knot/models or inside resource dir.
+    // Let's use standard home dir ~/.knot logic for stable storage
+    let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
+    let base = Path::new(&home).join(".knot").join("indexes");
+
+    // 2. Hash absolute path of data_dir
+    let abs_path = std::fs::canonicalize(data_dir).unwrap_or(PathBuf::from(data_dir));
+    let path_str = abs_path.to_string_lossy();
+    // use md5::{Md5, Digest}; // Assuming md-5 crate structure.
+    // Actually typically: let hash = md5::compute(bytes); is for `md5` crate.
+    // The user added `md-5` crate which implements `RustCrypto` traits.
+    // So usage is:
+    use md5::{Digest, Md5};
+    let mut hasher = Md5::new();
+    hasher.update(path_str.as_bytes());
+    let hash = hasher.finalize();
+    let hash_hex = format!("{:x}", hash);
+
+    let index_dir = base.join(hash_hex).join("knot_index.lance");
+
+    // Ensure parent dir exists
+    if let Some(p) = index_dir.parent() {
+        let _ = std::fs::create_dir_all(p);
+    }
+
+    println!(
+        "[App] Resolved index path for '{}' -> {:?}",
+        data_dir, index_dir
+    );
+    index_dir
+}
+
 /// Tauri 命令：打开 Doc Parser 窗口
 #[tauri::command]
 async fn open_doc_parser_window(app: tauri::AppHandle) -> Result<(), String> {
@@ -128,7 +163,7 @@ async fn ensure_parsing_llm(app: &tauri::AppHandle, state: AppState) -> Result<(
             parsing_model_path.to_str().unwrap_or(""),
             &bin_dir,
             parsing_mmproj_arg.as_deref(),
-            8080,
+            18080,
         )
     })
     .await
@@ -140,11 +175,11 @@ async fn ensure_parsing_llm(app: &tauri::AppHandle, state: AppState) -> Result<(
             let mut guard = parsing_llm_store.write().await;
             *guard = Some(sidecar);
 
-            let client = Arc::new(LlamaClient::new(8080));
+            let client = Arc::new(LlamaClient::new(18080));
             let mut client_guard = parsing_client_store.write().await;
             *client_guard = Some(client);
 
-            println!("[LazyLoad] ✓ Parsing LLM Started.");
+            println!("[LazyLoad] ✓ Parsing LLM Started on port 18080.");
             Ok(())
         }
         Err(e) => Err(format!("Failed to spawn Parsing LLM: {}", e)),
@@ -230,6 +265,17 @@ async fn parse_file(
     }
 
     Ok(root)
+}
+
+#[tauri::command]
+async fn stop_parsing_llm(state: State<'_, AppState>) -> Result<(), String> {
+    let parsing_llm = state.parsing_llm.clone();
+    let mut guard = parsing_llm.write().await;
+    if guard.is_some() {
+        println!("[App] Stopping Parsing LLM (OCRFlux)...");
+        *guard = None; // Drop the Sidecar, which kills the process
+    }
+    Ok(())
 }
 
 /// 应用状态
@@ -385,18 +431,18 @@ fn main() {
                     chat_model_path.to_str().unwrap_or(""),
                     &bin_dir_clone2,
                     None,
-                    8081,
+                    18081,
                 ) {
                     Ok(sidecar) => {
                         tokio::runtime::Runtime::new().unwrap().block_on(async {
                             let mut guard = chat_llm_clone.write().await;
                             *guard = Some(sidecar);
 
-                            let client = Arc::new(LlamaClient::new(8081));
+                            let client = Arc::new(LlamaClient::new(18081));
                             let mut client_guard = chat_client_clone.write().await;
                             *client_guard = Some(client);
                         });
-                        println!("[Engine] ✓ Chat LLM (Qwen3) started on port 8081");
+                        println!("[Engine] ✓ Chat LLM (Qwen3) started on port 18081");
                     }
                     Err(e) => {
                         eprintln!("[Engine] ✗ Failed to start Chat LLM: {}", e);
@@ -466,6 +512,36 @@ fn main() {
                 }
             }
 
+            // 11. Auto-start indexing if configured
+            // Moved here to ensure app is ready
+            let app_handle_for_index = app.handle().clone();
+            let state_for_index = app.state::<AppState>();
+            let thread_safe_embedding_for_index = state_for_index.thread_safe_embedding.clone();
+
+            // Spawn a task to check config and start indexing
+            tauri::async_runtime::spawn(async move {
+                // Give some time for other systems to init? Not strictly necessary but safe.
+                tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+                let config = load_config(&app_handle_for_index);
+                if let Some(dir) = config.data_dir {
+                    if !dir.is_empty() {
+                        println!(
+                            "[App] Found configured data_dir: {}. Starting background indexing...",
+                            dir
+                        );
+                        let index_path = get_index_path(&app_handle_for_index, &dir);
+                        start_background_indexing(
+                            app_handle_for_index,
+                            thread_safe_embedding_for_index,
+                            dir,
+                            index_path.to_string_lossy().to_string(),
+                        )
+                        .await;
+                    }
+                }
+            });
+
             println!("[App] Application started, engines loading in background...");
             Ok(())
         })
@@ -479,7 +555,8 @@ fn main() {
             download_model,
             get_detected_region,
             start_download_queue,
-            reload_models
+            reload_models,
+            stop_parsing_llm
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -582,14 +659,17 @@ async fn set_data_dir(
 
     // Trigger indexing in background
     let app_clone = app.clone();
-    let app_clone = app.clone();
     // state_clone removed (unused)
 
     // Cloning Arcs manually since AppState might not derive Clone
     let thread_safe_embedding = state.thread_safe_embedding.clone();
 
+    // Get index path
+    let index_path = get_index_path(&app_clone, &path);
+    let index_path_str = index_path.to_string_lossy().to_string();
+
     tauri::async_runtime::spawn(async move {
-        start_background_indexing(app_clone, thread_safe_embedding, path).await;
+        start_background_indexing(app_clone, thread_safe_embedding, path, index_path_str).await;
     });
 
     Ok(())
@@ -599,11 +679,13 @@ async fn start_background_indexing(
     app: tauri::AppHandle,
     embedding_store: Arc<RwLock<Option<Arc<ThreadSafeEmbeddingEngine>>>>,
     data_dir: String,
+    index_path: String,
 ) {
     use knot_core::index::KnotIndexer;
     use knot_core::store::KnotStore;
 
     println!("[Indexer] Starting background indexing for: {}", data_dir);
+    println!("[Indexer] Using external index path: {}", index_path);
     let _ = app.emit("indexing-status", "starting");
 
     // 1. Get Embedding Engine (Wait loop logic could be better, here just check)
@@ -628,34 +710,17 @@ async fn start_background_indexing(
     let indexer = KnotIndexer::new(&data_dir, Some(provider_dyn)).await;
     let _ = app.emit("indexing-status", "scanning");
 
-    // 3. Scan & Index
-    let input_path = std::path::Path::new(&data_dir); // Wait, data_dir is where we STORE index.
-                                                      // We need SOURCE directory.
-                                                      // The user request said: "Select Datadir in Settings... Select after save, start parsing and saving index."
-                                                      // Usually "Datadir" means where DB is. "Source" means where docs are.
-                                                      // For "Personal Wiki" apps, usually we open a "Vault" (Source Dir) and store index inside `.knot` folder IN it.
-                                                      // OR we select a Source Dir, and store index in AppData.
-                                                      // The user said: "Select Datadir... start parsing". This implies Datadir IS the Source Dir.
-                                                      // And we should probably store index in `.knot` inside it, or in global AppData?
-                                                      // "knot_index.lance" in data_dir.
-                                                      // If I pick my notes dir as data_dir, putting `knot_index.lance` there pollutes it?
-                                                      // User request: "Select Datadir... start parsing".
-                                                      // I will assume input path = data_dir. And I will store index in `${data_dir}/.knot_rag`.
-                                                      // Or just make `KnotIndexer` usage clearer.
-                                                      // `KnotIndexer::new(data_dir)`: expects data_dir to be where valid DB goes.
-                                                      // If user selects `~/Documents/Notes`, and I pass that as `data_dir`:
-                                                      // DB goes to `~/Documents/Notes/knot.db`.
-                                                      // Index goes to `~/Documents/Notes/knot_index.lance`.
-                                                      // This is "acceptable" for a workspace-based app (VSCode style `.vscode` or similar).
-                                                      // I will use that approach for now as it makes "portable vaults" possible.
+    // 3. Scan & Index (Initial Pass)
+    let input_path = std::path::Path::new(&data_dir);
 
+    // Initial Scan
     match indexer.index_directory(&input_path).await {
         Ok((records, deleted)) => {
             println!("[Indexer] Found {} new/modified records.", records.len());
             let _ = app.emit("indexing-status", "saving");
 
             if !records.is_empty() || !deleted.is_empty() {
-                match KnotStore::new(&data_dir).await {
+                match KnotStore::new(&index_path).await {
                     Ok(store) => {
                         for del in deleted {
                             let _ = store.delete_file(&del).await;
@@ -671,12 +736,122 @@ async fn start_background_indexing(
                     Err(e) => eprintln!("[Indexer] Store Init Error: {}", e),
                 }
             }
-            println!("[Indexer] Complete.");
+            println!("[Indexer] Initial scan complete.");
             let _ = app.emit("indexing-status", "ready");
         }
         Err(e) => {
-            eprintln!("[Indexer] Failed: {}", e);
+            eprintln!("[Indexer] Initial scan failed: {}", e);
             let _ = app.emit("indexing-status", format!("error: {}", e));
+        }
+    }
+
+    // 4. Start Monitoring
+    println!("[Indexer] Starting file monitor on: {:?}", input_path);
+    use knot_core::monitor::{should_index_file, DirectoryWatcher};
+
+    match DirectoryWatcher::new(input_path) {
+        Ok(mut watcher) => {
+            println!(
+                "[Indexer] Watcher created successfully for: {:?}",
+                input_path
+            );
+            let _ = app.emit("search-status", "monitoring");
+
+            println!("[Indexer] Entering watch event loop...");
+            // Need copies for async move
+            let index_path_for_watch = index_path.clone();
+
+            while let Some(res) = watcher.rx.recv().await {
+                println!("[Indexer] Loop received event...");
+                match res {
+                    Ok(event) => {
+                        // Simple debounce or immediate action
+                        // For now, immediate.
+                        use knot_core::notify::EventKind;
+                        match event.kind {
+                            EventKind::Create(_) | EventKind::Modify(_) => {
+                                for path in event.paths {
+                                    if should_index_file(&path) {
+                                        println!("[Monitor] Change detected: {:?}", path);
+                                        let _ = app.emit("indexing-status", "updating");
+
+                                        // Incremental Index
+                                        // We use index_directory on the *file*? No, index_directory expects directory.
+                                        // But indexer.index_file is available.
+                                        // Wait, KnotIndexer::index_file(path) returns records.
+
+                                        // Re-instantiate Store (cheap)
+                                        // Note: Store isn't thread-safe across await point if generated here?
+                                        // KnotStore::new is async.
+
+                                        match indexer.index_file(&path).await {
+                                            Ok(records) => {
+                                                if !records.is_empty() {
+                                                    println!(
+                                                        "[Monitor] Indexing {} records for {:?}",
+                                                        records.len(),
+                                                        path
+                                                    );
+                                                    if let Ok(store) =
+                                                        KnotStore::new(&index_path_for_watch).await
+                                                    {
+                                                        // We should also update registry hash!
+                                                        // Indexer.index_file logic inside knot-core/index.rs:
+                                                        // It computes embedding.
+                                                        // DOES IT UPDATE REGISTRY?
+                                                        // Looking at `knot-core/src/index.rs`:
+                                                        // `index_file` does NOT update registry. `index_directory` does (lines 112-114).
+                                                        // The CLI implementation had this issue too (Hack comment).
+
+                                                        // Ideally indexer.index_file should take an option to update registry,
+                                                        // or we expose a method `index_and_update_single_file`.
+
+                                                        // For now, let's call index_directory on the PARENT of the file?
+                                                        // Or just ignore registry update for now (it will happen on next full scan).
+                                                        // BUT if registry isn't updated, next full scan will re-index it. That's acceptable.
+
+                                                        let _ = store
+                                                            .delete_file(&path.to_string_lossy())
+                                                            .await; // Clear old
+                                                        let _ = store.add_records(records).await;
+                                                        let _ = store.create_fts_index().await;
+                                                        let _ =
+                                                            app.emit("indexing-status", "ready");
+                                                    }
+                                                }
+                                            }
+                                            Err(e) => {
+                                                eprintln!("[Monitor] Failed to index file: {}", e)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            EventKind::Remove(_) => {
+                                for path in event.paths {
+                                    println!("[Monitor] Removal detected: {:?}", path);
+                                    if let Ok(store) = KnotStore::new(&index_path_for_watch).await {
+                                        let path_str = path.to_string_lossy();
+                                        // Attempt to delete exact file
+                                        let _ = store.delete_file(&path_str).await;
+                                        // Also attempt to delete as folder (recursive)
+                                        // Since we don't know if the removed path was a file or folder (it's gone now!),
+                                        // we can safely try both or just run the prefix delete if it looks like a folder?
+                                        // Safest is to try deleting children too if it *was* a folder.
+                                        // Running delete_folder won't hurt if it was a file (no children match prefix).
+                                        let _ = store.delete_folder(&path_str).await;
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                    Err(e) => eprintln!("[Monitor] Watch error: {}", e),
+                }
+            }
+        }
+        Err(e) => {
+            eprintln!("[Indexer] Failed to start watcher: {}", e);
         }
     }
 }
@@ -710,11 +885,15 @@ async fn rag_query(
 
     // 1. Get Data Dir
     let config = load_config(&app);
-    let data_dir = config.data_dir.ok_or("请先在设置中选择文档目录")?;
-    println!("[rag_query] Data dir: {}", data_dir);
+    let data_dir = config.data_dir.ok_or("Data directory not set")?;
 
-    // 2. Search Context
-    let store = KnotStore::new(&data_dir).await.map_err(|e| e.to_string())?;
+    // Resolve external index path
+    let index_path = get_index_path(&app, &data_dir);
+    let index_path_str = index_path.to_string_lossy().to_string();
+
+    let store = knot_core::store::KnotStore::new(&index_path_str)
+        .await
+        .map_err(|e| format!("Store error: {}", e))?;
     println!("[rag_query] Store initialized");
 
     // Use Mock embedding for query vector for now OR implementation needed?
