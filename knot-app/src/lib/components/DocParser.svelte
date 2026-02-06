@@ -185,6 +185,13 @@
                 : node.content
             : "";
 
+        let pageInfo = "";
+        if (node.metadata?.page_number) {
+            pageInfo = `<span>📄 Page ${node.metadata.page_number}</span>`;
+        } else if (node.metadata?.line_number) {
+            pageInfo = `<span>📍 Line ${node.metadata.line_number}</span>`;
+        }
+
         let html = `
     <div class="tree-node" style="--depth: ${depth}">
       <div class="tree-node-header">
@@ -195,7 +202,7 @@
       ${contentPreview ? `<div class="tree-content">${escapeHtml(contentPreview)}</div>` : ""}
       <div class="tree-meta">
         <span>📝 ${node.metadata?.token_count || 0} tokens</span>
-        ${node.metadata?.line_number ? `<span>📍 Line ${node.metadata.line_number}</span>` : ""}
+        ${pageInfo}
         ${node.summary ? `<span>📋 有摘要</span>` : ""}
         ${node.embedding ? `<span>🔢 有向量</span>` : ""}
       </div>`;

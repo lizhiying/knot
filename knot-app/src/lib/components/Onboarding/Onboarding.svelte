@@ -7,16 +7,47 @@
 
     let isDownloading = $state(false);
     let downloadProgress = $state(0);
-    let currentFile = $state("");
     let statusMessage = $state("Checking system requirements...");
 
     // Core model that is required
     const CORE_MODEL = "Qwen3-1.7B-Q4_K_M.gguf";
 
+    // Models Metadata for Progress Calculation
+    const SIZE_GB = 1024 * 1024 * 1024;
+    const SIZE_MB = 1024 * 1024;
+
+    let models = [
+        {
+            name: "OCRFlux-3B.Q4_K_M.gguf",
+            sizeBytes: 2.1 * SIZE_GB,
+            currentBytes: 0,
+        },
+        {
+            name: "OCRFlux-3B.mmproj-f16.gguf",
+            sizeBytes: 600 * SIZE_MB,
+            currentBytes: 0,
+        },
+        {
+            name: "Qwen3-1.7B-Q4_K_M.gguf",
+            sizeBytes: 1.7 * SIZE_GB,
+            currentBytes: 0,
+        },
+    ];
+
+    let totalBytes = models.reduce((acc, m) => acc + m.sizeBytes, 0);
+
+    function recalcProgress() {
+        if (totalBytes === 0) return;
+        const downloaded = models.reduce((acc, m) => acc + m.currentBytes, 0);
+        downloadProgress = (downloaded / totalBytes) * 100;
+    }
+
     async function startDownload() {
         isDownloading = true;
-        statusMessage = "Initializing download...";
+        statusMessage = "Downloading models...";
         downloadProgress = 0;
+        // Reset progress
+        models.forEach((m) => (m.currentBytes = 0));
 
         try {
             // Start download queue
@@ -36,9 +67,24 @@
         await win.setSize(new LogicalSize(896, 600));
 
         const unlistenProgress = listen("download-progress", (event) => {
-            currentFile = event.payload.filename;
-            downloadProgress = event.payload.percentage;
-            statusMessage = `Downloading ${event.payload.filename}...`;
+            const { filename, percentage } = event.payload;
+            const idx = models.findIndex((m) => m.name === filename);
+            if (idx !== -1) {
+                // Determine bytes for this file
+                models[idx].currentBytes =
+                    (percentage / 100.0) * models[idx].sizeBytes;
+                recalcProgress();
+            }
+            // Keep status message stable
+            statusMessage = "Downloading models...";
+        });
+
+        const unlistenQueueItemDone = listen("queue-item-complete", (event) => {
+            const idx = models.findIndex((m) => m.name === event.payload);
+            if (idx !== -1) {
+                models[idx].currentBytes = models[idx].sizeBytes;
+                recalcProgress();
+            }
         });
 
         const unlistenQueueFinished = listen("queue-finished", () => {
@@ -64,10 +110,6 @@
                                 e,
                             );
                             statusMessage = "Initialization failed: " + e;
-                            // Still try to complete if it's just a resize error, but maybe not if reload failed?
-                            // If reload failed, search won't work. unique error handling?
-                            // For now, let's assume if reload fails, we stay on onboarding or let them through but search will fail.
-                            // Let's let them through to not block them forever, they can retry in settings.
                             onComplete();
                         }
                     } else {
@@ -85,6 +127,7 @@
 
         return () => {
             unlistenProgress.then((u) => u());
+            unlistenQueueItemDone.then((u) => u());
             unlistenQueueFinished.then((u) => u());
             unlistenError.then((u) => u());
         };

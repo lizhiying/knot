@@ -9,13 +9,14 @@ pub struct IndexDispatcher {
 
 impl IndexDispatcher {
     pub fn new() -> Self {
-        Self {
-            parsers: vec![
-                Box::new(MarkdownParser::new()),
-                Box::new(crate::formats::docx::DocxParser::new()),
-                Box::new(crate::formats::pdf::PdfParser::new()),
-            ],
-        }
+        let mut parsers: Vec<Box<dyn DocumentParser>> = vec![Box::new(MarkdownParser::new())];
+
+        #[cfg(feature = "office")]
+        parsers.push(Box::new(crate::formats::docx::DocxParser::new()));
+
+        parsers.push(Box::new(crate::formats::pdf::PdfParser::new()));
+
+        Self { parsers }
     }
 
     /// 外部调用的主入口

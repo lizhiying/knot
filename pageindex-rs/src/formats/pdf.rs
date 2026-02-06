@@ -226,22 +226,7 @@ impl DocumentParser for PdfParser {
         // This moves all Pdfium logic into a sync function, so no Pdfium types live across awaits here.
         let page_images = self.load_and_render_pages(path)?;
 
-        let mut root = PageNode {
-            node_id: "root".to_string(),
-            title: path.file_stem().unwrap().to_string_lossy().to_string(),
-            level: 0,
-            content: String::new(),
-            summary: None,
-            embedding: None,
-            metadata: NodeMeta {
-                file_path: path.to_string_lossy().to_string(),
-                page_number: None,
-                line_number: None,
-                token_count: 0,
-                extra: HashMap::new(),
-            },
-            children: Vec::new(),
-        };
+        let mut pages = Vec::with_capacity(page_images.len());
 
         // 2. Process images with LLM (Async)
         let total_pages = page_images.len();
@@ -273,14 +258,7 @@ impl DocumentParser for PdfParser {
                         },
                         children: Vec::new(),
                     };
-                    root.children.push(node);
-
-                    // Append to root content
-                    root.content.push_str(&markdown);
-                    root.content.push_str("\n\n");
-
-                    // Merge extra metadata to root as well (optional, but good for global lookup)
-                    root.metadata.extra.extend(extra);
+                    pages.push(node);
                 }
                 Err(e) => {
                     eprintln!("Failed to process page {}: {}", i + 1, e);
@@ -288,19 +266,25 @@ impl DocumentParser for PdfParser {
             }
         }
 
-        root.metadata.token_count = root.content.len() / 4;
+        // 3. Post-process: Build Semantic Tree using H1/H2
+        let semantic_root = crate::core::tree_builder::SemanticTreeBuilder::build_from_pages(
+            path.file_stem().unwrap().to_string_lossy().to_string(),
+            path.to_string_lossy().to_string(),
+            pages,
+        );
 
         // Save duration
         let duration = start_time.elapsed();
-        root.metadata.extra.insert(
+        let mut final_root = semantic_root;
+        final_root.metadata.extra.insert(
             "processing_time_ms".to_string(),
             duration.as_millis().to_string(),
         );
-        root.metadata.extra.insert(
+        final_root.metadata.extra.insert(
             "processing_time_display".to_string(),
             format!("{:.2} s", duration.as_secs_f64()),
         );
 
-        Ok(root)
+        Ok(final_root)
     }
 }

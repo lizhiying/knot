@@ -73,22 +73,40 @@ impl QueueManager {
         }
 
         loop {
-            // Get next item
-            let filename = {
+            // 1. Snapshot Queue (Fetch Process Batch)
+            let batch: Vec<String> = {
                 let mut queue = self.queue.lock().await;
-                queue.pop_front()
+                if queue.is_empty() {
+                    break;
+                }
+                queue.drain(..).collect()
             };
 
-            match filename {
-                Some(filename) => {
+            if batch.is_empty() {
+                break;
+            }
+
+            // 2. Prepare Tasks Data (Pre-calculate paths/URLs to avoid locking in async block)
+            let mut tasks_data = Vec::new();
+            for filename in batch {
+                let target_path = manager.get_download_target_path(&filename);
+                let url = {
+                    let config = self.source_config.lock().await;
+                    config.get_url(&filename)
+                };
+                tasks_data.push((filename, target_path, url));
+            }
+
+            println!(
+                "[Queue] Processing batch of {} files concurrently...",
+                tasks_data.len()
+            );
+
+            // 3. Execute Concurrently
+            let futures = tasks_data.into_iter().map(|(filename, target_path, url)| {
+                let app = app.clone();
+                async move {
                     let _ = app.emit("queue-status", format!("Starting {}", filename));
-
-                    let target_path = manager.get_download_target_path(&filename);
-                    let url = {
-                        let config = self.source_config.lock().await;
-                        config.get_url(&filename)
-                    };
-
                     println!("[Queue] Downloading {} from {}", filename, url);
 
                     match Downloader::download_file(&app, &url, &target_path, &filename).await {
@@ -99,14 +117,12 @@ impl QueueManager {
                             eprintln!("[Queue] Failed {}: {}", filename, e);
                             let _ =
                                 app.emit("download-error", format!("Failed {}: {}", filename, e));
-                            // Continue or abort? Usually continue for others, but for models dependence?
-                            // Milestone says "Retry". We just stop queue for now or continue?
-                            // Simple queue: continue.
                         }
                     }
                 }
-                None => break, // Queue empty
-            }
+            });
+
+            futures_util::future::join_all(futures).await;
         }
 
         let mut is_processing = self.is_processing.lock().await;

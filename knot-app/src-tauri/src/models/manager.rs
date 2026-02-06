@@ -9,12 +9,23 @@ pub struct ModelPathManager {
 
 impl ModelPathManager {
     pub fn new(app: &tauri::AppHandle) -> Self {
-        let app_data_dir = app.path().app_data_dir().unwrap_or(PathBuf::from("."));
+        // User requested: ~/.knot/models
+        let home_dir = std::env::var("HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| app.path().app_data_dir().unwrap_or(PathBuf::from(".")));
+
+        let app_data_dir = home_dir.join(".knot").join("models");
+
+        // Ensure directory exists immediately
+        if !app_data_dir.exists() {
+            let _ = std::fs::create_dir_all(&app_data_dir);
+        }
+
         // Using correct resource resolution logic similar to main.rs
         let resource_dir = app.path().resource_dir().unwrap_or(PathBuf::from("."));
 
         Self {
-            app_data_dir: app_data_dir.join("models"),
+            app_data_dir,
             resource_dir: resource_dir.join("models"),
         }
     }
