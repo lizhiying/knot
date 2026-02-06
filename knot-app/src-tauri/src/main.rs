@@ -772,56 +772,60 @@ async fn start_background_indexing(
                             EventKind::Create(_) | EventKind::Modify(_) => {
                                 for path in event.paths {
                                     if should_index_file(&path) {
-                                        println!("[Monitor] Change detected: {:?}", path);
-                                        let _ = app.emit("indexing-status", "updating");
+                                        let exists = path.exists();
+                                        if exists {
+                                            println!(
+                                                "[Monitor] Change detected (Update): {:?}",
+                                                path
+                                            );
+                                            let _ = app.emit("indexing-status", "updating");
 
-                                        // Incremental Index
-                                        // We use index_directory on the *file*? No, index_directory expects directory.
-                                        // But indexer.index_file is available.
-                                        // Wait, KnotIndexer::index_file(path) returns records.
-
-                                        // Re-instantiate Store (cheap)
-                                        // Note: Store isn't thread-safe across await point if generated here?
-                                        // KnotStore::new is async.
-
-                                        match indexer.index_file(&path).await {
-                                            Ok(records) => {
-                                                if !records.is_empty() {
-                                                    println!(
-                                                        "[Monitor] Indexing {} records for {:?}",
-                                                        records.len(),
-                                                        path
-                                                    );
-                                                    if let Ok(store) =
-                                                        KnotStore::new(&index_path_for_watch).await
-                                                    {
-                                                        // We should also update registry hash!
-                                                        // Indexer.index_file logic inside knot-core/index.rs:
-                                                        // It computes embedding.
-                                                        // DOES IT UPDATE REGISTRY?
-                                                        // Looking at `knot-core/src/index.rs`:
-                                                        // `index_file` does NOT update registry. `index_directory` does (lines 112-114).
-                                                        // The CLI implementation had this issue too (Hack comment).
-
-                                                        // Ideally indexer.index_file should take an option to update registry,
-                                                        // or we expose a method `index_and_update_single_file`.
-
-                                                        // For now, let's call index_directory on the PARENT of the file?
-                                                        // Or just ignore registry update for now (it will happen on next full scan).
-                                                        // BUT if registry isn't updated, next full scan will re-index it. That's acceptable.
-
-                                                        let _ = store
-                                                            .delete_file(&path.to_string_lossy())
-                                                            .await; // Clear old
-                                                        let _ = store.add_records(records).await;
-                                                        let _ = store.create_fts_index().await;
-                                                        let _ =
-                                                            app.emit("indexing-status", "ready");
+                                            match indexer.index_file(&path).await {
+                                                Ok(records) => {
+                                                    if !records.is_empty() {
+                                                        println!(
+                                                            "[Monitor] Indexing {} records for {:?}",
+                                                            records.len(),
+                                                            path
+                                                        );
+                                                        if let Ok(store) =
+                                                            KnotStore::new(&index_path_for_watch)
+                                                                .await
+                                                        {
+                                                            let _ = store
+                                                                .delete_file(
+                                                                    &path.to_string_lossy(),
+                                                                )
+                                                                .await; // Clear old
+                                                            let _ =
+                                                                store.add_records(records).await;
+                                                            let _ = store.create_fts_index().await;
+                                                            let _ = app
+                                                                .emit("indexing-status", "ready");
+                                                        }
                                                     }
                                                 }
+                                                Err(e) => {
+                                                    eprintln!(
+                                                        "[Monitor] Failed to index file: {}",
+                                                        e
+                                                    )
+                                                }
                                             }
-                                            Err(e) => {
-                                                eprintln!("[Monitor] Failed to index file: {}", e)
+                                        } else {
+                                            // Handle case where "Modify" event implies removal (e.g. Rename From, or swift delete)
+                                            println!(
+                                                "[Monitor] Change detected (Remove/Move): {:?}",
+                                                path
+                                            );
+                                            if let Ok(store) =
+                                                KnotStore::new(&index_path_for_watch).await
+                                            {
+                                                match store.delete_file(&path.to_string_lossy()).await {
+                                                     Ok(_) => println!("[Monitor] Ignored/Deleted from index: {:?}", path),
+                                                     Err(e) => eprintln!("[Monitor] Failed to delete from index: {}", e),
+                                                 }
+                                                let _ = store.create_fts_index().await;
                                             }
                                         }
                                     }
