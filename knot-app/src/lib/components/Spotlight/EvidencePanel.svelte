@@ -30,9 +30,10 @@
 
     <!-- 证据列表 -->
     <div class="flex-1 overflow-y-auto p-4 space-y-3 scroll-hide">
-        {#each results as result (result.id)}
+        {#each results as result, i (result.id)}
             <EvidenceCard
                 {result}
+                index={i + 1}
                 onMouseEnter={() => onHighlight(result.id)}
                 onMouseLeave={() => onUnhighlight(result.id)}
             />

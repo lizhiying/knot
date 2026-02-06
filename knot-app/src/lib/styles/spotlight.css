@@ -63,12 +63,12 @@
   border: 1px solid var(--evidence-card-border);
 }
 
-.evidence-card.highlighted {
+/* .evidence-card.highlighted {
   background: rgba(59, 130, 246, 0.15);
   border-color: rgba(59, 130, 246, 0.5);
   transform: scale(1.03);
   box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
-}
+} */
 
 /* 滚动条隐藏 */
 .scroll-hide::-webkit-scrollbar {
