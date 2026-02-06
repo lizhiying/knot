@@ -781,100 +781,135 @@ async fn start_background_indexing(
             );
             let _ = app.emit("search-status", "monitoring");
 
-            println!("[Indexer] Entering watch event loop...");
+            println!("[Indexer] Entering watch event loop with debounce...");
             // Need copies for async move
             let index_path_for_watch = index_path.clone();
 
-            while let Some(res) = watcher.rx.recv().await {
-                println!("[Indexer] Loop received event...");
-                match res {
-                    Ok(event) => {
-                        // Simple debounce or immediate action
-                        // For now, immediate.
-                        use knot_core::notify::EventKind;
-                        match event.kind {
-                            EventKind::Create(_) | EventKind::Modify(_) => {
-                                for path in event.paths {
-                                    if should_index_file(&path) {
-                                        let exists = path.exists();
-                                        if exists {
-                                            println!(
-                                                "[Monitor] Change detected (Update): {:?}",
-                                                path
-                                            );
-                                            let _ = app.emit("indexing-status", "updating");
+            let mut pending_updates: std::collections::HashSet<PathBuf> =
+                std::collections::HashSet::new();
+            let mut pending_removals: std::collections::HashSet<PathBuf> =
+                std::collections::HashSet::new();
 
-                                            match indexer.index_file(&path).await {
-                                                Ok(records) => {
-                                                    if !records.is_empty() {
-                                                        println!(
-                                                            "[Monitor] Indexing {} records for {:?}",
-                                                            records.len(),
-                                                            path
-                                                        );
-                                                        if let Ok(store) =
-                                                            KnotStore::new(&index_path_for_watch)
-                                                                .await
-                                                        {
-                                                            let _ = store
-                                                                .delete_file(
-                                                                    &path.to_string_lossy(),
-                                                                )
-                                                                .await; // Clear old
-                                                            let _ =
-                                                                store.add_records(records).await;
-                                                            let _ = store.create_fts_index().await;
-                                                            let _ = app
-                                                                .emit("indexing-status", "ready");
-                                                        }
-                                                    }
-                                                }
-                                                Err(e) => {
-                                                    eprintln!(
-                                                        "[Monitor] Failed to index file: {}",
-                                                        e
-                                                    )
+            let debounce_duration = std::time::Duration::from_millis(500);
+            let mut debounce_timer = Box::pin(tokio::time::sleep(tokio::time::Duration::MAX)); // Inactive initially
+            let mut timer_active = false;
+
+            loop {
+                tokio::select! {
+                    maybe_res = watcher.rx.recv() => {
+                        match maybe_res {
+                            Some(res) => {
+                                match res {
+                                    Ok(event) => {
+                                        use knot_core::notify::EventKind;
+                                        // Reset timer
+                                        debounce_timer = Box::pin(tokio::time::sleep(debounce_duration));
+                                        timer_active = true;
+
+                                        match event.kind {
+                                            EventKind::Create(_) | EventKind::Modify(_) => {
+                                                for path in event.paths {
+                                                     pending_updates.insert(path);
                                                 }
                                             }
-                                        } else {
-                                            // Handle case where "Modify" event implies removal (e.g. Rename From, or swift delete)
-                                            println!(
-                                                "[Monitor] Change detected (Remove/Move): {:?}",
-                                                path
-                                            );
-                                            if let Ok(store) =
-                                                KnotStore::new(&index_path_for_watch).await
-                                            {
-                                                match store.delete_file(&path.to_string_lossy()).await {
-                                                     Ok(_) => println!("[Monitor] Ignored/Deleted from index: {:?}", path),
-                                                     Err(e) => eprintln!("[Monitor] Failed to delete from index: {}", e),
-                                                 }
-                                                let _ = store.create_fts_index().await;
+                                            EventKind::Remove(_) => {
+                                                for path in event.paths {
+                                                    // If a file is removed, remove it from updates if present
+                                                    pending_updates.remove(&path);
+                                                    pending_removals.insert(path);
+                                                }
                                             }
+                                            _ => {}
                                         }
                                     }
+                                    Err(e) => eprintln!("[Monitor] Watch error: {}", e),
                                 }
                             }
-                            EventKind::Remove(_) => {
-                                for path in event.paths {
-                                    println!("[Monitor] Removal detected: {:?}", path);
-                                    if let Ok(store) = KnotStore::new(&index_path_for_watch).await {
+                            None => {
+                                println!("[Indexer] Watcher channel closed.");
+                                break;
+                            }
+                        }
+                    }
+                    _ = &mut debounce_timer, if timer_active => {
+                        // Timer expired, process updates
+                        timer_active = false;
+                        // Reset timer to indefinite
+                        debounce_timer = Box::pin(tokio::time::sleep(tokio::time::Duration::MAX));
+
+                        if !pending_updates.is_empty() || !pending_removals.is_empty() {
+                            println!("[Monitor] Debounce triggered. Processing {} updates, {} removals.", pending_updates.len(), pending_removals.len());
+                            let _ = app.emit("indexing-status", "updating");
+
+                            // Process Removals First
+                            if !pending_removals.is_empty() {
+                                if let Ok(store) = KnotStore::new(&index_path_for_watch).await {
+                                    for path in pending_removals.drain() {
+                                        println!("[Monitor] Removal detected: {:?}", path);
                                         let path_str = path.to_string_lossy();
-                                        // Attempt to delete exact file
                                         let _ = store.delete_file(&path_str).await;
-                                        // Also attempt to delete as folder (recursive)
-                                        // Since we don't know if the removed path was a file or folder (it's gone now!),
-                                        // we can safely try both or just run the prefix delete if it looks like a folder?
-                                        // Safest is to try deleting children too if it *was* a folder.
-                                        // Running delete_folder won't hurt if it was a file (no children match prefix).
                                         let _ = store.delete_folder(&path_str).await;
                                     }
                                 }
                             }
-                            _ => {}
+                            pending_removals.clear(); // Ensure cleared if store init failed (drain clears it)
+
+                            // Process Updates
+                             if !pending_updates.is_empty() {
+                                let paths: Vec<_> = pending_updates.drain().collect();
+                                let mut total_records = 0;
+                                let mut updated_cnt = 0;
+
+                                // We need indexer reference.
+                                // indexer is available in this scope? Yes.
+
+                                // Optimization: If we have many files, maybe parallelize?
+                                // For now, sequential is safer for DB locks.
+
+                                // We need to re-open store once for efficiency?
+                                // Or open per file?
+                                // KnotStore::new is cheap (just struct init? no, it connects sqlite)
+                                // Better to open once if possible.
+
+                                let store_opt = KnotStore::new(&index_path_for_watch).await.ok();
+
+                                for path in paths {
+                                    if should_index_file(&path) {
+                                         if path.exists() {
+                                             // Index it
+                                             match indexer.index_file(&path).await {
+                                                 Ok(records) => {
+                                                     if !records.is_empty() {
+                                                         total_records += records.len();
+                                                         updated_cnt += 1;
+                                                         if let Some(store) = &store_opt {
+                                                              let _ = store.delete_file(&path.to_string_lossy()).await;
+                                                              let _ = store.add_records(records).await;
+                                                         }
+                                                     }
+                                                 }
+                                                 Err(e) => eprintln!("[Monitor] Failed to index {:?}: {}", path, e),
+                                             }
+                                         } else {
+                                             // Just removed?
+                                         }
+                                    }
+                                }
+
+                                if let Some(store) = &store_opt {
+                                    if total_records > 0 {
+                                        let _ = store.create_fts_index().await;
+                                    }
+                                }
+
+                                if updated_cnt > 0 {
+                                    println!("[Monitor] Updated {} files with {} records.", updated_cnt, total_records);
+                                }
+                             }
+
+                            let _ = app.emit("indexing-status", "ready");
                         }
                     }
-                    Err(e) => eprintln!("[Monitor] Watch error: {}", e),
                 }
             }
         }
