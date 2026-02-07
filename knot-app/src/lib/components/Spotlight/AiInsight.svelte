@@ -1,5 +1,6 @@
 <script>
     import { marked } from "marked";
+    import { open } from "@tauri-apps/plugin-shell";
 
     /**
      * AI 洞察区域组件
@@ -29,6 +30,19 @@
     // Render Markdown
     let htmlContent = $state("");
 
+    // Handle link clicks
+    async function handleLinkClick(event) {
+        const target = event.target.closest("a");
+        if (target && target.href) {
+            event.preventDefault();
+            try {
+                await open(target.href);
+            } catch (error) {
+                console.error("Failed to open link:", error);
+            }
+        }
+    }
+
     $effect(() => {
         if (content) {
             Promise.resolve(marked.parse(content)).then((res) => {
@@ -40,7 +54,7 @@
     });
 </script>
 
-<div class="w-[62%] flex flex-col">
+<div class="w-[62%] flex flex-col h-full min-h-0">
     <div class="p-6 overflow-y-auto scroll-hide flex-1">
         <!-- 状态指示 -->
         <div
@@ -64,6 +78,8 @@
         {#if !isThinking && content}
             <div
                 class="markdown-content text-[14px] prose prose-sm dark:prose-invert max-w-none"
+                onclick={handleLinkClick}
+                role="presentation"
             >
                 {@html htmlContent}
             </div>

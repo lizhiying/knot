@@ -8,111 +8,90 @@
     import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 
     import { invoke } from "@tauri-apps/api/core";
-    import { open } from "@tauri-apps/plugin-dialog";
-    import { listen } from "@tauri-apps/api/event";
-    import ModelManager from "./ModelManager.svelte";
+    import { open, ask, message } from "@tauri-apps/plugin-dialog";
     import { navigation } from "$lib/stores/navigation.svelte.js";
+    import ModelManager from "./ModelManager.svelte";
+    import { listen } from "@tauri-apps/api/event"; // Also missing listen used in onMount
 
-    // Data Dir State
-    let dataDir = $state("");
-    let indexingStatus = $state("");
-
-    // Global Shortcut State
-    let shortcutKey = $state("");
-    let isRecording = $state(false);
-    let savedShortcut = $state("");
-    let logoError = $state(false);
-
-    // ... existing tabs const ...
     const tabs = [
         { id: "general", label: "General", icon: "settings" },
-        { id: "models", label: "Models", icon: "download" },
+        { id: "models", label: "Models", icon: "smart_toy" },
         { id: "theme", label: "Appearance", icon: "palette" },
         { id: "about", label: "About", icon: "info" },
     ];
 
+    // Config state
+    let dataDir = $state("");
+    let indexingStatus = $state("ready");
+    let isRecording = $state(false);
+    let shortcutKey = $state("");
+    let savedShortcut = $state("");
+    let logoError = $state(false);
+
     const THEMES = {
-        dark: {
-            id: "dark",
-            name: "Dark Void",
-            type: "dark",
-            colors: {
-                "--bg-main": "#0f1115",
-                "--bg-secondary": "#15171c",
-                "--bg-card": "#1e2025",
-                "--border-color": "#2d3039",
-                "--text-primary": "#ececec",
-                "--accent-primary": "#10b981",
-            },
-        },
         light: {
             id: "light",
-            name: "Pure Light",
-            type: "light",
+            name: "Light",
+            type: "Classic",
             colors: {
-                "--bg-main": "#f8f9fa",
-                "--bg-secondary": "#f1f3f5",
-                "--bg-card": "#ffffff",
-                "--border-color": "#e5e7eb",
-                "--text-primary": "#111827",
-                "--accent-primary": "#059669",
+                "--bg-main": "#ffffff",
+                "--bg-card": "#f4f4f5",
+                "--bg-secondary": "#e4e4e7",
+                "--border-color": "#d4d4d8",
+                "--text-primary": "#18181b",
+                "--accent-primary": "#3b82f6",
             },
         },
-        warm: {
-            id: "warm",
-            name: "Warm Paper",
-            type: "light",
+        dark: {
+            id: "dark",
+            name: "Dark",
+            type: "Classic",
             colors: {
-                "--bg-main": "#fdfbf7",
-                "--bg-secondary": "#f5f2eb",
-                "--bg-card": "#ffffff",
-                "--border-color": "#e6e2d8",
-                "--text-primary": "#2c2520",
-                "--accent-primary": "#d97706",
+                "--bg-main": "#09090b",
+                "--bg-card": "#18181b",
+                "--bg-secondary": "#27272a",
+                "--border-color": "#3f3f46",
+                "--text-primary": "#f4f4f5",
+                "--accent-primary": "#3b82f6",
             },
         },
-        cool: {
-            id: "cool",
-            name: "Cool Breeze",
-            type: "light",
+        system: {
+            id: "system",
+            name: "System",
+            type: "Auto",
             colors: {
-                "--bg-main": "#f0f4f8",
-                "--bg-secondary": "#eef2f6",
-                "--bg-card": "#ffffff",
-                "--border-color": "#dae1e7",
-                "--text-primary": "#0f172a",
-                "--accent-primary": "#0ea5e9",
-            },
-        },
-        lavender: {
-            id: "lavender",
-            name: "Soft Lavender",
-            type: "light",
-            colors: {
-                "--bg-main": "#fbfbfc",
-                "--bg-secondary": "#f7f6fa",
-                "--bg-card": "#ffffff",
-                "--border-color": "#e9e8f0",
-                "--text-primary": "#2e2a36",
-                "--accent-primary": "#8b5cf6",
+                "--bg-main": "#71717a",
+                "--bg-card": "#52525b",
+                "--bg-secondary": "#3f3f46",
+                "--border-color": "#27272a",
+                "--text-primary": "#fafafa",
+                "--accent-primary": "#3b82f6",
             },
         },
     };
 
-    async function toggleSpotlight() {
-        const win = getCurrentWebviewWindow();
-        const isVisible = await win.isVisible();
-        if (isVisible) {
-            await win.hide();
-        } else {
-            await win.show();
-            await win.setFocus();
+    async function selectDataDir() {
+        try {
+            const selected = await open({
+                directory: true,
+                multiple: false,
+                defaultPath: dataDir || undefined,
+            });
+            if (selected) {
+                await invoke("set_data_dir", { path: selected });
+                dataDir = selected;
+                await message(
+                    "Data directory updated. Indexing will start in background.",
+                    { title: "Success", kind: "info" },
+                );
+            }
+        } catch (err) {
+            console.error("Failed to select dir:", err);
         }
     }
 
     async function saveShortcut() {
         if (!shortcutKey) return;
-
         try {
             await unregisterAll();
             await register(shortcutKey, (event) => {
@@ -120,56 +99,74 @@
                     toggleSpotlight();
                 }
             });
-            savedShortcut = shortcutKey;
             localStorage.setItem("knot_global_shortcut", shortcutKey);
-            console.log("Shortcut registered:", shortcutKey);
+            savedShortcut = shortcutKey;
+            await message("Global shortcut saved!", {
+                title: "Success",
+                kind: "info",
+            });
         } catch (err) {
-            console.error("Failed to register shortcut:", err);
-            // alert("Failed to register shortcut: " + err);
+            console.error("Failed to save shortcut:", err);
+            await message("Failed to save shortcut: " + err, {
+                title: "Error",
+                kind: "error",
+            });
         }
     }
 
-    async function selectDataDir() {
-        try {
-            const selected = await open({
-                directory: true,
-                multiple: false,
-                title: "Select Document Folder",
-            });
-
-            if (selected) {
-                // Save and Trigger Indexing
-                // Assuming backend updates config and starts indexing
-                await invoke("set_data_dir", { path: selected });
-                dataDir = selected;
-                // indexingStatus = "Starting..."; // Backend will emit events
-            }
-        } catch (err) {
-            console.error("Failed to set data dir:", err);
+    async function toggleSpotlight() {
+        const win = getCurrentWebviewWindow();
+        if (await win.isVisible()) {
+            await win.hide();
+        } else {
+            await win.show();
+            await win.setFocus();
         }
     }
 
     async function resetIndex() {
-        if (
-            !confirm(
-                "Are you sure you want to clear the index? This will delete all indexed data and require a full re-scan.",
-            )
-        )
-            return;
+        const confirmed = await ask(
+            "Are you sure you want to clear the index? This will delete all indexed data and require a full re-scan.",
+            { title: "Clear Index", kind: "warning" },
+        );
+
+        if (!confirmed) return;
+
         try {
             await invoke("reset_index");
-            indexingStatus =
-                "Index cleared. Re-indexing will start shortly or on restart.";
-            // Optionally force re-set data dir to trigger immediate re-index if logic supports it
-            // But reset_index just deletes files.
-            // If we want to trigger re-index, we might need to call set_data_dir again or similar.
-            // For now, prompt user.
-            alert(
-                "Index cleared successfully. Please restart the application to rebuild the index.",
+            indexingStatus = "Index cleared."; // Update status immediately
+
+            await message(
+                "Index cleared successfully. You can now click 'Re-index' to rebuild it.",
+                { title: "Success", kind: "info" },
             );
         } catch (err) {
             console.error("Failed to reset index:", err);
-            alert("Failed to reset index: " + err);
+            await message("Failed to reset index: " + err, {
+                title: "Error",
+                kind: "error",
+            });
+        }
+    }
+
+    async function handleReindex() {
+        if (!dataDir) return;
+
+        try {
+            // Trigger indexing by re-setting the data dir (which calls start_background_indexing)
+            await invoke("set_data_dir", { path: dataDir });
+            indexingStatus = "starting scan...";
+
+            await message("Re-indexing started in background.", {
+                title: "Success",
+                kind: "info",
+            });
+        } catch (err) {
+            console.error("Failed to re-index:", err);
+            await message("Failed to re-index: " + err, {
+                title: "Error",
+                kind: "error",
+            });
         }
     }
 
@@ -459,12 +456,19 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="mt-4">
+                        <div class="mt-4 flex gap-3">
                             <button
                                 class="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-red-500/10 text-red-500 hover:bg-red-500/20 shadow-sm border border-red-500/20"
                                 onclick={resetIndex}
                             >
                                 Clear Index
+                            </button>
+                            <button
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                onclick={handleReindex}
+                                disabled={!dataDir}
+                            >
+                                Re-index
                             </button>
                         </div>
                     </div>

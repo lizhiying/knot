@@ -1,0 +1,15 @@
+# --- 中文高频停用词 ---
+的, 了, 在, 是, 我, 有, 和, 就, 不, 人, 都, 一, 一个, 上, 也, 很, 到, 说, 要, 去, 你, 
+会, 着, 没, 看, 好, 自己, 这, 们, 个, 而, 及, 与, 为, 以, 到, 从, 于, 由, 被, 把, 
+哪些, 那个, 那个, 哪儿, 哪里, 为什么, 怎么办, 怎么样, 或是, 还是, 既然, 那么, 
+因为, 所以, 虽然, 但是, 如果, 只要, 只有, 
+# --- 语气助词 ---
+吗, 吧, 啊, 呢, 嘛, 呀, 哇, 哈哈, 哦, 嗯
+# --- 常用符号 ---
++, -, *, /, =, <, >, [, ], {, }, (, ), |, &, !
+# --- 英文高频停用词 ---
+a, an, the, and, or, but, if, because, as, until, while, of, at, by, for, with, about, 
+against, between, into, through, during, before, after, above, below, to, from, up, 
+down, in, out, on, off, over, under, again, further, then, once, here, there, when, 
+where, why, how, all, any, both, each, few, more, most, other, some, such, no, nor, 
+not, only, own, same, so, than, too, very, s, t, can, will, just, don, should, now

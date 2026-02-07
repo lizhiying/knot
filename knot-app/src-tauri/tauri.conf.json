@@ -44,7 +44,8 @@
     "resources": [
       "../bin/**/*",
       "../../models/bge-small-zh-v1.5.onnx",
-      "../../models/bge-small-zh-v1.5-tokenizer.json"
+      "../../models/bge-small-zh-v1.5-tokenizer.json",
+      "../stopwords.txt"
     ]
   }
 }

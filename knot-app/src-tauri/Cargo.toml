@@ -13,6 +13,7 @@ ort = { version = "2.0.0-rc.9", features = ["load-dynamic"] }
 tauri = { version = "2.0", features = ["macos-private-api"] }
 tauri-plugin-dialog = "2"
 tokio = { workspace = true, features = ["full"] }
+tauri-plugin-shell = "2"
 
 # 额外依赖
 # 额外依赖

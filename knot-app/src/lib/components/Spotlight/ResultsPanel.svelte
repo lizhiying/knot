@@ -20,7 +20,7 @@
 </script>
 
 {#if visible}
-    <div class="flex h-full">
+    <div class="flex h-full min-h-0">
         <EvidencePanel
             {results}
             {matchText}
