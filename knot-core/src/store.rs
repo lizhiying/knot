@@ -55,27 +55,60 @@ impl KnotStore {
 
     fn ensure_tantivy_index(&self) -> Result<Index> {
         let mut schema_builder = t_schema::Schema::builder();
-        // ID: Stored, not indexed (we search by text, retrieve ID/Path)
-        // Actually, for deletion we need to find by Path. So Path should be string field (indexed).
-        // Text: Indexed + Stored
 
-        // Custom Text Options for Jieba
-        let text_options = TextOptions::default()
-            .set_indexing_options(
-                TextFieldIndexing::default()
-                    .set_tokenizer("jieba")
-                    .set_index_option(IndexRecordOption::WithFreqsAndPositions),
-            )
-            .set_stored();
+        // 1. Text Options
+        // Jieba: Chinese Semantic Segmentation
+        let text_zh_options = TextOptions::default().set_indexing_options(
+            TextFieldIndexing::default()
+                .set_tokenizer("jieba")
+                .set_index_option(IndexRecordOption::WithFreqsAndPositions),
+        ); // Not Stored
 
+        // Standard: General Multilingual (Simple)
+        let text_std_options = TextOptions::default().set_indexing_options(
+            TextFieldIndexing::default()
+                .set_tokenizer("default") // Uses standard tokenizer
+                .set_index_option(IndexRecordOption::WithFreqsAndPositions),
+        ); // Not Stored
+
+        // 2. Schema Definition
         schema_builder.add_text_field("id", t_schema::STRING | t_schema::STORED);
         schema_builder.add_text_field("file_path", t_schema::STRING | t_schema::STORED);
-        // Use ICU options for main text
-        schema_builder.add_text_field("text", text_options);
+
+        // Content: Stored only (for Snippet display)
+        schema_builder.add_text_field("content", t_schema::STORED);
+
+        // Indexed Fields (Dual Indexing)
+        // Note: Field names must be used in QueryParser
+        schema_builder.add_text_field("text_zh", text_zh_options);
+        schema_builder.add_text_field("text_std", text_std_options);
+
         schema_builder.add_text_field("parent_id", t_schema::STRING | t_schema::STORED);
         schema_builder.add_text_field("breadcrumbs", t_schema::STRING | t_schema::STORED);
 
         let schema = schema_builder.build();
+
+        // Auto-Migration: Check if schema matches
+        // If "text_zh" field is missing in existing index, we must reset.
+        let reset_needed = if self.tantivy_path.exists() {
+            use tantivy::directory::MmapDirectory;
+            if let Ok(dir) = MmapDirectory::open(&self.tantivy_path) {
+                if let Ok(idx) = Index::open(dir) {
+                    idx.schema().get_field("text_zh").is_err()
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        } else {
+            false
+        };
+
+        if reset_needed {
+            let _ = std::fs::remove_dir_all(&self.tantivy_path);
+            let _ = std::fs::create_dir_all(&self.tantivy_path);
+        }
 
         // Open or Create
         use tantivy::directory::MmapDirectory;
@@ -83,12 +116,12 @@ impl KnotStore {
         let index = Index::open_or_create(dir, schema)?;
 
         // Register Jieba Tokenizer
-        // We need to register it every time we open the index
         let stop_words = include_str!("../../knot-app/stopwords.txt")
             .split_whitespace()
             .map(|s| s.to_string())
             .collect::<Vec<_>>();
 
+        // For Tantivy 0.22, use TextAnalyzer::builder(tokenizer)
         let jieba_tokenizer = tantivy::tokenizer::TextAnalyzer::builder(JiebaTokenizer::new())
             .filter(tantivy::tokenizer::LowerCaser)
             .filter(tantivy::tokenizer::RemoveLongFilter::limit(40))
@@ -128,14 +161,15 @@ impl KnotStore {
         }
 
         // 2. Write to Tantivy
-        // Blocking operation, but fast enough for now.
         let index = self.ensure_tantivy_index()?;
         let mut index_writer = index.writer::<TantivyDocument>(50_000_000)?; // 50MB buffer
 
         let schema = index.schema();
         let f_id = schema.get_field("id").unwrap();
         let f_path = schema.get_field("file_path").unwrap();
-        let f_text = schema.get_field("text").unwrap();
+        let f_content = schema.get_field("content").unwrap();
+        let f_text_zh = schema.get_field("text_zh").unwrap();
+        let f_text_std = schema.get_field("text_std").unwrap();
         let f_pid = schema.get_field("parent_id").unwrap();
         let f_bc = schema.get_field("breadcrumbs").unwrap();
 
@@ -143,7 +177,10 @@ impl KnotStore {
             let mut doc = TantivyDocument::default();
             doc.add_text(f_id, &record.id);
             doc.add_text(f_path, &record.file_path);
-            doc.add_text(f_text, &record.text);
+            doc.add_text(f_content, &record.text); // Store original text
+            doc.add_text(f_text_zh, &record.text); // Index with Jieba
+            doc.add_text(f_text_std, &record.text); // Index with Standard
+
             if let Some(pid) = &record.parent_id {
                 doc.add_text(f_pid, pid);
             }
@@ -267,11 +304,16 @@ impl KnotStore {
         let schema = index.schema();
         let f_id = schema.get_field("id").unwrap();
         let f_path = schema.get_field("file_path").unwrap();
-        let f_text = schema.get_field("text").unwrap();
+        let f_content = schema.get_field("content").unwrap();
+        let f_text_zh = schema.get_field("text_zh").unwrap();
+        let f_text_std = schema.get_field("text_std").unwrap();
         let f_pid = schema.get_field("parent_id").unwrap();
         let f_bc = schema.get_field("breadcrumbs").unwrap();
 
-        let query_parser = QueryParser::for_index(&index, vec![f_text]);
+        // Search both fields (Dual Indexing)
+        // QueryParser will automatically create a Disjunction (OR) query over these fields
+        let query_parser = QueryParser::for_index(&index, vec![f_text_zh, f_text_std]);
+
         match query_parser.parse_query(query_text) {
             Ok(q) => {
                 let top_docs = searcher.search(&q, &TopDocs::with_limit(20))?;
@@ -290,7 +332,7 @@ impl KnotStore {
                         existing.source = SearchSource::Hybrid;
                     } else {
                         let text = doc
-                            .get_first(f_text)
+                            .get_first(f_content) // Retrieve from stored content
                             .and_then(|v| v.as_str())
                             .unwrap_or_default()
                             .to_string();

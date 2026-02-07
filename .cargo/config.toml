@@ -14,3 +14,4 @@ ORT_DYLIB_PATH = "/Users/lizhiying/Projects/knot/source/knot-workspaces/knot-app
 
 # Linux x64
 # ORT_DYLIB_PATH = "/path/to/knot-workspaces/knot-app/bin/onnxruntime/linux-x64/libonnxruntime.so"
+

@@ -1,6 +1,6 @@
 use jieba_rs::{Jieba, Token as JiebaToken, TokenizeMode};
 use std::sync::Arc;
-use tantivy::tokenizer::{Token, TokenStream, Tokenizer};
+use tantivy::tokenizer::{BoxTokenStream, Token, TokenStream, Tokenizer};
 
 #[derive(Clone)]
 pub struct JiebaTokenizer {
@@ -54,15 +54,16 @@ impl<'a> TokenStream for JiebaTokenStream<'a> {
 }
 
 impl Tokenizer for JiebaTokenizer {
-    type TokenStream<'a> = JiebaTokenStream<'a>;
+    type TokenStream<'a> = BoxTokenStream<'a>;
 
-    fn token_stream<'a>(&'a mut self, text: &'a str) -> Self::TokenStream<'a> {
+    fn token_stream<'a>(&'a mut self, text: &'a str) -> BoxTokenStream<'a> {
         let tokens = self.jieba.tokenize(text, TokenizeMode::Search, true);
-        JiebaTokenStream {
+        let stream = JiebaTokenStream {
             tokens,
             index: 0,
             token: Token::default(),
-        }
+        };
+        BoxTokenStream::new(stream)
     }
 }
 
