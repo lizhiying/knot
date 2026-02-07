@@ -1,4 +1,5 @@
 use crate::mock_embedding::MockEmbeddingProvider;
+use crate::path_processor::PathProcessor;
 use crate::store::VectorRecord;
 use anyhow::Result;
 use futures::stream::{self, StreamExt};
@@ -164,23 +165,38 @@ impl KnotIndexer {
         let mut root_node = self.dispatcher.index_file(&abs_path, &config).await?;
 
         // Manually generate embeddings for nodes if missing
-        self.enrich_node(&mut root_node).await?;
+        let file_name = PathProcessor::extract_file_name(&path.to_string_lossy());
+        let directory_tags = PathProcessor::extract_directory_tags(&path.to_string_lossy());
+
+        self.enrich_node(&mut root_node, &file_name, &directory_tags)
+            .await?;
 
         // Flatten to records
         Ok(self.flatten_tree(root_node, &abs_path))
     }
 
-    async fn enrich_node(&self, node: &mut PageNode) -> Result<()> {
+    async fn enrich_node(
+        &self,
+        node: &mut PageNode,
+        file_name: &str,
+        directory_tags: &str,
+    ) -> Result<()> {
         if node.embedding.is_none() && !node.content.is_empty() {
+            // Inject Metadata for Embedding Context
+            let enriched_text = format!(
+                "File: {} | Path: {}\n\n{}",
+                file_name, directory_tags, node.content
+            );
+
             let vec = self
                 .embedding_provider
-                .generate_embedding(&node.content)
+                .generate_embedding(&enriched_text)
                 .await?;
             node.embedding = Some(vec);
         }
 
         for child in &mut node.children {
-            Box::pin(self.enrich_node(child)).await?;
+            Box::pin(self.enrich_node(child, file_name, directory_tags)).await?;
         }
         Ok(())
     }
@@ -244,5 +260,72 @@ impl KnotIndexer {
                 records,
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pageindex_rs::{EmbeddingProvider, PageIndexError};
+    use std::sync::Mutex;
+
+    struct SpyEmbeddingProvider {
+        last_text: Arc<Mutex<String>>,
+    }
+
+    #[async_trait::async_trait]
+    impl EmbeddingProvider for SpyEmbeddingProvider {
+        async fn generate_embedding(&self, text: &str) -> Result<Vec<f32>, PageIndexError> {
+            let mut last = self.last_text.lock().unwrap();
+            *last = text.to_string();
+            Ok(vec![0.0; 512])
+        }
+    }
+
+    #[tokio::test]
+    async fn test_enrich_node_with_metadata() {
+        let last_text = Arc::new(Mutex::new(String::new()));
+        let provider = Arc::new(SpyEmbeddingProvider {
+            last_text: last_text.clone(),
+        });
+
+        let indexer = KnotIndexer::new(":memory:", Some(provider)).await;
+
+        // Setup a mock node
+        let mut node = PageNode {
+            node_id: "1".to_string(),
+            title: "Test Node".to_string(),
+            level: 1,
+            content: "Original Content".to_string(),
+            summary: None,
+            embedding: None,
+            metadata: pageindex_rs::NodeMeta {
+                file_path: "test.md".to_string(),
+                page_number: None,
+                line_number: None,
+                token_count: 0,
+                extra: std::collections::HashMap::new(),
+            },
+            children: vec![],
+        };
+
+        let file_name = "test.md";
+        let tags = "project src";
+
+        // Call the private method via test access (tests is child module so it can access private items)
+        indexer
+            .enrich_node(&mut node, file_name, tags)
+            .await
+            .unwrap();
+
+        // Check if embedding was generated using enriched text
+        let captured_text = last_text.lock().unwrap().clone();
+        assert!(captured_text.contains("File: test.md"));
+        assert!(captured_text.contains("Path: project src"));
+        assert!(captured_text.contains("Original Content"));
+
+        // Check if original content is preserved
+        assert_eq!(node.content, "Original Content");
+        assert!(node.embedding.is_some());
     }
 }
