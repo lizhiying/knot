@@ -287,6 +287,7 @@ impl KnotStore {
 
                     if let Some(existing) = results_map.get_mut(&doc_id) {
                         existing.score += bm25_score * 2.0;
+                        existing.source = SearchSource::Hybrid;
                     } else {
                         let text = doc
                             .get_first(f_text)
@@ -314,6 +315,7 @@ impl KnotStore {
                             score: bm25_score * 2.0,
                             parent_id,
                             breadcrumbs,
+                            source: SearchSource::Keyword,
                         };
                         results_map.insert(doc_id, new_result);
                     }
@@ -375,6 +377,7 @@ impl KnotStore {
                     score: 0.0,
                     parent_id: pid,
                     breadcrumbs: bc,
+                    source: SearchSource::Vector,
                 });
             }
         }
@@ -449,6 +452,23 @@ pub struct VectorRecord {
     pub breadcrumbs: Option<String>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum SearchSource {
+    Vector,
+    Keyword,
+    Hybrid,
+}
+
+impl std::fmt::Display for SearchSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SearchSource::Vector => write!(f, "Vector"),
+            SearchSource::Keyword => write!(f, "Keyword"),
+            SearchSource::Hybrid => write!(f, "Hybrid"),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct SearchResult {
     pub id: String,
@@ -457,4 +477,5 @@ pub struct SearchResult {
     pub score: f32, // Reranking score
     pub parent_id: Option<String>,
     pub breadcrumbs: Option<String>,
+    pub source: SearchSource,
 }

@@ -140,6 +140,7 @@
                 score: s.score,
                 snippet: s.text,
                 path: s.context || s.file_path,
+                source: s.source,
             }));
 
             // 显示结果

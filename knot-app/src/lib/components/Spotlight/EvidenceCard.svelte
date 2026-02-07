@@ -49,6 +49,21 @@
         </div>
 
         <div class="flex items-center gap-2">
+            {#if result.source}
+                {@const sourceClass =
+                    {
+                        Vector: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+                        Keyword:
+                            "bg-orange-500/10 text-orange-500 border-orange-500/20",
+                        Hybrid: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+                    }[result.source] ||
+                    "bg-gray-500/10 text-gray-500 border-gray-500/20"}
+                <span
+                    class="text-[9px] font-bold px-1.5 py-0.5 rounded-md border shadow-sm uppercase tracking-wider {sourceClass}"
+                >
+                    {result.source}
+                </span>
+            {/if}
             <span
                 class="text-[10px] font-bold px-1.5 py-0.5 rounded-md text-[var(--accent-primary)] border border-[var(--accent-primary)]/20 shadow-sm bg-[var(--accent-glow)]"
             >

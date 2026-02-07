@@ -934,6 +934,7 @@ struct HybridSearchResultDisplay {
     score: f32,
     context: Option<String>,
     text: String,
+    source: String,
 }
 
 #[tauri::command]
@@ -1016,6 +1017,7 @@ async fn rag_query(
             score: res.score,
             context: res.breadcrumbs.clone(),
             text: res.text.clone(),
+            source: res.source.to_string(),
         });
     }
 
