@@ -1,3 +1,4 @@
+use crate::path_processor::PathProcessor;
 use crate::tokenizer::JiebaTokenizer;
 use anyhow::Result;
 use arrow::record_batch::RecordBatchIterator;
@@ -64,12 +65,39 @@ impl KnotStore {
                 .set_index_option(IndexRecordOption::WithFreqsAndPositions),
         ); // Not Stored
 
+        // Standard: General Multilingual (Simple) - reused for path_tags but maybe better to use default?
+        // Let's use simple whitespace tokenizer for path_tags to separate folder names?
+        // Or "default" which splits on punctuation. Paths have / which is punctuation.
+        // Let's use "default" for path_tags for now.
+
+        // Define Fields
         // Standard: General Multilingual (Simple)
         let text_std_options = TextOptions::default().set_indexing_options(
             TextFieldIndexing::default()
                 .set_tokenizer("default") // Uses standard tokenizer
                 .set_index_option(IndexRecordOption::WithFreqsAndPositions),
-        ); // Not Stored
+        );
+
+        // Define Fields
+        // text_zh: Jieba Tokenized
+        let _text_zh = schema_builder.add_text_field("text_zh", text_zh_options);
+        // text_std: Default Tokenized
+        let _text_std = schema_builder.add_text_field("text_std", text_std_options.clone());
+
+        let file_name_options = TextOptions::default().set_indexing_options(
+            TextFieldIndexing::default()
+                .set_tokenizer("jieba") // Use Jieba for filenames to handle Chinese filenames
+                .set_index_option(IndexRecordOption::WithFreqsAndPositions),
+        ) | t_schema::STORED;
+        let _file_name = schema_builder.add_text_field("file_name", file_name_options);
+
+        // path_tags: store parent directories as searchable tags
+        let path_tags_options = TextOptions::default().set_indexing_options(
+            TextFieldIndexing::default()
+                .set_tokenizer("default")
+                .set_index_option(IndexRecordOption::WithFreqsAndPositions),
+        ) | t_schema::STORED;
+        let _path_tags = schema_builder.add_text_field("path_tags", path_tags_options);
 
         // 2. Schema Definition
         schema_builder.add_text_field("id", t_schema::STRING | t_schema::STORED);
@@ -77,11 +105,6 @@ impl KnotStore {
 
         // Content: Stored only (for Snippet display)
         schema_builder.add_text_field("content", t_schema::STORED);
-
-        // Indexed Fields (Dual Indexing)
-        // Note: Field names must be used in QueryParser
-        schema_builder.add_text_field("text_zh", text_zh_options);
-        schema_builder.add_text_field("text_std", text_std_options);
 
         schema_builder.add_text_field("parent_id", t_schema::STRING | t_schema::STORED);
         schema_builder.add_text_field("breadcrumbs", t_schema::STRING | t_schema::STORED);
@@ -170,6 +193,8 @@ impl KnotStore {
         let f_content = schema.get_field("content").unwrap();
         let f_text_zh = schema.get_field("text_zh").unwrap();
         let f_text_std = schema.get_field("text_std").unwrap();
+        let f_file_name = schema.get_field("file_name").unwrap();
+        let f_path_tags = schema.get_field("path_tags").unwrap();
         let f_pid = schema.get_field("parent_id").unwrap();
         let f_bc = schema.get_field("breadcrumbs").unwrap();
 
@@ -177,6 +202,14 @@ impl KnotStore {
             let mut doc = TantivyDocument::default();
             doc.add_text(f_id, &record.id);
             doc.add_text(f_path, &record.file_path);
+
+            // Extract Metadata
+            let extracted_file_name = PathProcessor::extract_file_name(&record.file_path);
+            let extracted_tags = PathProcessor::extract_directory_tags(&record.file_path);
+
+            doc.add_text(f_file_name, &extracted_file_name);
+            doc.add_text(f_path_tags, &extracted_tags);
+
             doc.add_text(f_content, &record.text); // Store original text
             doc.add_text(f_text_zh, &record.text); // Index with Jieba
             doc.add_text(f_text_std, &record.text); // Index with Standard
@@ -306,13 +339,35 @@ impl KnotStore {
         let f_path = schema.get_field("file_path").unwrap();
         let f_content = schema.get_field("content").unwrap();
         let f_text_zh = schema.get_field("text_zh").unwrap();
-        let f_text_std = schema.get_field("text_std").unwrap();
+
         let f_pid = schema.get_field("parent_id").unwrap();
         let f_bc = schema.get_field("breadcrumbs").unwrap();
 
         // Search both fields (Dual Indexing)
         // QueryParser will automatically create a Disjunction (OR) query over these fields
-        let query_parser = QueryParser::for_index(&index, vec![f_text_zh, f_text_std]);
+        let query_parser =
+            if let (Ok(f_text_std_field), Ok(f_file_name_field), Ok(f_path_tags_field)) = (
+                index.schema().get_field("text_std"),
+                index.schema().get_field("file_name"),
+                index.schema().get_field("path_tags"),
+            ) {
+                // With Dual Indexing and Metadata
+                let mut fields = vec![f_text_zh, f_text_std_field];
+                fields.push(f_file_name_field);
+                fields.push(f_path_tags_field);
+
+                let mut parser = QueryParser::for_index(&index, fields);
+                parser.set_field_boost(f_text_zh, 1.0);
+                parser.set_field_boost(f_text_std_field, 1.0);
+                parser.set_field_boost(f_file_name_field, 3.0); // High boost for filename match
+                parser.set_field_boost(f_path_tags_field, 1.5); // Moderate boost for directory match
+                parser
+            } else {
+                // Fallback
+                let mut parser = QueryParser::for_index(&index, vec![f_text_zh]);
+                parser.set_field_boost(f_text_zh, 1.0);
+                parser
+            };
 
         match query_parser.parse_query(query_text) {
             Ok(q) => {
