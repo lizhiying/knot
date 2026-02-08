@@ -15,3 +15,10 @@ notify = "6.1"
 ort = { version = "2.0.0-rc.9", features = ["load-dynamic"] }
 tokenizers = "0.21"
 async-trait = "0.1"
+
+# 下载 & LLM 支持
+reqwest = { version = "0.12", features = ["json", "stream"] }
+futures-util = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+indicatif = "0.17"

@@ -15,13 +15,13 @@ Scope:
 - JSON 输出格式
 
 Tasks:
-- [ ] 实现 download 命令框架 (参数解析)
-- [ ] 添加模型下载逻辑 (复用 knot-app 的 Downloader)
-- [ ] 集成 LlamaSidecar 到 knot-cli
-- [ ] 实现 ask 命令 (检索 + LLM 生成)
-- [ ] 实现流式终端输出 (打字机效果)
-- [ ] 添加 --json 参数支持 query/ask
-- [ ] 添加 --source 参数限制搜索范围
+- [x] 实现 download 命令框架 (参数解析)
+- [x] 添加模型下载逻辑 (基于 reqwest + indicatif 进度条)
+- [x] 集成 LlamaSidecar 到 knot-cli
+- [x] 实现 ask 命令 (检索 + LLM 生成)
+- [x] 实现流式终端输出 (打字机效果)
+- [x] 添加 --json 参数支持 query/ask
+- [x] 添加 --source 参数限制搜索范围 (已在 iteration1 实现)
 
 Exit criteria:
 - `knot-cli download` 成功下载 Embedding 模型

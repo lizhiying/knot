@@ -25,6 +25,6 @@ Tasks:
 - [x] 端到端测试: index + query 返回有意义结果 ✅
 
 Exit criteria:
-- `knot-cli status` 正确显示模型和索引状态
-- `knot-cli index -i ~/test` 成功索引文档
-- `knot-cli query -t "测试查询"` 返回相关结果 (Score > 0)
+- `cargo run -p knot-cli -- status` 正确显示模型和索引状态
+- `cargo run -p knot-cli -- index -i ~/test` 成功索引文档
+- `cargo run -p knot-cli -- query -t "测试查询"` 返回相关结果 (Score > 0)
