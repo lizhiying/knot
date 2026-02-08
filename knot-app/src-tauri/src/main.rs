@@ -55,7 +55,7 @@ fn get_bin_dir(app: &tauri::AppHandle) -> PathBuf {
     resolve_resource(app, "bin", 1)
 }
 
-fn get_index_base_dir(app: &tauri::AppHandle, data_dir: &str) -> PathBuf {
+fn get_index_base_dir(_app: &tauri::AppHandle, data_dir: &str) -> PathBuf {
     // 1. Get base ~/.knot/indexes
     let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
     let base = Path::new(&home).join(".knot").join("indexes");
@@ -284,6 +284,7 @@ pub struct AppState {
     pub chat_client: Arc<RwLock<Option<Arc<LlamaClient>>>>,
     pub queue_manager: Arc<QueueManager>,
     pub knot_store: Arc<RwLock<Option<Arc<knot_core::store::KnotStore>>>>,
+    pub model_status: Arc<RwLock<String>>,
 }
 
 fn main() {
@@ -339,6 +340,7 @@ fn main() {
             let queue_manager = Arc::new(QueueManager::new());
             let knot_store: Arc<RwLock<Option<Arc<knot_core::store::KnotStore>>>> =
                 Arc::new(RwLock::new(None));
+            let model_status = Arc::new(RwLock::new("loading".to_string()));
 
             app.manage(AppState {
                 embedding: embedding.clone(),
@@ -349,6 +351,7 @@ fn main() {
                 chat_client: chat_client.clone(),
                 queue_manager: queue_manager.clone(),
                 knot_store: knot_store.clone(),
+                model_status: model_status.clone(),
             });
 
             // 保留旧的 EngineManager
@@ -409,6 +412,9 @@ fn main() {
             let chat_model_path = manager.get_model_path("Qwen3-1.7B-Q4_K_M.gguf");
 
             let bin_dir_clone2 = bin_dir.clone();
+            let app_handle_clone = app_handle.clone();
+            let model_status_clone = model_status.clone();
+
             std::thread::spawn(move || {
                 // HOT RELOAD LOGIC:
                 // Check if model exists. If not, we do nothing and wait for "reload_models" command.
@@ -432,13 +438,32 @@ fn main() {
                     18081,
                 ) {
                     Ok(sidecar) => {
+                        let app_handle_g = app_handle_clone.clone();
+                        let model_status_g = model_status_clone.clone();
+
                         tokio::runtime::Runtime::new().unwrap().block_on(async {
                             let mut guard = chat_llm_clone.write().await;
                             *guard = Some(sidecar);
 
                             let client = Arc::new(LlamaClient::new(18081));
                             let mut client_guard = chat_client_clone.write().await;
-                            *client_guard = Some(client);
+                            *client_guard = Some(client.clone()); // Cloning ARC
+
+                            // Warmup on startup
+                            println!("[Engine] Performing startup warmup...");
+                            if let Err(e) = client.warmup().await {
+                                eprintln!("[Engine] Startup warmup failed: {}", e);
+                                // Don't fail the whole startup, just log
+                            } else {
+                                println!("[Engine] Startup warmup successful.");
+                            }
+
+                            // Update status
+                            {
+                                let mut status = model_status_g.write().await;
+                                *status = "ready".to_string();
+                            }
+                            let _ = app_handle_g.emit("model-status", "ready");
                         });
                         println!("[Engine] ✓ Chat LLM (Qwen3) started on port 18081");
                     }
@@ -635,6 +660,7 @@ fn main() {
             rag_search,
             rag_generate,
             check_model_status,
+            get_model_status,
             download_model,
             get_detected_region,
             start_download_queue,
@@ -642,7 +668,8 @@ fn main() {
             stop_parsing_llm,
             stop_parsing_llm,
             reset_index,
-            set_streaming_enabled
+            set_streaming_enabled,
+            get_index_status
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -688,6 +715,29 @@ fn main() {
                 _ => {}
             }
         });
+}
+
+#[derive(serde::Serialize)]
+struct IndexStatus {
+    file_count: u64,
+    doc_count: u64,
+}
+
+#[tauri::command]
+async fn get_index_status(state: State<'_, AppState>) -> Result<IndexStatus, String> {
+    let store_guard = state.knot_store.read().await;
+    if let Some(store) = store_guard.as_ref() {
+        let doc_count = store.get_doc_count().map_err(|e| e.to_string())?;
+        let file_count = store.get_file_count().await.map_err(|e| e.to_string())?;
+        return Ok(IndexStatus {
+            file_count,
+            doc_count,
+        });
+    }
+    Ok(IndexStatus {
+        file_count: 0,
+        doc_count: 0,
+    })
 }
 
 // --- Configuration ---
@@ -1258,7 +1308,6 @@ async fn rag_query(
     state: State<'_, AppState>,
     query: String,
 ) -> Result<RagResponse, String> {
-    use knot_core::store::KnotStore;
     use pageindex_rs::LlmProvider;
 
     println!("[rag_query] Starting query: {}", query);
@@ -1369,6 +1418,12 @@ async fn rag_query(
 // --- Model Management Commands ---
 
 #[tauri::command]
+async fn get_model_status(state: State<'_, AppState>) -> Result<String, String> {
+    let status = state.model_status.read().await;
+    Ok(status.clone())
+}
+
+#[tauri::command]
 async fn check_model_status(app: tauri::AppHandle, filename: String) -> Result<bool, String> {
     let manager = ModelPathManager::new(&app);
     Ok(manager.get_model_path(&filename).exists())
@@ -1440,6 +1495,11 @@ async fn start_download_queue(
 #[tauri::command]
 async fn reload_models(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     println!("[Command] Reloading models...");
+    {
+        let mut status = state.model_status.write().await;
+        *status = "loading".to_string();
+    }
+    let _ = app.emit("model-status", "loading");
 
     // 1. Try Reload Parsing LLM (OCR)
     let _ = ensure_parsing_llm(&app, state.inner().clone()).await;
@@ -1479,8 +1539,29 @@ async fn reload_models(app: tauri::AppHandle, state: State<'_, AppState>) -> Res
 
                     let client = Arc::new(LlamaClient::new(8081));
                     let mut c_guard = chat_client_store.write().await;
-                    *c_guard = Some(client);
+                    *c_guard = Some(client.clone());
                     println!("[Reload] ✓ Chat LLM Started.");
+
+                    // Fire and forget warmup
+                    let app_handle = app.clone();
+                    let model_status_clone = state.model_status.clone(); // Clone for task
+
+                    tokio::spawn(async move {
+                        if let Err(e) = client.warmup().await {
+                            eprintln!("[Reload] Warmup failed: {}", e);
+                            {
+                                let mut status = model_status_clone.write().await;
+                                *status = "error".to_string();
+                            }
+                            let _ = app_handle.emit("model-status", "error");
+                        } else {
+                            {
+                                let mut status = model_status_clone.write().await;
+                                *status = "ready".to_string();
+                            }
+                            let _ = app_handle.emit("model-status", "ready");
+                        }
+                    });
                 }
                 Err(e) => eprintln!("[Reload] Failed to start Chat LLM: {}", e),
             }

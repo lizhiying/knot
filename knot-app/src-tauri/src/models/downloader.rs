@@ -21,7 +21,7 @@ impl Downloader {
         filename_for_event: &str, // 用于前端显示的标识
     ) -> Result<(), String> {
         let client = reqwest::Client::new();
-        let mut response = client
+        let response = client
             .get(url)
             .send()
             .await

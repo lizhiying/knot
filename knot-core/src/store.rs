@@ -21,7 +21,7 @@ const EMBEDDING_DIM: i32 = 512;
 pub struct KnotStore {
     conn: Connection,
     table_name: String,
-    tantivy_path: PathBuf,
+    // tantivy_path: PathBuf,
     tantivy_index: Index, // Cached Index to avoid repeated initialization
 }
 
@@ -49,7 +49,7 @@ impl KnotStore {
         let store = Self {
             conn,
             table_name: "vectors".to_string(),
-            tantivy_path,
+            // tantivy_path,
             tantivy_index,
         };
 
@@ -153,6 +153,41 @@ impl KnotStore {
     pub async fn create_fts_index(&self) -> Result<()> {
         // Placeholder
         Ok(())
+    }
+
+    pub fn get_doc_count(&self) -> Result<u64> {
+        let index = self.get_tantivy_index();
+        let reader = index.reader()?;
+        let searcher = reader.searcher();
+        Ok(searcher.num_docs())
+    }
+
+    pub async fn get_file_count(&self) -> Result<u64> {
+        let table = self.conn.open_table(&self.table_name).execute().await?;
+        // Query unique file_path count using SQL
+        let results = table
+            .query()
+            .select(lancedb::query::Select::Columns(vec![
+                "file_path".to_string()
+            ]))
+            .execute()
+            .await?;
+
+        let batches: Vec<RecordBatch> = results.try_collect().await?;
+        let mut unique_paths = std::collections::HashSet::new();
+
+        for batch in batches {
+            let column = batch
+                .column(0)
+                .as_any()
+                .downcast_ref::<StringArray>()
+                .unwrap();
+            for i in 0..batch.num_rows() {
+                unique_paths.insert(column.value(i).to_string());
+            }
+        }
+
+        Ok(unique_paths.len() as u64)
     }
 
     pub async fn add_records(&self, records: Vec<VectorRecord>) -> Result<()> {

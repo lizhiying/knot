@@ -179,10 +179,9 @@ impl LlamaClient {
 
         let body = json!({
             "prompt": formatted_prompt,
-            "stream": true, // Enable Streaming
+            "stream": true,
             "n_predict": 1024,
             "temperature": 0.1,
-            "cache_prompt": true, // Explicitly enable prompt caching
             "stop": ["<|im_end|>"]
         });
 
@@ -213,7 +212,7 @@ impl LlamaClient {
                             while let Some(item) = stream.next().await {
                                 match item {
                                     Ok(chunk) => {
-                                        let chunk_len = chunk.len();
+                                        let _chunk_len = chunk.len();
                                         // println!("[LlamaClient] Received chunk of size: {}", chunk_len);
 
                                         let chunk_str = String::from_utf8_lossy(&chunk);
@@ -459,7 +458,6 @@ impl LlmProvider for LlamaClient {
         let body = json!({
             "prompt": formatted_prompt,
             "n_predict": 1024,
-            "probability": 0.0, // optional
             "temperature": 0.1,
             "stop": ["<|im_end|>"]
         });
@@ -654,6 +652,70 @@ impl LlmProvider for LlamaClient {
                         "LLM Request failed: {}",
                         e
                     )));
+                }
+            }
+        }
+    }
+}
+
+impl LlamaClient {
+    /// 发送一个预热请求，触发模型加载
+    pub async fn warmup(&self) -> Result<(), PageIndexError> {
+        let _guard = self.gate.lock_low().await;
+        println!("[LlamaClient] Sending warmup request...");
+
+        // Empty prompt or very short prompt
+        let body = json!({
+            "prompt": "<|im_start|>system\nWarmup.<|im_end|>\n",
+            "n_predict": 1,
+            "temperature": 0.0
+        });
+
+        let mut attempts = 0;
+        let max_attempts = 5; // Warmup doesn't need to try too hard if server is dead
+
+        loop {
+            let res = self
+                .client
+                .post(format!("{}/completion", self.base_url))
+                .json(&body)
+                .send()
+                .await;
+
+            match res {
+                Ok(response) => {
+                    if response.status().is_success() {
+                        println!("[LlamaClient] Warmup successful.");
+                        return Ok(());
+                    } else if response.status().as_u16() == 503 {
+                        attempts += 1;
+                        if attempts >= max_attempts {
+                            println!("[LlamaClient] Warmup failed: 503 Timeout.");
+                            return Err(PageIndexError::ParseError("Warmup 503".into()));
+                        }
+                        println!(
+                            "[LlamaClient] Warmup 503, retrying ({}/{})",
+                            attempts, max_attempts
+                        );
+                        sleep(Duration::from_secs(1)).await;
+                        continue;
+                    } else {
+                        println!("[LlamaClient] Warmup failed status: {}", response.status());
+                        return Err(PageIndexError::ParseError(format!(
+                            "Warmup Error: {}",
+                            response.status()
+                        )));
+                    }
+                }
+                Err(e) => {
+                    attempts += 1;
+                    if attempts >= max_attempts {
+                        println!("[LlamaClient] Warmup network error: {}", e);
+                        return Err(PageIndexError::ParseError(format!("Warmup Error: {}", e)));
+                    }
+                    println!("[LlamaClient] Warmup network error: {}, retrying...", e);
+                    sleep(Duration::from_secs(1)).await;
+                    continue;
                 }
             }
         }

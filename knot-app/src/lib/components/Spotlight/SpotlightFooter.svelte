@@ -16,6 +16,62 @@
         hasTopBorder = true,
         onNavigate = () => {},
     } = $props();
+
+    import { invoke } from "@tauri-apps/api/core";
+    import { listen } from "@tauri-apps/api/event";
+    import { onMount } from "svelte";
+
+    let modelStatus = $state("loading");
+    let indexedDocs = $state(0);
+
+    onMount(() => {
+        // Listen for model status updates
+        const unlistenModelStatus = listen("model-status", (event) => {
+            console.log("Model Status Event:", event.payload);
+            modelStatus = event.payload;
+        });
+
+        // Listen for indexing status and refresh doc count
+        const unlistenIndexingStatus = listen("indexing-status", (event) => {
+            console.log("Indexing Status Event:", event.payload);
+            if (event.payload === "ready") {
+                refreshDocCount();
+            }
+        });
+
+        // Get initial status
+        invoke("get_model_status")
+            .then((status) => {
+                console.log("Initial Model Status:", status);
+                modelStatus = status;
+            })
+            .catch((e) => {
+                console.error("Failed to get model status:", e);
+            });
+
+        const refreshDocCount = () => {
+            invoke("get_index_status")
+                .then((status) => {
+                    console.log("Index Status:", status);
+                    indexedDocs = status.file_count;
+                    // We can also track doc_count if needed for tooltips
+                })
+                .catch((e) => {
+                    console.error("Failed to get index status:", e);
+                });
+        };
+
+        refreshDocCount();
+
+        return () => {
+            unlistenModelStatus.then((unlisten) => unlisten());
+            unlistenIndexingStatus.then((unlisten) => unlisten());
+        };
+    });
+    const formatCount = (num) => {
+        if (num >= 10000) return (num / 1000).toFixed(1) + "k";
+        return num.toLocaleString();
+    };
 </script>
 
 <div
@@ -82,18 +138,16 @@
     <!-- Right Side: Context Aware Status -->
     <div class="flex items-center gap-4">
         {#if navigation.view === VIEW_SEARCH}
-            <div class="flex items-center gap-3 text-[var(--text-secondary)]">
+            <div
+                class="flex items-center gap-3 text-[var(--text-secondary)] opacity-60"
+            >
                 <div class="flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-[16px]"
+                    <span class="material-symbols-outlined text-[14px]"
                         >database</span
                     >
-                    <span>{docCount}</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-[16px]"
-                        >bolt</span
+                    <span class="text-[10px]"
+                        >{formatCount(indexedDocs)} Docs</span
                     >
-                    <span>{ragActive ? "RAG Active" : "RAG Inactive"}</span>
                 </div>
             </div>
         {:else if navigation.view === VIEW_DOC_PARSER}
@@ -112,17 +166,6 @@
 
         <!-- Common shortcuts -->
         <div class="flex items-center gap-3 opacity-60">
-            {#if navigation.view === VIEW_SEARCH}
-                <div class="flex items-center gap-1">
-                    <kbd
-                        class="px-1.5 py-0.5 rounded bg-[var(--bg-card)] border border-[var(--border-color)] font-mono text-[10px] text-[var(--text-secondary)]"
-                        >⏎</kbd
-                    >
-                    <span class="text-[10px] text-[var(--text-secondary)]"
-                        >Search</span
-                    >
-                </div>
-            {/if}
             <div class="flex items-center gap-1">
                 <kbd
                     class="px-1.5 py-0.5 rounded bg-[var(--bg-card)] border border-[var(--border-color)] font-mono text-[10px] text-[var(--text-secondary)]"
@@ -131,6 +174,33 @@
                 <span class="text-[10px] text-[var(--text-secondary)]"
                     >Close</span
                 >
+            </div>
+
+            <!-- Model Status -->
+            <div
+                class="flex items-center gap-1.5"
+                title={modelStatus === "loading"
+                    ? "Model Loading..."
+                    : "Model Ready"}
+            >
+                {#if modelStatus === "loading"}
+                    <!-- Loading Spinner -->
+                    <span
+                        class="material-symbols-outlined text-[14px] animate-spin text-[var(--text-secondary)]"
+                        >sync</span
+                    >
+                {:else if modelStatus === "ready"}
+                    <!-- Green Check -->
+                    <span
+                        class="material-symbols-outlined text-[14px] text-green-500"
+                        >check_circle</span
+                    >
+                {:else if modelStatus === "error"}
+                    <span
+                        class="material-symbols-outlined text-[14px] text-red-500"
+                        >error</span
+                    >
+                {/if}
             </div>
         </div>
     </div>
