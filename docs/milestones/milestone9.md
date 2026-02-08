@@ -67,40 +67,87 @@ knot-cli ──────▶ knot-core
 | 任务                    | 复杂度 | 说明                                                    |
 | :---------------------- | :----- | :------------------------------------------------------ |
 | 集成真实 Embedding 模型 | 中     | CLI 需加载 ONNX 模型 (BGE-small-zh)，替换 MockEmbedding |
-| 模型路径配置            | 低     | 添加 `--models-dir` 参数，指定模型文件位置              |
+| 默认模型路径约定        | 低     | 默认使用 `~/.knot/models/bge-small-zh-v1.5.onnx`        |
 | 修复 Query 向量维度     | 低     | 当前硬编码 384 维，需与实际模型维度 (512) 匹配          |
+| 添加 `status` 命令      | 低     | 显示：模型是否可用、已索引文件数量                      |
 
 ### P1: LLM 支持 (完整 RAG)
 
 | 任务              | 复杂度 | 说明                                                  |
 | :---------------- | :----- | :---------------------------------------------------- |
 | 集成 LlamaSidecar | 中     | 添加 `ask` 命令，启动 llama-server 并调用 LlamaClient |
-| LLM 模型路径配置  | 低     | 添加 `--llm-model` 参数                               |
+| 默认 LLM 模型约定 | 低     | 默认使用 `~/.knot/models/qwen3-1.5b-q4_0.gguf`        |
 | 流式输出支持      | 低     | 在终端显示打字机效果                                  |
 
 ### P2: 体验优化 (可选)
 
-| 任务             | 复杂度 | 说明                       |
-| :--------------- | :----- | :------------------------- |
-| 配置文件支持     | 低     | 支持 `~/.knot/config.toml` |
-| 进度条显示       | 低     | 索引过程显示进度           |
-| 交互式 REPL 模式 | 中     | 启动后持续等待查询输入     |
+| 任务             | 复杂度 | 说明                                    |
+| :--------------- | :----- | :-------------------------------------- |
+| 配置文件支持     | 低     | 支持 `~/.knot/config.toml` 覆盖默认路径 |
+| 进度条显示       | 低     | 索引过程显示进度                        |
+| 交互式 REPL 模式 | 中     | 启动后持续等待查询输入                  |
+
+## 默认路径约定
+
+所有数据默认存储在 `~/.knot/` 下，无需用户指定：
+
+```
+~/.knot/
+├── models/
+│   ├── bge-small-zh-v1.5.onnx          # Embedding 模型 (默认)
+│   ├── bge-small-zh-v1.5-tokenizer.json
+│   └── qwen3-1.5b-q4_0.gguf            # LLM 模型 (默认)
+├── indexes/
+│   └── <hash>/                          # 按数据源路径 hash 分隔
+│       ├── knot_index.lance/
+│       └── tantivy/
+└── config.toml                          # 可选配置文件
+```
+
+**模型选择逻辑**：
+- CLI 默认使用固定的模型文件名（如 `bge-small-zh-v1.5.onnx`）
+- 如需切换模型，可通过 `--embedding-model` 或配置文件指定
 
 ## 建议实施顺序
 
-1. **Phase 1**: 集成 Embedding 模型 → 让 `index` 和 `query` 能产生有意义的结果
-2. **Phase 2**: 添加 `ask` 命令 → 完整 RAG 闭环
-3. **Phase 3**: 配置文件 + 体验优化
+1. **Phase 1**: 集成 Embedding 模型 + `status` 命令 → 让用户知道系统状态
+2. **Phase 2**: 让 `index` 和 `query` 能产生有意义的结果
+3. **Phase 3**: 添加 `ask` 命令 → 完整 RAG 闭环
+4. **Phase 4**: 配置文件 + 体验优化
 
 ## 预期命令示例
 
 ```bash
-# 索引
-knot-cli index -i ~/Documents/notes --models-dir ~/.knot/models
+# 查看状态 (模型是否就绪、索引文件数)
+knot-cli status
 
-# 查询 (纯检索)
-knot-cli query -t "如何使用 Rust 的生命周期？" --data-dir ~/.knot
+# 索引 (默认使用 ~/.knot/models 下的模型)
+knot-cli index -i ~/Documents/notes
+
+# 查询 (纯检索，默认使用 ~/.knot 下的索引)
+knot-cli query -t "如何使用 Rust 的生命周期？"
 
 # RAG 问答 (需要 LLM)
-knot-cli ask -q "总结一下 Rust 的所有权规则" --llm-model ~/.knot/models/qwen3-1.5b-q4.gguf
+knot-cli ask -q "总结一下 Rust 的所有权规则"
+
+# 高级：指定自定义模型
+knot-cli index -i ~/Documents/notes --embedding-model ~/.knot/models/custom.onnx
+```
+
+## `status` 命令输出示例
+
+```
+Knot CLI Status
+===============
+
+Models:
+  ✓ Embedding: ~/.knot/models/bge-small-zh-v1.5.onnx (512 dim)
+  ✓ LLM:       ~/.knot/models/qwen3-1.5b-q4_0.gguf (1.5B params)
+
+Index:
+  Files:     1,234
+  Chunks:    8,901
+  Last Sync: 2026-02-08 13:40:00
+
+Data Directory: ~/.knot
 ```
