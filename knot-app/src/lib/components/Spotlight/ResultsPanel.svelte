@@ -9,6 +9,8 @@
         visible = false,
         results = [],
         insightState = {},
+        isSearching = false,
+        searchDuration = 0,
         highlightedCardId = null,
         onHighlightCard = () => {},
         onUnhighlightCard = () => {},
@@ -24,6 +26,8 @@
         <EvidencePanel
             {results}
             {matchText}
+            {isSearching}
+            {searchDuration}
             onHighlight={onHighlightCard}
             onUnhighlight={onUnhighlightCard}
         />

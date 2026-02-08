@@ -22,6 +22,7 @@ pub struct KnotStore {
     conn: Connection,
     table_name: String,
     tantivy_path: PathBuf,
+    tantivy_index: Index, // Cached Index to avoid repeated initialization
 }
 
 impl KnotStore {
@@ -42,19 +43,23 @@ impl KnotStore {
 
         let conn = connect(&path_str).execute().await?;
 
+        // Pre-initialize Tantivy Index (expensive, do once)
+        let tantivy_index = Self::create_tantivy_index(&tantivy_path)?;
+
         let store = Self {
             conn,
             table_name: "vectors".to_string(),
             tantivy_path,
+            tantivy_index,
         };
-
-        // Ensure Schema exists
-        store.ensure_tantivy_index()?;
 
         Ok(store)
     }
 
-    fn ensure_tantivy_index(&self) -> Result<Index> {
+    /// Create and configure Tantivy Index (called once during initialization)
+    fn create_tantivy_index(tantivy_path: &PathBuf) -> Result<Index> {
+        use tantivy::directory::MmapDirectory;
+
         let mut schema_builder = t_schema::Schema::builder();
 
         // 1. Text Options
@@ -65,33 +70,24 @@ impl KnotStore {
                 .set_index_option(IndexRecordOption::WithFreqsAndPositions),
         ); // Not Stored
 
-        // Standard: General Multilingual (Simple) - reused for path_tags but maybe better to use default?
-        // Let's use simple whitespace tokenizer for path_tags to separate folder names?
-        // Or "default" which splits on punctuation. Paths have / which is punctuation.
-        // Let's use "default" for path_tags for now.
-
-        // Define Fields
         // Standard: General Multilingual (Simple)
         let text_std_options = TextOptions::default().set_indexing_options(
             TextFieldIndexing::default()
-                .set_tokenizer("default") // Uses standard tokenizer
+                .set_tokenizer("default")
                 .set_index_option(IndexRecordOption::WithFreqsAndPositions),
         );
 
         // Define Fields
-        // text_zh: Jieba Tokenized
         let _text_zh = schema_builder.add_text_field("text_zh", text_zh_options);
-        // text_std: Default Tokenized
         let _text_std = schema_builder.add_text_field("text_std", text_std_options.clone());
 
         let file_name_options = TextOptions::default().set_indexing_options(
             TextFieldIndexing::default()
-                .set_tokenizer("jieba") // Use Jieba for filenames to handle Chinese filenames
+                .set_tokenizer("jieba")
                 .set_index_option(IndexRecordOption::WithFreqsAndPositions),
         ) | t_schema::STORED;
         let _file_name = schema_builder.add_text_field("file_name", file_name_options);
 
-        // path_tags: store parent directories as searchable tags
         let path_tags_options = TextOptions::default().set_indexing_options(
             TextFieldIndexing::default()
                 .set_tokenizer("default")
@@ -102,20 +98,15 @@ impl KnotStore {
         // 2. Schema Definition
         schema_builder.add_text_field("id", t_schema::STRING | t_schema::STORED);
         schema_builder.add_text_field("file_path", t_schema::STRING | t_schema::STORED);
-
-        // Content: Stored only (for Snippet display)
         schema_builder.add_text_field("content", t_schema::STORED);
-
         schema_builder.add_text_field("parent_id", t_schema::STRING | t_schema::STORED);
         schema_builder.add_text_field("breadcrumbs", t_schema::STRING | t_schema::STORED);
 
         let schema = schema_builder.build();
 
         // Auto-Migration: Check if schema matches
-        // If "text_zh" field is missing in existing index, we must reset.
-        let reset_needed = if self.tantivy_path.exists() {
-            use tantivy::directory::MmapDirectory;
-            if let Ok(dir) = MmapDirectory::open(&self.tantivy_path) {
+        let reset_needed = if tantivy_path.exists() {
+            if let Ok(dir) = MmapDirectory::open(tantivy_path) {
                 if let Ok(idx) = Index::open(dir) {
                     idx.schema().get_field("text_zh").is_err()
                 } else {
@@ -129,22 +120,20 @@ impl KnotStore {
         };
 
         if reset_needed {
-            let _ = std::fs::remove_dir_all(&self.tantivy_path);
-            let _ = std::fs::create_dir_all(&self.tantivy_path);
+            let _ = std::fs::remove_dir_all(tantivy_path);
+            let _ = std::fs::create_dir_all(tantivy_path);
         }
 
         // Open or Create
-        use tantivy::directory::MmapDirectory;
-        let dir = MmapDirectory::open(&self.tantivy_path)?;
+        let dir = MmapDirectory::open(tantivy_path)?;
         let index = Index::open_or_create(dir, schema)?;
 
-        // Register Jieba Tokenizer
+        // Register Jieba Tokenizer (expensive operation, done once)
         let stop_words = include_str!("../../knot-app/stopwords.txt")
             .split_whitespace()
             .map(|s| s.to_string())
             .collect::<Vec<_>>();
 
-        // For Tantivy 0.22, use TextAnalyzer::builder(tokenizer)
         let jieba_tokenizer = tantivy::tokenizer::TextAnalyzer::builder(JiebaTokenizer::new())
             .filter(tantivy::tokenizer::LowerCaser)
             .filter(tantivy::tokenizer::RemoveLongFilter::limit(40))
@@ -154,6 +143,11 @@ impl KnotStore {
         index.tokenizers().register("jieba", jieba_tokenizer);
 
         Ok(index)
+    }
+
+    /// Get cached Tantivy Index for search operations
+    fn get_tantivy_index(&self) -> &Index {
+        &self.tantivy_index
     }
 
     pub async fn create_fts_index(&self) -> Result<()> {
@@ -184,7 +178,7 @@ impl KnotStore {
         }
 
         // 2. Write to Tantivy
-        let index = self.ensure_tantivy_index()?;
+        let index = self.get_tantivy_index();
         let mut index_writer = index.writer::<TantivyDocument>(50_000_000)?; // 50MB buffer
 
         let schema = index.schema();
@@ -239,7 +233,7 @@ impl KnotStore {
         }
 
         // Tantivy Delete
-        let index = self.ensure_tantivy_index()?;
+        let index = self.get_tantivy_index();
         let mut writer = index.writer::<TantivyDocument>(50_000_000)?;
         let f_path = index.schema().get_field("file_path").unwrap();
         // Term-based delete requires Exact Match. STRING field is exact match.
@@ -293,6 +287,9 @@ impl KnotStore {
         query_text: &str,
     ) -> Result<Vec<SearchResult>> {
         use std::collections::HashMap;
+        use std::time::Instant;
+
+        let total_start = Instant::now();
 
         // Map ID -> SearchResult
         let mut results_map: HashMap<String, SearchResult> = HashMap::new();
@@ -300,6 +297,7 @@ impl KnotStore {
         let table_names = self.conn.table_names().execute().await?;
 
         // 1. LanceDB Vector Search
+        let vec_start = Instant::now();
         if table_names.contains(&self.table_name) {
             let table = self.conn.open_table(&self.table_name).execute().await?;
             // Fetch slightly more to allow good fusion
@@ -309,20 +307,11 @@ impl KnotStore {
             let candidates = self.batches_to_results(vec_results_batches);
 
             for mut c in candidates {
-                // Vector score normalization might be needed?
-                // LanceDB returns distance? Or similarity?
-                // Usually L2 distance. Smaller is better.
-                // We need to invert it or check metric.
-                // Assuming lower is better, we might need to strictly control score format.
-                // For now, let's assume it's roughly comparable or just use it as base.
-                // Actually, if it's distance, we should transform it.
-                // But let's keep it simple for Iteration 1.
-                c.score = 50.0; // Base score for vector match presence?
-                                // Or keep original score if meaningful.
-                                // Let's just assign a base "Importance" score.
+                c.score = 50.0;
                 results_map.insert(c.id.clone(), c);
             }
         }
+        println!("[Search] Vector search: {:?}", vec_start.elapsed());
 
         if query_text.is_empty() {
             let final_results: Vec<SearchResult> = results_map.into_values().collect();
@@ -330,7 +319,8 @@ impl KnotStore {
         }
 
         // 2. Tantivy Search (Keyword)
-        let index = self.ensure_tantivy_index()?;
+        let kw_start = Instant::now();
+        let index = self.get_tantivy_index();
         let reader = index.reader()?;
         let searcher = reader.searcher();
 
@@ -420,6 +410,7 @@ impl KnotStore {
             }
             Err(e) => eprintln!("[Tantivy] Query Error: {}", e),
         }
+        println!("[Search] Keyword search: {:?}", kw_start.elapsed());
 
         // 3. Final Sort
         let mut final_results: Vec<SearchResult> = results_map.into_values().collect();
@@ -429,6 +420,7 @@ impl KnotStore {
                 .unwrap_or(std::cmp::Ordering::Equal)
         });
 
+        println!("[Search] Total search time: {:?}", total_start.elapsed());
         Ok(final_results.into_iter().take(10).collect())
     }
 

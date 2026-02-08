@@ -103,6 +103,9 @@
         // Startup check removed (handled by HomePage/Onboarding)
     });
 
+    let isSearching = $state(false); // 左侧骨架屏状态
+    let searchDuration = $state(0); // 搜索耗时
+
     async function handleSearch(query) {
         if (isStreaming) return;
         if (!query.trim()) return;
@@ -117,52 +120,88 @@
         // Switch to search view
         navigation.setActiveView(VIEW_SEARCH);
 
-        // 显示思考状态
+        // 阶段1：快速搜索
+        const searchStartTime = performance.now();
+        isSearching = true; // 开启左侧骨架屏
+        searchDuration = 0; // 重置耗时
+
         insightState = {
-            status: "Searching & Analyzing...",
+            status: "Searching...",
             statusType: "analyzing",
-            isThinking: true,
+            isThinking: true, // 开启右侧骨架屏
             content: "",
             showCursor: false,
         };
         searchResults = [];
 
-        try {
-            // Call Backend
-            console.log("[Spotlight] Invoking rag_query:", query);
-            const response = await invoke("rag_query", { query: query });
-            console.log("[Spotlight] Response:", response);
+        let searchContext = ""; // 保存上下文供 LLM 生成使用
 
-            // Map Sources
-            searchResults = response.sources.map((s, idx) => ({
+        try {
+            // 调用 rag_search（快速返回）
+            console.log("[Spotlight] Invoking rag_search:", query);
+            const searchResponse = await invoke("rag_search", { query: query });
+
+            // 记录搜索耗时
+            const durationSec = (performance.now() - searchStartTime) / 1000;
+            searchDuration = Number(durationSec.toFixed(1)); // 保留一位小数
+            console.log(
+                `[Spotlight] rag_search Response (${searchDuration}s):`,
+                searchResponse,
+            );
+
+            // 立即显示搜索结果，关闭左侧骨架屏
+            searchResults = searchResponse.sources.map((s, idx) => ({
                 id: idx + 1,
-                title: s.file_path.split("/").pop() || s.file_path, // approximate title
+                title: s.file_path.split("/").pop() || s.file_path,
                 score: s.score,
                 snippet: s.text,
                 path: s.context || s.file_path,
                 source: s.source,
             }));
-
-            // 显示结果
+            searchContext = searchResponse.context;
+            isSearching = false; // 关闭左侧骨架屏
             isLoading = false;
 
+            // 阶段2：LLM 生成
+            const generateStartTime = performance.now();
             insightState = {
-                status: "Synthesizing Insight",
+                status: `Generating Insight...`,
                 statusType: "analyzing",
-                isThinking: false,
+                isThinking: true, // 右侧继续保持骨架屏
                 content: "",
+                showCursor: false,
+            };
+
+            console.log("[Spotlight] Invoking rag_generate...");
+            const answer = await invoke("rag_generate", {
+                query: query,
+                context: searchContext,
+            });
+            const generateDuration = (
+                (performance.now() - generateStartTime) /
+                1000
+            ).toFixed(1);
+            console.log(
+                `[Spotlight] rag_generate Response (${generateDuration}s):`,
+                answer,
+            );
+
+            // 开始显示回答，关闭右侧骨架屏
+            insightState = {
+                ...insightState,
+                isThinking: false,
                 showCursor: true,
             };
 
-            // 模拟流式输出 (Backend currently returns full string)
+            // 模拟流式输出
             isStreaming = true;
-            await streamResponse(response.answer); // Reuse existing simulation for UX
+            await streamResponse(answer);
             isStreaming = false;
 
-            // 完成状态
+            // 完成状态 - 显示生成耗时 (左侧已显示搜索耗时)
             insightState = {
                 ...insightState,
-                status: "Insight Complete",
+                status: `AI Insight (${generateDuration}s)`,
                 statusType: "complete",
                 showCursor: false,
             };
@@ -412,6 +451,8 @@
                         visible={showResults}
                         results={searchResults}
                         {insightState}
+                        {isSearching}
+                        {searchDuration}
                         {highlightedCardId}
                         onHighlightCard={handleHighlightCard}
                         onUnhighlightCard={handleUnhighlightCard}

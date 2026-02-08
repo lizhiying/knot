@@ -8,6 +8,7 @@ use std::sync::Arc;
 use tauri::{Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder};
 use tokio::sync::RwLock;
 
+mod eval_api;
 mod models;
 use models::config::{ModelSourceConfig, Region};
 use models::downloader::Downloader;
@@ -282,6 +283,7 @@ pub struct AppState {
     pub chat_llm: Arc<RwLock<Option<LlamaSidecar>>>,
     pub chat_client: Arc<RwLock<Option<Arc<LlamaClient>>>>,
     pub queue_manager: Arc<QueueManager>,
+    pub knot_store: Arc<RwLock<Option<Arc<knot_core::store::KnotStore>>>>,
 }
 
 fn main() {
@@ -335,6 +337,8 @@ fn main() {
             }
 
             let queue_manager = Arc::new(QueueManager::new());
+            let knot_store: Arc<RwLock<Option<Arc<knot_core::store::KnotStore>>>> =
+                Arc::new(RwLock::new(None));
 
             app.manage(AppState {
                 embedding: embedding.clone(),
@@ -344,6 +348,7 @@ fn main() {
                 chat_llm: chat_llm.clone(),
                 chat_client: chat_client.clone(),
                 queue_manager: queue_manager.clone(),
+                knot_store: knot_store.clone(),
             });
 
             // 保留旧的 EngineManager
@@ -510,6 +515,7 @@ fn main() {
             let app_handle_for_index = app.handle().clone();
             let state_for_index = app.state::<AppState>();
             let thread_safe_embedding_for_index = state_for_index.thread_safe_embedding.clone();
+            let knot_store_for_prewarm = state_for_index.knot_store.clone();
 
             // Spawn a task to check config and start indexing
             tauri::async_runtime::spawn(async move {
@@ -527,6 +533,20 @@ fn main() {
                         let index_path = base_dir.join("knot_index.lance");
                         let db_path = base_dir.join("knot.db");
 
+                        // Pre-warm KnotStore
+                        let index_path_str = index_path.to_string_lossy().to_string();
+                        println!("[Store] Pre-warming KnotStore at startup...");
+                        match knot_core::store::KnotStore::new(&index_path_str).await {
+                            Ok(store) => {
+                                let mut guard = knot_store_for_prewarm.write().await;
+                                *guard = Some(Arc::new(store));
+                                println!("[Store] KnotStore pre-warmed at startup");
+                            }
+                            Err(e) => {
+                                eprintln!("[Store] Failed to pre-warm KnotStore: {}", e);
+                            }
+                        }
+
                         start_background_indexing(
                             app_handle_for_index,
                             thread_safe_embedding_for_index,
@@ -539,6 +559,70 @@ fn main() {
                 }
             });
 
+            // 12. Start Eval HTTP API Server (for Python evaluation scripts)
+            let eval_thread_safe_embedding = thread_safe_embedding.clone();
+            let eval_chat_client = chat_client.clone();
+            let eval_app_handle = app.handle().clone();
+
+            tauri::async_runtime::spawn(async move {
+                // Wait for engines to possibly load
+                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+
+                // Get index path from config
+                let config = load_config(&eval_app_handle);
+                let index_path = if let Some(dir) = config.data_dir {
+                    let base_dir = get_index_base_dir(&eval_app_handle, &dir);
+                    Some(
+                        base_dir
+                            .join("knot_index.lance")
+                            .to_string_lossy()
+                            .to_string(),
+                    )
+                } else {
+                    None
+                };
+
+                // Cast ThreadSafeEmbeddingEngine to dyn EmbeddingProvider
+                let embedding_for_api: std::sync::Arc<
+                    tokio::sync::RwLock<
+                        Option<std::sync::Arc<dyn pageindex_rs::EmbeddingProvider + Send + Sync>>,
+                    >,
+                > = std::sync::Arc::new(tokio::sync::RwLock::new(None));
+
+                // Clone to update
+                let embedding_for_api_clone = embedding_for_api.clone();
+                let eval_thread_safe_embedding_clone = eval_thread_safe_embedding.clone();
+
+                // Spawn a task to sync embedding provider
+                tokio::spawn(async move {
+                    loop {
+                        let provider_opt = {
+                            let guard = eval_thread_safe_embedding_clone.read().await;
+                            guard.clone()
+                        };
+                        if let Some(provider) = provider_opt {
+                            let mut guard = embedding_for_api_clone.write().await;
+                            *guard = Some(
+                                provider
+                                    as std::sync::Arc<
+                                        dyn pageindex_rs::EmbeddingProvider + Send + Sync,
+                                    >,
+                            );
+                            break;
+                        }
+                        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                    }
+                });
+
+                let eval_state = eval_api::EvalApiState {
+                    thread_safe_embedding: embedding_for_api,
+                    chat_client: eval_chat_client,
+                    index_path: std::sync::Arc::new(tokio::sync::RwLock::new(index_path)),
+                };
+
+                eval_api::start_eval_server(eval_state, 18765).await;
+            });
+
             println!("[App] Application started, engines loading in background...");
             Ok(())
         })
@@ -548,6 +632,8 @@ fn main() {
             get_app_config,
             set_data_dir,
             rag_query,
+            rag_search,
+            rag_generate,
             check_model_status,
             download_model,
             get_detected_region,
@@ -669,6 +755,28 @@ async fn set_data_dir(
     let mut config = load_config(&app);
     config.data_dir = Some(path.clone());
     save_config(&app, &config)?;
+
+    // Pre-warm KnotStore in background
+    let knot_store_clone = state.knot_store.clone();
+    let app_clone_for_store = app.clone();
+    let path_for_store = path.clone();
+    tauri::async_runtime::spawn(async move {
+        println!("[Store] Pre-warming KnotStore...");
+        let base_dir = get_index_base_dir(&app_clone_for_store, &path_for_store);
+        let index_path = base_dir.join("knot_index.lance");
+        let index_path_str = index_path.to_string_lossy().to_string();
+
+        match knot_core::store::KnotStore::new(&index_path_str).await {
+            Ok(store) => {
+                let mut guard = knot_store_clone.write().await;
+                *guard = Some(Arc::new(store));
+                println!("[Store] KnotStore pre-warmed and cached");
+            }
+            Err(e) => {
+                eprintln!("[Store] Failed to pre-warm KnotStore: {}", e);
+            }
+        }
+    });
 
     // Trigger indexing in background
     let app_clone = app.clone();
@@ -928,13 +1036,176 @@ struct RagResponse {
     sources: Vec<HybridSearchResultDisplay>,
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, Clone)]
 struct HybridSearchResultDisplay {
     file_path: String,
     score: f32,
     context: Option<String>,
     text: String,
     source: String,
+}
+
+/// 搜索响应（不含 LLM 回答）
+#[derive(serde::Serialize)]
+struct RagSearchResponse {
+    sources: Vec<HybridSearchResultDisplay>,
+    context: String, // 预构建的上下文，供 rag_generate 使用
+}
+
+/// 仅执行搜索，快速返回结果
+#[tauri::command]
+async fn rag_search(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    query: String,
+) -> Result<RagSearchResponse, String> {
+    use std::time::Instant;
+
+    let total_start = Instant::now();
+    println!("[rag_search] Starting query: {}", query);
+
+    // 1. Get or initialize cached store
+    let store_start = Instant::now();
+    let store = {
+        // Try to get cached store
+        let guard = state.knot_store.read().await;
+        if let Some(s) = guard.as_ref() {
+            println!("[rag_search] Using cached store");
+            s.clone()
+        } else {
+            drop(guard); // Release read lock
+
+            // Initialize store
+            let config = load_config(&app);
+            let data_dir = config.data_dir.ok_or("Data directory not set")?;
+            let base_dir = get_index_base_dir(&app, &data_dir);
+            let index_path = base_dir.join("knot_index.lance");
+            let index_path_str = index_path.to_string_lossy().to_string();
+
+            let new_store = Arc::new(
+                knot_core::store::KnotStore::new(&index_path_str)
+                    .await
+                    .map_err(|e| format!("Store error: {}", e))?,
+            );
+
+            // Cache the store
+            let mut write_guard = state.knot_store.write().await;
+            *write_guard = Some(new_store.clone());
+            println!("[rag_search] Store initialized and cached");
+            new_store
+        }
+    };
+    println!("[rag_search] Store ready: {:?}", store_start.elapsed());
+
+    // 2. Generate Query Embedding
+    use pageindex_rs::EmbeddingProvider;
+    let embedding_provider = {
+        let guard = state.thread_safe_embedding.read().await;
+        guard.clone()
+    }
+    .ok_or("Embedding Engine not ready")?;
+
+    let embed_start = Instant::now();
+    let query_vec = embedding_provider
+        .generate_embedding(&query)
+        .await
+        .map_err(|e| e.to_string())?;
+    println!("[rag_search] Embedding: {:?}", embed_start.elapsed());
+
+    // 3. Execute Search
+    let search_start = Instant::now();
+    let search_results = store
+        .search(query_vec, &query)
+        .await
+        .map_err(|e| e.to_string())?;
+    println!(
+        "[rag_search] Search: {:?}, found {} results",
+        search_start.elapsed(),
+        search_results.len()
+    );
+
+    // 4. Format Context and Display Sources
+    let mut context_str = String::new();
+    let mut display_sources = Vec::new();
+
+    for (i, res) in search_results.iter().take(5).enumerate() {
+        let context_line = res.breadcrumbs.clone().unwrap_or_default();
+        context_str.push_str(&format!(
+            "[{}] (匹配度: {:.0}%) 文件: {} - 章节: {}\n内容: {}\n\n",
+            i + 1,
+            res.score,
+            res.file_path,
+            context_line,
+            res.text
+        ));
+
+        display_sources.push(HybridSearchResultDisplay {
+            file_path: res.file_path.clone(),
+            score: res.score,
+            context: res.breadcrumbs.clone(),
+            text: res.text.clone(),
+            source: res.source.to_string(),
+        });
+    }
+
+    println!("[rag_search] Total: {:?}", total_start.elapsed());
+
+    Ok(RagSearchResponse {
+        sources: display_sources,
+        context: context_str,
+    })
+}
+
+/// 根据搜索上下文生成 LLM 回答
+#[tauri::command]
+async fn rag_generate(
+    state: State<'_, AppState>,
+    query: String,
+    context: String,
+) -> Result<String, String> {
+    use pageindex_rs::LlmProvider;
+
+    println!("[rag_generate] Starting generation for query: {}", query);
+
+    let llm_client = {
+        let guard = state.chat_client.read().await;
+        guard.clone()
+    }
+    .ok_or("Chat LLM (Qwen3) not ready")?;
+
+    let prompt = format!(
+        r#"<|im_start|>system
+你是一个智能助手。请根据参考文档回答用户问题。
+
+**回答原则**：
+1. **开门见山**：直接把文档中找到的关键信息（如日期、地点、结论）放在第一句。
+2. **去除客套**：不要使用"根据参考文档..."、"综上所述..."等前缀。
+3. **详细展开**：在核心答案之后，引用文档细节进行说明。
+4. 只有当文档完全不包含相关信息时，才说"无法找到答案"。
+<|im_end|>
+<|im_start|>user
+参考文档：
+{}
+
+用户问题: {}<|im_end|>
+<|im_start|>assistant
+"#,
+        context, query
+    );
+
+    println!(
+        "[rag_generate] Prompt Preview (first 500 chars):\n{:.500}...",
+        prompt
+    );
+
+    let answer = llm_client
+        .generate_content(&prompt)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    println!("[rag_generate] LLM Answer generated");
+
+    Ok(answer)
 }
 
 #[tauri::command]
@@ -1029,7 +1300,7 @@ async fn rag_query(
     .ok_or("Chat LLM (Qwen3) not ready")?;
 
     let prompt = format!(
-        "<|im_start|>system\n你是一个智能助手。请根据参考文档回答用户问题。\n\n**回答原则**：\n1. **开门见山**：直接把文档中找到的关键信息（如日期、地点、结论）放在第一句。例如直接说：“行程安排在 2.17 (周二)。”\n2. **去除客套**：不要使用“根据参考文档…”、“综上所述…”等前缀。\n3. **详细展开**：在核心答案之后，引用文档细节进行说明。\n4. 只有当文档完全不包含相关信息时，才说“无法找到答案”。\n<|im_end|>\n<|im_start|>user\n参考文档：\n{}\n\n用户问题: {}<|im_end|>\n<|im_start|>assistant\n",
+        "<|im_start|>system\n你是一个智能助手。请根据参考文档回答用户问题。\n\n**回答原则**：\n1. **开门见山**：直接把文档中找到的关键信息（如日期、地点、结论）放在第一句。\n2. **去除客套**：不要使用“根据参考文档…”、“综上所述…”等前缀。\n3. **详细展开**：在核心答案之后，引用文档细节进行说明。\n4. 只有当文档完全不包含相关信息时，才说“无法找到答案”。\n<|im_end|>\n<|im_start|>user\n参考文档：\n{}\n\n用户问题: {}<|im_end|>\n<|im_start|>assistant\n",
         context_str, query
     );
 
