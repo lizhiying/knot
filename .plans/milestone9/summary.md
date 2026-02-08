@@ -244,6 +244,138 @@ rm ~/.knot/config.toml
 
 ---
 
+## 第三方集成指南 (Rust + Tauri)
+
+如果你的 Rust + Tauri 应用想集成 Knot 的 RAG 能力，有以下三种方式：
+
+### 方式1: 作为 Library 依赖 (推荐)
+
+直接在 `Cargo.toml` 中引入 `knot-core` 作为依赖：
+
+```toml
+[dependencies]
+knot-core = { path = "../knot-workspaces/knot-core" }
+# 或发布到 crates.io 后:
+# knot-core = "0.1"
+```
+
+使用示例：
+
+```rust
+use knot_core::{KnotStore, KnotIndexer, ThreadSafeEmbeddingEngine};
+use knot_core::llm::{LlamaSidecar, LlamaClient};
+use std::sync::Arc;
+
+// 1. 初始化 Embedding 引擎
+let embedding_engine = ThreadSafeEmbeddingEngine::new(
+    "/path/to/model.onnx",
+    "/path/to/tokenizer.json",
+)?;
+
+// 2. 索引文档
+let indexer = KnotIndexer::new("/path/to/registry.db", Some(Arc::new(embedding_engine))).await;
+let (records, deleted) = indexer.index_directory("/path/to/docs").await?;
+
+let store = KnotStore::new("/path/to/index.lance").await?;
+store.add_records(records).await?;
+store.create_fts_index().await?;
+
+// 3. 搜索
+let query_vec = embedding_engine.generate_embedding("搜索关键词").await?;
+let results = store.search(query_vec, "搜索关键词").await?;
+
+// 4. LLM 生成 (可选)
+let sidecar = LlamaSidecar::spawn_quiet("/path/to/model.gguf", &bin_dir, None, 28081)?;
+let client = LlamaClient::new(28081);
+let mut rx = client.generate_content_stream(&prompt).await?;
+while let Some(token) = rx.recv().await {
+    print!("{}", token);
+}
+```
+
+### 方式2: 作为 CLI 子进程调用
+
+在 Tauri 中通过 `std::process::Command` 调用 CLI：
+
+```rust
+use std::process::Command;
+
+// 索引
+let output = Command::new("knot-cli")
+    .args(["index", "-i", "/path/to/docs"])
+    .output()?;
+
+// 搜索 (JSON 输出便于解析)
+let output = Command::new("knot-cli")
+    .args(["query", "-t", "搜索关键词", "--json"])
+    .output()?;
+let results: serde_json::Value = serde_json::from_slice(&output.stdout)?;
+
+// RAG 问答
+let output = Command::new("knot-cli")
+    .args(["ask", "-q", "你的问题", "--json"])
+    .output()?;
+let answer: serde_json::Value = serde_json::from_slice(&output.stdout)?;
+```
+
+### 方式3: 通过 LLM HTTP 服务
+
+先启动 LLM 服务，然后通过 HTTP 调用：
+
+```rust
+// 启动服务 (单独进程或后台线程)
+let _ = Command::new("knot-cli")
+    .args(["serve"])
+    .spawn()?;
+
+// 等待服务就绪
+tokio::time::sleep(Duration::from_secs(5)).await;
+
+// HTTP 调用
+let client = reqwest::Client::new();
+let resp = client.post("http://127.0.0.1:28081/completion")
+    .json(&serde_json::json!({
+        "prompt": "<|im_start|>user\n你好<|im_end|>\n<|im_start|>assistant\n",
+        "stream": true
+    }))
+    .send()
+    .await?;
+
+// 处理流式响应...
+```
+
+### 集成注意事项
+
+| 项目                    | 说明                                           |
+| :---------------------- | :--------------------------------------------- |
+| **模型文件**            | 需要将 embedding 和 LLM 模型打包或让用户下载   |
+| **llama-server 二进制** | 需要在 `bin` 目录下提供对应平台的 llama-server |
+| **数据目录**            | 默认 `~/.knot/`，可通过 `config.toml` 自定义   |
+| **端口**                | LLM 服务默认 28081，避免与其他服务冲突         |
+| **平台兼容**            | 支持 macOS (arm64/x64)、Linux、Windows         |
+
+### Tauri 特定配置
+
+如果使用 Tauri，需要在 `tauri.conf.json` 中添加权限：
+
+```json
+{
+  "tauri": {
+    "allowlist": {
+      "shell": {
+        "execute": true,
+        "sidecar": true
+      },
+      "fs": {
+        "all": true
+      }
+    }
+  }
+}
+```
+
+---
+
 ## 相关提交
 
 ```
