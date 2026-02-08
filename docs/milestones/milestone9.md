@@ -238,7 +238,82 @@ Rust 的所有权规则可以总结为以下三条核心规则：
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-References:
-  • ~/Projects/rust-book-cn/ch04-01-what-is-ownership.md
-  • ~/Documents/notes/rust-notes.md
+Referenced Chunks (8):
+
+[1] ~/Projects/rust-book-cn/ch04-01-what-is-ownership.md
+    Score: 0.9234 | Source: Hybrid
+    Context: 第四章 > 什么是所有权
+    "Rust 通过所有权系统管理内存，编译器在编译时会根据一系列的规则进行检查..."
+
+[2] ~/Documents/notes/rust-notes.md
+    Score: 0.8567 | Source: Vector
+    Context: Rust 学习笔记 > 所有权
+    "所有权规则：1. 每个值都有一个所有者 2. 同时只能有一个所有者 3. 所有者离开作用域值被丢弃..."
+
+[3] ~/Projects/rust-book-cn/ch04-02-references-and-borrowing.md
+    Score: 0.7891 | Source: Keyword
+    Context: 第四章 > 引用与借用
+    "引用允许你使用值但不获取其所有权..."
+
+...
+```
+
+## JSON 输出格式
+
+`query` 和 `ask` 命令支持 `--json` 参数，方便其他程序调用：
+
+```bash
+# query 输出 JSON
+knot-cli query -t "Rust 所有权" --json
+
+# ask 输出 JSON
+knot-cli ask -q "总结所有权规则" --json
+```
+
+### `query --json` 输出示例
+
+```json
+{
+  "query": "Rust 所有权",
+  "sources_searched": 2,
+  "results": [
+    {
+      "rank": 1,
+      "file_path": "~/Projects/rust-book-cn/ch04-01-what-is-ownership.md",
+      "score": 0.9234,
+      "source": "hybrid",
+      "context": "第四章 > 什么是所有权",
+      "content": "Rust 通过所有权系统管理内存，编译器在编译时会根据一系列的规则进行检查..."
+    },
+    {
+      "rank": 2,
+      "file_path": "~/Documents/notes/rust-notes.md",
+      "score": 0.8567,
+      "source": "vector",
+      "context": "Rust 学习笔记 > 所有权",
+      "content": "所有权规则：1. 每个值都有一个所有者..."
+    }
+  ]
+}
+```
+
+### `ask --json` 输出示例
+
+```json
+{
+  "query": "总结所有权规则",
+  "sources_searched": 2,
+  "chunks_found": 8,
+  "answer": "Rust 的所有权规则可以总结为以下三条核心规则：\n\n1. 每个值都有一个所有者...",
+  "references": [
+    {
+      "rank": 1,
+      "file_path": "~/Projects/rust-book-cn/ch04-01-what-is-ownership.md",
+      "score": 0.9234,
+      "source": "hybrid",
+      "context": "第四章 > 什么是所有权",
+      "content": "Rust 通过所有权系统管理内存..."
+    }
+  ]
+}
 ```
