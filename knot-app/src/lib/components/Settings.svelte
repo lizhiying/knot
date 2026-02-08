@@ -22,6 +22,7 @@
 
     // Config state
     let dataDir = $state("");
+    let isStreamingEnabled = $state(true);
     let indexingStatus = $state("ready");
     let isRecording = $state(false);
     let shortcutKey = $state("");
@@ -170,6 +171,23 @@
         }
     }
 
+    async function toggleStreaming() {
+        try {
+            const newState = !isStreamingEnabled;
+            // Optimistic update
+            isStreamingEnabled = newState;
+            await invoke("set_streaming_enabled", { enabled: newState });
+        } catch (err) {
+            console.error("Failed to toggle streaming:", err);
+            // Revert on failure
+            isStreamingEnabled = !isStreamingEnabled;
+            await message("Failed to update setting: " + err, {
+                title: "Error",
+                kind: "error",
+            });
+        }
+    }
+
     function handleKeyDown(e) {
         if (!isRecording) return;
         e.preventDefault();
@@ -199,6 +217,9 @@
             const config = await invoke("get_app_config");
             if (config.data_dir) {
                 dataDir = config.data_dir;
+            }
+            if (config.streaming_enabled !== undefined) {
+                isStreamingEnabled = config.streaming_enabled;
             }
         } catch (e) {
             console.error("Failed to load config:", e);
@@ -435,6 +456,40 @@
                                 >
                             </div>
                         {/if}
+                    </div>
+
+                    <!-- Streaming Preference -->
+                    <div
+                        class="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] p-6 mb-6"
+                    >
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3
+                                    class="font-medium text-sm text-[var(--text-primary)]"
+                                >
+                                    Response Streaming
+                                </h3>
+                                <p
+                                    class="text-[var(--text-secondary)] text-xs mt-1"
+                                >
+                                    Typewriter effect for AI responses. Disable
+                                    if you prefer seeing the full answer at
+                                    once.
+                                </p>
+                            </div>
+                            <button
+                                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {isStreamingEnabled
+                                    ? 'bg-[var(--accent-primary)]'
+                                    : 'bg-[var(--bg-card)] border border-[var(--border-color)]'}"
+                                onclick={toggleStreaming}
+                            >
+                                <span
+                                    class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {isStreamingEnabled
+                                        ? 'translate-x-6'
+                                        : 'translate-x-1'}"
+                                ></span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Index Management Section -->

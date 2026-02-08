@@ -31,17 +31,29 @@ impl LlamaSidecar {
 
         println!("[LLM] Starting server from {:?} on port {}", bin_path, port);
 
+        // Prompt Caching:
+        // We remove --no-warmup to ensure cache slots can be potentially reused or at least not aggressively cleared?
+        // Actually, standard llama-server caches by default if slots are available.
+        // We add --unlimited-parallel to allow dynamic slot allocation.
+        // Prompt Caching:
+        // We remove --no-warmup to ensure cache slots can be potentially reused or at least not aggressively cleared?
+        // Actually, standard llama-server caches by default if slots are available.
+        // We add --unlimited-parallel to allow dynamic slot allocation.
         let mut cmd = Command::new(&bin_path);
         cmd.arg("--model")
             .arg(model_path)
-            .arg("--mmap") // Critical for lazy loading
+            .arg("--mmap")
             .arg("--port")
             .arg(port.to_string())
             .arg("--n-gpu-layers")
-            .arg("99") // Try to offload all
-            .arg("-c") // Limit context to avoid OOM
+            .arg("99")
+            .arg("-c")
             .arg("4096")
-            .arg("--no-warmup");
+            .arg("--parallel")
+            .arg("2")
+            .arg("-fa")
+            .arg("on");
+        // .arg("--no-warmup"); // Removed to allow better caching behavior if relevant, usually implicit.
 
         if let Some(mmproj) = mmproj_path {
             cmd.arg("--mmproj").arg(mmproj);
@@ -146,6 +158,157 @@ impl LlamaClient {
             client: reqwest::Client::new(),
             gate: Arc::new(PriorityGate::new()),
         }
+    }
+
+    /// 流式生成内容
+    /// 返回一个 Receiver，接收生成的 token
+    pub async fn generate_content_stream(
+        &self,
+        prompt: &str,
+    ) -> Result<tokio::sync::mpsc::Receiver<String>, PageIndexError> {
+        let _guard = self.gate.lock_high().await;
+
+        let formatted_prompt = if prompt.contains("<|im_start|>") {
+            prompt.to_string()
+        } else {
+            format!(
+                "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n",
+                prompt
+            )
+        };
+
+        let body = json!({
+            "prompt": formatted_prompt,
+            "stream": true, // Enable Streaming
+            "n_predict": 1024,
+            "temperature": 0.1,
+            "cache_prompt": true, // Explicitly enable prompt caching
+            "stop": ["<|im_end|>"]
+        });
+
+        let client = self.client.clone();
+        let url = format!("{}/completion", self.base_url);
+        let (tx, rx) = tokio::sync::mpsc::channel(100);
+
+        tokio::spawn(async move {
+            println!("[LlamaClient] Stream task spawned. URL: {}", url);
+            let mut attempts = 0;
+            let max_attempts = 60; // Wait up to 60s for model load
+
+            loop {
+                println!(
+                    "[LlamaClient] Stream request attempt {}/{}",
+                    attempts + 1,
+                    max_attempts
+                );
+                let res = client.post(&url).json(&body).send().await;
+
+                match res {
+                    Ok(response) => {
+                        if response.status().is_success() {
+                            use futures_util::StreamExt;
+                            let mut stream = response.bytes_stream();
+                            println!("[LlamaClient] Response stream acquired. Starting to read chunks...");
+
+                            while let Some(item) = stream.next().await {
+                                match item {
+                                    Ok(chunk) => {
+                                        let chunk_len = chunk.len();
+                                        // println!("[LlamaClient] Received chunk of size: {}", chunk_len);
+
+                                        let chunk_str = String::from_utf8_lossy(&chunk);
+                                        // Server-Sent Events format: "data: {...}\n\n"
+                                        for line in chunk_str.lines() {
+                                            if line.starts_with("data: ") {
+                                                // println!("[LlamaClient] Parsing data line: {:.50}...", line);
+                                                let json_str = &line[6..];
+                                                if let Ok(json) =
+                                                    serde_json::from_str::<serde_json::Value>(
+                                                        json_str,
+                                                    )
+                                                {
+                                                    if let Some(content) = json["content"].as_str()
+                                                    {
+                                                        if !content.is_empty() {
+                                                            // println!("[LlamaClient] Sending content: {:?}", content);
+                                                            if tx
+                                                                .send(content.to_string())
+                                                                .await
+                                                                .is_err()
+                                                            {
+                                                                println!("[LlamaClient] Receiver dropped.");
+                                                                break; // Receiver dropped
+                                                            }
+                                                        }
+                                                    }
+                                                    // Check for stop
+                                                    if let Some(stop) = json["stop"].as_bool() {
+                                                        if stop {
+                                                            println!("[LlamaClient] Stop token received.");
+                                                            break;
+                                                        }
+                                                    }
+                                                } else {
+                                                    println!(
+                                                        "[LlamaClient] Failed to parse JSON: {}",
+                                                        json_str
+                                                    );
+                                                }
+                                            } else if !line.trim().is_empty() {
+                                                // println!("[LlamaClient] Ignored non-data line: {}", line);
+                                            }
+                                        }
+                                    }
+                                    Err(e) => {
+                                        println!("[LlamaClient] Stream Error: {}", e);
+                                        let _ = tx.send(format!("Stream Error: {}", e)).await;
+                                        break;
+                                    }
+                                }
+                            }
+                            println!("[LlamaClient] Stream ended successfully.");
+                            return; // Success, exit task
+                        } else if response.status().as_u16() == 503 {
+                            attempts += 1;
+                            if attempts >= max_attempts {
+                                println!("[LlamaClient] Error 503 Timeout.");
+                                let _ = tx
+                                    .send(format!("Error: {} (Timeout)", response.status()))
+                                    .await;
+                                return;
+                            }
+                            println!(
+                                "[LlamaClient] 503 Service Unavailable, retrying... ({}/{})",
+                                attempts, max_attempts
+                            );
+                            sleep(Duration::from_secs(1)).await;
+                            continue;
+                        } else {
+                            println!("[LlamaClient] Error status: {}", response.status());
+                            let _ = tx.send(format!("Error: {}", response.status())).await;
+                            return;
+                        }
+                    }
+                    Err(e) => {
+                        // Network error (e.g. Connection Refused), retry
+                        attempts += 1;
+                        if attempts >= max_attempts {
+                            println!("[LlamaClient] Max attempts reached. Network error: {}", e);
+                            let _ = tx.send(format!("Request Error: {}", e)).await;
+                            return;
+                        }
+                        println!(
+                            "[LlamaClient] Network error: {}. Retrying... ({}/{})",
+                            e, attempts, max_attempts
+                        );
+                        sleep(Duration::from_secs(1)).await;
+                        continue;
+                    }
+                }
+            }
+        });
+
+        Ok(rx)
     }
 }
 
@@ -271,6 +434,8 @@ impl LlmProvider for LlamaClient {
         }
     }
 
+    /// 核心接口：输入 Prompt，输出内容 (Synchronous wrapper, or keep independent)
+    /// High Priority
     async fn generate_content(&self, prompt: &str) -> Result<String, PageIndexError> {
         // High Priority
         let _guard = self.gate.lock_high().await;
@@ -293,7 +458,7 @@ impl LlmProvider for LlamaClient {
 
         let body = json!({
             "prompt": formatted_prompt,
-            "n_predict": 2048,
+            "n_predict": 1024,
             "probability": 0.0, // optional
             "temperature": 0.1,
             "stop": ["<|im_end|>"]

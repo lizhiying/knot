@@ -18,6 +18,7 @@
     import DocParser from "./../DocParser.svelte";
     import Settings from "./../Settings.svelte";
     import { invoke } from "@tauri-apps/api/core";
+    import { listen } from "@tauri-apps/api/event";
     import { onMount } from "svelte";
 
     const { getCurrentWebviewWindow } = window.__TAURI__.webviewWindow;
@@ -173,32 +174,45 @@
             };
 
             console.log("[Spotlight] Invoking rag_generate...");
-            const answer = await invoke("rag_generate", {
-                query: query,
-                context: searchContext,
+            
+            // 准备接收流式输出
+            insightState = {
+                ...insightState,
+                content: "", // Clear content
+                // Keep isThinking true until first token
+            };
+
+            let isFirstToken = true;
+            const unlisten = await listen("llm-token", (event) => {
+                if (isFirstToken) {
+                    // 收到第一个 token，关闭骨架屏，显示光标
+                    insightState = {
+                        ...insightState,
+                        isThinking: false,
+                        showCursor: true,
+                    };
+                    isFirstToken = false;
+                }
+                insightState.content += event.payload;
             });
+
+            isStreaming = true;
+            try {
+                await invoke("rag_generate", {
+                    query: query,
+                    context: searchContext,
+                });
+            } finally {
+                unlisten(); // 停止监听
+                isStreaming = false;
+            }
+
             const generateDuration = (
                 (performance.now() - generateStartTime) /
                 1000
             ).toFixed(1);
-            console.log(
-                `[Spotlight] rag_generate Response (${generateDuration}s):`,
-                answer,
-            );
 
-            // 开始显示回答，关闭右侧骨架屏
-            insightState = {
-                ...insightState,
-                isThinking: false,
-                showCursor: true,
-            };
-
-            // 模拟流式输出
-            isStreaming = true;
-            await streamResponse(answer);
-            isStreaming = false;
-
-            // 完成状态 - 显示生成耗时 (左侧已显示搜索耗时)
+            // 完成状态
             insightState = {
                 ...insightState,
                 status: `AI Insight (${generateDuration}s)`,
@@ -233,33 +247,7 @@
         }
     }
 
-    // 流式输出模拟
-    async function streamResponse(html) {
-        return new Promise((resolve) => {
-            let currentContent = "";
-            let index = 0;
-            const chars = html.split("");
 
-            const interval = setInterval(() => {
-                if (index < chars.length) {
-                    // 批量添加字符以加快速度
-                    const batchSize = 3;
-                    for (
-                        let i = 0;
-                        i < batchSize && index < chars.length;
-                        i++
-                    ) {
-                        currentContent += chars[index];
-                        index++;
-                    }
-                    insightState = { ...insightState, content: currentContent };
-                } else {
-                    clearInterval(interval);
-                    resolve();
-                }
-            }, 10);
-        });
-    }
 
     // 高亮卡片
     function handleHighlightCard(id) {

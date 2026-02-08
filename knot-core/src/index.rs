@@ -83,7 +83,7 @@ impl KnotIndexer {
                                         {
                                             if stored_hash == hash {
                                                 should_index = false;
-                                                println!("Skipping unchanged: {:?}", file_path);
+                                                // println!("Skipping unchanged: {:?}", file_path);
                                             } else {
                                                 println!("Start Indexing: {:?}", file_path);
                                             }

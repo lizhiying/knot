@@ -640,7 +640,9 @@ fn main() {
             start_download_queue,
             reload_models,
             stop_parsing_llm,
-            reset_index
+            stop_parsing_llm,
+            reset_index,
+            set_streaming_enabled
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -693,6 +695,12 @@ fn main() {
 #[derive(serde::Serialize, serde::Deserialize, Default, Clone, Debug)]
 struct AppConfig {
     data_dir: Option<String>,
+    #[serde(default = "default_streaming_enabled")]
+    streaming_enabled: bool,
+}
+
+fn default_streaming_enabled() -> bool {
+    true
 }
 
 fn get_config_path(app: &tauri::AppHandle) -> PathBuf {
@@ -1156,13 +1164,15 @@ async fn rag_search(
     })
 }
 
-/// 根据搜索上下文生成 LLM 回答
+/// 根据搜索上下文生成 LLM 回答 (Streaming Version)
 #[tauri::command]
 async fn rag_generate(
+    app: tauri::AppHandle,
     state: State<'_, AppState>,
     query: String,
     context: String,
-) -> Result<String, String> {
+) -> Result<(), String> {
+    // Note: generate_content_stream is an inherent method of LlamaClient, not part of LlmProvider trait currently.
     use pageindex_rs::LlmProvider;
 
     println!("[rag_generate] Starting generation for query: {}", query);
@@ -1198,14 +1208,48 @@ async fn rag_generate(
         prompt
     );
 
-    let answer = llm_client
-        .generate_content(&prompt)
-        .await
-        .map_err(|e| e.to_string())?;
+    // Check config for streaming preference
+    let config = load_config(&app);
+    if config.streaming_enabled {
+        // Use streaming
+        println!("[rag_generate] Streaming enabled. Starting stream...");
+        let mut rx = llm_client
+            .generate_content_stream(&prompt)
+            .await
+            .map_err(|e| e.to_string())?;
 
-    println!("[rag_generate] LLM Answer generated");
+        println!("[rag_generate] Stream started...");
 
-    Ok(answer)
+        while let Some(token) = rx.recv().await {
+            // Emit token event
+            if let Err(e) = app.emit("llm-token", token) {
+                println!("[rag_generate] Failed to emit token: {}", e);
+                break;
+            }
+        }
+        println!("[rag_generate] Stream finished.");
+    } else {
+        // Use synchronous generation
+        println!("[rag_generate] Streaming disabled. Using sync generation...");
+        // Add a small delay for UI to switch state if needed (optional)
+        // tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+
+        let content = llm_client
+            .generate_content(&prompt)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        // Emit the entire content as one token
+        if let Err(e) = app.emit("llm-token", content) {
+            println!("[rag_generate] Failed to emit content: {}", e);
+        }
+        println!("[rag_generate] Sync generation finished.");
+    }
+
+    // Emit done event
+    let _ = app.emit("llm-done", ());
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -1447,5 +1491,13 @@ async fn reload_models(app: tauri::AppHandle, state: State<'_, AppState>) -> Res
         println!("[Reload] Chat LLM already running.");
     }
 
+    Ok(())
+}
+
+#[tauri::command]
+async fn set_streaming_enabled(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
+    let mut config = load_config(&app);
+    config.streaming_enabled = enabled;
+    save_config(&app, &config)?;
     Ok(())
 }
