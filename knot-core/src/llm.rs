@@ -102,6 +102,16 @@ impl LlamaSidecar {
             quiet,
         })
     }
+
+    /// Convenience method: spawn with default settings (no mmproj, with output)
+    pub fn spawn(bin_dir: &Path, model_path: &str, port: u16) -> Result<Self> {
+        Self::spawn_with_mmap(model_path, bin_dir, None, port)
+    }
+
+    /// Get the PID of the running process
+    pub fn get_pid(&self) -> Option<u32> {
+        self.process.as_ref().map(|p| p.id())
+    }
 }
 
 impl Drop for LlamaSidecar {

@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 const EMBEDDING_DIM: usize = 512;
-const LLM_PORT: u16 = 8081;
+const LLM_PORT: u16 = 28081;
 
 /// Knot 配置文件结构
 #[derive(Debug, Deserialize, Default)]
@@ -230,6 +230,20 @@ enum Commands {
         /// Path to watch
         #[arg(short, long)]
         input: PathBuf,
+    },
+
+    /// Start LLM server daemon
+    Serve {
+        /// Stop the running server
+        #[arg(long)]
+        stop: bool,
+    },
+
+    /// Interactive chat mode (REPL)
+    Chat {
+        /// Limit search to a specific source directory
+        #[arg(long)]
+        source: Option<PathBuf>,
     },
 }
 
@@ -885,17 +899,35 @@ async fn main() -> Result<()> {
                 context, query
             );
 
-            // 3. Start LLM sidecar (quiet mode - no debug output)
-            let bin_dir = get_bin_dir();
-            let _sidecar = LlamaSidecar::spawn_quiet(
-                llm_model_path.to_str().unwrap(),
-                &bin_dir,
-                None,
-                LLM_PORT,
-            )?;
+            // 3. Check if LLM server is already running, otherwise start it
+            let server_reused = is_llm_server_running().await;
+            let _sidecar: Option<LlamaSidecar>;
 
-            // Wait a bit for sidecar to start
-            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+            if server_reused {
+                if !json {
+                    println!("Generating answer... (using existing server)\n");
+                }
+                _sidecar = None;
+            } else {
+                if !json {
+                    println!("Generating answer...\n");
+                }
+                let bin_dir = get_bin_dir();
+                _sidecar = Some(LlamaSidecar::spawn_quiet(
+                    llm_model_path.to_str().unwrap(),
+                    &bin_dir,
+                    None,
+                    LLM_PORT,
+                )?);
+
+                // Wait for sidecar to start
+                for _ in 0..30 {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+                    if is_llm_server_running().await {
+                        break;
+                    }
+                }
+            }
 
             // 4. Stream response
             let client = LlamaClient::new(LLM_PORT);
@@ -1014,6 +1046,257 @@ async fn main() -> Result<()> {
                 }
             }
         }
+
+        Commands::Serve { stop } => {
+            if stop {
+                // Stop the running server
+                if let Some(pid) = read_server_pid() {
+                    println!("Stopping LLM server (PID: {})...", pid);
+                    #[cfg(unix)]
+                    {
+                        use std::process::Command;
+                        let _ = Command::new("kill").arg(pid.to_string()).status();
+                    }
+                    remove_pid_file();
+                    println!("✓ Server stopped.");
+                } else {
+                    println!("No running server found.");
+                }
+                return Ok(());
+            }
+
+            // Check if server is already running
+            if is_llm_server_running().await {
+                println!("LLM server is already running on port {}.", LLM_PORT);
+                return Ok(());
+            }
+
+            // Check LLM model
+            let llm_model_path = get_llm_model_path();
+            if !llm_model_path.exists() {
+                eprintln!("❌ LLM model not found: {:?}", llm_model_path);
+                eprintln!("Run: cargo run -q -p knot-cli -- download --model llm");
+                std::process::exit(1);
+            }
+
+            println!("Starting LLM server on port {}...", LLM_PORT);
+            println!("Model: {:?}", llm_model_path);
+            println!();
+            println!("Press Ctrl+C to stop.");
+            println!();
+
+            // Start the server (foreground mode for now)
+            let bin_dir = get_bin_dir();
+            let sidecar =
+                LlamaSidecar::spawn(&bin_dir, llm_model_path.to_str().unwrap(), LLM_PORT)?;
+
+            // Save PID if we have one
+            if let Some(pid) = sidecar.get_pid() {
+                save_server_pid(pid);
+            }
+
+            // Wait for server to be ready
+            let mut ready = false;
+            for _ in 0..60 {
+                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                if is_llm_server_running().await {
+                    ready = true;
+                    break;
+                }
+            }
+
+            if ready {
+                println!("✓ LLM server is ready!");
+                println!("You can now use 'ask' command in another terminal.");
+
+                // Keep running until Ctrl+C
+                tokio::signal::ctrl_c().await?;
+                println!("\nShutting down...");
+            } else {
+                eprintln!("❌ Server failed to start within 60 seconds.");
+            }
+
+            remove_pid_file();
+        }
+
+        Commands::Chat { source } => {
+            use std::io::{self, BufRead, Write};
+
+            println!("Knot Interactive Chat");
+            println!("=====================\n");
+
+            // Check if server is already running
+            let server_already_running = is_llm_server_running().await;
+            let _sidecar: Option<LlamaSidecar>;
+
+            if server_already_running {
+                println!("✓ Connected to existing LLM server on port {}.", LLM_PORT);
+                _sidecar = None;
+            } else {
+                // Check and start LLM server
+                let llm_model_path = get_llm_model_path();
+                if !llm_model_path.exists() {
+                    eprintln!("❌ LLM model not found: {:?}", llm_model_path);
+                    eprintln!("Run: cargo run -q -p knot-cli -- download --model llm");
+                    std::process::exit(1);
+                }
+
+                println!("Loading LLM model (this may take a moment)...");
+                let bin_dir = get_bin_dir();
+                _sidecar = Some(LlamaSidecar::spawn_quiet(
+                    llm_model_path.to_str().unwrap(),
+                    &bin_dir,
+                    None,
+                    LLM_PORT,
+                )?);
+
+                // Wait for server to be ready
+                let spinner = indicatif::ProgressBar::new_spinner();
+                spinner.set_style(
+                    indicatif::ProgressStyle::default_spinner()
+                        .template("{spinner:.green} {msg}")
+                        .unwrap(),
+                );
+                spinner.set_message("Waiting for LLM server...");
+                spinner.enable_steady_tick(std::time::Duration::from_millis(100));
+
+                let mut ready = false;
+                for _ in 0..60 {
+                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                    if is_llm_server_running().await {
+                        ready = true;
+                        break;
+                    }
+                }
+                spinner.finish_and_clear();
+
+                if !ready {
+                    eprintln!("❌ LLM server failed to start.");
+                    std::process::exit(1);
+                }
+
+                println!("✓ LLM server ready!");
+            }
+
+            // Initialize embedding engine
+            let embedding_engine = init_embedding_engine(None)?;
+            let llm_client = Arc::new(LlamaClient::new(LLM_PORT));
+
+            // Determine which indexes to search
+            let indexes_to_search: Vec<PathBuf> = if let Some(source_dir) = source {
+                vec![get_index_path_for_source(&source_dir)]
+            } else {
+                let indexes_dir = get_indexes_dir();
+                if indexes_dir.exists() {
+                    std::fs::read_dir(&indexes_dir)?
+                        .flatten()
+                        .map(|e| e.path())
+                        .filter(|p| p.is_dir() && p.join("knot_index.lance").exists())
+                        .collect()
+                } else {
+                    vec![]
+                }
+            };
+
+            if indexes_to_search.is_empty() {
+                eprintln!("❌ No indexes found. Please run 'index' command first.");
+                std::process::exit(1);
+            }
+
+            println!(
+                "\nSearching across {} source(s). Type 'exit' or Ctrl+D to quit.\n",
+                indexes_to_search.len()
+            );
+
+            let stdin = io::stdin();
+            let mut stdout = io::stdout();
+
+            loop {
+                print!("You> ");
+                stdout.flush()?;
+
+                let mut input = String::new();
+                if stdin.lock().read_line(&mut input)? == 0 {
+                    println!("\nGoodbye!");
+                    break;
+                }
+
+                let query = input.trim();
+                if query.is_empty() {
+                    continue;
+                }
+                if query == "exit" || query == "quit" {
+                    println!("Goodbye!");
+                    break;
+                }
+
+                // Search for relevant chunks
+                use pageindex_rs::EmbeddingProvider;
+                let query_vec = match embedding_engine.generate_embedding(query).await {
+                    Ok(v) => v,
+                    Err(e) => {
+                        eprintln!("Embedding error: {}", e);
+                        continue;
+                    }
+                };
+
+                let mut all_results = Vec::new();
+                for idx_path in &indexes_to_search {
+                    let lance_path = idx_path.join("knot_index.lance");
+                    if let Ok(store) = KnotStore::new(lance_path.to_str().unwrap()).await {
+                        if let Ok(results) = store.search(query_vec.clone(), query).await {
+                            all_results.extend(results);
+                        }
+                    }
+                }
+
+                if all_results.is_empty() {
+                    println!("\n[No relevant documents found.]\n");
+                    continue;
+                }
+
+                // Build context
+                let context: String = all_results
+                    .iter()
+                    .enumerate()
+                    .map(|(i, r)| {
+                        let truncated: String = r.text.chars().take(500).collect();
+                        format!(
+                            "[{}] {}:\n{}\n",
+                            i + 1,
+                            r.breadcrumbs.as_deref().unwrap_or(&r.file_path),
+                            truncated
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                let prompt = format!(
+                    "<|im_start|>system\n你是一个知识助手。根据以下文档内容回答用户问题。如果无法从文档中找到答案，请说明。\n<|im_end|>\n<|im_start|>user\n文档内容:\n{}\n\n问题: {}\n<|im_end|>\n<|im_start|>assistant\n",
+                    context, query
+                );
+
+                // Stream the response
+                print!("\n");
+                let mut stream_rx = match llm_client.generate_content_stream(&prompt).await {
+                    Ok(rx) => rx,
+                    Err(e) => {
+                        eprintln!("LLM error: {}", e);
+                        continue;
+                    }
+                };
+
+                while let Some(chunk) = stream_rx.recv().await {
+                    let clean = filter_think_tags(&chunk);
+                    if !clean.is_empty() {
+                        print!("{}", clean);
+                        stdout.flush()?;
+                    }
+                }
+
+                println!("\n");
+            }
+        }
     }
 
     Ok(())
@@ -1057,4 +1340,45 @@ fn filter_think_tags(text: &str) -> String {
     }
 
     result.trim().to_string()
+}
+
+/// Get the PID file path for the LLM server
+fn get_pid_file_path() -> PathBuf {
+    get_knot_root().join("llm-server.pid")
+}
+
+/// Check if LLM server is already running on the port
+async fn is_llm_server_running() -> bool {
+    let url = format!("http://127.0.0.1:{}/health", LLM_PORT);
+    match reqwest::Client::new()
+        .get(&url)
+        .timeout(std::time::Duration::from_millis(500))
+        .send()
+        .await
+    {
+        Ok(resp) => resp.status().is_success(),
+        Err(_) => false,
+    }
+}
+
+/// Save the server PID to a file
+fn save_server_pid(pid: u32) {
+    let pid_file = get_pid_file_path();
+    let _ = std::fs::write(&pid_file, pid.to_string());
+}
+
+/// Read the server PID from file
+fn read_server_pid() -> Option<u32> {
+    let pid_file = get_pid_file_path();
+    if pid_file.exists() {
+        std::fs::read_to_string(&pid_file).ok()?.trim().parse().ok()
+    } else {
+        None
+    }
+}
+
+/// Remove the PID file
+fn remove_pid_file() {
+    let pid_file = get_pid_file_path();
+    let _ = std::fs::remove_file(pid_file);
 }
