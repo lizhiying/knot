@@ -22,7 +22,7 @@ Tasks:
 - [x] 修改 index 命令使用真实 Embedding (替换 MockEmbedding)
 - [x] 修复 query 命令向量维度 (384 → 512)
 - [x] 实现 status 命令 (显示模型状态、索引统计)
-- [ ] 端到端测试: index + query 返回有意义结果
+- [x] 端到端测试: index + query 返回有意义结果 ✅
 
 Exit criteria:
 - `knot-cli status` 正确显示模型和索引状态
