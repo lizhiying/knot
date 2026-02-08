@@ -346,7 +346,9 @@ impl KnotStore {
                 results_map.insert(c.id.clone(), c);
             }
         }
-        println!("[Search] Vector search: {:?}", vec_start.elapsed());
+        if std::env::var("KNOT_QUIET").is_err() {
+            println!("[Search] Vector search: {:?}", vec_start.elapsed());
+        }
 
         if query_text.is_empty() {
             let final_results: Vec<SearchResult> = results_map.into_values().collect();
@@ -445,7 +447,9 @@ impl KnotStore {
             }
             Err(e) => eprintln!("[Tantivy] Query Error: {}", e),
         }
-        println!("[Search] Keyword search: {:?}", kw_start.elapsed());
+        if std::env::var("KNOT_QUIET").is_err() {
+            println!("[Search] Keyword search: {:?}", kw_start.elapsed());
+        }
 
         // 3. Final Sort
         let mut final_results: Vec<SearchResult> = results_map.into_values().collect();
@@ -455,7 +459,9 @@ impl KnotStore {
                 .unwrap_or(std::cmp::Ordering::Equal)
         });
 
-        println!("[Search] Total search time: {:?}", total_start.elapsed());
+        if std::env::var("KNOT_QUIET").is_err() {
+            println!("[Search] Total search time: {:?}", total_start.elapsed());
+        }
         Ok(final_results.into_iter().take(10).collect())
     }
 

@@ -4,9 +4,24 @@ use std::process::{Child, Command, Stdio};
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 
+/// Helper function to check if we should print debug output
+fn is_quiet() -> bool {
+    std::env::var("KNOT_QUIET").is_ok()
+}
+
+/// Macro for debug prints that respect KNOT_QUIET environment variable
+macro_rules! debug_println {
+    ($($arg:tt)*) => {
+        if !is_quiet() {
+            println!($($arg)*);
+        }
+    };
+}
+
 pub struct LlamaSidecar {
     process: Option<Child>,
     _is_running: Arc<AtomicBool>,
+    quiet: bool,
 }
 
 impl LlamaSidecar {
@@ -15,6 +30,26 @@ impl LlamaSidecar {
         bin_dir: &Path,
         mmproj_path: Option<&str>,
         port: u16,
+    ) -> Result<Self> {
+        Self::spawn_internal(model_path, bin_dir, mmproj_path, port, false)
+    }
+
+    /// Spawn without any console output (for CLI use)
+    pub fn spawn_quiet(
+        model_path: &str,
+        bin_dir: &Path,
+        mmproj_path: Option<&str>,
+        port: u16,
+    ) -> Result<Self> {
+        Self::spawn_internal(model_path, bin_dir, mmproj_path, port, true)
+    }
+
+    fn spawn_internal(
+        model_path: &str,
+        bin_dir: &Path,
+        mmproj_path: Option<&str>,
+        port: u16,
+        quiet: bool,
     ) -> Result<Self> {
         // 根据平台选择正确的二进制文件
         #[cfg(target_os = "macos")]
@@ -29,16 +64,10 @@ impl LlamaSidecar {
         // CLEANUP: Check for zombie processes on the target port
         cleanup_process_on_port(port);
 
-        println!("[LLM] Starting server from {:?} on port {}", bin_path, port);
+        if !quiet {
+            println!("[LLM] Starting server from {:?} on port {}", bin_path, port);
+        }
 
-        // Prompt Caching:
-        // We remove --no-warmup to ensure cache slots can be potentially reused or at least not aggressively cleared?
-        // Actually, standard llama-server caches by default if slots are available.
-        // We add --unlimited-parallel to allow dynamic slot allocation.
-        // Prompt Caching:
-        // We remove --no-warmup to ensure cache slots can be potentially reused or at least not aggressively cleared?
-        // Actually, standard llama-server caches by default if slots are available.
-        // We add --unlimited-parallel to allow dynamic slot allocation.
         let mut cmd = Command::new(&bin_path);
         cmd.arg("--model")
             .arg(model_path)
@@ -53,41 +82,55 @@ impl LlamaSidecar {
             .arg("2")
             .arg("-fa")
             .arg("on");
-        // .arg("--no-warmup"); // Removed to allow better caching behavior if relevant, usually implicit.
 
         if let Some(mmproj) = mmproj_path {
             cmd.arg("--mmproj").arg(mmproj);
         }
 
-        let child = cmd
-            .stdout(Stdio::piped())
-            .stderr(Stdio::inherit())
-            .spawn()?;
+        // In quiet mode, suppress stderr output
+        let child = if quiet {
+            cmd.stdout(Stdio::null()).stderr(Stdio::null()).spawn()?
+        } else {
+            cmd.stdout(Stdio::piped())
+                .stderr(Stdio::inherit())
+                .spawn()?
+        };
 
         Ok(Self {
             process: Some(child),
             _is_running: Arc::new(AtomicBool::new(true)),
+            quiet,
         })
     }
 }
 
 impl Drop for LlamaSidecar {
     fn drop(&mut self) {
-        println!("[LlamaSidecar] Drop called. Checking process...");
+        if !self.quiet {
+            println!("[LlamaSidecar] Drop called. Checking process...");
+        }
         if let Some(mut child) = self.process.take() {
-            println!(
-                "[LlamaSidecar] Killing child process (PID: {:?})...",
-                child.id()
-            );
+            if !self.quiet {
+                println!(
+                    "[LlamaSidecar] Killing child process (PID: {:?})...",
+                    child.id()
+                );
+            }
             if let Err(e) = child.kill() {
-                println!("[LlamaSidecar] Failed to kill process: {}", e);
+                if !self.quiet {
+                    println!("[LlamaSidecar] Failed to kill process: {}", e);
+                }
             } else {
-                println!("[LlamaSidecar] Process kill signal sent.");
+                if !self.quiet {
+                    println!("[LlamaSidecar] Process kill signal sent.");
+                }
                 // Clean up zombie
                 let _ = child.wait();
             }
         } else {
-            println!("[LlamaSidecar] No process to kill.");
+            if !self.quiet {
+                println!("[LlamaSidecar] No process to kill.");
+            }
         }
     }
 }
@@ -190,12 +233,12 @@ impl LlamaClient {
         let (tx, rx) = tokio::sync::mpsc::channel(100);
 
         tokio::spawn(async move {
-            println!("[LlamaClient] Stream task spawned. URL: {}", url);
+            debug_println!("[LlamaClient] Stream task spawned. URL: {}", url);
             let mut attempts = 0;
             let max_attempts = 60; // Wait up to 60s for model load
 
             loop {
-                println!(
+                debug_println!(
                     "[LlamaClient] Stream request attempt {}/{}",
                     attempts + 1,
                     max_attempts
@@ -207,19 +250,19 @@ impl LlamaClient {
                         if response.status().is_success() {
                             use futures_util::StreamExt;
                             let mut stream = response.bytes_stream();
-                            println!("[LlamaClient] Response stream acquired. Starting to read chunks...");
+                            debug_println!("[LlamaClient] Response stream acquired. Starting to read chunks...");
 
                             while let Some(item) = stream.next().await {
                                 match item {
                                     Ok(chunk) => {
                                         let _chunk_len = chunk.len();
-                                        // println!("[LlamaClient] Received chunk of size: {}", chunk_len);
+                                        // debug_println!("[LlamaClient] Received chunk of size: {}", chunk_len);
 
                                         let chunk_str = String::from_utf8_lossy(&chunk);
                                         // Server-Sent Events format: "data: {...}\n\n"
                                         for line in chunk_str.lines() {
                                             if line.starts_with("data: ") {
-                                                // println!("[LlamaClient] Parsing data line: {:.50}...", line);
+                                                // debug_println!("[LlamaClient] Parsing data line: {:.50}...", line);
                                                 let json_str = &line[6..];
                                                 if let Ok(json) =
                                                     serde_json::from_str::<serde_json::Value>(
@@ -229,13 +272,13 @@ impl LlamaClient {
                                                     if let Some(content) = json["content"].as_str()
                                                     {
                                                         if !content.is_empty() {
-                                                            // println!("[LlamaClient] Sending content: {:?}", content);
+                                                            // debug_println!("[LlamaClient] Sending content: {:?}", content);
                                                             if tx
                                                                 .send(content.to_string())
                                                                 .await
                                                                 .is_err()
                                                             {
-                                                                println!("[LlamaClient] Receiver dropped.");
+                                                                debug_println!("[LlamaClient] Receiver dropped.");
                                                                 break; // Receiver dropped
                                                             }
                                                         }
@@ -243,7 +286,7 @@ impl LlamaClient {
                                                     // Check for stop
                                                     if let Some(stop) = json["stop"].as_bool() {
                                                         if stop {
-                                                            println!("[LlamaClient] Stop token received.");
+                                                            debug_println!("[LlamaClient] Stop token received.");
                                                             break;
                                                         }
                                                     }
@@ -254,23 +297,23 @@ impl LlamaClient {
                                                     );
                                                 }
                                             } else if !line.trim().is_empty() {
-                                                // println!("[LlamaClient] Ignored non-data line: {}", line);
+                                                // debug_println!("[LlamaClient] Ignored non-data line: {}", line);
                                             }
                                         }
                                     }
                                     Err(e) => {
-                                        println!("[LlamaClient] Stream Error: {}", e);
+                                        debug_println!("[LlamaClient] Stream Error: {}", e);
                                         let _ = tx.send(format!("Stream Error: {}", e)).await;
                                         break;
                                     }
                                 }
                             }
-                            println!("[LlamaClient] Stream ended successfully.");
+                            debug_println!("[LlamaClient] Stream ended successfully.");
                             return; // Success, exit task
                         } else if response.status().as_u16() == 503 {
                             attempts += 1;
                             if attempts >= max_attempts {
-                                println!("[LlamaClient] Error 503 Timeout.");
+                                debug_println!("[LlamaClient] Error 503 Timeout.");
                                 let _ = tx
                                     .send(format!("Error: {} (Timeout)", response.status()))
                                     .await;
@@ -283,7 +326,7 @@ impl LlamaClient {
                             sleep(Duration::from_secs(1)).await;
                             continue;
                         } else {
-                            println!("[LlamaClient] Error status: {}", response.status());
+                            debug_println!("[LlamaClient] Error status: {}", response.status());
                             let _ = tx.send(format!("Error: {}", response.status())).await;
                             return;
                         }
@@ -292,7 +335,10 @@ impl LlamaClient {
                         // Network error (e.g. Connection Refused), retry
                         attempts += 1;
                         if attempts >= max_attempts {
-                            println!("[LlamaClient] Max attempts reached. Network error: {}", e);
+                            debug_println!(
+                                "[LlamaClient] Max attempts reached. Network error: {}",
+                                e
+                            );
                             let _ = tx.send(format!("Request Error: {}", e)).await;
                             return;
                         }
@@ -402,7 +448,7 @@ impl LlmProvider for LlamaClient {
                     } else if response.status().as_u16() == 503 {
                         attempts += 1;
                         if attempts >= max_attempts {
-                            println!("[LlamaClient] Error status: {}", response.status());
+                            debug_println!("[LlamaClient] Error status: {}", response.status());
                             return Err(PageIndexError::ParseError(format!(
                                 "LLM Error status: {} (Timeout)",
                                 response.status()
@@ -415,7 +461,7 @@ impl LlmProvider for LlamaClient {
                         sleep(Duration::from_secs(1)).await;
                         continue;
                     } else {
-                        println!("[LlamaClient] Error status: {}", response.status());
+                        debug_println!("[LlamaClient] Error status: {}", response.status());
                         return Err(PageIndexError::ParseError(format!(
                             "LLM Error status: {}",
                             response.status()
@@ -423,7 +469,7 @@ impl LlmProvider for LlamaClient {
                     }
                 }
                 Err(e) => {
-                    println!("[LlamaClient] Request failed: {}", e);
+                    debug_println!("[LlamaClient] Request failed: {}", e);
                     return Err(PageIndexError::ParseError(format!(
                         "LLM Request failed: {}",
                         e
@@ -445,10 +491,10 @@ impl LlmProvider for LlamaClient {
         );
 
         let formatted_prompt = if prompt.trim().starts_with("<|im_start|>") {
-            println!("[LlamaClient] Using RAW PROMPT (ChatML detected)");
+            debug_println!("[LlamaClient] Using RAW PROMPT (ChatML detected)");
             prompt.to_string()
         } else {
-            println!("[LlamaClient] Using WRAPPED PROMPT (Default)");
+            debug_println!("[LlamaClient] Using WRAPPED PROMPT (Default)");
             format!(
                 "<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n{}\n<|im_end|>\n<|im_start|>assistant\n",
                 prompt
@@ -497,7 +543,7 @@ impl LlmProvider for LlamaClient {
                     } else if response.status().as_u16() == 503 {
                         attempts += 1;
                         if attempts >= max_attempts {
-                            println!("[LlamaClient] Error status: {}", response.status());
+                            debug_println!("[LlamaClient] Error status: {}", response.status());
                             return Err(PageIndexError::ParseError(format!(
                                 "LLM Error status: {} (Timeout)",
                                 response.status()
@@ -510,7 +556,7 @@ impl LlmProvider for LlamaClient {
                         sleep(Duration::from_secs(1)).await;
                         continue;
                     } else {
-                        println!("[LlamaClient] Error status: {}", response.status());
+                        debug_println!("[LlamaClient] Error status: {}", response.status());
                         return Err(PageIndexError::ParseError(format!(
                             "LLM Error status: {}",
                             response.status()
@@ -518,7 +564,7 @@ impl LlmProvider for LlamaClient {
                     }
                 }
                 Err(e) => {
-                    println!("[LlamaClient] Request failed: {}", e);
+                    debug_println!("[LlamaClient] Request failed: {}", e);
                     return Err(PageIndexError::ParseError(format!(
                         "LLM Request failed: {}",
                         e
@@ -621,7 +667,10 @@ impl LlmProvider for LlamaClient {
                         attempts += 1;
                         if attempts >= max_attempts {
                             let error_text = response.text().await.unwrap_or_default();
-                            println!("[LlamaClient] Error status: 503 | Body: {}", error_text);
+                            debug_println!(
+                                "[LlamaClient] Error status: 503 | Body: {}",
+                                error_text
+                            );
                             return Err(PageIndexError::ParseError(format!(
                                 "LLM Error: Service Unavailable (Model Loading Timeout): {}",
                                 error_text
@@ -647,7 +696,7 @@ impl LlmProvider for LlamaClient {
                     }
                 }
                 Err(e) => {
-                    println!("[LlamaClient] Request failed: {}", e);
+                    debug_println!("[LlamaClient] Request failed: {}", e);
                     return Err(PageIndexError::ParseError(format!(
                         "LLM Request failed: {}",
                         e
@@ -662,7 +711,7 @@ impl LlamaClient {
     /// 发送一个预热请求，触发模型加载
     pub async fn warmup(&self) -> Result<(), PageIndexError> {
         let _guard = self.gate.lock_low().await;
-        println!("[LlamaClient] Sending warmup request...");
+        debug_println!("[LlamaClient] Sending warmup request...");
 
         // Empty prompt or very short prompt
         let body = json!({
@@ -685,12 +734,12 @@ impl LlamaClient {
             match res {
                 Ok(response) => {
                     if response.status().is_success() {
-                        println!("[LlamaClient] Warmup successful.");
+                        debug_println!("[LlamaClient] Warmup successful.");
                         return Ok(());
                     } else if response.status().as_u16() == 503 {
                         attempts += 1;
                         if attempts >= max_attempts {
-                            println!("[LlamaClient] Warmup failed: 503 Timeout.");
+                            debug_println!("[LlamaClient] Warmup failed: 503 Timeout.");
                             return Err(PageIndexError::ParseError("Warmup 503".into()));
                         }
                         println!(
@@ -700,7 +749,7 @@ impl LlamaClient {
                         sleep(Duration::from_secs(1)).await;
                         continue;
                     } else {
-                        println!("[LlamaClient] Warmup failed status: {}", response.status());
+                        debug_println!("[LlamaClient] Warmup failed status: {}", response.status());
                         return Err(PageIndexError::ParseError(format!(
                             "Warmup Error: {}",
                             response.status()
@@ -710,10 +759,10 @@ impl LlamaClient {
                 Err(e) => {
                     attempts += 1;
                     if attempts >= max_attempts {
-                        println!("[LlamaClient] Warmup network error: {}", e);
+                        debug_println!("[LlamaClient] Warmup network error: {}", e);
                         return Err(PageIndexError::ParseError(format!("Warmup Error: {}", e)));
                     }
-                    println!("[LlamaClient] Warmup network error: {}, retrying...", e);
+                    debug_println!("[LlamaClient] Warmup network error: {}, retrying...", e);
                     sleep(Duration::from_secs(1)).await;
                     continue;
                 }

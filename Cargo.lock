@@ -4228,9 +4228,18 @@ name = "knot-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "clap",
+ "futures-util",
+ "indicatif",
  "knot-core",
  "notify",
+ "ort",
+ "pageindex-rs",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokenizers",
  "tokio",
 ]
 

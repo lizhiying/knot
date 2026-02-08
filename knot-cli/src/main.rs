@@ -72,6 +72,10 @@ fn get_index_path_for_source(source_dir: &Path) -> PathBuf {
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+
+    /// Show verbose debug output
+    #[arg(long, short, global = true)]
+    verbose: bool,
 }
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -239,6 +243,11 @@ async fn download_file(url: &str, path: &Path) -> Result<()> {
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
+
+    // Set quiet mode unless verbose is enabled
+    if !cli.verbose {
+        std::env::set_var("KNOT_QUIET", "1");
+    }
 
     match cli.command {
         Commands::Status => {
@@ -654,14 +663,9 @@ async fn main() -> Result<()> {
                 context, query
             );
 
-            // 3. Start LLM sidecar
-            if !json {
-                println!("Generating answer...\n");
-                println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-            }
-
+            // 3. Start LLM sidecar (quiet mode - no debug output)
             let bin_dir = get_bin_dir();
-            let _sidecar = LlamaSidecar::spawn_with_mmap(
+            let _sidecar = LlamaSidecar::spawn_quiet(
                 llm_model_path.to_str().unwrap(),
                 &bin_dir,
                 None,
@@ -676,36 +680,33 @@ async fn main() -> Result<()> {
             let mut rx = client.generate_content_stream(&prompt).await?;
 
             let mut answer = String::new();
+
             while let Some(token) = rx.recv().await {
-                if json {
-                    answer.push_str(&token);
-                } else {
-                    print!("{}", token);
-                    use std::io::Write;
-                    std::io::stdout().flush().ok();
-                }
+                answer.push_str(&token);
             }
 
+            // Filter out <think>...</think> from the answer
+            let clean_answer = filter_think_tags(&answer);
+
             if json {
-                // JSON output
-                let answer_escaped = answer.replace('"', "\\\"").replace('\n', "\\n");
-                println!("{{");
-                println!("  \"query\": \"{}\",", query);
-                println!("  \"sources_searched\": {},", indexes_to_search.len());
-                println!("  \"chunks_found\": {},", all_results.len());
-                println!("  \"answer\": \"{}\",", answer_escaped);
-                println!("  \"references\": [");
-                for (i, res) in all_results.iter().enumerate() {
-                    let comma = if i < all_results.len() - 1 { "," } else { "" };
-                    println!("    {{");
-                    println!("      \"rank\": {},", i + 1);
-                    println!("      \"file_path\": \"{}\",", res.file_path);
-                    println!("      \"score\": {:.4}", res.score);
-                    println!("    }}{}", comma);
-                }
-                println!("  ]");
-                println!("}}");
+                // JSON output - use serde_json for proper escaping
+                let json_output = serde_json::json!({
+                    "query": query,
+                    "sources_searched": indexes_to_search.len(),
+                    "chunks_found": all_results.len(),
+                    "answer": clean_answer,
+                    "references": all_results.iter().enumerate().map(|(i, res)| {
+                        serde_json::json!({
+                            "rank": i + 1,
+                            "file_path": res.file_path,
+                            "score": res.score
+                        })
+                    }).collect::<Vec<_>>()
+                });
+                println!("{}", serde_json::to_string_pretty(&json_output).unwrap());
             } else {
+                // Print the clean answer for terminal output
+                println!("{}", clean_answer);
                 println!("\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
                 println!("Referenced Chunks ({}):\n", all_results.len());
                 for (i, res) in all_results.iter().enumerate() {
@@ -802,4 +803,36 @@ fn should_process(path: &Path) -> bool {
     } else {
         false
     }
+}
+
+/// Filter out <think>...</think> blocks from LLM output
+fn filter_think_tags(text: &str) -> String {
+    let mut result = String::new();
+    let mut chars = text.chars().peekable();
+    let mut in_think = false;
+
+    while let Some(c) = chars.next() {
+        if c == '<' {
+            // Check for <think> or </think>
+            let mut tag = String::from("<");
+            while let Some(&next) = chars.peek() {
+                tag.push(chars.next().unwrap());
+                if next == '>' {
+                    break;
+                }
+            }
+
+            if tag == "<think>" {
+                in_think = true;
+            } else if tag == "</think>" {
+                in_think = false;
+            } else if !in_think {
+                result.push_str(&tag);
+            }
+        } else if !in_think {
+            result.push(c);
+        }
+    }
+
+    result.trim().to_string()
 }
