@@ -64,19 +64,20 @@ knot-cli ──────▶ knot-core
 
 ### P0: 核心功能 (必须)
 
-| 任务                    | 复杂度 | 说明                                                    |
-| :---------------------- | :----- | :------------------------------------------------------ |
-| 集成真实 Embedding 模型 | 中     | CLI 需加载 ONNX 模型 (BGE-small-zh)，替换 MockEmbedding |
-| 默认模型路径约定        | 低     | 默认使用 `~/.knot/models/bge-small-zh-v1.5.onnx`        |
-| 修复 Query 向量维度     | 低     | 当前硬编码 384 维，需与实际模型维度 (512) 匹配          |
-| 添加 `status` 命令      | 低     | 显示：模型是否可用、已索引文件数量                      |
+| 任务                    | 复杂度 | 说明                                                                                                  |
+| :---------------------- | :----- | :---------------------------------------------------------------------------------------------------- |
+| 集成真实 Embedding 模型 | 中     | CLI 需加载 ONNX 模型 (BGE-small-zh)，替换 MockEmbedding                                               |
+| 默认模型路径约定        | 低     | 默认使用 `~/.knot/models/bge-small-zh-v1.5.onnx` 和 `~/.knot/models/bge-small-zh-v1.5-tokenizer.json` |
+| 修复 Query 向量维度     | 低     | 当前硬编码 384 维，需与实际模型维度 (512) 匹配                                                        |
+| 添加 `status` 命令      | 低     | 显示：模型是否可用、已索引文件数量                                                                    |
+| 添加 `download` 命令    | 中     | 当模型缺失时，自动下载所需模型到 `~/.knot/models/`                                                    |
 
 ### P1: LLM 支持 (完整 RAG)
 
 | 任务              | 复杂度 | 说明                                                  |
 | :---------------- | :----- | :---------------------------------------------------- |
 | 集成 LlamaSidecar | 中     | 添加 `ask` 命令，启动 llama-server 并调用 LlamaClient |
-| 默认 LLM 模型约定 | 低     | 默认使用 `~/.knot/models/qwen3-1.5b-q4_0.gguf`        |
+| 默认 LLM 模型约定 | 低     | 默认使用 `~/.knot/models/Qwen3-1.7B-Q4_K_M.gguf`      |
 | 流式输出支持      | 低     | 在终端显示打字机效果                                  |
 
 ### P2: 体验优化 (可选)
@@ -94,15 +95,27 @@ knot-cli ──────▶ knot-core
 ```
 ~/.knot/
 ├── models/
-│   ├── bge-small-zh-v1.5.onnx          # Embedding 模型 (默认)
-│   ├── bge-small-zh-v1.5-tokenizer.json
-│   └── qwen3-1.5b-q4_0.gguf            # LLM 模型 (默认)
+│   ├── bge-small-zh-v1.5.onnx           # Embedding 模型 (必需)
+│   ├── bge-small-zh-v1.5-tokenizer.json # Embedding Tokenizer (必需)
+│   ├── Qwen3-1.7B-Q4_K_M.gguf           # LLM 对话模型 (RAG 问答需要)
+│   ├── OCRFlux-3B.Q4_K_M.gguf           # PDF/图片 OCR 模型 (PDF 解析需要)
+│   └── OCRFlux-3B.mmproj-f16.gguf       # OCR 视觉投影模型 (PDF 解析需要)
 ├── indexes/
-│   └── <hash>/                          # 按数据源路径 hash 分隔
+│   └── <hash>/                           # 按数据源路径 hash 分隔
 │       ├── knot_index.lance/
 │       └── tantivy/
-└── config.toml                          # 可选配置文件
+└── config.toml                           # 可选配置文件
 ```
+
+### 模型清单
+
+| 模型文件                           | 用途         | 大小   | 必需性         |
+| :--------------------------------- | :----------- | :----- | :------------- |
+| `bge-small-zh-v1.5.onnx`           | 文本向量化   | ~90MB  | ✅ 必需         |
+| `bge-small-zh-v1.5-tokenizer.json` | 分词器       | ~1MB   | ✅ 必需         |
+| `Qwen3-1.7B-Q4_K_M.gguf`           | RAG 问答生成 | ~1.1GB | ⚠️ ask 命令需要 |
+| `OCRFlux-3B.Q4_K_M.gguf`           | PDF/图片 OCR | ~2GB   | ⚠️ PDF 解析需要 |
+| `OCRFlux-3B.mmproj-f16.gguf`       | OCR 视觉投影 | ~600MB | ⚠️ PDF 解析需要 |
 
 **模型选择逻辑**：
 - CLI 默认使用固定的模型文件名（如 `bge-small-zh-v1.5.onnx`）
@@ -118,6 +131,14 @@ knot-cli ──────▶ knot-core
 ## 预期命令示例
 
 ```bash
+# 下载缺失的模型
+knot-cli download
+
+# 下载特定模型
+knot-cli download --model embedding   # 仅下载 Embedding 模型
+knot-cli download --model llm         # 仅下载 LLM 对话模型
+knot-cli download --model ocr         # 仅下载 OCR 模型
+
 # 查看状态 (模型是否就绪、索引文件数)
 knot-cli status
 
@@ -141,8 +162,10 @@ Knot CLI Status
 ===============
 
 Models:
-  ✓ Embedding: ~/.knot/models/bge-small-zh-v1.5.onnx (512 dim)
-  ✓ LLM:       ~/.knot/models/qwen3-1.5b-q4_0.gguf (1.5B params)
+  ✓ Embedding:  bge-small-zh-v1.5.onnx (512 dim)
+  ✓ LLM:        Qwen3-1.7B-Q4_K_M.gguf (1.7B params)
+  ✗ OCR:        OCRFlux-3B.Q4_K_M.gguf (missing)
+    → Run 'knot-cli download --model ocr' to install
 
 Index:
   Files:     1,234
