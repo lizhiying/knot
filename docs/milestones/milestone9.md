@@ -172,5 +172,13 @@ Index:
   Chunks:    8,901
   Last Sync: 2026-02-08 13:40:00
 
-Data Directory: ~/.knot
+Source Directories (2):
+  1. ~/Documents/notes
+  2. ~/Projects/rust-book-cn
+
+Paths:
+  Knot Root:      ~/.knot
+  Config Home:    ~/.knot/config.toml
+  Index Storage:  ~/.knot/indexes/
+  Models:         ~/.knot/models/
 ```
