@@ -4241,6 +4241,7 @@ dependencies = [
  "serde_json",
  "tokenizers",
  "tokio",
+ "toml 0.8.2",
 ]
 
 [[package]]

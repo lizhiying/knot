@@ -85,10 +85,14 @@ impl KnotIndexer {
                                                 should_index = false;
                                                 // println!("Skipping unchanged: {:?}", file_path);
                                             } else {
-                                                println!("Start Indexing: {:?}", file_path);
+                                                if std::env::var("KNOT_QUIET").is_err() {
+                                                    println!("Start Indexing: {:?}", file_path);
+                                                }
                                             }
                                         } else {
-                                            println!("Start Indexing (New): {:?}", file_path);
+                                            if std::env::var("KNOT_QUIET").is_err() {
+                                                println!("Start Indexing (New): {:?}", file_path);
+                                            }
                                         }
                                     }
                                 }

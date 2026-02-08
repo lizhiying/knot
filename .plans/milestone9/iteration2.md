@@ -26,5 +26,7 @@ Tasks:
 Exit criteria:
 - `cargo run -p knot-cli -- download` 成功下载 Embedding 模型
 - `cargo run -p knot-cli -- download --model llm` 成功下载 LLM 模型
-- `cargo run -p knot-cli -- ask -q "测试问题"` 返回 LLM 生成的回答
+- `cargo run -p knot-cli -- ask -q "rust"` 返回 LLM 生成的回答
 - `cargo run -p knot-cli -- query -t "测试" --json` 返回有效 JSON
+
+将来可以用 cargo install --path knot-cli 安装到系统，然后直接用 knot-cli ask -q "rust" --json 运行

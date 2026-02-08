@@ -4,11 +4,48 @@ use knot_core::embedding::{EmbeddingEngine, ThreadSafeEmbeddingEngine};
 use knot_core::index::KnotIndexer;
 use knot_core::llm::{LlamaClient, LlamaSidecar};
 use knot_core::store::KnotStore;
+use serde::Deserialize;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 const EMBEDDING_DIM: usize = 512;
 const LLM_PORT: u16 = 8081;
+
+/// Knot 配置文件结构
+#[derive(Debug, Deserialize, Default)]
+struct KnotConfig {
+    #[serde(default)]
+    models: ModelsConfig,
+    #[serde(default)]
+    paths: PathsConfig,
+}
+
+#[derive(Debug, Deserialize, Default)]
+struct ModelsConfig {
+    embedding: Option<PathBuf>,
+    llm: Option<PathBuf>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+struct PathsConfig {
+    models_dir: Option<PathBuf>,
+    indexes_dir: Option<PathBuf>,
+}
+
+/// 加载配置文件
+fn load_config() -> KnotConfig {
+    let config_path = get_knot_root().join("config.toml");
+    if config_path.exists() {
+        match std::fs::read_to_string(&config_path) {
+            Ok(content) => match toml::from_str(&content) {
+                Ok(config) => return config,
+                Err(e) => eprintln!("Warning: Failed to parse config.toml: {}", e),
+            },
+            Err(e) => eprintln!("Warning: Failed to read config.toml: {}", e),
+        }
+    }
+    KnotConfig::default()
+}
 
 /// 获取 Knot 根目录 (~/.knot)
 fn get_knot_root() -> PathBuf {
@@ -16,14 +53,22 @@ fn get_knot_root() -> PathBuf {
     Path::new(&home).join(".knot")
 }
 
-/// 获取默认模型目录
+/// 获取默认模型目录（可被配置覆盖）
 fn get_models_dir() -> PathBuf {
-    get_knot_root().join("models")
+    let config = load_config();
+    config
+        .paths
+        .models_dir
+        .unwrap_or_else(|| get_knot_root().join("models"))
 }
 
-/// 获取默认索引目录
+/// 获取默认索引目录（可被配置覆盖）
 fn get_indexes_dir() -> PathBuf {
-    get_knot_root().join("indexes")
+    let config = load_config();
+    config
+        .paths
+        .indexes_dir
+        .unwrap_or_else(|| get_knot_root().join("indexes"))
 }
 
 /// 获取 bin 目录 (llama-server)
@@ -64,6 +109,40 @@ fn get_index_path_for_source(source_dir: &Path) -> PathBuf {
     let hash = hasher.finish();
 
     get_indexes_dir().join(format!("{:016x}", hash))
+}
+
+/// 计算目录大小
+fn get_dir_size(path: &Path) -> std::io::Result<u64> {
+    let mut size = 0;
+    if path.is_dir() {
+        for entry in std::fs::read_dir(path)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                size += get_dir_size(&path)?;
+            } else {
+                size += entry.metadata()?.len();
+            }
+        }
+    }
+    Ok(size)
+}
+
+/// 格式化文件大小
+fn format_size(bytes: u64) -> String {
+    const KB: u64 = 1024;
+    const MB: u64 = KB * 1024;
+    const GB: u64 = MB * 1024;
+
+    if bytes >= GB {
+        format!("{:.2} GB", bytes as f64 / GB as f64)
+    } else if bytes >= MB {
+        format!("{:.2} MB", bytes as f64 / MB as f64)
+    } else if bytes >= KB {
+        format!("{:.2} KB", bytes as f64 / KB as f64)
+    } else {
+        format!("{} B", bytes)
+    }
 }
 
 #[derive(Parser)]
@@ -107,7 +186,14 @@ enum Commands {
         /// Custom embedding model path
         #[arg(long)]
         embedding_model: Option<PathBuf>,
+
+        /// Remove the index instead of creating it
+        #[arg(long)]
+        remove: bool,
     },
+
+    /// List all indexed sources
+    IndexList,
 
     /// Query the index
     Query {
@@ -147,21 +233,38 @@ enum Commands {
     },
 }
 
-/// 初始化 Embedding 引擎
+/// 初始化 Embedding 引擎（支持配置文件覆盖模型路径）
 fn init_embedding_engine(model_path: Option<&Path>) -> Result<ThreadSafeEmbeddingEngine> {
-    let default_model = get_models_dir().join("bge-small-zh-v1.5.onnx");
+    let config = load_config();
+    let default_model = config
+        .models
+        .embedding
+        .unwrap_or_else(|| get_models_dir().join("bge-small-zh-v1.5.onnx"));
     let model_path = model_path.unwrap_or(&default_model);
 
     if !model_path.exists() {
-        anyhow::bail!(
-            "Embedding model not found: {:?}\n\
-             Run 'knot-cli download --model embedding' to install.",
-            model_path
-        );
+        eprintln!("❌ Embedding model not found: {:?}", model_path);
+        eprintln!();
+        eprintln!("To fix this, run:");
+        eprintln!("  cargo run -q -p knot-cli -- download --model embedding");
+        eprintln!();
+        eprintln!("Or configure a custom path in ~/.knot/config.toml:");
+        eprintln!("  [models]");
+        eprintln!("  embedding = \"/path/to/your/model.onnx\"");
+        std::process::exit(1);
     }
 
     let engine = EmbeddingEngine::init_onnx(model_path.to_str().unwrap())?;
     Ok(ThreadSafeEmbeddingEngine::new(engine))
+}
+
+/// 获取 LLM 模型路径（支持配置文件覆盖）
+fn get_llm_model_path() -> PathBuf {
+    let config = load_config();
+    config
+        .models
+        .llm
+        .unwrap_or_else(|| get_models_dir().join("Qwen3-1.7B-Q4_K_M.gguf"))
 }
 
 /// 模型下载 URL 配置
@@ -403,7 +506,22 @@ async fn main() -> Result<()> {
         Commands::Index {
             input,
             embedding_model,
+            remove,
         } => {
+            let index_path = get_index_path_for_source(&input);
+
+            if remove {
+                // Remove the index
+                if index_path.exists() {
+                    println!("Removing index for: {:?}", input);
+                    std::fs::remove_dir_all(&index_path)?;
+                    println!("✓ Index removed successfully.");
+                } else {
+                    println!("No index found for: {:?}", input);
+                }
+                return Ok(());
+            }
+
             println!("Indexing directory: {:?}", input);
 
             // Initialize embedding engine
@@ -411,7 +529,6 @@ async fn main() -> Result<()> {
             let provider = Arc::new(embedding_engine);
 
             // Calculate index path based on source directory
-            let index_path = get_index_path_for_source(&input);
             let lance_path = index_path.join("knot_index.lance");
 
             println!("Index path: {:?}", lance_path);
@@ -419,27 +536,128 @@ async fn main() -> Result<()> {
             // Create index directory
             std::fs::create_dir_all(&index_path)?;
 
+            // Save source path metadata for later display
+            let metadata_path = index_path.join("source.txt");
+            std::fs::write(&metadata_path, input.to_string_lossy().as_bytes())?;
+
             // Create registry path
             let registry_path = index_path.join("knot.db");
 
             let indexer = KnotIndexer::new(registry_path.to_str().unwrap(), Some(provider)).await;
-            let (records, deleted_files) = indexer.index_directory(&input).await?;
 
-            println!("Found {} vectors to add.", records.len());
-            println!("Found {} files to delete.", deleted_files.len());
+            // Show spinner during file scanning
+            let spinner = indicatif::ProgressBar::new_spinner();
+            spinner.set_style(
+                indicatif::ProgressStyle::default_spinner()
+                    .template("{spinner:.green} {msg}")
+                    .unwrap(),
+            );
+            spinner.set_message("Scanning files...");
+            spinner.enable_steady_tick(std::time::Duration::from_millis(100));
+
+            let (records, deleted_files) = indexer.index_directory(&input).await?;
+            spinner.finish_and_clear();
+
+            println!(
+                "Found {} vectors to add, {} files to delete.",
+                records.len(),
+                deleted_files.len()
+            );
 
             let store = KnotStore::new(lance_path.to_str().unwrap()).await?;
 
-            // Handle deletions
-            for del_path in deleted_files {
-                println!("Deleting from store: {}", del_path);
-                store.delete_file(&del_path).await?;
+            // Handle deletions with progress
+            if !deleted_files.is_empty() {
+                let del_bar = indicatif::ProgressBar::new(deleted_files.len() as u64);
+                del_bar.set_style(
+                    indicatif::ProgressStyle::default_bar()
+                        .template("{spinner:.red} [{bar:40.red/dim}] {pos}/{len} Deleting...")
+                        .unwrap()
+                        .progress_chars("█▓░"),
+                );
+                for del_path in deleted_files {
+                    store.delete_file(&del_path).await?;
+                    del_bar.inc(1);
+                }
+                del_bar.finish_and_clear();
             }
 
-            store.add_records(records).await?;
-            store.create_fts_index().await?;
+            // Add records with progress
+            if !records.is_empty() {
+                let add_bar = indicatif::ProgressBar::new(records.len() as u64);
+                add_bar.set_style(
+                    indicatif::ProgressStyle::default_bar()
+                        .template(
+                            "{spinner:.green} [{bar:40.green/dim}] {pos}/{len} Adding vectors...",
+                        )
+                        .unwrap()
+                        .progress_chars("█▓░"),
+                );
+                add_bar.set_position(0);
 
-            println!("Indexing complete.");
+                // Add records in chunks for progress update
+                let chunk_size = 50;
+                for chunk in records.chunks(chunk_size) {
+                    store.add_records(chunk.to_vec()).await?;
+                    add_bar.inc(chunk.len() as u64);
+                }
+                add_bar.finish_and_clear();
+            }
+
+            // Create FTS index with spinner
+            let fts_spinner = indicatif::ProgressBar::new_spinner();
+            fts_spinner.set_style(
+                indicatif::ProgressStyle::default_spinner()
+                    .template("{spinner:.blue} {msg}")
+                    .unwrap(),
+            );
+            fts_spinner.set_message("Creating full-text search index...");
+            fts_spinner.enable_steady_tick(std::time::Duration::from_millis(100));
+            store.create_fts_index().await?;
+            fts_spinner.finish_and_clear();
+
+            println!("✓ Indexing complete.");
+        }
+
+        Commands::IndexList => {
+            println!("Indexed Sources");
+            println!("===============\n");
+
+            let indexes_dir = get_indexes_dir();
+            if !indexes_dir.exists() {
+                println!("No indexes found.");
+                return Ok(());
+            }
+
+            let mut found = false;
+            for entry in std::fs::read_dir(&indexes_dir)?.flatten() {
+                let path = entry.path();
+                if path.is_dir() && path.join("knot_index.lance").exists() {
+                    found = true;
+                    let index_id = path.file_name().unwrap().to_string_lossy();
+
+                    // Try to read source metadata
+                    let source_path = path.join("source.txt");
+                    let source = if source_path.exists() {
+                        std::fs::read_to_string(&source_path).unwrap_or_else(|_| "Unknown".into())
+                    } else {
+                        "Unknown".into()
+                    };
+
+                    // Get directory size
+                    let size = get_dir_size(&path).unwrap_or(0);
+                    let size_str = format_size(size);
+
+                    println!("[{}]", index_id);
+                    println!("  Source: {}", source);
+                    println!("  Size:   {}", size_str);
+                    println!();
+                }
+            }
+
+            if !found {
+                println!("No indexes found.");
+            }
         }
 
         Commands::Query { text, source, json } => {
@@ -554,13 +772,17 @@ async fn main() -> Result<()> {
             json,
         } => {
             // Check LLM model
-            let llm_model_path = get_models_dir().join("Qwen3-1.7B-Q4_K_M.gguf");
+            let llm_model_path = get_llm_model_path();
             if !llm_model_path.exists() {
-                anyhow::bail!(
-                    "LLM model not found: {:?}\n\
-                     Run 'knot-cli download --model llm' to install.",
-                    llm_model_path
-                );
+                eprintln!("❌ LLM model not found: {:?}", llm_model_path);
+                eprintln!();
+                eprintln!("To fix this, run:");
+                eprintln!("  cargo run -q -p knot-cli -- download --model llm");
+                eprintln!();
+                eprintln!("Or configure a custom path in ~/.knot/config.toml:");
+                eprintln!("  [models]");
+                eprintln!("  llm = \"/path/to/your/model.gguf\"");
+                std::process::exit(1);
             }
 
             if !json {
