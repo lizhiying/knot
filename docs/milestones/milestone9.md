@@ -142,16 +142,23 @@ knot-cli download --model ocr         # 仅下载 OCR 模型
 # 查看状态 (模型是否就绪、索引文件数)
 knot-cli status
 
-# 索引 (默认使用 ~/.knot/models 下的模型)
+# 索引目录
 knot-cli index -i ~/Documents/notes
+knot-cli index -i ~/Projects/rust-book-cn
 
-# 查询 (纯检索，默认使用 ~/.knot 下的索引)
+# 查询 (默认搜索所有已索引目录)
 knot-cli query -t "如何使用 Rust 的生命周期？"
 
-# RAG 问答 (需要 LLM)
+# 查询指定目录
+knot-cli query -t "如何使用 Rust 的生命周期？" --source ~/Documents/notes
+
+# RAG 问答 (默认搜索所有已索引目录)
 knot-cli ask -q "总结一下 Rust 的所有权规则"
 
-# 高级：指定自定义模型
+# RAG 问答指定目录
+knot-cli ask -q "总结一下 Rust 的所有权规则" --source ~/Projects/rust-book-cn
+
+# 高级：指定自定义 Embedding 模型
 knot-cli index -i ~/Documents/notes --embedding-model ~/.knot/models/custom.onnx
 ```
 
