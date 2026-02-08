@@ -186,3 +186,59 @@ Paths:
   Index Storage:  ~/.knot/indexes/<hash>/
   Models:         ~/.knot/models/
 ```
+
+## `query` 命令输出示例
+
+```
+$ knot-cli query -t "如何使用 Rust 的生命周期？"
+
+Searching across 2 sources...
+
+Results (5 matches):
+
+[1] ~/Projects/rust-book-cn/ch10-03-lifetime-syntax.md
+    Score: 0.8921 | Source: Hybrid
+    Context: 第十章 > 生命周期语法
+    "生命周期注解并不改变任何引用的生命周期的长短。相反它们描述了多个引用生命周期相互的关系..."
+
+[2] ~/Documents/notes/rust-notes.md
+    Score: 0.7845 | Source: Vector
+    Context: Rust 学习笔记 > 所有权
+    "生命周期的主要目标是避免悬垂引用，它会导致程序引用了非预期引用的数据..."
+
+[3] ~/Projects/rust-book-cn/ch04-02-references-and-borrowing.md
+    Score: 0.7234 | Source: Keyword
+    Context: 第四章 > 引用与借用
+    "引用的生命周期必须短于或等于被引用值的生命周期..."
+
+...
+```
+
+## `ask` 命令输出示例
+
+```
+$ knot-cli ask -q "总结一下 Rust 的所有权规则"
+
+Searching across 2 sources...
+Found 8 relevant chunks.
+
+Generating answer...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Rust 的所有权规则可以总结为以下三条核心规则：
+
+1. **每个值都有一个所有者**：Rust 中的每个值都有一个被称为其所有者的变量。
+
+2. **同一时间只能有一个所有者**：值在任一时刻有且只有一个所有者。
+
+3. **所有者离开作用域时，值被丢弃**：当所有者（变量）离开作用域，这个值将被丢弃（drop）。
+
+这些规则确保了内存安全，无需垃圾回收器。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+References:
+  • ~/Projects/rust-book-cn/ch04-01-what-is-ownership.md
+  • ~/Documents/notes/rust-notes.md
+```
