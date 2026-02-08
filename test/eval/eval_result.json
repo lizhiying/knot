@@ -1,0 +1,637 @@
+{
+  "summary": {
+    "total_questions": 10,
+    "passed": 7,
+    "overall_accuracy": 0.7,
+    "timestamp": "2026-02-08 09:46:16"
+  },
+  "by_type": {
+    "extractive": {
+      "count": 8,
+      "passed": 6,
+      "accuracy": 0.75
+    },
+    "multi_hop": {
+      "count": 1,
+      "passed": 0,
+      "accuracy": 0.0
+    },
+    "refusal": {
+      "count": 1,
+      "passed": 1,
+      "accuracy": 1.0
+    }
+  },
+  "results": [
+    {
+      "id": "rust_q01",
+      "question": "Cargo 是什么？它有什么作用？",
+      "type": "extractive",
+      "answer_gold": "Cargo 是 Rust 的构建系统和包管理器，用于处理构建代码、下载依赖库和编译依赖库等任务。",
+      "answer_pred": "Cargo 是 Rust 的构建系统和包管理器，用于管理 Rust 项目的构建、依赖和运行。它通过自动化处理代码编译、依赖下载、构建和测试，简化了项目的维护。其主要作用包括：\n\n1. **构建项目**：通过 `cargo build` 编译代码，生成可执行文件或库，确保代码符合 Rust 的编译规则。\n2. **管理依赖**：通过 `Cargo.toml` 配置依赖项，自动下载并管理外部库，确保项目使用最新版本的依赖。\n3. **运行和测试**：使用 `cargo run` 运行可执行文件，`cargo test` 测试代码，验证功能是否正确。\n4. **项目组织**：通过 `cargo new` 创建新项目，自动配置 `Cargo.toml` 和源代码结构（如 `src/` 目录），并初始化 Git 仓库。\n5. **工作空间管理**：支持多 crate 项目的组织，通过工作空间（workspace）协调多个项目之间的依赖和构建。\n\nCargo 的核心功能还包括发布库到 crates.io、自定义构建配置、运行自定义命令等，但文档中主要强调了其基础功能。对于复杂项目，Cargo 的模块化管理（如依赖协调、构建流程）显著提升了开发效率。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "把使用 Cargo 当作习惯\n对于简单项目而言，使用 Cargo 和直接使用  相比并没有太大的优势，但是在程序变得更加复杂时，它会证明自己的价值。对于拥有多个 crate 的复杂项目，交给 Cargo 来协调构建将简单得多。尽管  项目很简单，其所使用的很多实用工具，在你将来的 Rust 生涯中也会用得到。其实，要在已存在的项目上构建，可以使用以下命令，通过 Git 检出代码，进入到该项目目录并构建：\n```console\n$ git clone example.org/someproject\n$ cd someproject\n$ cargo build\n```\n关于更多 Cargo 的信息，请查阅相应文档。",
+          "score": 104.54097
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch14-00-more-about-cargo.md",
+          "heading": "rust-book-cn__src__ch14-00-more-about-cargo",
+          "quote": "进一步认识 Cargo 和 Crates.io\n目前为止我们只使用过 Cargo 构建、运行和测试代码这些最基本的功能，不过它还可以做到更多。本章会讨论 Cargo 其他一些更为高级的功能，我们将展示如何：使用发布配置来自定义构建将库发布到 crates.io使用工作空间来组织更大的项目从 crates.io 安装二进制文件使用自定义的命令来扩展 CargoCargo 的功能不止本章所介绍的，关于其全部功能的详尽解释，请查看 文档",
+          "score": 102.19948
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo",
+          "quote": "Hello, Cargo!\nCargo 是 Rust 的构建系统和包管理器。大多数 Rustacean 们使用 Cargo 来管理他们的 Rust 项目，因为它可以为你处理很多任务，比如构建代码、下载依赖库，以及编译这些库。（我们把代码所需要的库叫做依赖（dependency））。最简单的 Rust 程序（如我们刚刚编写的）不含任何依赖。所以如果使用 Cargo 来构建 “Hello, world!” 项目，将只会用到 Cargo 构建代码的那部分功能。在编写更复杂的 Rust 程序时，你将添加依赖项，如果使用 Cargo 启动项目，则添加依赖项将更容易。由于绝大多数 Rust 项目使用 Cargo，本书接下来的部分假设你也使用 Cargo。如果使用“安装” 部分介绍的官方安装包的话，则自带了 Cargo。如果通过其他方式安装的话，可以在终端输入如下命令检查是否安装了 Cargo：\n```console\n$ cargo --version\n```\n如果你看到了版本号，说明安装成功！如果看到类似  的错误，你应该查看相应安装文档以确定如何单独安装 Cargo。",
+          "score": 56.602955
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "构建并运行 Cargo 项目\n现在让我们看看通过 Cargo 构建和运行 “Hello, world!” 程序有什么不同！在 hello_cargo 目录下，输入下面的命令来构建项目：\n```console\n$ cargo build\n   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 2.85 secs\n```\n这个命令会在 target/debug/hello_cargo 下创建一个可执行文件（在 Windows 上是 target\\debug\\hello_cargo.exe），而不是放在目前目录下。你可以使用下面的命令来运行它：\n```console\n$ ./target/debug/hello_cargo # 或者在 Windows 下为 .\\target\\debug\\hello_cargo.exe\nHello, world!\n```\n如果一切顺利，终端上应该会打印出 。首次运行  时，也会使 Cargo 在项目根目录创建一个新文件：Cargo.lock。这个文件记录项目依赖的实际版本。这个项目并没有依赖，所以其内容比较少。您不需要手动更改这个文件，Cargo 会为您管理好它。我们刚刚使用  构建了项目，并使用  运行了程序，但是，我们也可以使用  命令，一次性完成代码编译和运行的操作：\n```console\n$ cargo run\n    Finished dev [unoptimized + debuginfo] target(s) in 0.0 secs\n     Running `target/debug/hello_cargo`\nHello, world!\n```\n注意这一次并没有出现表明 Cargo 正在编译  的输出。Cargo 发现文件并没有被改变，就直接运行了二进制文件。如果修改了源文件的话，Cargo 会在运行之前重新构建项目，并会出现像这样的输出：\n```console\n$ cargo run\n   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 0.33 secs\n     Running `target/debug/hello_cargo`\nHello, world!\n```\nCargo 还提供了一个名为  的命令。该命令快速检查代码确保其可以编译，但并不产生可执行文件：\n```console\n$ cargo check\n   Checking hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 0.32 secs\n```\n为什么你会不需要可执行文件呢？通常， 要比  快得多，因为它省略了生成可执行文件的步骤。如果你在编写代码时不断检查你的代码，那么使用  命令可以加快这个过程！为此很多 Rustacean 编写代码时会定期运行  以确保它们可以编译。当准备好使用可执行文件时才运行 。我们回顾下已学习的 Cargo 内容：可以使用  构建项目。可以使用  一步构建并运行项目。可以使用  构建项目而无需生成二进制文件来检查错误。Cargo 会将构建结果保存到 target/debug 目录，而不是源码所在的目录。使用 Cargo 的一个额外的优点是，不管你使用什么操作系统，其命令都是一样的。所以从现在开始本书将不再为 Linux 、macOS 或 Windows 提供平台特定的命令。",
+          "score": 56.27738
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "使用 Cargo 创建项目\n我们使用 Cargo 创建一个新项目，然后看看与上面的 Hello, world! 项目有什么不同。回到 projects 目录（或者你存放代码的目录）。接下来，可在任何操作系统下运行以下命令：\n```console\n$ cargo new hello_cargo\n$ cd hello_cargo\n```\n第一行命令新建了名为 hello_cargo 的目录。我们将项目命名为 hello_cargo，同时 Cargo 在一个同名目录中创建项目文件。进入 hello_cargo 目录并列出文件。将会看到 Cargo 生成了两个文件和一个目录：一个 Cargo.toml 文件，一个 src 目录，以及位于 src 目录中的 main.rs 文件。它也在 hello_cargo 目录初始化了一个 Git 仓库，并带有一个 .gitignore 文件。如果在现有的 Git 仓库中运行 ，则不会生成 Git 文件；但你可以使用  来无视此限制，强制生成 Git 文件。注意：Git 是一个常用的版本控制系统（version control system， VCS）。可以通过  参数使  切换到其它版本控制系统，或者不使用 VCS。运行  查看可用的选项。使用你喜欢的文本编辑器打开 Cargo.toml 文件。它应该看起来如示例 1-2 所示：文件名：Cargo.toml\n```toml\n[package]\nname = \"hello_cargo\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n```\n示例 1-2：cargo new 命令生成的 Cargo.toml 的内容此文件使用 TOML (Tom's Obvious, Minimal Language) 格式，这是 Cargo 配置文件的格式。第一行，，是一个表块（section）标题，表明下面的语句用来配置一个包（package）。随着我们在这个文件增加更多的信息，还将增加其他表块。接下来的三行设置了 Cargo 编译程序所需的配置：项目的名称、版本，以及使用的 Rust 大版本号（edition，区别于 version）。附录 E 会介绍 （译注：Rust 的核心版本，即 2015、2018、2021 版等） 的值。最后一行， 是一个表块的开头，你可以在其中列出你的项目所依赖的任何包。在 Rust 中，代码包被称为 crate。这个项目并不需要其他的 crate，不过在第 2 章的第一个项目会用到依赖，那时会用得上这个表块。现在打开 src/main.rs 看看：文件名：src/main.rs\n```rust\nfn main() {\n    println!(\"Hello, world!\");\n}\n```\nCargo 生成了一个 “Hello, world!” 程序，正如我们之前编写的示例 1-1！到目前为止，之前项目与 Cargo 生成项目的区别是，Cargo 将代码放在 src 目录，同时项目根目录包含一个 Cargo.toml 配置文件。Cargo 期望源文件位于 src 目录中。项目根目录只存放说明文件（README）、许可协议（license）信息、配置文件和其他跟代码无关的文件。使用 Cargo 可帮助你保持项目干净整洁。这里为一切事物所准备，一切都位于正确的位置。对于没有使用 Cargo 开始的项目，比如我们之前创建的 Hello,world! 项目，你可以将其转化为一个 Cargo 项目。将代码放入 src 目录，并创建一个合适的 Cargo.toml 文件。",
+          "score": 55.91357
+        }
+      ],
+      "scores": {
+        "llm_score": 1.0,
+        "llm_correct": true,
+        "llm_reasoning": "模型回答准确涵盖了标准答案的核心信息，完整列举了Cargo的五个主要作用，并补充了其扩展功能（如发布库、自定义构建配置），同时保持与标准答案一致的表述方式，无矛盾内容。",
+        "citation_hit": true
+      },
+      "passed": true,
+      "duration": 26.24
+    },
+    {
+      "id": "rust_q02",
+      "question": "如何使用 Cargo 创建一个新项目？",
+      "type": "extractive",
+      "answer_gold": "使用命令 cargo new hello_cargo 可以创建一个名为 hello_cargo 的新项目。",
+      "answer_pred": "使用 Cargo 创建新项目需要按照以下步骤操作：首先，在项目目录下运行 `cargo new hello_cargo` 命令，该命令会创建一个名为 `hello_cargo` 的目录，并生成包含 `Cargo.toml` 配置文件、`src` 目录以及 `main.rs` 源文件的项目结构。接着，进入该目录并列出文件，Cargo 会自动初始化 Git 仓库并生成 `.gitignore` 文件。若需强制生成 Git 文件，可使用 `git init` 命令。项目根目录仅存放说明文件、许可协议、配置文件等，而源代码文件位于 `src` 目录中。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "使用 Cargo 创建项目\n我们使用 Cargo 创建一个新项目，然后看看与上面的 Hello, world! 项目有什么不同。回到 projects 目录（或者你存放代码的目录）。接下来，可在任何操作系统下运行以下命令：\n```console\n$ cargo new hello_cargo\n$ cd hello_cargo\n```\n第一行命令新建了名为 hello_cargo 的目录。我们将项目命名为 hello_cargo，同时 Cargo 在一个同名目录中创建项目文件。进入 hello_cargo 目录并列出文件。将会看到 Cargo 生成了两个文件和一个目录：一个 Cargo.toml 文件，一个 src 目录，以及位于 src 目录中的 main.rs 文件。它也在 hello_cargo 目录初始化了一个 Git 仓库，并带有一个 .gitignore 文件。如果在现有的 Git 仓库中运行 ，则不会生成 Git 文件；但你可以使用  来无视此限制，强制生成 Git 文件。注意：Git 是一个常用的版本控制系统（version control system， VCS）。可以通过  参数使  切换到其它版本控制系统，或者不使用 VCS。运行  查看可用的选项。使用你喜欢的文本编辑器打开 Cargo.toml 文件。它应该看起来如示例 1-2 所示：文件名：Cargo.toml\n```toml\n[package]\nname = \"hello_cargo\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n```\n示例 1-2：cargo new 命令生成的 Cargo.toml 的内容此文件使用 TOML (Tom's Obvious, Minimal Language) 格式，这是 Cargo 配置文件的格式。第一行，，是一个表块（section）标题，表明下面的语句用来配置一个包（package）。随着我们在这个文件增加更多的信息，还将增加其他表块。接下来的三行设置了 Cargo 编译程序所需的配置：项目的名称、版本，以及使用的 Rust 大版本号（edition，区别于 version）。附录 E 会介绍 （译注：Rust 的核心版本，即 2015、2018、2021 版等） 的值。最后一行， 是一个表块的开头，你可以在其中列出你的项目所依赖的任何包。在 Rust 中，代码包被称为 crate。这个项目并不需要其他的 crate，不过在第 2 章的第一个项目会用到依赖，那时会用得上这个表块。现在打开 src/main.rs 看看：文件名：src/main.rs\n```rust\nfn main() {\n    println!(\"Hello, world!\");\n}\n```\nCargo 生成了一个 “Hello, world!” 程序，正如我们之前编写的示例 1-1！到目前为止，之前项目与 Cargo 生成项目的区别是，Cargo 将代码放在 src 目录，同时项目根目录包含一个 Cargo.toml 配置文件。Cargo 期望源文件位于 src 目录中。项目根目录只存放说明文件（README）、许可协议（license）信息、配置文件和其他跟代码无关的文件。使用 Cargo 可帮助你保持项目干净整洁。这里为一切事物所准备，一切都位于正确的位置。对于没有使用 Cargo 开始的项目，比如我们之前创建的 Hello,world! 项目，你可以将其转化为一个 Cargo 项目。将代码放入 src 目录，并创建一个合适的 Cargo.toml 文件。",
+          "score": 110.5141
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo",
+          "quote": "Hello, Cargo!\nCargo 是 Rust 的构建系统和包管理器。大多数 Rustacean 们使用 Cargo 来管理他们的 Rust 项目，因为它可以为你处理很多任务，比如构建代码、下载依赖库，以及编译这些库。（我们把代码所需要的库叫做依赖（dependency））。最简单的 Rust 程序（如我们刚刚编写的）不含任何依赖。所以如果使用 Cargo 来构建 “Hello, world!” 项目，将只会用到 Cargo 构建代码的那部分功能。在编写更复杂的 Rust 程序时，你将添加依赖项，如果使用 Cargo 启动项目，则添加依赖项将更容易。由于绝大多数 Rust 项目使用 Cargo，本书接下来的部分假设你也使用 Cargo。如果使用“安装” 部分介绍的官方安装包的话，则自带了 Cargo。如果通过其他方式安装的话，可以在终端输入如下命令检查是否安装了 Cargo：\n```console\n$ cargo --version\n```\n如果你看到了版本号，说明安装成功！如果看到类似  的错误，你应该查看相应安装文档以确定如何单独安装 Cargo。",
+          "score": 106.60295
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "构建并运行 Cargo 项目\n现在让我们看看通过 Cargo 构建和运行 “Hello, world!” 程序有什么不同！在 hello_cargo 目录下，输入下面的命令来构建项目：\n```console\n$ cargo build\n   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 2.85 secs\n```\n这个命令会在 target/debug/hello_cargo 下创建一个可执行文件（在 Windows 上是 target\\debug\\hello_cargo.exe），而不是放在目前目录下。你可以使用下面的命令来运行它：\n```console\n$ ./target/debug/hello_cargo # 或者在 Windows 下为 .\\target\\debug\\hello_cargo.exe\nHello, world!\n```\n如果一切顺利，终端上应该会打印出 。首次运行  时，也会使 Cargo 在项目根目录创建一个新文件：Cargo.lock。这个文件记录项目依赖的实际版本。这个项目并没有依赖，所以其内容比较少。您不需要手动更改这个文件，Cargo 会为您管理好它。我们刚刚使用  构建了项目，并使用  运行了程序，但是，我们也可以使用  命令，一次性完成代码编译和运行的操作：\n```console\n$ cargo run\n    Finished dev [unoptimized + debuginfo] target(s) in 0.0 secs\n     Running `target/debug/hello_cargo`\nHello, world!\n```\n注意这一次并没有出现表明 Cargo 正在编译  的输出。Cargo 发现文件并没有被改变，就直接运行了二进制文件。如果修改了源文件的话，Cargo 会在运行之前重新构建项目，并会出现像这样的输出：\n```console\n$ cargo run\n   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 0.33 secs\n     Running `target/debug/hello_cargo`\nHello, world!\n```\nCargo 还提供了一个名为  的命令。该命令快速检查代码确保其可以编译，但并不产生可执行文件：\n```console\n$ cargo check\n   Checking hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 0.32 secs\n```\n为什么你会不需要可执行文件呢？通常， 要比  快得多，因为它省略了生成可执行文件的步骤。如果你在编写代码时不断检查你的代码，那么使用  命令可以加快这个过程！为此很多 Rustacean 编写代码时会定期运行  以确保它们可以编译。当准备好使用可执行文件时才运行 。我们回顾下已学习的 Cargo 内容：可以使用  构建项目。可以使用  一步构建并运行项目。可以使用  构建项目而无需生成二进制文件来检查错误。Cargo 会将构建结果保存到 target/debug 目录，而不是源码所在的目录。使用 Cargo 的一个额外的优点是，不管你使用什么操作系统，其命令都是一样的。所以从现在开始本书将不再为 Linux 、macOS 或 Windows 提供平台特定的命令。",
+          "score": 106.27738
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "把使用 Cargo 当作习惯\n对于简单项目而言，使用 Cargo 和直接使用  相比并没有太大的优势，但是在程序变得更加复杂时，它会证明自己的价值。对于拥有多个 crate 的复杂项目，交给 Cargo 来协调构建将简单得多。尽管  项目很简单，其所使用的很多实用工具，在你将来的 Rust 生涯中也会用得到。其实，要在已存在的项目上构建，可以使用以下命令，通过 Git 检出代码，进入到该项目目录并构建：\n```console\n$ git clone example.org/someproject\n$ cd someproject\n$ cargo build\n```\n关于更多 Cargo 的信息，请查阅相应文档。",
+          "score": 104.54097
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo",
+          "quote": "总结\n你已准备好开启 Rust 之旅了！在本章，你学习了：使用  安装最新稳定版的 Rust更新到新版的 Rust打开本地安装的文档直接通过  编写并运行 “Hello, world!” 程序使用 Cargo 的惯例来创建和运行一个新项目是时候通过构建更强大的程序来熟悉阅读和编写 Rust 代码了。所以在第 2 章，我们会构建一个猜数字游戏程序。如果你更希望从学习 Rust 常用的编程概念开始，请阅读第 3 章，接着再回到第 2 章。",
+          "score": 95.766495
+        }
+      ],
+      "scores": {
+        "llm_score": 1.0,
+        "llm_correct": true,
+        "llm_reasoning": "模型回答准确包含标准答案的关键信息（cargo new命令），并补充了创建项目的具体步骤（创建目录、生成文件结构、初始化Git），同时明确区分了项目根目录和源代码目录，与标准答案一致且无矛盾。",
+        "citation_hit": true
+      },
+      "passed": true,
+      "duration": 23.77
+    },
+    {
+      "id": "rust_q03",
+      "question": "cargo build 和 cargo run 有什么区别？",
+      "type": "extractive",
+      "answer_gold": "cargo build 只构建项目生成可执行文件，而 cargo run 会一步完成代码编译和运行操作。",
+      "answer_pred": "Cargo build和cargo run的主要区别在于它们的功能和输出。Cargo build会编译项目并生成可执行文件（如target/debug/hello_cargo），而cargo run则直接运行生成的可执行文件。具体来说：\n\n1. **编译与运行流程**：  \n   - `cargo build`会编译代码，生成目标文件（如target/debug/hello_cargo），但不会运行程序。  \n   - `cargo run`会自动编译项目，并直接运行生成的可执行文件，无需用户手动干预。\n\n2. **输出差异**：  \n   - `cargo build`会显示编译过程的输出（如编译时间、依赖检查等），而`cargo run`在代码未修改时会省略编译步骤，直接运行二进制文件。\n\n3. **适用场景**：  \n   - `cargo build`用于构建项目，确保代码可编译。  \n   - `cargo run`用于运行构建后的可执行文件，适用于测试或调试。\n\n文档中提到，`cargo run`在修改源文件后会重新编译，而`cargo build`每次都会重新编译，但省略了生成可执行文件的步骤。这种设计使得`cargo run`更高效，尤其在开发过程中快速验证代码。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "构建并运行 Cargo 项目\n现在让我们看看通过 Cargo 构建和运行 “Hello, world!” 程序有什么不同！在 hello_cargo 目录下，输入下面的命令来构建项目：\n```console\n$ cargo build\n   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 2.85 secs\n```\n这个命令会在 target/debug/hello_cargo 下创建一个可执行文件（在 Windows 上是 target\\debug\\hello_cargo.exe），而不是放在目前目录下。你可以使用下面的命令来运行它：\n```console\n$ ./target/debug/hello_cargo # 或者在 Windows 下为 .\\target\\debug\\hello_cargo.exe\nHello, world!\n```\n如果一切顺利，终端上应该会打印出 。首次运行  时，也会使 Cargo 在项目根目录创建一个新文件：Cargo.lock。这个文件记录项目依赖的实际版本。这个项目并没有依赖，所以其内容比较少。您不需要手动更改这个文件，Cargo 会为您管理好它。我们刚刚使用  构建了项目，并使用  运行了程序，但是，我们也可以使用  命令，一次性完成代码编译和运行的操作：\n```console\n$ cargo run\n    Finished dev [unoptimized + debuginfo] target(s) in 0.0 secs\n     Running `target/debug/hello_cargo`\nHello, world!\n```\n注意这一次并没有出现表明 Cargo 正在编译  的输出。Cargo 发现文件并没有被改变，就直接运行了二进制文件。如果修改了源文件的话，Cargo 会在运行之前重新构建项目，并会出现像这样的输出：\n```console\n$ cargo run\n   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 0.33 secs\n     Running `target/debug/hello_cargo`\nHello, world!\n```\nCargo 还提供了一个名为  的命令。该命令快速检查代码确保其可以编译，但并不产生可执行文件：\n```console\n$ cargo check\n   Checking hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 0.32 secs\n```\n为什么你会不需要可执行文件呢？通常， 要比  快得多，因为它省略了生成可执行文件的步骤。如果你在编写代码时不断检查你的代码，那么使用  命令可以加快这个过程！为此很多 Rustacean 编写代码时会定期运行  以确保它们可以编译。当准备好使用可执行文件时才运行 。我们回顾下已学习的 Cargo 内容：可以使用  构建项目。可以使用  一步构建并运行项目。可以使用  构建项目而无需生成二进制文件来检查错误。Cargo 会将构建结果保存到 target/debug 目录，而不是源码所在的目录。使用 Cargo 的一个额外的优点是，不管你使用什么操作系统，其命令都是一样的。所以从现在开始本书将不再为 Linux 、macOS 或 Windows 提供平台特定的命令。",
+          "score": 183.49838
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "把使用 Cargo 当作习惯\n对于简单项目而言，使用 Cargo 和直接使用  相比并没有太大的优势，但是在程序变得更加复杂时，它会证明自己的价值。对于拥有多个 crate 的复杂项目，交给 Cargo 来协调构建将简单得多。尽管  项目很简单，其所使用的很多实用工具，在你将来的 Rust 生涯中也会用得到。其实，要在已存在的项目上构建，可以使用以下命令，通过 Git 检出代码，进入到该项目目录并构建：\n```console\n$ git clone example.org/someproject\n$ cd someproject\n$ cargo build\n```\n关于更多 Cargo 的信息，请查阅相应文档。",
+          "score": 182.39705
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo",
+          "quote": "Hello, Cargo!\nCargo 是 Rust 的构建系统和包管理器。大多数 Rustacean 们使用 Cargo 来管理他们的 Rust 项目，因为它可以为你处理很多任务，比如构建代码、下载依赖库，以及编译这些库。（我们把代码所需要的库叫做依赖（dependency））。最简单的 Rust 程序（如我们刚刚编写的）不含任何依赖。所以如果使用 Cargo 来构建 “Hello, world!” 项目，将只会用到 Cargo 构建代码的那部分功能。在编写更复杂的 Rust 程序时，你将添加依赖项，如果使用 Cargo 启动项目，则添加依赖项将更容易。由于绝大多数 Rust 项目使用 Cargo，本书接下来的部分假设你也使用 Cargo。如果使用“安装” 部分介绍的官方安装包的话，则自带了 Cargo。如果通过其他方式安装的话，可以在终端输入如下命令检查是否安装了 Cargo：\n```console\n$ cargo --version\n```\n如果你看到了版本号，说明安装成功！如果看到类似  的错误，你应该查看相应安装文档以确定如何单独安装 Cargo。",
+          "score": 165.20316
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "使用 Cargo 创建项目\n我们使用 Cargo 创建一个新项目，然后看看与上面的 Hello, world! 项目有什么不同。回到 projects 目录（或者你存放代码的目录）。接下来，可在任何操作系统下运行以下命令：\n```console\n$ cargo new hello_cargo\n$ cd hello_cargo\n```\n第一行命令新建了名为 hello_cargo 的目录。我们将项目命名为 hello_cargo，同时 Cargo 在一个同名目录中创建项目文件。进入 hello_cargo 目录并列出文件。将会看到 Cargo 生成了两个文件和一个目录：一个 Cargo.toml 文件，一个 src 目录，以及位于 src 目录中的 main.rs 文件。它也在 hello_cargo 目录初始化了一个 Git 仓库，并带有一个 .gitignore 文件。如果在现有的 Git 仓库中运行 ，则不会生成 Git 文件；但你可以使用  来无视此限制，强制生成 Git 文件。注意：Git 是一个常用的版本控制系统（version control system， VCS）。可以通过  参数使  切换到其它版本控制系统，或者不使用 VCS。运行  查看可用的选项。使用你喜欢的文本编辑器打开 Cargo.toml 文件。它应该看起来如示例 1-2 所示：文件名：Cargo.toml\n```toml\n[package]\nname = \"hello_cargo\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n```\n示例 1-2：cargo new 命令生成的 Cargo.toml 的内容此文件使用 TOML (Tom's Obvious, Minimal Language) 格式，这是 Cargo 配置文件的格式。第一行，，是一个表块（section）标题，表明下面的语句用来配置一个包（package）。随着我们在这个文件增加更多的信息，还将增加其他表块。接下来的三行设置了 Cargo 编译程序所需的配置：项目的名称、版本，以及使用的 Rust 大版本号（edition，区别于 version）。附录 E 会介绍 （译注：Rust 的核心版本，即 2015、2018、2021 版等） 的值。最后一行， 是一个表块的开头，你可以在其中列出你的项目所依赖的任何包。在 Rust 中，代码包被称为 crate。这个项目并不需要其他的 crate，不过在第 2 章的第一个项目会用到依赖，那时会用得上这个表块。现在打开 src/main.rs 看看：文件名：src/main.rs\n```rust\nfn main() {\n    println!(\"Hello, world!\");\n}\n```\nCargo 生成了一个 “Hello, world!” 程序，正如我们之前编写的示例 1-1！到目前为止，之前项目与 Cargo 生成项目的区别是，Cargo 将代码放在 src 目录，同时项目根目录包含一个 Cargo.toml 配置文件。Cargo 期望源文件位于 src 目录中。项目根目录只存放说明文件（README）、许可协议（license）信息、配置文件和其他跟代码无关的文件。使用 Cargo 可帮助你保持项目干净整洁。这里为一切事物所准备，一切都位于正确的位置。对于没有使用 Cargo 开始的项目，比如我们之前创建的 Hello,world! 项目，你可以将其转化为一个 Cargo 项目。将代码放入 src 目录，并创建一个合适的 Cargo.toml 文件。",
+          "score": 163.56662
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo",
+          "quote": "总结\n你已准备好开启 Rust 之旅了！在本章，你学习了：使用  安装最新稳定版的 Rust更新到新版的 Rust打开本地安装的文档直接通过  编写并运行 “Hello, world!” 程序使用 Cargo 的惯例来创建和运行一个新项目是时候通过构建更强大的程序来熟悉阅读和编写 Rust 代码了。所以在第 2 章，我们会构建一个猜数字游戏程序。如果你更希望从学习 Rust 常用的编程概念开始，请阅读第 3 章，接着再回到第 2 章。",
+          "score": 144.77502
+        }
+      ],
+      "scores": {
+        "llm_score": 1.0,
+        "llm_correct": true,
+        "llm_reasoning": "模型回答准确涵盖了标准答案的核心信息，详细说明了cargo build和cargo run的区别（编译/运行流程、输出差异、适用场景），并正确指出了cargo run在修改后自动编译的特性，与标准答案完全一致，无矛盾内容。",
+        "citation_hit": true
+      },
+      "passed": true,
+      "duration": 21.14
+    },
+    {
+      "id": "rust_q04",
+      "question": "cargo check 命令有什么作用？为什么要使用它？",
+      "type": "extractive",
+      "answer_gold": "cargo check 快速检查代码确保其可以编译但不产生可执行文件。因为它比 cargo build 快得多，可以在编写代码时频繁运行以检查错误。",
+      "answer_pred": "cargo check命令用于快速检查代码确保其可以编译，但不生成可执行文件。它通过检查源代码是否符合 Rust 的编译要求，帮助开发者在修改代码前验证其正确性。这种机制在开发过程中尤为重要，因为它可以避免不必要的编译步骤，提升开发效率。当代码修改后，Cargo 会自动检测更改并重新检查，而无需显式运行编译命令。这种即时验证功能使得开发者能够更高效地调试和迭代代码，尤其是在频繁修改代码的场景下。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "构建并运行 Cargo 项目\n现在让我们看看通过 Cargo 构建和运行 “Hello, world!” 程序有什么不同！在 hello_cargo 目录下，输入下面的命令来构建项目：\n```console\n$ cargo build\n   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 2.85 secs\n```\n这个命令会在 target/debug/hello_cargo 下创建一个可执行文件（在 Windows 上是 target\\debug\\hello_cargo.exe），而不是放在目前目录下。你可以使用下面的命令来运行它：\n```console\n$ ./target/debug/hello_cargo # 或者在 Windows 下为 .\\target\\debug\\hello_cargo.exe\nHello, world!\n```\n如果一切顺利，终端上应该会打印出 。首次运行  时，也会使 Cargo 在项目根目录创建一个新文件：Cargo.lock。这个文件记录项目依赖的实际版本。这个项目并没有依赖，所以其内容比较少。您不需要手动更改这个文件，Cargo 会为您管理好它。我们刚刚使用  构建了项目，并使用  运行了程序，但是，我们也可以使用  命令，一次性完成代码编译和运行的操作：\n```console\n$ cargo run\n    Finished dev [unoptimized + debuginfo] target(s) in 0.0 secs\n     Running `target/debug/hello_cargo`\nHello, world!\n```\n注意这一次并没有出现表明 Cargo 正在编译  的输出。Cargo 发现文件并没有被改变，就直接运行了二进制文件。如果修改了源文件的话，Cargo 会在运行之前重新构建项目，并会出现像这样的输出：\n```console\n$ cargo run\n   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 0.33 secs\n     Running `target/debug/hello_cargo`\nHello, world!\n```\nCargo 还提供了一个名为  的命令。该命令快速检查代码确保其可以编译，但并不产生可执行文件：\n```console\n$ cargo check\n   Checking hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 0.32 secs\n```\n为什么你会不需要可执行文件呢？通常， 要比  快得多，因为它省略了生成可执行文件的步骤。如果你在编写代码时不断检查你的代码，那么使用  命令可以加快这个过程！为此很多 Rustacean 编写代码时会定期运行  以确保它们可以编译。当准备好使用可执行文件时才运行 。我们回顾下已学习的 Cargo 内容：可以使用  构建项目。可以使用  一步构建并运行项目。可以使用  构建项目而无需生成二进制文件来检查错误。Cargo 会将构建结果保存到 target/debug 目录，而不是源码所在的目录。使用 Cargo 的一个额外的优点是，不管你使用什么操作系统，其命令都是一样的。所以从现在开始本书将不再为 Linux 、macOS 或 Windows 提供平台特定的命令。",
+          "score": 115.596725
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo",
+          "quote": "Hello, Cargo!\nCargo 是 Rust 的构建系统和包管理器。大多数 Rustacean 们使用 Cargo 来管理他们的 Rust 项目，因为它可以为你处理很多任务，比如构建代码、下载依赖库，以及编译这些库。（我们把代码所需要的库叫做依赖（dependency））。最简单的 Rust 程序（如我们刚刚编写的）不含任何依赖。所以如果使用 Cargo 来构建 “Hello, world!” 项目，将只会用到 Cargo 构建代码的那部分功能。在编写更复杂的 Rust 程序时，你将添加依赖项，如果使用 Cargo 启动项目，则添加依赖项将更容易。由于绝大多数 Rust 项目使用 Cargo，本书接下来的部分假设你也使用 Cargo。如果使用“安装” 部分介绍的官方安装包的话，则自带了 Cargo。如果通过其他方式安装的话，可以在终端输入如下命令检查是否安装了 Cargo：\n```console\n$ cargo --version\n```\n如果你看到了版本号，说明安装成功！如果看到类似  的错误，你应该查看相应安装文档以确定如何单独安装 Cargo。",
+          "score": 106.60295
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "使用 Cargo 创建项目\n我们使用 Cargo 创建一个新项目，然后看看与上面的 Hello, world! 项目有什么不同。回到 projects 目录（或者你存放代码的目录）。接下来，可在任何操作系统下运行以下命令：\n```console\n$ cargo new hello_cargo\n$ cd hello_cargo\n```\n第一行命令新建了名为 hello_cargo 的目录。我们将项目命名为 hello_cargo，同时 Cargo 在一个同名目录中创建项目文件。进入 hello_cargo 目录并列出文件。将会看到 Cargo 生成了两个文件和一个目录：一个 Cargo.toml 文件，一个 src 目录，以及位于 src 目录中的 main.rs 文件。它也在 hello_cargo 目录初始化了一个 Git 仓库，并带有一个 .gitignore 文件。如果在现有的 Git 仓库中运行 ，则不会生成 Git 文件；但你可以使用  来无视此限制，强制生成 Git 文件。注意：Git 是一个常用的版本控制系统（version control system， VCS）。可以通过  参数使  切换到其它版本控制系统，或者不使用 VCS。运行  查看可用的选项。使用你喜欢的文本编辑器打开 Cargo.toml 文件。它应该看起来如示例 1-2 所示：文件名：Cargo.toml\n```toml\n[package]\nname = \"hello_cargo\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n```\n示例 1-2：cargo new 命令生成的 Cargo.toml 的内容此文件使用 TOML (Tom's Obvious, Minimal Language) 格式，这是 Cargo 配置文件的格式。第一行，，是一个表块（section）标题，表明下面的语句用来配置一个包（package）。随着我们在这个文件增加更多的信息，还将增加其他表块。接下来的三行设置了 Cargo 编译程序所需的配置：项目的名称、版本，以及使用的 Rust 大版本号（edition，区别于 version）。附录 E 会介绍 （译注：Rust 的核心版本，即 2015、2018、2021 版等） 的值。最后一行， 是一个表块的开头，你可以在其中列出你的项目所依赖的任何包。在 Rust 中，代码包被称为 crate。这个项目并不需要其他的 crate，不过在第 2 章的第一个项目会用到依赖，那时会用得上这个表块。现在打开 src/main.rs 看看：文件名：src/main.rs\n```rust\nfn main() {\n    println!(\"Hello, world!\");\n}\n```\nCargo 生成了一个 “Hello, world!” 程序，正如我们之前编写的示例 1-1！到目前为止，之前项目与 Cargo 生成项目的区别是，Cargo 将代码放在 src 目录，同时项目根目录包含一个 Cargo.toml 配置文件。Cargo 期望源文件位于 src 目录中。项目根目录只存放说明文件（README）、许可协议（license）信息、配置文件和其他跟代码无关的文件。使用 Cargo 可帮助你保持项目干净整洁。这里为一切事物所准备，一切都位于正确的位置。对于没有使用 Cargo 开始的项目，比如我们之前创建的 Hello,world! 项目，你可以将其转化为一个 Cargo 项目。将代码放入 src 目录，并创建一个合适的 Cargo.toml 文件。",
+          "score": 105.913574
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch01-03-hello-cargo.md",
+          "heading": "rust-book-cn__src__ch01-03-hello-cargo > Hello, Cargo!",
+          "quote": "把使用 Cargo 当作习惯\n对于简单项目而言，使用 Cargo 和直接使用  相比并没有太大的优势，但是在程序变得更加复杂时，它会证明自己的价值。对于拥有多个 crate 的复杂项目，交给 Cargo 来协调构建将简单得多。尽管  项目很简单，其所使用的很多实用工具，在你将来的 Rust 生涯中也会用得到。其实，要在已存在的项目上构建，可以使用以下命令，通过 Git 检出代码，进入到该项目目录并构建：\n```console\n$ git clone example.org/someproject\n$ cd someproject\n$ cargo build\n```\n关于更多 Cargo 的信息，请查阅相应文档。",
+          "score": 104.54097
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch02-00-guessing-game-tutorial.md",
+          "heading": "rust-book-cn__src__ch02-00-guessing-game-tutorial > 编写猜数字游戏 > 生成一个秘密数字 > 使用 crate 来增加更多功能",
+          "quote": "更新 crate 到一个新版本\n当你确实需要升级 crate 时，Cargo 提供了这样一个命令 ，它会忽略 Cargo.lock 文件，并计算出所有符合 Cargo.toml 声明的最新版本。Cargo 接下来会把这些版本写入 Cargo.lock 文件。不过，Cargo 默认只会寻找大于或等于  而小于  的版本。如果  crate 发布了两个新版本， 和 ，在运行  时会出现如下内容：\n```console\n$ cargo update\n    Updating crates.io index\n    Updating rand v0.8.3 -> v0.8.4\n```\nCargo 忽略了  版本。此时你还会注意到 Cargo.lock 文件中发生了更改， 无非就是正在使用的  crate 版本改为 。如果想要  使用  版本或任何  系列的版本，则必须像这样更新 Cargo.toml 文件：\n```toml\n[dependencies]\nrand = \"0.9.0\"\n```\n下一次运行  时，Cargo 会从 registry（注册源） 更新可用的 crate，并根据你指定的新版本重新计算。第 14 章会讲到 Cargo 及其生态系统 的更多内容，不过目前你只需要了解这么多。通过 Cargo 复用库代码非常容易，因此 Rustacean 能够编写出由很多包组装而成的更轻巧的项目。",
+          "score": 77.37493
+        }
+      ],
+      "scores": {
+        "llm_score": 1.0,
+        "llm_correct": true,
+        "llm_reasoning": "模型回答准确涵盖了标准答案的核心信息（cargo check的作用及原因），语义一致且无矛盾，同时补充了开发效率提升的细节，完全符合标准答案的表述。",
+        "citation_hit": true
+      },
+      "passed": true,
+      "duration": 11.99
+    },
+    {
+      "id": "rust_q05",
+      "question": "如何构建用于发布的优化版本？",
+      "type": "extractive",
+      "answer_gold": "使用 cargo build --release 命令可以优化编译项目，生成的可执行文件在 target/release 目录下。",
+      "answer_pred": "无法找到答案",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__blog__github-actions-workflow.zh-CN.md",
+          "heading": "ant-design__docs__blog__github-actions-workflow.zh-CN > 如何使用 > 网站部署",
+          "quote": "独立版本\n大家都知道 https://ant.design 官网永远保持最新版本，但有时候仍还是需要查阅具体版本的文档，Deploy to Surge Job 则是每次发布新版本后将站点部署到 Surge， URL 规则为  并将 url 评论在每一个发版 commit 上：everyone-version-preview",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__blog__github-actions-workflow.zh-CN.md",
+          "heading": "ant-design__docs__blog__github-actions-workflow.zh-CN",
+          "quote": "title: 你好，GitHub Actions\ndate: 2023-06-06\nauthor: Wxh16144\nzhihu_url: https://zhuanlan.zhihu.com/p/639266855\n大家好，我是 Wxh16144，通过学习 Ant Design 的组件库和参与社区贡献，我发现了一些提高开发效率和代码质量的工具。借此机会，希望与大家分享我的经验，帮助大家更好地了解 Ant Design，并将这些技巧应用到自己的项目中。",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__blog__tooltip-align.zh-CN.md",
+          "heading": "ant-design__docs__blog__tooltip-align.zh-CN",
+          "quote": "总结\n在完成 Tooltip 改造后，我们还会继续改造其他使用到弹出层的组件。希望在此之后，开发者可以尽可能不需要再关注  的配置，而是可以直接使用组件。祝你开发愉快！",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__AGENTS.md",
+          "heading": "ant-design__AGENTS > AGENTS.md > 开发指南 > 国际化规范",
+          "quote": "本地化配置\n本地化配置文件命名规则：，如：、通常在为 antd 添加或修改某一项本地化配置时，如无特殊说明，需要同时修改所有语言的本地化配置本地化配置的内容通常是纯字符串带有  的变量将在实际使用的地方被实时替换成对应的变量内容",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__spec__buttons.zh-CN.md",
+          "heading": "ant-design__docs__spec__buttons.zh-CN > 按钮顺序",
+          "quote": "有很多按钮组，如何确定顺序\n工具栏中的操作类型很多，我们会倾向于将变化较少的内容位置固化。以表格工具栏举例，排列逻辑如下：业务逻辑：「推进」进程的操作。例如：编辑、新建、发布、保存、取消、撤回等；视图控制：控制内容展示的形式。例如：全屏、表格密度、放大缩小、布局控制等；其他：刷新、分享、设置等；溢出：被折叠的操作，若进行响应式设计，从右往左折叠至溢出操作。",
+          "score": 50.0
+        }
+      ],
+      "scores": {
+        "llm_score": 0.5,
+        "llm_correct": false,
+        "llm_reasoning": "模型回答\"无法找到答案\"与标准答案存在矛盾，标准答案明确提供了构建优化版本的命令和路径，而模型直接否定存在答案，违反了\"核心信息正确\"的要求。",
+        "citation_hit": false
+      },
+      "passed": false,
+      "duration": 8.59
+    },
+    {
+      "id": "antd_q01",
+      "question": "在 antd 中 undefined 和 null 有什么区别？",
+      "type": "extractive",
+      "answer_gold": "antd 约定 undefined 是非受控的标志，null 作为显式的受控空值。",
+      "answer_pred": "Ant Design 中的 `undefined` 和 `null` 在组件受控状态中存在区别。根据文档[1]，`undefined` 被定义为非受控的标志，而 `null` 作为显式的受控空值。在输入元素中，React 认为 `undefined` 和 `null` 都属于非受控状态，但当从非空值转换为 `null` 或 `undefined` 时，组件不再受控，这可能引发意外行为。antd 中通过区分 `undefined` 和 `null` 来处理复杂数据类型的清空（如 `Option` 类型），确保在使用 `undefined` 时避免因非空值假设导致的错误。\n\n具体区别如下：\n1. **受控状态**：`undefined` 作为非受控标志，而 `null` 是显式受控空值。在表单处理中，`undefined` 可能导致组件失去受控状态，需通过 `onChange` 显式设置。\n2. **类型安全**：`null` 作为显式受控空值，确保在使用时明确处理空值场景，而 `undefined` 作为非受控标志，需通过逻辑判断避免误用。\n3. **实践建议**：在类组件中，不建议直接使用 `undefined` 和 `null` 作为表单属性，应通过 `onChange` 控制受控状态，以避免意外行为。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": " 和  在  的受控组件中有区别吗？\n有区别。antd 约定： 是非受控的标志， 作为显式的受控空值。在输入元素中，React 认为  和  都属于非受控的标志。当  由非空值转化为  或  时，组件不再受控，这通常是一些意外情况发生的原因。但在 antd 中，我们定义  为非受控的标志，而  则作为显式的受控空值。为的是处理  为复杂数据类型时的清空（如 ）置  为空值等场景。如果需要让组件受控且希望将  置为空值，请将  设置为 。注意：对于类  组件的 ，我们强烈不建议使用  和  作为  中的 ，请使用  作为  的 。",
+          "score": 92.42854
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__components__form__index.zh-CN.md",
+          "heading": "ant-design__components__form__index.zh-CN > FAQ",
+          "quote": "为什么  设置字段为  时，有的组件不会重置为空？ {#faq-set-fields-undefined}\n在 React 中， 从确定值改为  表示从受控变为非受控，因而不会重置展示值（但是 Form 中的值确实已经改变）。你可以通过 HOC 改变这一逻辑：\n```jsx\nconst MyInput = ({\n  // 强制保持受控逻辑\n  value = '',\n  ...rest\n}) => <input value={value} {...rest} />;\n\n<Form.Item name=\"my\">\n  <MyInput />\n</Form.Item>;\n```\n",
+          "score": 90.57297
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch06-01-defining-an-enum.md",
+          "heading": "rust-book-cn__src__ch06-01-defining-an-enum > 定义枚举",
+          "quote": " 枚举和其相对于空值的优势\n在之前的部分，我们看到了  枚举如何利用 Rust 的类型系统在程序中编码更多信息而不单单是数据。接下来我们分析一个  的案例， 是标准库定义的另一个枚举。 类型应用广泛是因为它编码了一个非常普遍的场景，即一个值要么有值要么没值。从类型系统的角度来表达这个概念就意味着编译器需要检查是否处理了所有应该处理的情况，这样就可以避免在其他编程语言中非常常见的 bug。编程语言的设计经常要考虑包含哪些功能，但考虑排除哪些功能也很重要。Rust 并没有很多其他语言中有的空值功能。空值（Null ）是一个值，它代表没有值。在有空值的语言中，变量总是这两种状态之一：空值和非空值。Tony Hoare，null 的发明者，在他 2009 年的演讲 “Null References: The Billion Dollar Mistake” 中曾经说到：我称之为我十亿美元的错误。当时，我在为一个面向对象语言设计第一个综合性的面向引用的类型系统。我的目标是通过编译器的自动检查来保证所有引用的使用都应该是绝对安全的。不过我未能抵抗住引入一个空引用的诱惑，仅仅是因为它是这么的容易实现。这引发了无数错误、漏洞和系统崩溃，在之后的四十多年中造成了数十亿美元的苦痛和伤害。空值的问题在于当你尝试像一个非空值那样使用一个空值，会出现某种形式的错误。因为空和非空的属性无处不在，非常容易出现这类错误。然而，空值尝试表达的概念仍然是有意义的：空值是一个因为某种原因目前无效或缺失的值。问题不在于概念而在于具体的实现。为此，Rust 并没有空值，不过它确实拥有一个可以编码存在或不存在概念的枚举。这个枚举是 ，而且它定义于标准库中，如下:\n```rust\nenum Option<T> {\n    Some(T),\n    None,\n}\n```\n 枚举是如此有用以至于它甚至被包含在了 prelude 之中，你不需要将其显式引入作用域。另外，它的成员也是如此，可以不需要  前缀来直接使用  和 。即便如此  也仍是常规的枚举， 和  仍是  的成员。 语法是一个我们还未讲到的 Rust 功能。它是一个泛型类型参数，第 10 章会更详细的讲解泛型。目前，所有你需要知道的就是  意味着  枚举的  成员可以包含任意类型的数据。这里是一些包含数字类型和字符串类型  值的例子：\n```rust\nlet some_number = Some(5);\nlet some_string = Some(\"a string\");\n\nlet absent_number: Option<i32> = None;\n```\n如果使用  而不是 ，需要告诉 Rust  是什么类型的，因为编译器只通过  值无法推断出  成员保存的值的类型。当有一个  值时，我们就知道存在一个值，而这个值保存在  中。当有个  值时，在某种意义上，它跟空值具有相同的意义：并没有一个有效的值。那么， 为什么就比空值要好呢？简而言之，因为  和 （这里  可以是任何类型）是不同的类型，编译器不允许像一个肯定有效的值那样使用 。例如，这段代码不能编译，因为它尝试将  与  相加：\n```rust,ignore\nlet x: i8 = 5;\nlet y: Option<i8> = Some(5);\n\nlet sum = x + y;\n```\n如果运行这些代码，将得到类似这样的错误信息：\n```text\nerror[E0277]: the trait bound `i8: std::ops::Add<std::option::Option<i8>>` is\nnot satisfied\n -->\n  |\n5 |     let sum = x + y;\n  |                 ^ no implementation for `i8 + std::option::Option<i8>`\n  |\n```\n很好！事实上，错误信息意味着 Rust 不知道该如何将  与  相加，因为它们的类型不同。当在 Rust 中拥有一个像  这样类型的值时，编译器确保它总是有一个有效的值。我们可以自信使用而无需做空值检查。只有当使用 （或者任何用到的类型）的时候需要担心可能没有值，而编译器会确保我们在使用值之前处理了为空的情况。换句话说，在对  进行  的运算之前必须将其转换为 。通常这能帮助我们捕获到空值最常见的问题之一：假设某值不为空但实际上为空的情况。不再担心会错误地假设一个非空值，会让你对代码更加有信心。为了拥有一个可能为空的值，你必须要显式地将其放入对应类型的  中。接着，当使用这个值时，必须明确地处理值为空的情况。只要一个值不是  类型，你就 可以 安全地认定它的值不为空。这是 Rust 的一个经过深思熟虑的设计决策，来限制空值的泛滥以增加 Rust 代码的安全性。那么当有一个  的值时，如何从  成员中取出  的值来使用它呢？ 枚举拥有大量用于各种情况的方法：你可以查看它的文档。熟悉  的方法将对你的 Rust 之旅非常有用。总的来说，为了使用  值，需要编写处理每个成员的代码。你想要一些代码只当拥有  值时运行，允许这些代码使用其中的 。也希望一些代码在值为  时运行，这些代码并没有一个可用的  值。 表达式就是这么一个处理枚举的控制流结构：它会根据枚举的成员运行不同的代码，这些代码可以使用匹配到的值中的数据。",
+          "score": 78.1561
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "V5 中 colorPrimary 和 colorInfo 及 colorLink 之间是什么关系？\n在 Ant Design Token 系统中  和  同属于 基础变量（Seed Token），所以两者是互相独立的。 则属于 别名变量（Alias Token）, 默认继承  且和  无关。",
+          "score": 76.65083
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__components__form__index.zh-CN.md",
+          "heading": "ant-design__components__form__index.zh-CN > FAQ",
+          "quote": "为什么 Form.List 不支持  还需要使用 ErrorList 展示错误？ {#faq-form-list-no-label}\nForm.List 本身是 renderProps，内部样式非常自由。因而默认配置  和  节点很难与之配合。如果你需要 antd 样式的 ，可以通过外部包裹 Form.Item 来实现。",
+          "score": 73.18793
+        }
+      ],
+      "scores": {
+        "llm_score": 0.95,
+        "llm_correct": true,
+        "llm_reasoning": "模型回答准确涵盖了标准答案的核心信息，正确区分了undefined（非受控）和null（受控空值）的语义差异，并补充了在表单处理中的实践建议。同时，模型回答未引入与标准答案矛盾的内容，且通过具体场景（如Option类型）说明区别，符合问题要求。虽然提及文档引用[1]，但未否定标准答案的权威性，因此判定为正确回答。",
+        "citation_hit": true
+      },
+      "passed": true,
+      "duration": 19.17
+    },
+    {
+      "id": "antd_q02",
+      "question": "为什么 message 和 notification 是小写的？",
+      "type": "extractive",
+      "answer_gold": "因为 message 是一个函数，而不是一个 React 组件。",
+      "answer_pred": "message 和 notification 是小写的，是因为它们是 React 的函数，而不是 React 组件。在 React 中，函数组件使用小写命名，而组件使用首字母大写的命名。因此，message 和 notification 是函数，而不是组件，这与其它组件（如 Modal、Form、Table 等）的命名规范不同。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "ConfigProvider 设置  后，message/notification/Modal.confirm 生成的节点样式丢失了？\nmessage/notification/Modal.confirm 等静态方法不同于  的渲染方式，是单独渲染在  生成的 DOM 树节点上，无法共享 ConfigProvider 提供的 context 信息。你有两种解决方式：使用官方提供的 message.useMessage、notification.useNotification 和 Modal.useModal 来调用这些方法。使用 App.useApp 直接调用 message、notification、modal 实例方法。",
+          "score": 123.31024
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__blog__why-not-static.zh-CN.md",
+          "heading": "ant-design__docs__blog__why-not-static.zh-CN > 静态方法 > Hooks",
+          "quote": "App\n因而在 v5 版本中，我们提供了 App 组件。这个组件本身带有 DOM 结构，会为自节点添加一些重置样式（比如在过去版本被人诟病的全局样式污染，现在只会作用到 App 之下）。同时也为 Modal、message、notification 添加了 ContextHolder。这样开发者在应用最外层添加 App 后，代码中就可以简单的使用它们了：\n```tsx\nconst Demo = () => {\n  const { message } = App.useApp();\n\n  React.useEffect(() => {\n    message.success('Hello World');\n  }, []);\n\n  // ...\n};\n```\n",
+          "score": 99.54347
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__components__form__index.zh-CN.md",
+          "heading": "ant-design__components__form__index.zh-CN > FAQ",
+          "quote": "为什么 Form.List 不支持  还需要使用 ErrorList 展示错误？ {#faq-form-list-no-label}\nForm.List 本身是 renderProps，内部样式非常自由。因而默认配置  和  节点很难与之配合。如果你需要 antd 样式的 ，可以通过外部包裹 Form.Item 来实现。",
+          "score": 81.84101
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch16-02-message-passing.md",
+          "heading": "rust-book-cn__src__ch16-02-message-passing > 使用消息传递在线程间传送数据",
+          "quote": "通道与所有权转移\n所有权规则在消息传递中扮演了重要角色，其有助于我们编写安全的并发代码。防止并发编程中的错误是在 Rust 程序中考虑所有权的一大优势。现在让我们做一个试验来看看通道与所有权如何一同协作以避免产生问题：我们将尝试在新建线程中的通道中发送完  值 之后 再使用它。尝试编译示例 16-9 中的代码并看看为何这是不允许的：文件名: src/main.rs\n```rust,ignore,does_not_compile\nuse std::thread;\nuse std::sync::mpsc;\n\nfn main() {\n    let (tx, rx) = mpsc::channel();\n\n    thread::spawn(move || {\n        let val = String::from(\"hi\");\n        tx.send(val).unwrap();\n        println!(\"val is {}\", val);\n    });\n\n    let received = rx.recv().unwrap();\n    println!(\"Got: {}\", received);\n}\n```\n示例 16-9: 在我们已经发送到通道中后，尝试使用  引用这里尝试在通过  发送  到通道中之后将其打印出来。允许这么做是一个坏主意：一旦将值发送到另一个线程后，那个线程可能会在我们再次使用它之前就将其修改或者丢弃。其他线程对值可能的修改会由于不一致或不存在的数据而导致错误或意外的结果。然而，尝试编译示例 16-9 的代码时，Rust 会给出一个错误：\n```text\nerror[E0382]: use of moved value: `val`\n  --> src/main.rs:10:31\n   |\n9  |         tx.send(val).unwrap();\n   |                 --- value moved here\n10 |         println!(\"val is {}\", val);\n   |                               ^^^ value used here after move\n   |\n   = note: move occurs because `val` has type `std::string::String`, which does\nnot implement the `Copy` trait\n```\n我们的并发错误会造成一个编译时错误。 函数获取其参数的所有权并移动这个值归接收者所有。这可以防止在发送后再次意外地使用这个值；所有权系统检查一切是否合乎规则。",
+          "score": 81.64591
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": " 和  是小写的，但是其他的组件都是首字母大写的，这是手滑吗？\n不，因为  是一个函数，而不是一个 React 组件。",
+          "score": 78.000626
+        }
+      ],
+      "scores": {
+        "llm_score": 1.0,
+        "llm_correct": true,
+        "llm_reasoning": "模型回答准确指出了message和notification是React函数而非组件的原因，符合标准答案的核心信息，逻辑清晰且无矛盾。",
+        "citation_hit": true
+      },
+      "passed": true,
+      "duration": 5.94
+    },
+    {
+      "id": "antd_q03",
+      "question": "如何将 antd 组件的默认语言切换为中文？",
+      "type": "multi_hop",
+      "answer_gold": "使用 ConfigProvider 组件来包裹应用，并配置 dayjs.locale('zh-cn')。",
+      "answer_pred": "无法找到答案。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__AGENTS.md",
+          "heading": "ant-design__AGENTS > AGENTS.md > 文档和 Changelog 规范",
+          "quote": "基本要求\n✅ 提供中英文两个版本✅ 新的属性需要声明可用的版本号✅ 属性命名符合 antd 的 API 命名规则",
+          "score": 68.910126
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "为什么修改组件传入的对象或数组属性组件不会更新？\nantd 内部会对 props 进行浅比较实现性能优化。当状态变更，你总是应该传递一个新的对象。具体请参考 React 的文档",
+          "score": 68.33522
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "CSS-in-JS 与 tailwindcss 优先级冲突？\n同上，你可以调整 antd 样式优先级以覆盖。相关 issue: #38794",
+          "score": 68.20919
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "如何修改 Ant Design 组件的默认样式？\n你可以覆盖它们的样式，但是我们不推荐这么做。antd 是一系列 React 组件，但同样是一套设计规范。",
+          "score": 68.19356
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__i18n.zh-CN.md",
+          "heading": "ant-design__docs__react__i18n.zh-CN",
+          "quote": "增加语言包\n如果你找不到你需要的语言包，欢迎你在 英文语言包 的基础上创建一个新的语言包，并给我们发一个 Pull Request，可以参考 阿塞拜疆语的 PR。基本步骤如下：Fork  并 git clone 到本地，切换到  分支，执行一次拉取确保最新，基于  分支切换一个新分支，以下工作将在新分支完成。\n```bash\ngit clone git@github.com:<your organization>/ant-design.git\ncd ant-design/\ngit remote add upstream git@github.com:ant-design/ant-design.git\ngit checkout -b <your new branch name> upstream/feature\n```\n为 @rc-component/picker 添加对应语言，参考 这个。为 @rc-component/pagination 添加对应语言，参考 这个。等待  和  发布含上述内容的最低版本。参考 阿塞拜疆语的 PR 向  发起 PR，完善对应语言的其他内容和更新  和  版本。在 index.test.tsx 添加该语言的测试用例。更新 snapshot，在这之前或许你还需要先删除  和 lock 文件 （ or ） 并全新安装。\n```bash\nnpm run test -- components/locale -u\n```\n更新 docs/react/i18n.zh-CN.md 和 docs/react/i18n.zh-CN.md，将对应语言添加到文档列表。观察 CI 是否通过，若未通过，根据日志进行修改直至通过。万事俱备等待 review 。",
+          "score": 50.0
+        }
+      ],
+      "scores": {
+        "llm_score": 0.0,
+        "llm_correct": false,
+        "llm_reasoning": "模型回答\"无法找到答案\"与标准答案存在矛盾，标准答案明确提供了使用ConfigProvider和dayjs.locale('zh-cn')的解决方案，而模型未提供任何有效信息。",
+        "citation_hit": true
+      },
+      "passed": false,
+      "duration": 8.46
+    },
+    {
+      "id": "antd_q04",
+      "question": "如何关闭 antd 组件的动画？",
+      "type": "extractive",
+      "answer_gold": "通过 ConfigProvider 的 theme 属性设置 token: { motion: false }。",
+      "answer_pred": "通过使用 `SeedToken` 可以很方便地实现关闭组件动画：  \n```jsx\nimport { ConfigProvider } from 'antd';\n\n<ConfigProvider theme={{ token: { motion: false } }}>\n  <App />\n</ConfigProvider>;\n```  \n该方法通过设置 `token` 的 `motion` 属性为 `false` 来禁用组件的动画效果。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "如何关闭组件动画\n通过 SeedToken 可以很方便的实现：\n```jsx\nimport { ConfigProvider } from 'antd';\n\n<ConfigProvider theme={{ token: { motion: false } }}>\n  <App />\n</ConfigProvider>;\n```\n",
+          "score": 83.97012
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "如何拓展 antd 的组件？\n如果你需要一些 antd 没有包含的功能，你可以尝试通过 HOC 拓展 antd 的组件。 更多antd 对新增组件需求会进行严格的讨论，以防止 API 腐败而变为历史债务。antd 侧对于 API 也更倾向于提供原子化的能力使开发者可以更灵活的定制自己所需要的功能。",
+          "score": 73.7199
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "为什么修改组件传入的对象或数组属性组件不会更新？\nantd 内部会对 props 进行浅比较实现性能优化。当状态变更，你总是应该传递一个新的对象。具体请参考 React 的文档",
+          "score": 68.33522
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__blog__testing-migrate.zh-CN.md",
+          "heading": "ant-design__docs__blog__testing-migrate.zh-CN > 迁移",
+          "quote": "四、兼容性测试\n在大版本升级的同时，废弃了部分组件，但是并没有在 antd 中移除，比如 BackTop 组件，需要在组件中加入 warning 以保证兼容性，所以还需要对 warning 编写专门的单元测试:\n```diff\n    describe('BackTop', () => {\n++    it('should console Error', () => {\n++        const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});\n++        render(<BackTop />);\n++        expect(errSpy).toHaveBeenCalledWith(\n++          'Warning: [antd: BackTop] `BackTop` is deprecated. Please use `FloatButton.BackTop` instead.',\n++        );\n++      errSpy.mockRestore();\n++    });\n    });\n```\n",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch20-02-multithreaded.md",
+          "heading": "rust-book-cn__src__ch20-02-multithreaded > 将单线程服务器变为多线程服务器 > 使用线程池改善吞吐量",
+          "quote": "实现  方法\n最后让我们实现  上的  方法。同时也要修改  结构体：它将不再是结构体， 将是一个有着  接收到的闭包类型的 trait 对象的类型别名。第 19 章 “类型别名用来创建类型同义词” 部分提到过，类型别名允许将长的类型变短。观察示例 20-19：文件名: src/lib.rs\n```rust\n// --snip--\n# pub struct ThreadPool {\n#     workers: Vec<Worker>,\n#     sender: mpsc::Sender<Job>,\n# }\n# use std::sync::mpsc;\n# struct Worker {}\n\ntype Job = Box<dyn FnOnce() + Send + 'static>;\n\nimpl ThreadPool {\n    // --snip--\n\n    pub fn execute<F>(&self, f: F)\n        where\n            F: FnOnce() + Send + 'static\n    {\n        let job = Box::new(f);\n\n        self.sender.send(job).unwrap();\n    }\n}\n\n// --snip--\n```\n示例 20-19: 为存放每一个闭包的  创建一个  类型别名，接着在通道中发出任务在使用  得到的闭包新建  实例之后，将这些任务从通道的发送端发出。这里调用  上的 ，因为发送可能会失败，这可能发生于例如停止了所有线程执行的情况，这意味着接收端停止接收新消息了。不过目前我们无法停止线程执行；只要线程池存在他们就会一直执行。使用  是因为我们知道失败不可能发生，即便编译器不这么认为。不过到此事情还没有结束！在 worker 中，传递给  的闭包仍然还只是 引用 了通道的接收端。相反我们需要闭包一直循环，向通道的接收端请求任务，并在得到任务时执行他们。如示例 20-20 对  做出修改：文件名: src/lib.rs\n```rust,ignore,does_not_compile\n// --snip--\n\nimpl Worker {\n    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {\n        let thread = thread::spawn(move || {\n            loop {\n                let job = receiver.lock().unwrap().recv().unwrap();\n\n                println!(\"Worker {} got a job; executing.\", id);\n\n                job();\n            }\n        });\n\n        Worker {\n            id,\n            thread,\n        }\n    }\n}\n```\n示例 20-20: 在 worker 线程中接收并执行任务这里，首先在  上调用了  来获取互斥器，接着  在出现任何错误时 panic。如果互斥器处于一种叫做 被污染（poisoned）的状态时获取锁可能会失败，这可能发生于其他线程在持有锁时 panic 了且没有释放锁。在这种情况下，调用  使其 panic 是正确的行为。请随意将  改为包含有意义错误信息的 。如果锁定了互斥器，接着调用  从通道中接收 。最后的  也绕过了一些错误，这可能发生于持有通道发送端的线程停止的情况，类似于如果接收端关闭时  方法如何返回  一样。调用  会阻塞当前线程，所以如果还没有任务，其会等待直到有可用的任务。 确保一次只有一个  线程尝试请求任务。通过这个技巧，线程池处于可以运行的状态了！执行  并发起一些请求：\n```text\n$ cargo run\n   Compiling hello v0.1.0 (file:///projects/hello)\nwarning: field is never used: `workers`\n --> src/lib.rs:7:5\n  |\n7 |     workers: Vec<Worker>,\n  |     ^^^^^^^^^^^^^^^^^^^^\n  |\n  = note: #[warn(dead_code)] on by default\n\nwarning: field is never used: `id`\n  --> src/lib.rs:61:5\n   |\n61 |     id: usize,\n   |     ^^^^^^^^^\n   |\n   = note: #[warn(dead_code)] on by default\n\nwarning: field is never used: `thread`\n  --> src/lib.rs:62:5\n   |\n62 |     thread: thread::JoinHandle<()>,\n   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n   |\n   = note: #[warn(dead_code)] on by default\n\n    Finished dev [unoptimized + debuginfo] target(s) in 0.99 secs\n     Running `target/debug/hello`\nWorker 0 got a job; executing.\nWorker 2 got a job; executing.\nWorker 1 got a job; executing.\nWorker 3 got a job; executing.\nWorker 0 got a job; executing.\nWorker 2 got a job; executing.\nWorker 1 got a job; executing.\nWorker 3 got a job; executing.\nWorker 0 got a job; executing.\nWorker 2 got a job; executing.\n```\n成功了！现在我们有了一个可以异步执行连接的线程池！它绝不会创建超过四个线程，所以当服务器收到大量请求时系统也不会负担过重。如果请求 /sleep，server 也能够通过另外一个线程处理其他请求。注意如果同时在多个浏览器窗口打开 /sleep，它们可能会彼此间隔地加载 5 秒，因为一些浏览器处于缓存的原因会顺序执行相同请求的多个实例。这些限制并不是由于我们的 Web 服务器造成的。在学习了第 18 章的  循环之后，你可能会好奇为何不能如此编写 worker 线程，如示例 20-21 所示：文件名: src/lib.rs\n```rust,ignore,not_desired_behavior\n// --snip--\n\nimpl Worker {\n    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {\n        let thread = thread::spawn(move || {\n            while let Ok(job) = receiver.lock().unwrap().recv() {\n                println!(\"Worker {} got a job; executing.\", id);\n\n                job();\n            }\n        });\n\n        Worker {\n            id,\n            thread,\n        }\n    }\n}\n```\n示例 20-21: 一个使用  的  替代实现这段代码可以编译和运行，但是并不会产生所期望的线程行为：一个慢请求仍然会导致其他请求等待执行。其原因有些微妙： 结构体没有公有  方法，因为锁的所有权依赖  方法返回的  中  的生命周期。这允许借用检查器在编译时确保绝不会在没有持有锁的情况下访问由  守护的资源，不过如果没有认真的思考  的生命周期的话，也可能会导致比预期更久的持有锁。因为  表达式中的值在整个块一直处于作用域中， 调用的过程中其仍然持有锁，这意味着其他 worker 不能接收任务。相反通过使用  并在循环块之内而不是之外获取锁和任务， 方法返回的  在  语句结束之后立刻就被丢弃了。这确保了  调用过程中持有锁，而在  调用前锁就被释放了，这就允许并发处理多个请求了。",
+          "score": 50.0
+        }
+      ],
+      "scores": {
+        "llm_score": 0.5,
+        "llm_correct": false,
+        "llm_reasoning": "模型回答中提到的\"SeedToken\"并非antd官方推荐的关闭动画方式，标准答案明确指出应通过ConfigProvider的theme属性设置token: { motion: false }。虽然技术上两者均可实现动画禁用，但模型回答存在术语混淆（SeedToken非antd官方API）且未直接引用标准答案中的具体实现方式，导致信息不一致。",
+        "citation_hit": true
+      },
+      "passed": false,
+      "duration": 13.52
+    },
+    {
+      "id": "refusal_q01",
+      "question": "antd 是否支持 Windows XP 系统？",
+      "type": "refusal",
+      "answer_gold": "",
+      "answer_pred": "无法找到答案。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "如何支持 SSR？\n请参考动态主题文档 服务端渲染 部分内容。",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__AGENTS.md",
+          "heading": "ant-design__AGENTS > AGENTS.md > 样式规范",
+          "quote": "响应式和主题支持\n✅ 组件应支持在不同屏幕尺寸下良好展示✅ 所有组件必须支持暗色模式✅ 组件应支持从右到左（RTL）的阅读方向✅ 使用 CSS 逻辑属性（如 ）替代方向性属性（如 ）✅ 支持通过  进行主题定制",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__AGENTS.md",
+          "heading": "ant-design__AGENTS > AGENTS.md > 工具链和环境",
+          "quote": "构建工具\n使用 webpack 进行构建支持 ES modules 和 CommonJS提供 UMD 格式的构建产物支持按需加载",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__spec__layout.zh-CN.md",
+          "heading": "ant-design__docs__spec__layout.zh-CN",
+          "quote": "适配\n在设计过程中，设计师还需要建立适配的概念，根据具体情况判断系统是否需要进行适配，以及哪些区块需要考虑动态布局。据统计，使用中台系统的用户的主流分辨率主要为 1920、1440 和 1366，个别系统还存在 1280 的显示设备。Ant Design 两种较为典型的适配方案：",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "你们有接受捐助的渠道吗，比如支付宝或者微信支付？\nhttps://opencollective.com/ant-design",
+          "score": 50.0
+        }
+      ],
+      "scores": {
+        "refusal_correct": true
+      },
+      "passed": true,
+      "duration": 14.8
+    }
+  ],
+  "failures": [
+    {
+      "id": "rust_q05",
+      "question": "如何构建用于发布的优化版本？",
+      "type": "extractive",
+      "answer_gold": "使用 cargo build --release 命令可以优化编译项目，生成的可执行文件在 target/release 目录下。",
+      "answer_pred": "无法找到答案",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__blog__github-actions-workflow.zh-CN.md",
+          "heading": "ant-design__docs__blog__github-actions-workflow.zh-CN > 如何使用 > 网站部署",
+          "quote": "独立版本\n大家都知道 https://ant.design 官网永远保持最新版本，但有时候仍还是需要查阅具体版本的文档，Deploy to Surge Job 则是每次发布新版本后将站点部署到 Surge， URL 规则为  并将 url 评论在每一个发版 commit 上：everyone-version-preview",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__blog__github-actions-workflow.zh-CN.md",
+          "heading": "ant-design__docs__blog__github-actions-workflow.zh-CN",
+          "quote": "title: 你好，GitHub Actions\ndate: 2023-06-06\nauthor: Wxh16144\nzhihu_url: https://zhuanlan.zhihu.com/p/639266855\n大家好，我是 Wxh16144，通过学习 Ant Design 的组件库和参与社区贡献，我发现了一些提高开发效率和代码质量的工具。借此机会，希望与大家分享我的经验，帮助大家更好地了解 Ant Design，并将这些技巧应用到自己的项目中。",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__blog__tooltip-align.zh-CN.md",
+          "heading": "ant-design__docs__blog__tooltip-align.zh-CN",
+          "quote": "总结\n在完成 Tooltip 改造后，我们还会继续改造其他使用到弹出层的组件。希望在此之后，开发者可以尽可能不需要再关注  的配置，而是可以直接使用组件。祝你开发愉快！",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__AGENTS.md",
+          "heading": "ant-design__AGENTS > AGENTS.md > 开发指南 > 国际化规范",
+          "quote": "本地化配置\n本地化配置文件命名规则：，如：、通常在为 antd 添加或修改某一项本地化配置时，如无特殊说明，需要同时修改所有语言的本地化配置本地化配置的内容通常是纯字符串带有  的变量将在实际使用的地方被实时替换成对应的变量内容",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__spec__buttons.zh-CN.md",
+          "heading": "ant-design__docs__spec__buttons.zh-CN > 按钮顺序",
+          "quote": "有很多按钮组，如何确定顺序\n工具栏中的操作类型很多，我们会倾向于将变化较少的内容位置固化。以表格工具栏举例，排列逻辑如下：业务逻辑：「推进」进程的操作。例如：编辑、新建、发布、保存、取消、撤回等；视图控制：控制内容展示的形式。例如：全屏、表格密度、放大缩小、布局控制等；其他：刷新、分享、设置等；溢出：被折叠的操作，若进行响应式设计，从右往左折叠至溢出操作。",
+          "score": 50.0
+        }
+      ],
+      "scores": {
+        "llm_score": 0.5,
+        "llm_correct": false,
+        "llm_reasoning": "模型回答\"无法找到答案\"与标准答案存在矛盾，标准答案明确提供了构建优化版本的命令和路径，而模型直接否定存在答案，违反了\"核心信息正确\"的要求。",
+        "citation_hit": false
+      },
+      "passed": false,
+      "duration": 8.59
+    },
+    {
+      "id": "antd_q03",
+      "question": "如何将 antd 组件的默认语言切换为中文？",
+      "type": "multi_hop",
+      "answer_gold": "使用 ConfigProvider 组件来包裹应用，并配置 dayjs.locale('zh-cn')。",
+      "answer_pred": "无法找到答案。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__AGENTS.md",
+          "heading": "ant-design__AGENTS > AGENTS.md > 文档和 Changelog 规范",
+          "quote": "基本要求\n✅ 提供中英文两个版本✅ 新的属性需要声明可用的版本号✅ 属性命名符合 antd 的 API 命名规则",
+          "score": 68.910126
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "为什么修改组件传入的对象或数组属性组件不会更新？\nantd 内部会对 props 进行浅比较实现性能优化。当状态变更，你总是应该传递一个新的对象。具体请参考 React 的文档",
+          "score": 68.33522
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "CSS-in-JS 与 tailwindcss 优先级冲突？\n同上，你可以调整 antd 样式优先级以覆盖。相关 issue: #38794",
+          "score": 68.20919
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "如何修改 Ant Design 组件的默认样式？\n你可以覆盖它们的样式，但是我们不推荐这么做。antd 是一系列 React 组件，但同样是一套设计规范。",
+          "score": 68.19356
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__i18n.zh-CN.md",
+          "heading": "ant-design__docs__react__i18n.zh-CN",
+          "quote": "增加语言包\n如果你找不到你需要的语言包，欢迎你在 英文语言包 的基础上创建一个新的语言包，并给我们发一个 Pull Request，可以参考 阿塞拜疆语的 PR。基本步骤如下：Fork  并 git clone 到本地，切换到  分支，执行一次拉取确保最新，基于  分支切换一个新分支，以下工作将在新分支完成。\n```bash\ngit clone git@github.com:<your organization>/ant-design.git\ncd ant-design/\ngit remote add upstream git@github.com:ant-design/ant-design.git\ngit checkout -b <your new branch name> upstream/feature\n```\n为 @rc-component/picker 添加对应语言，参考 这个。为 @rc-component/pagination 添加对应语言，参考 这个。等待  和  发布含上述内容的最低版本。参考 阿塞拜疆语的 PR 向  发起 PR，完善对应语言的其他内容和更新  和  版本。在 index.test.tsx 添加该语言的测试用例。更新 snapshot，在这之前或许你还需要先删除  和 lock 文件 （ or ） 并全新安装。\n```bash\nnpm run test -- components/locale -u\n```\n更新 docs/react/i18n.zh-CN.md 和 docs/react/i18n.zh-CN.md，将对应语言添加到文档列表。观察 CI 是否通过，若未通过，根据日志进行修改直至通过。万事俱备等待 review 。",
+          "score": 50.0
+        }
+      ],
+      "scores": {
+        "llm_score": 0.0,
+        "llm_correct": false,
+        "llm_reasoning": "模型回答\"无法找到答案\"与标准答案存在矛盾，标准答案明确提供了使用ConfigProvider和dayjs.locale('zh-cn')的解决方案，而模型未提供任何有效信息。",
+        "citation_hit": true
+      },
+      "passed": false,
+      "duration": 8.46
+    },
+    {
+      "id": "antd_q04",
+      "question": "如何关闭 antd 组件的动画？",
+      "type": "extractive",
+      "answer_gold": "通过 ConfigProvider 的 theme 属性设置 token: { motion: false }。",
+      "answer_pred": "通过使用 `SeedToken` 可以很方便地实现关闭组件动画：  \n```jsx\nimport { ConfigProvider } from 'antd';\n\n<ConfigProvider theme={{ token: { motion: false } }}>\n  <App />\n</ConfigProvider>;\n```  \n该方法通过设置 `token` 的 `motion` 属性为 `false` 来禁用组件的动画效果。",
+      "citations_pred": [
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "如何关闭组件动画\n通过 SeedToken 可以很方便的实现：\n```jsx\nimport { ConfigProvider } from 'antd';\n\n<ConfigProvider theme={{ token: { motion: false } }}>\n  <App />\n</ConfigProvider>;\n```\n",
+          "score": 83.97012
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "如何拓展 antd 的组件？\n如果你需要一些 antd 没有包含的功能，你可以尝试通过 HOC 拓展 antd 的组件。 更多antd 对新增组件需求会进行严格的讨论，以防止 API 腐败而变为历史债务。antd 侧对于 API 也更倾向于提供原子化的能力使开发者可以更灵活的定制自己所需要的功能。",
+          "score": 73.7199
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__react__faq.zh-CN.md",
+          "heading": "ant-design__docs__react__faq.zh-CN",
+          "quote": "为什么修改组件传入的对象或数组属性组件不会更新？\nantd 内部会对 props 进行浅比较实现性能优化。当状态变更，你总是应该传递一个新的对象。具体请参考 React 的文档",
+          "score": 68.33522
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/ant-design__docs__blog__testing-migrate.zh-CN.md",
+          "heading": "ant-design__docs__blog__testing-migrate.zh-CN > 迁移",
+          "quote": "四、兼容性测试\n在大版本升级的同时，废弃了部分组件，但是并没有在 antd 中移除，比如 BackTop 组件，需要在组件中加入 warning 以保证兼容性，所以还需要对 warning 编写专门的单元测试:\n```diff\n    describe('BackTop', () => {\n++    it('should console Error', () => {\n++        const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});\n++        render(<BackTop />);\n++        expect(errSpy).toHaveBeenCalledWith(\n++          'Warning: [antd: BackTop] `BackTop` is deprecated. Please use `FloatButton.BackTop` instead.',\n++        );\n++      errSpy.mockRestore();\n++    });\n    });\n```\n",
+          "score": 50.0
+        },
+        {
+          "doc_path": "/Users/lizhiying/Projects/knot/source/knot-test-docs/documents/rust-book-cn__src__ch20-02-multithreaded.md",
+          "heading": "rust-book-cn__src__ch20-02-multithreaded > 将单线程服务器变为多线程服务器 > 使用线程池改善吞吐量",
+          "quote": "实现  方法\n最后让我们实现  上的  方法。同时也要修改  结构体：它将不再是结构体， 将是一个有着  接收到的闭包类型的 trait 对象的类型别名。第 19 章 “类型别名用来创建类型同义词” 部分提到过，类型别名允许将长的类型变短。观察示例 20-19：文件名: src/lib.rs\n```rust\n// --snip--\n# pub struct ThreadPool {\n#     workers: Vec<Worker>,\n#     sender: mpsc::Sender<Job>,\n# }\n# use std::sync::mpsc;\n# struct Worker {}\n\ntype Job = Box<dyn FnOnce() + Send + 'static>;\n\nimpl ThreadPool {\n    // --snip--\n\n    pub fn execute<F>(&self, f: F)\n        where\n            F: FnOnce() + Send + 'static\n    {\n        let job = Box::new(f);\n\n        self.sender.send(job).unwrap();\n    }\n}\n\n// --snip--\n```\n示例 20-19: 为存放每一个闭包的  创建一个  类型别名，接着在通道中发出任务在使用  得到的闭包新建  实例之后，将这些任务从通道的发送端发出。这里调用  上的 ，因为发送可能会失败，这可能发生于例如停止了所有线程执行的情况，这意味着接收端停止接收新消息了。不过目前我们无法停止线程执行；只要线程池存在他们就会一直执行。使用  是因为我们知道失败不可能发生，即便编译器不这么认为。不过到此事情还没有结束！在 worker 中，传递给  的闭包仍然还只是 引用 了通道的接收端。相反我们需要闭包一直循环，向通道的接收端请求任务，并在得到任务时执行他们。如示例 20-20 对  做出修改：文件名: src/lib.rs\n```rust,ignore,does_not_compile\n// --snip--\n\nimpl Worker {\n    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {\n        let thread = thread::spawn(move || {\n            loop {\n                let job = receiver.lock().unwrap().recv().unwrap();\n\n                println!(\"Worker {} got a job; executing.\", id);\n\n                job();\n            }\n        });\n\n        Worker {\n            id,\n            thread,\n        }\n    }\n}\n```\n示例 20-20: 在 worker 线程中接收并执行任务这里，首先在  上调用了  来获取互斥器，接着  在出现任何错误时 panic。如果互斥器处于一种叫做 被污染（poisoned）的状态时获取锁可能会失败，这可能发生于其他线程在持有锁时 panic 了且没有释放锁。在这种情况下，调用  使其 panic 是正确的行为。请随意将  改为包含有意义错误信息的 。如果锁定了互斥器，接着调用  从通道中接收 。最后的  也绕过了一些错误，这可能发生于持有通道发送端的线程停止的情况，类似于如果接收端关闭时  方法如何返回  一样。调用  会阻塞当前线程，所以如果还没有任务，其会等待直到有可用的任务。 确保一次只有一个  线程尝试请求任务。通过这个技巧，线程池处于可以运行的状态了！执行  并发起一些请求：\n```text\n$ cargo run\n   Compiling hello v0.1.0 (file:///projects/hello)\nwarning: field is never used: `workers`\n --> src/lib.rs:7:5\n  |\n7 |     workers: Vec<Worker>,\n  |     ^^^^^^^^^^^^^^^^^^^^\n  |\n  = note: #[warn(dead_code)] on by default\n\nwarning: field is never used: `id`\n  --> src/lib.rs:61:5\n   |\n61 |     id: usize,\n   |     ^^^^^^^^^\n   |\n   = note: #[warn(dead_code)] on by default\n\nwarning: field is never used: `thread`\n  --> src/lib.rs:62:5\n   |\n62 |     thread: thread::JoinHandle<()>,\n   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n   |\n   = note: #[warn(dead_code)] on by default\n\n    Finished dev [unoptimized + debuginfo] target(s) in 0.99 secs\n     Running `target/debug/hello`\nWorker 0 got a job; executing.\nWorker 2 got a job; executing.\nWorker 1 got a job; executing.\nWorker 3 got a job; executing.\nWorker 0 got a job; executing.\nWorker 2 got a job; executing.\nWorker 1 got a job; executing.\nWorker 3 got a job; executing.\nWorker 0 got a job; executing.\nWorker 2 got a job; executing.\n```\n成功了！现在我们有了一个可以异步执行连接的线程池！它绝不会创建超过四个线程，所以当服务器收到大量请求时系统也不会负担过重。如果请求 /sleep，server 也能够通过另外一个线程处理其他请求。注意如果同时在多个浏览器窗口打开 /sleep，它们可能会彼此间隔地加载 5 秒，因为一些浏览器处于缓存的原因会顺序执行相同请求的多个实例。这些限制并不是由于我们的 Web 服务器造成的。在学习了第 18 章的  循环之后，你可能会好奇为何不能如此编写 worker 线程，如示例 20-21 所示：文件名: src/lib.rs\n```rust,ignore,not_desired_behavior\n// --snip--\n\nimpl Worker {\n    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {\n        let thread = thread::spawn(move || {\n            while let Ok(job) = receiver.lock().unwrap().recv() {\n                println!(\"Worker {} got a job; executing.\", id);\n\n                job();\n            }\n        });\n\n        Worker {\n            id,\n            thread,\n        }\n    }\n}\n```\n示例 20-21: 一个使用  的  替代实现这段代码可以编译和运行，但是并不会产生所期望的线程行为：一个慢请求仍然会导致其他请求等待执行。其原因有些微妙： 结构体没有公有  方法，因为锁的所有权依赖  方法返回的  中  的生命周期。这允许借用检查器在编译时确保绝不会在没有持有锁的情况下访问由  守护的资源，不过如果没有认真的思考  的生命周期的话，也可能会导致比预期更久的持有锁。因为  表达式中的值在整个块一直处于作用域中， 调用的过程中其仍然持有锁，这意味着其他 worker 不能接收任务。相反通过使用  并在循环块之内而不是之外获取锁和任务， 方法返回的  在  语句结束之后立刻就被丢弃了。这确保了  调用过程中持有锁，而在  调用前锁就被释放了，这就允许并发处理多个请求了。",
+          "score": 50.0
+        }
+      ],
+      "scores": {
+        "llm_score": 0.5,
+        "llm_correct": false,
+        "llm_reasoning": "模型回答中提到的\"SeedToken\"并非antd官方推荐的关闭动画方式，标准答案明确指出应通过ConfigProvider的theme属性设置token: { motion: false }。虽然技术上两者均可实现动画禁用，但模型回答存在术语混淆（SeedToken非antd官方API）且未直接引用标准答案中的具体实现方式，导致信息不一致。",
+        "citation_hit": true
+      },
+      "passed": false,
+      "duration": 13.52
+    }
+  ]
+}

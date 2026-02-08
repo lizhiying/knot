@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knot RAG 评测报告</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-green: #4ade80;
+            --accent-red: #f87171;
+            --accent-yellow: #facc15;
+            --accent-blue: #60a5fa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .timestamp {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .summary-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .summary-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+        
+        .summary-value.accuracy {
+            color: #4ade80;
+        }
+        
+        .summary-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .type-stat {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .type-name {
+            width: 100px;
+            color: var(--text-secondary);
+        }
+        
+        .type-bar-container {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-card);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .type-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .type-value {
+            width: 120px;
+            text-align: right;
+            font-family: monospace;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--bg-card);
+        }
+        
+        th {
+            background: var(--bg-card);
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: sticky;
+            top: 0;
+        }
+        
+        tr.passed td.status {
+            color: var(--accent-green);
+        }
+        
+        tr.failed {
+            background: rgba(248, 113, 113, 0.1);
+        }
+        
+        tr.failed td.status {
+            color: var(--accent-red);
+        }
+        
+        .id, .type, .status {
+            white-space: nowrap;
+        }
+        
+        .question {
+            max-width: 200px;
+        }
+        
+        .answer-gold, .answer-pred {
+            max-width: 250px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .scores {
+            min-width: 120px;
+        }
+        
+        .score-item {
+            display: block;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+        
+        .duration {
+            font-family: monospace;
+            color: var(--accent-yellow);
+            white-space: nowrap;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .action {
+            text-align: center;
+        }
+        
+        .retry-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--text-secondary);
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .retry-btn:hover {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        
+        .retry-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .retry-btn.loading {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔮 Knot RAG 评测报告</h1>
+            <p class="timestamp">生成时间: 2026-02-08 09:46:16</p>
+        </header>
+        
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-value">10</div>
+                <div class="summary-label">总测试题数</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value">7</div>
+                <div class="summary-label">通过题数</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value accuracy">70.0%</div>
+                <div class="summary-label">整体准确率</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value">3</div>
+                <div class="summary-label">题目类型</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">📊 按类型统计</h2>
+            
+        <div class="type-stat">
+            <div class="type-name">extractive</div>
+            <div class="type-bar-container">
+                <div class="type-bar" style="width: 75.0%; background: #4ade80;"></div>
+            </div>
+            <div class="type-value">6/8 (75%)</div>
+        </div>
+        
+        <div class="type-stat">
+            <div class="type-name">multi_hop</div>
+            <div class="type-bar-container">
+                <div class="type-bar" style="width: 0.0%; background: #f87171;"></div>
+            </div>
+            <div class="type-value">0/1 (0%)</div>
+        </div>
+        
+        <div class="type-stat">
+            <div class="type-name">refusal</div>
+            <div class="type-bar-container">
+                <div class="type-bar" style="width: 100.0%; background: #4ade80;"></div>
+            </div>
+            <div class="type-value">1/1 (100%)</div>
+        </div>
+        
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">📝 详细结果</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>类型</th>
+                            <th>问题</th>
+                            <th>标准答案</th>
+                            <th>模型回答</th>
+                            <th>评分</th>
+                            <th>耗时</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+        <tr class="passed" id="row-rust_q01" data-question="Cargo 是什么？它有什么作用？" data-gold="Cargo 是 Rust 的构建系统和包管理器，用于处理构建代码、下载依赖库和编译依赖库等任务。">
+            <td class="id">rust_q01</td>
+            <td class="type">extractive</td>
+            <td class="question">Cargo 是什么？它有什么作用？</td>
+            <td class="answer-gold">Cargo 是 Rust 的构建系统和包管理器，用于处理构建代码、下载依赖库和编译依赖库等任务。</td>
+            <td class="answer-pred" id="pred-rust_q01">Cargo 是 Rust 的构建系统和包管理器，用于管理 Rust 项目的构建、依赖和运行。它通过自动化处理代码编译、依赖下载、构建和测试，简化了项目的维护。其主要作用包括：
+
+1. **构建项目**：通过 `cargo build` 编译代码，生成可执行文件或库，确保代码符合 Rust 的编译规则。
+2. **管理依赖**：通过 `Cargo.toml` 配置依赖项，自动下载并管理外部库，确保项目使用最新版本的依赖。
+3. **运行和测试**：使用 `cargo run` 运行可执行文件，`cargo test` 测试代码，验证功能是否正确。
+4. **项目组织**：通过 `cargo ne...</td>
+            <td class="scores" id="scores-rust_q01"><span class="score-item">llm_score: 100.0%</span><span class="score-item">llm_correct: True</span><span class="score-item">llm_reasoning: 模型回答准确涵盖了标准答案的核心信息，完整列举了Cargo的五个主要作用，并补充了其扩展功能（如发布库、自定义构建配置），同时保持与标准答案一致的表述方式，无矛盾内容。</span><span class="score-item">citation_hit: True</span></td>
+            <td class="duration">26.2s</td>
+            <td class="status" id="status-rust_q01">✓ 通过</td>
+            <td class="action">
+                <button class="retry-btn" onclick="retryTest('rust_q01')">
+                    🔄
+                </button>
+            </td>
+        </tr>
+        
+        <tr class="passed" id="row-rust_q02" data-question="如何使用 Cargo 创建一个新项目？" data-gold="使用命令 cargo new hello_cargo 可以创建一个名为 hello_cargo 的新项目。">
+            <td class="id">rust_q02</td>
+            <td class="type">extractive</td>
+            <td class="question">如何使用 Cargo 创建一个新项目？</td>
+            <td class="answer-gold">使用命令 cargo new hello_cargo 可以创建一个名为 hello_cargo 的新项目。</td>
+            <td class="answer-pred" id="pred-rust_q02">使用 Cargo 创建新项目需要按照以下步骤操作：首先，在项目目录下运行 `cargo new hello_cargo` 命令，该命令会创建一个名为 `hello_cargo` 的目录，并生成包含 `Cargo.toml` 配置文件、`src` 目录以及 `main.rs` 源文件的项目结构。接着，进入该目录并列出文件，Cargo 会自动初始化 Git 仓库并生成 `.gitignore` 文件。若需强制生成 Git 文件，可使用 `git init` 命令。项目根目录仅存放说明文件、许可协议、配置文件等，而源代码文件位于 `src` 目录中。</td>
+            <td class="scores" id="scores-rust_q02"><span class="score-item">llm_score: 100.0%</span><span class="score-item">llm_correct: True</span><span class="score-item">llm_reasoning: 模型回答准确包含标准答案的关键信息（cargo new命令），并补充了创建项目的具体步骤（创建目录、生成文件结构、初始化Git），同时明确区分了项目根目录和源代码目录，与标准答案一致且无矛盾。</span><span class="score-item">citation_hit: True</span></td>
+            <td class="duration">23.8s</td>
+            <td class="status" id="status-rust_q02">✓ 通过</td>
+            <td class="action">
+                <button class="retry-btn" onclick="retryTest('rust_q02')">
+                    🔄
+                </button>
+            </td>
+        </tr>
+        
+        <tr class="passed" id="row-rust_q03" data-question="cargo build 和 cargo run 有什么区别？" data-gold="cargo build 只构建项目生成可执行文件，而 cargo run 会一步完成代码编译和运行操作。">
+            <td class="id">rust_q03</td>
+            <td class="type">extractive</td>
+            <td class="question">cargo build 和 cargo run 有什么区别？</td>
+            <td class="answer-gold">cargo build 只构建项目生成可执行文件，而 cargo run 会一步完成代码编译和运行操作。</td>
+            <td class="answer-pred" id="pred-rust_q03">Cargo build和cargo run的主要区别在于它们的功能和输出。Cargo build会编译项目并生成可执行文件（如target/debug/hello_cargo），而cargo run则直接运行生成的可执行文件。具体来说：
+
+1. **编译与运行流程**：  
+   - `cargo build`会编译代码，生成目标文件（如target/debug/hello_cargo），但不会运行程序。  
+   - `cargo run`会自动编译项目，并直接运行生成的可执行文件，无需用户手动干预。
+
+2. **输出差异**：  
+   - `cargo build`会显示编译过程的输出（...</td>
+            <td class="scores" id="scores-rust_q03"><span class="score-item">llm_score: 100.0%</span><span class="score-item">llm_correct: True</span><span class="score-item">llm_reasoning: 模型回答准确涵盖了标准答案的核心信息，详细说明了cargo build和cargo run的区别（编译/运行流程、输出差异、适用场景），并正确指出了cargo run在修改后自动编译的特性，与标准答案完全一致，无矛盾内容。</span><span class="score-item">citation_hit: True</span></td>
+            <td class="duration">21.1s</td>
+            <td class="status" id="status-rust_q03">✓ 通过</td>
+            <td class="action">
+                <button class="retry-btn" onclick="retryTest('rust_q03')">
+                    🔄
+                </button>
+            </td>
+        </tr>
+        
+        <tr class="passed" id="row-rust_q04" data-question="cargo check 命令有什么作用？为什么要使用它？" data-gold="cargo check 快速检查代码确保其可以编译但不产生可执行文件。因为它比 cargo build 快得多，可以在编写代码时频繁运行以检查错误。">
+            <td class="id">rust_q04</td>
+            <td class="type">extractive</td>
+            <td class="question">cargo check 命令有什么作用？为什么要使用它？</td>
+            <td class="answer-gold">cargo check 快速检查代码确保其可以编译但不产生可执行文件。因为它比 cargo build 快得多，可以在编写代码时频繁运行以检查错误。</td>
+            <td class="answer-pred" id="pred-rust_q04">cargo check命令用于快速检查代码确保其可以编译，但不生成可执行文件。它通过检查源代码是否符合 Rust 的编译要求，帮助开发者在修改代码前验证其正确性。这种机制在开发过程中尤为重要，因为它可以避免不必要的编译步骤，提升开发效率。当代码修改后，Cargo 会自动检测更改并重新检查，而无需显式运行编译命令。这种即时验证功能使得开发者能够更高效地调试和迭代代码，尤其是在频繁修改代码的场景下。</td>
+            <td class="scores" id="scores-rust_q04"><span class="score-item">llm_score: 100.0%</span><span class="score-item">llm_correct: True</span><span class="score-item">llm_reasoning: 模型回答准确涵盖了标准答案的核心信息（cargo check的作用及原因），语义一致且无矛盾，同时补充了开发效率提升的细节，完全符合标准答案的表述。</span><span class="score-item">citation_hit: True</span></td>
+            <td class="duration">12.0s</td>
+            <td class="status" id="status-rust_q04">✓ 通过</td>
+            <td class="action">
+                <button class="retry-btn" onclick="retryTest('rust_q04')">
+                    🔄
+                </button>
+            </td>
+        </tr>
+        
+        <tr class="failed" id="row-rust_q05" data-question="如何构建用于发布的优化版本？" data-gold="使用 cargo build --release 命令可以优化编译项目，生成的可执行文件在 target/release 目录下。">
+            <td class="id">rust_q05</td>
+            <td class="type">extractive</td>
+            <td class="question">如何构建用于发布的优化版本？</td>
+            <td class="answer-gold">使用 cargo build --release 命令可以优化编译项目，生成的可执行文件在 target/release 目录下。</td>
+            <td class="answer-pred" id="pred-rust_q05">无法找到答案</td>
+            <td class="scores" id="scores-rust_q05"><span class="score-item">llm_score: 50.0%</span><span class="score-item">llm_correct: False</span><span class="score-item">llm_reasoning: 模型回答"无法找到答案"与标准答案存在矛盾，标准答案明确提供了构建优化版本的命令和路径，而模型直接否定存在答案，违反了"核心信息正确"的要求。</span><span class="score-item">citation_hit: False</span></td>
+            <td class="duration">8.6s</td>
+            <td class="status" id="status-rust_q05">✗ 失败</td>
+            <td class="action">
+                <button class="retry-btn" onclick="retryTest('rust_q05')">
+                    🔄
+                </button>
+            </td>
+        </tr>
+        
+        <tr class="passed" id="row-antd_q01" data-question="在 antd 中 undefined 和 null 有什么区别？" data-gold="antd 约定 undefined 是非受控的标志，null 作为显式的受控空值。">
+            <td class="id">antd_q01</td>
+            <td class="type">extractive</td>
+            <td class="question">在 antd 中 undefined 和 null 有什么区别？</td>
+            <td class="answer-gold">antd 约定 undefined 是非受控的标志，null 作为显式的受控空值。</td>
+            <td class="answer-pred" id="pred-antd_q01">Ant Design 中的 `undefined` 和 `null` 在组件受控状态中存在区别。根据文档[1]，`undefined` 被定义为非受控的标志，而 `null` 作为显式的受控空值。在输入元素中，React 认为 `undefined` 和 `null` 都属于非受控状态，但当从非空值转换为 `null` 或 `undefined` 时，组件不再受控，这可能引发意外行为。antd 中通过区分 `undefined` 和 `null` 来处理复杂数据类型的清空（如 `Option` 类型），确保在使用 `undefined` 时避免因非空值假设导致的错误。
+
+具体区别如下：
+1. ...</td>
+            <td class="scores" id="scores-antd_q01"><span class="score-item">llm_score: 95.0%</span><span class="score-item">llm_correct: True</span><span class="score-item">llm_reasoning: 模型回答准确涵盖了标准答案的核心信息，正确区分了undefined（非受控）和null（受控空值）的语义差异，并补充了在表单处理中的实践建议。同时，模型回答未引入与标准答案矛盾的内容，且通过具体场景（如Option类型）说明区别，符合问题要求。虽然提及文档引用[1]，但未否定标准答案的权威性，因此判定为正确回答。</span><span class="score-item">citation_hit: True</span></td>
+            <td class="duration">19.2s</td>
+            <td class="status" id="status-antd_q01">✓ 通过</td>
+            <td class="action">
+                <button class="retry-btn" onclick="retryTest('antd_q01')">
+                    🔄
+                </button>
+            </td>
+        </tr>
+        
+        <tr class="passed" id="row-antd_q02" data-question="为什么 message 和 notification 是小写的？" data-gold="因为 message 是一个函数，而不是一个 React 组件。">
+            <td class="id">antd_q02</td>
+            <td class="type">extractive</td>
+            <td class="question">为什么 message 和 notification 是小写的？</td>
+            <td class="answer-gold">因为 message 是一个函数，而不是一个 React 组件。</td>
+            <td class="answer-pred" id="pred-antd_q02">message 和 notification 是小写的，是因为它们是 React 的函数，而不是 React 组件。在 React 中，函数组件使用小写命名，而组件使用首字母大写的命名。因此，message 和 notification 是函数，而不是组件，这与其它组件（如 Modal、Form、Table 等）的命名规范不同。</td>
+            <td class="scores" id="scores-antd_q02"><span class="score-item">llm_score: 100.0%</span><span class="score-item">llm_correct: True</span><span class="score-item">llm_reasoning: 模型回答准确指出了message和notification是React函数而非组件的原因，符合标准答案的核心信息，逻辑清晰且无矛盾。</span><span class="score-item">citation_hit: True</span></td>
+            <td class="duration">5.9s</td>
+            <td class="status" id="status-antd_q02">✓ 通过</td>
+            <td class="action">
+                <button class="retry-btn" onclick="retryTest('antd_q02')">
+                    🔄
+                </button>
+            </td>
+        </tr>
+        
+        <tr class="failed" id="row-antd_q03" data-question="如何将 antd 组件的默认语言切换为中文？" data-gold="使用 ConfigProvider 组件来包裹应用，并配置 dayjs.locale(&#x27;zh-cn&#x27;)。">
+            <td class="id">antd_q03</td>
+            <td class="type">multi_hop</td>
+            <td class="question">如何将 antd 组件的默认语言切换为中文？</td>
+            <td class="answer-gold">使用 ConfigProvider 组件来包裹应用，并配置 dayjs.locale(&#x27;zh-cn&#x27;)。</td>
+            <td class="answer-pred" id="pred-antd_q03">无法找到答案。</td>
+            <td class="scores" id="scores-antd_q03"><span class="score-item">llm_score: 0.0%</span><span class="score-item">llm_correct: False</span><span class="score-item">llm_reasoning: 模型回答"无法找到答案"与标准答案存在矛盾，标准答案明确提供了使用ConfigProvider和dayjs.locale('zh-cn')的解决方案，而模型未提供任何有效信息。</span><span class="score-item">citation_hit: True</span></td>
+            <td class="duration">8.5s</td>
+            <td class="status" id="status-antd_q03">✗ 失败</td>
+            <td class="action">
+                <button class="retry-btn" onclick="retryTest('antd_q03')">
+                    🔄
+                </button>
+            </td>
+        </tr>
+        
+        <tr class="failed" id="row-antd_q04" data-question="如何关闭 antd 组件的动画？" data-gold="通过 ConfigProvider 的 theme 属性设置 token: { motion: false }。">
+            <td class="id">antd_q04</td>
+            <td class="type">extractive</td>
+            <td class="question">如何关闭 antd 组件的动画？</td>
+            <td class="answer-gold">通过 ConfigProvider 的 theme 属性设置 token: { motion: false }。</td>
+            <td class="answer-pred" id="pred-antd_q04">通过使用 `SeedToken` 可以很方便地实现关闭组件动画：  
+```jsx
+import { ConfigProvider } from &#x27;antd&#x27;;
+
+&lt;ConfigProvider theme={{ token: { motion: false } }}&gt;
+  &lt;App /&gt;
+&lt;/ConfigProvider&gt;;
+```  
+该方法通过设置 `token` 的 `motion` 属性为 `false` 来禁用组件的动画效果。</td>
+            <td class="scores" id="scores-antd_q04"><span class="score-item">llm_score: 50.0%</span><span class="score-item">llm_correct: False</span><span class="score-item">llm_reasoning: 模型回答中提到的"SeedToken"并非antd官方推荐的关闭动画方式，标准答案明确指出应通过ConfigProvider的theme属性设置token: { motion: false }。虽然技术上两者均可实现动画禁用，但模型回答存在术语混淆（SeedToken非antd官方API）且未直接引用标准答案中的具体实现方式，导致信息不一致。</span><span class="score-item">citation_hit: True</span></td>
+            <td class="duration">13.5s</td>
+            <td class="status" id="status-antd_q04">✗ 失败</td>
+            <td class="action">
+                <button class="retry-btn" onclick="retryTest('antd_q04')">
+                    🔄
+                </button>
+            </td>
+        </tr>
+        
+        <tr class="passed" id="row-refusal_q01" data-question="antd 是否支持 Windows XP 系统？" data-gold="">
+            <td class="id">refusal_q01</td>
+            <td class="type">refusal</td>
+            <td class="question">antd 是否支持 Windows XP 系统？</td>
+            <td class="answer-gold"></td>
+            <td class="answer-pred" id="pred-refusal_q01">无法找到答案。</td>
+            <td class="scores" id="scores-refusal_q01"><span class="score-item">refusal_correct: True</span></td>
+            <td class="duration">14.8s</td>
+            <td class="status" id="status-refusal_q01">✓ 通过</td>
+            <td class="action">
+                <button class="retry-btn" onclick="retryTest('refusal_q01')">
+                    🔄
+                </button>
+            </td>
+        </tr>
+        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <footer>
+            Knot RAG Evaluation System • Powered by 🦀 Rust + 🐍 Python
+        </footer>
+    </div>
+    
+    <script>
+        const API_URL = 'http://127.0.0.1:18765';
+        
+        async function retryTest(id) {
+            const row = document.getElementById(`row-${id}`);
+            const question = row.dataset.question;
+            const answerGold = row.dataset.gold;
+            
+            const btn = event.target;
+            btn.disabled = true;
+            btn.classList.add('loading');
+            btn.textContent = '⌛';
+            
+            try {
+                // 1. 调用 RAG 查询
+                const ragResp = await fetch(`${API_URL}/rag/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: question })
+                });
+                
+                if (!ragResp.ok) throw new Error('RAG API 调用失败');
+                const ragData = await ragResp.json();
+                
+                // 2. 调用 LLM 评判
+                const judgeResp = await fetch(`${API_URL}/llm/judge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: question,
+                        answer_gold: answerGold,
+                        answer_pred: ragData.answer
+                    })
+                });
+                
+                if (!judgeResp.ok) throw new Error('LLM Judge API 调用失败');
+                const judgeData = await judgeResp.json();
+                
+                // 3. 更新界面
+                const row = document.getElementById(`row-${id}`);
+                const predCell = document.getElementById(`pred-${id}`);
+                const scoresCell = document.getElementById(`scores-${id}`);
+                const statusCell = document.getElementById(`status-${id}`);
+                
+                predCell.textContent = ragData.answer.substring(0, 300) + (ragData.answer.length > 300 ? '...' : '');
+                
+                scoresCell.innerHTML = `
+                    <span class="score-item">llm_score: ${(judgeData.score * 100).toFixed(0)}%</span>
+                    <span class="score-item">llm_correct: ${judgeData.correct}</span>
+                    <span class="score-item">llm_reasoning: ${judgeData.reasoning}</span>
+                `;
+                
+                if (judgeData.correct) {
+                    row.className = 'passed';
+                    statusCell.textContent = '✓ 通过';
+                    statusCell.style.color = '#4ade80';
+                } else {
+                    row.className = 'failed';
+                    statusCell.textContent = '✗ 失败';
+                    statusCell.style.color = '#f87171';
+                }
+                
+                btn.textContent = '✔';
+                btn.style.background = '#4ade80';
+                
+            } catch (err) {
+                console.error(err);
+                btn.textContent = '✗';
+                btn.style.background = '#f87171';
+                alert('重试失败: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                setTimeout(() => {
+                    btn.textContent = '🔄';
+                    btn.style.background = '';
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>

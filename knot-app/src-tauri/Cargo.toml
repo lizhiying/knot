@@ -28,6 +28,8 @@ base64 = "0.21"
 fs2 = "0.4.3"
 futures-util = "0.3"
 md-5 = "0.10.6"
+axum = "0.7"
+tower-http = { version = "0.5", features = ["cors"] }
 
 [build-dependencies]
 tauri-build = { version = "2.0", features = [] }
