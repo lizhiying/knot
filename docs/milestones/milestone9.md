@@ -167,18 +167,15 @@ Models:
   ✗ OCR:        OCRFlux-3B.Q4_K_M.gguf (missing)
     → Run 'knot-cli download --model ocr' to install
 
-Index:
-  Files:     1,234
-  Chunks:    8,901
-  Last Sync: 2026-02-08 13:40:00
-
-Source Directories (2):
+Indexed Sources (2):
   1. ~/Documents/notes
+     Files: 234 | Chunks: 1,890 | Last Sync: 2026-02-08 13:40:00
   2. ~/Projects/rust-book-cn
+     Files: 1,000 | Chunks: 7,011 | Last Sync: 2026-02-08 10:15:00
 
 Paths:
   Knot Root:      ~/.knot
   Config Home:    ~/.knot/config.toml
-  Index Storage:  ~/.knot/indexes/
+  Index Storage:  ~/.knot/indexes/<hash>/
   Models:         ~/.knot/models/
 ```
