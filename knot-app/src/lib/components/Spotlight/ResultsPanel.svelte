@@ -17,7 +17,7 @@
     } = $props();
 
     let matchText = $derived(
-        results.length > 0 ? `${results.length} results match` : "Analyzing...",
+        results.length > 0 ? `${results.length} results match` : "No results",
     );
 </script>
 

@@ -163,6 +163,20 @@
             isSearching = false; // 关闭左侧骨架屏
             isLoading = false;
 
+            // 检查是否有搜索结果
+            if (searchResults.length === 0 || !searchContext.trim()) {
+                // 没有搜索结果，显示提示而不调用 LLM
+                insightState = {
+                    status: "No Results",
+                    statusType: "complete",
+                    isThinking: false,
+                    content:
+                        "在文档库中未找到与您问题相关的内容。请尝试：\n\n• 使用不同的关键词\n• 检查拼写是否正确\n• 使用更通用的搜索词",
+                    showCursor: false,
+                };
+                return;
+            }
+
             // 阶段2：LLM 生成
             const generateStartTime = performance.now();
             insightState = {
@@ -174,7 +188,7 @@
             };
 
             console.log("[Spotlight] Invoking rag_generate...");
-            
+
             // 准备接收流式输出
             insightState = {
                 ...insightState,
@@ -246,8 +260,6 @@
             };
         }
     }
-
-
 
     // 高亮卡片
     function handleHighlightCard(id) {

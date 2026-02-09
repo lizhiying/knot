@@ -96,9 +96,10 @@ async fn rag_query(
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
-    // 4. 搜索
+    // 4. 搜索 (使用默认阈值)
+    let distance_threshold = 1.5; // TODO: 从配置获取
     let search_results = store
-        .search(query_vec, &query)
+        .search(query_vec, &query, distance_threshold)
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 

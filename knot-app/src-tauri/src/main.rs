@@ -415,6 +415,10 @@ fn main() {
             let app_handle_clone = app_handle.clone();
             let model_status_clone = model_status.clone();
 
+            // 读取配置的 context_size
+            let config = load_config(&app_handle);
+            let llm_context_size = config.llm_context_size;
+
             std::thread::spawn(move || {
                 // HOT RELOAD LOGIC:
                 // Check if model exists. If not, we do nothing and wait for "reload_models" command.
@@ -431,11 +435,12 @@ fn main() {
                     chat_model_path
                 );
                 // Qwen3 usually doesn't need mmproj (Text only).
-                match LlamaSidecar::spawn_with_mmap(
+                match LlamaSidecar::spawn_with_context(
                     chat_model_path.to_str().unwrap_or(""),
                     &bin_dir_clone2,
                     None,
                     18081,
+                    llm_context_size,
                 ) {
                     Ok(sidecar) => {
                         let app_handle_g = app_handle_clone.clone();
@@ -669,6 +674,10 @@ fn main() {
             stop_parsing_llm,
             reset_index,
             set_streaming_enabled,
+            set_vector_distance_threshold,
+            set_llm_context_size,
+            set_llm_max_tokens,
+            set_llm_think_enabled,
             get_index_status
         ])
         .build(tauri::generate_context!())
@@ -747,10 +756,38 @@ struct AppConfig {
     data_dir: Option<String>,
     #[serde(default = "default_streaming_enabled")]
     streaming_enabled: bool,
+    /// 向量距离阈值：距离 > 此值的结果被过滤
+    #[serde(default = "default_vector_distance_threshold")]
+    vector_distance_threshold: f32,
+    /// LLM 上下文窗口大小（需要重启生效）
+    #[serde(default = "default_llm_context_size")]
+    llm_context_size: u32,
+    /// LLM 最大生成 token 数
+    #[serde(default = "default_llm_max_tokens")]
+    llm_max_tokens: u32,
+    /// 是否启用 LLM Think 模式
+    #[serde(default = "default_llm_think_enabled")]
+    llm_think_enabled: bool,
 }
 
 fn default_streaming_enabled() -> bool {
     true
+}
+
+fn default_vector_distance_threshold() -> f32 {
+    0.75 // 默认值：过滤距离>0.75的结果（随机字符串距离约0.8-0.86）
+}
+
+fn default_llm_context_size() -> u32 {
+    8192 // 默认上下文窗口大小
+}
+
+fn default_llm_max_tokens() -> u32 {
+    1024 // 默认最大生成 token 数
+}
+
+fn default_llm_think_enabled() -> bool {
+    false // 默认关闭 Think 模式，因为会增加延迟
 }
 
 fn get_config_path(app: &tauri::AppHandle) -> PathBuf {
@@ -1119,6 +1156,28 @@ async fn rag_search(
 ) -> Result<RagSearchResponse, String> {
     use std::time::Instant;
 
+    // 边缘情况：空查询直接返回空结果
+    let query = query.trim().to_string();
+    if query.is_empty() {
+        return Ok(RagSearchResponse {
+            sources: vec![],
+            context: String::new(),
+        });
+    }
+
+    // 边缘情况：超长查询截断到 500 字符
+    const MAX_QUERY_LENGTH: usize = 500;
+    let query = if query.chars().count() > MAX_QUERY_LENGTH {
+        println!(
+            "[rag_search] Query truncated from {} to {} chars",
+            query.chars().count(),
+            MAX_QUERY_LENGTH
+        );
+        query.chars().take(MAX_QUERY_LENGTH).collect::<String>()
+    } else {
+        query
+    };
+
     let total_start = Instant::now();
     println!("[rag_search] Starting query: {}", query);
 
@@ -1171,9 +1230,12 @@ async fn rag_search(
     println!("[rag_search] Embedding: {:?}", embed_start.elapsed());
 
     // 3. Execute Search
+    let config = load_config(&app);
+    let distance_threshold = config.vector_distance_threshold;
+
     let search_start = Instant::now();
     let search_results = store
-        .search(query_vec, &query)
+        .search(query_vec, &query, distance_threshold)
         .await
         .map_err(|e| e.to_string())?;
     println!(
@@ -1233,6 +1295,77 @@ async fn rag_generate(
     }
     .ok_or("Chat LLM (Qwen3) not ready")?;
 
+    // 加载配置
+    let config = load_config(&app);
+    let llm_context_size = config.llm_context_size;
+    let llm_max_tokens = config.llm_max_tokens;
+
+    // 动态计算最大上下文字符数
+    // 公式：(context_size / parallel - max_tokens - prompt_overhead) * chars_per_token
+    // parallel=2, prompt_overhead=300, chars_per_token≈2
+    let tokens_for_context = (llm_context_size / 2)
+        .saturating_sub(llm_max_tokens)
+        .saturating_sub(300);
+    let max_context_chars = (tokens_for_context as usize) * 2;
+    println!(
+        "[rag_generate] Config: context_size={}, max_tokens={}, max_context_chars={}",
+        llm_context_size, llm_max_tokens, max_context_chars
+    );
+
+    let context_len = context.chars().count();
+
+    let final_context = if context_len > max_context_chars {
+        println!(
+            "[rag_generate] Context too long ({} chars), using two-stage compression...",
+            context_len
+        );
+
+        // 第一阶段：让 LLM 从长上下文中提取与问题相关的关键信息
+        let compress_prompt = format!(
+            r#"<|im_start|>system
+你是信息提取专家。请从以下文档中提取与用户问题最相关的关键信息。
+只输出关键信息，不要回答问题本身。保持简洁，最多 500 字。
+<|im_end|>
+<|im_start|>user
+用户问题: {}
+
+文档内容:
+{}
+<|im_end|>
+<|im_start|>assistant
+"#,
+            query,
+            // 第一阶段可以使用更长的上下文，因为输出很短
+            context.chars().take(12000).collect::<String>()
+        );
+
+        use pageindex_rs::LlmProvider;
+        match llm_client.generate_content(&compress_prompt).await {
+            Ok(compressed) => {
+                println!(
+                    "[rag_generate] Compression complete: {} -> {} chars",
+                    context_len,
+                    compressed.len()
+                );
+                compressed
+            }
+            Err(e) => {
+                println!("[rag_generate] Compression failed: {}, using truncation", e);
+                // 降级：压缩失败则使用简单截断
+                context.chars().take(max_context_chars).collect::<String>()
+            }
+        }
+    } else {
+        context
+    };
+
+    // 根据 think 模式配置生成不同的 prompt
+    let think_suffix = if config.llm_think_enabled {
+        ""
+    } else {
+        " /no_think"
+    };
+
     let prompt = format!(
         r#"<|im_start|>system
 你是一个智能助手。请根据参考文档回答用户问题。
@@ -1247,10 +1380,10 @@ async fn rag_generate(
 参考文档：
 {}
 
-用户问题: {}<|im_end|>
+用户问题: {}{}<|im_end|>
 <|im_start|>assistant
 "#,
-        context, query
+        final_context, query, think_suffix
     );
 
     println!(
@@ -1264,7 +1397,7 @@ async fn rag_generate(
         // Use streaming
         println!("[rag_generate] Streaming enabled. Starting stream...");
         let mut rx = llm_client
-            .generate_content_stream(&prompt)
+            .generate_content_stream(&prompt, llm_max_tokens)
             .await
             .map_err(|e| e.to_string())?;
 
@@ -1310,6 +1443,28 @@ async fn rag_query(
 ) -> Result<RagResponse, String> {
     use pageindex_rs::LlmProvider;
 
+    // 边缘情况：空查询直接返回空结果
+    let query = query.trim().to_string();
+    if query.is_empty() {
+        return Ok(RagResponse {
+            answer: "请输入搜索内容".to_string(),
+            sources: vec![],
+        });
+    }
+
+    // 边缘情况：超长查询截断到 500 字符
+    const MAX_QUERY_LENGTH: usize = 500;
+    let query = if query.chars().count() > MAX_QUERY_LENGTH {
+        println!(
+            "[rag_query] Query truncated from {} to {} chars",
+            query.chars().count(),
+            MAX_QUERY_LENGTH
+        );
+        query.chars().take(MAX_QUERY_LENGTH).collect::<String>()
+    } else {
+        query
+    };
+
     println!("[rag_query] Starting query: {}", query);
 
     // 1. Get Data Dir
@@ -1349,8 +1504,11 @@ async fn rag_query(
         .map_err(|e| e.to_string())?;
     println!("[rag_query] Embedding generated");
 
+    let config = load_config(&app);
+    let distance_threshold = config.vector_distance_threshold;
+
     let search_results = store
-        .search(query_vec, &query)
+        .search(query_vec, &query, distance_threshold)
         .await
         .map_err(|e| e.to_string())?;
     println!(
@@ -1580,5 +1738,50 @@ async fn set_streaming_enabled(app: tauri::AppHandle, enabled: bool) -> Result<(
     let mut config = load_config(&app);
     config.streaming_enabled = enabled;
     save_config(&app, &config)?;
+    Ok(())
+}
+
+#[tauri::command]
+async fn set_vector_distance_threshold(
+    app: tauri::AppHandle,
+    threshold: f32,
+) -> Result<(), String> {
+    let mut config = load_config(&app);
+    config.vector_distance_threshold = threshold;
+    save_config(&app, &config)?;
+    println!("[Config] Vector distance threshold set to: {}", threshold);
+    Ok(())
+}
+
+#[tauri::command]
+async fn set_llm_context_size(app: tauri::AppHandle, size: u32) -> Result<(), String> {
+    let mut config = load_config(&app);
+    config.llm_context_size = size;
+    save_config(&app, &config)?;
+    println!(
+        "[Config] LLM context size set to: {} (restart required)",
+        size
+    );
+    Ok(())
+}
+
+#[tauri::command]
+async fn set_llm_max_tokens(app: tauri::AppHandle, max_tokens: u32) -> Result<(), String> {
+    let mut config = load_config(&app);
+    config.llm_max_tokens = max_tokens;
+    save_config(&app, &config)?;
+    println!("[Config] LLM max tokens set to: {}", max_tokens);
+    Ok(())
+}
+
+#[tauri::command]
+async fn set_llm_think_enabled(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
+    let mut config = load_config(&app);
+    config.llm_think_enabled = enabled;
+    save_config(&app, &config)?;
+    println!(
+        "[Config] LLM think mode: {}",
+        if enabled { "enabled" } else { "disabled" }
+    );
     Ok(())
 }

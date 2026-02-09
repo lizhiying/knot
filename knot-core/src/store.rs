@@ -2,7 +2,9 @@ use crate::path_processor::PathProcessor;
 use crate::tokenizer::JiebaTokenizer;
 use anyhow::Result;
 use arrow::record_batch::RecordBatchIterator;
-use arrow_array::{types::Float32Type, FixedSizeListArray, RecordBatch, StringArray};
+use arrow_array::{
+    types::Float32Type, Array, FixedSizeListArray, Float32Array, RecordBatch, StringArray,
+};
 use arrow_schema::{DataType, Field, Schema};
 use futures::TryStreamExt;
 use lancedb::query::{ExecutableQuery, QueryBase};
@@ -17,6 +19,16 @@ use tantivy::tokenizer::StopWordFilter;
 use tantivy::{Index, TantivyDocument};
 
 const EMBEDDING_DIM: i32 = 512;
+
+/// 向量距离阈值：距离 > 此值的结果被过滤（不相关）
+/// BGE 模型 L2 距离参考：高度相关 0-0.5, 中度 0.5-0.75, 不相关 >0.75
+const VECTOR_DISTANCE_THRESHOLD: f32 = 0.75;
+
+/// 向量搜索候选结果（带距离信息）
+struct CandidateWithDistance {
+    result: SearchResult,
+    distance: f32,
+}
 
 pub struct KnotStore {
     conn: Connection,
@@ -316,18 +328,71 @@ impl KnotStore {
         Ok(())
     }
 
+    /// 预处理查询文本：在中英文边界插入空格以改善分词
+    fn preprocess_query(query: &str) -> String {
+        let mut result = String::with_capacity(query.len() * 2);
+        let mut prev_is_ascii = false;
+        let mut prev_is_cjk = false;
+
+        for c in query.chars() {
+            let is_ascii = c.is_ascii_alphanumeric();
+            let is_cjk = c >= '\u{4e00}' && c <= '\u{9fff}'; // CJK 基本区
+
+            // 在中英文边界插入空格
+            if (prev_is_ascii && is_cjk) || (prev_is_cjk && is_ascii) {
+                result.push(' ');
+            }
+
+            result.push(c);
+            prev_is_ascii = is_ascii;
+            prev_is_cjk = is_cjk;
+        }
+
+        result
+    }
+
     pub async fn search(
         &self,
         query_vector: Vec<f32>,
         query_text: &str,
+        distance_threshold: f32,
     ) -> Result<Vec<SearchResult>> {
         use std::collections::HashMap;
         use std::time::Instant;
 
         let total_start = Instant::now();
 
-        // Map ID -> SearchResult
+        // 预处理查询文本
+        let processed_query = Self::preprocess_query(query_text);
+        if processed_query != query_text {
+            println!(
+                "[Search] Query preprocessed: '{}' -> '{}'",
+                query_text, processed_query
+            );
+        }
+        let query_text = &processed_query;
+
+        // 使用传入的阈值（来自设置页面）
+        // 环境变量 KNOT_DISTANCE_THRESHOLD 仅用于调试日志对比，不覆盖设置
+        let effective_threshold = distance_threshold;
+        if let Ok(env_threshold) = std::env::var("KNOT_DISTANCE_THRESHOLD") {
+            if std::env::var("KNOT_QUIET").is_err() {
+                println!(
+                    "[Search] Note: KNOT_DISTANCE_THRESHOLD={} (ignored, using config: {})",
+                    env_threshold, effective_threshold
+                );
+            }
+        }
+
+        // RRF 参数
+        const RRF_K: f32 = 60.0; // RRF 常数，典型值 60
+        const VECTOR_WEIGHT: f32 = 0.6; // 向量搜索权重
+        const KEYWORD_WEIGHT: f32 = 0.4; // 关键词搜索权重
+
+        // 存储结果：ID -> (SearchResult, vector_rank, keyword_rank)
         let mut results_map: HashMap<String, SearchResult> = HashMap::new();
+        let mut vector_ranks: HashMap<String, usize> = HashMap::new();
+        let mut keyword_ranks: HashMap<String, usize> = HashMap::new();
 
         let table_names = self.conn.table_names().execute().await?;
 
@@ -335,19 +400,37 @@ impl KnotStore {
         let vec_start = Instant::now();
         if table_names.contains(&self.table_name) {
             let table = self.conn.open_table(&self.table_name).execute().await?;
-            // Fetch slightly more to allow good fusion
             let vec_query = table.query().nearest_to(query_vector)?;
             let vec_results_stream = vec_query.limit(20).execute().await?;
             let vec_results_batches: Vec<RecordBatch> = vec_results_stream.try_collect().await?;
-            let candidates = self.batches_to_results(vec_results_batches);
+            let candidates = self.batches_to_results_with_distance(vec_results_batches);
 
-            for mut c in candidates {
-                c.score = 50.0;
-                results_map.insert(c.id.clone(), c);
+            let mut rank = 1usize;
+            for c in candidates {
+                // 过滤距离过大的结果（不相关）
+                if c.distance > effective_threshold {
+                    continue;
+                }
+
+                let id = c.result.id.clone();
+                vector_ranks.insert(id.clone(), rank);
+                rank += 1;
+
+                // 距离转相似度分数：距离越小，分数越高
+                // 距离 0 -> 100, 距离 1 -> 50, 距离 2 -> 0
+                let similarity: f32 = (100.0 - c.distance * 50.0).max(0.0);
+                let mut result = c.result;
+                result.score = similarity; // 临时存储，后面会用 RRF 重新计算
+                result.source = SearchSource::Vector;
+                results_map.insert(id, result);
             }
         }
         if std::env::var("KNOT_QUIET").is_err() {
-            println!("[Search] Vector search: {:?}", vec_start.elapsed());
+            println!(
+                "[Search] Vector search: {:?}, found {} results",
+                vec_start.elapsed(),
+                vector_ranks.len()
+            );
         }
 
         if query_text.is_empty() {
@@ -366,19 +449,15 @@ impl KnotStore {
         let f_path = schema.get_field("file_path").unwrap();
         let f_content = schema.get_field("content").unwrap();
         let f_text_zh = schema.get_field("text_zh").unwrap();
-
         let f_pid = schema.get_field("parent_id").unwrap();
         let f_bc = schema.get_field("breadcrumbs").unwrap();
 
-        // Search both fields (Dual Indexing)
-        // QueryParser will automatically create a Disjunction (OR) query over these fields
         let query_parser =
             if let (Ok(f_text_std_field), Ok(f_file_name_field), Ok(f_path_tags_field)) = (
                 index.schema().get_field("text_std"),
                 index.schema().get_field("file_name"),
                 index.schema().get_field("path_tags"),
             ) {
-                // With Dual Indexing and Metadata
                 let mut fields = vec![f_text_zh, f_text_std_field];
                 fields.push(f_file_name_field);
                 fields.push(f_path_tags_field);
@@ -386,11 +465,10 @@ impl KnotStore {
                 let mut parser = QueryParser::for_index(&index, fields);
                 parser.set_field_boost(f_text_zh, 1.0);
                 parser.set_field_boost(f_text_std_field, 1.0);
-                parser.set_field_boost(f_file_name_field, 3.0); // High boost for filename match
-                parser.set_field_boost(f_path_tags_field, 1.5); // Moderate boost for directory match
+                parser.set_field_boost(f_file_name_field, 3.0);
+                parser.set_field_boost(f_path_tags_field, 1.5);
                 parser
             } else {
-                // Fallback
                 let mut parser = QueryParser::for_index(&index, vec![f_text_zh]);
                 parser.set_field_boost(f_text_zh, 1.0);
                 parser
@@ -400,6 +478,13 @@ impl KnotStore {
             Ok(q) => {
                 let top_docs = searcher.search(&q, &TopDocs::with_limit(20))?;
 
+                // 收集 BM25 分数用于标准化
+                let bm25_scores: Vec<f32> = top_docs.iter().map(|(s, _)| *s).collect();
+                let max_bm25 = bm25_scores.iter().cloned().fold(0.0, f32::max);
+                let min_bm25 = bm25_scores.iter().cloned().fold(f32::MAX, f32::min);
+                let bm25_range = (max_bm25 - min_bm25).max(0.001); // 避免除零
+
+                let mut rank = 1usize;
                 for (bm25_score, doc_address) in top_docs {
                     let doc: TantivyDocument = searcher.doc(doc_address)?;
 
@@ -409,12 +494,19 @@ impl KnotStore {
                         .unwrap_or_default()
                         .to_string();
 
+                    keyword_ranks.insert(doc_id.clone(), rank);
+                    rank += 1;
+
+                    // BM25 标准化到 0-100
+                    let normalized_bm25 = ((bm25_score - min_bm25) / bm25_range * 100.0).min(100.0);
+
                     if let Some(existing) = results_map.get_mut(&doc_id) {
-                        existing.score += bm25_score * 2.0;
+                        // 已存在向量结果，标记为混合
                         existing.source = SearchSource::Hybrid;
                     } else {
+                        // 仅关键词结果
                         let text = doc
-                            .get_first(f_content) // Retrieve from stored content
+                            .get_first(f_content)
                             .and_then(|v| v.as_str())
                             .unwrap_or_default()
                             .to_string();
@@ -436,7 +528,7 @@ impl KnotStore {
                             id: doc_id.clone(),
                             text,
                             file_path,
-                            score: bm25_score * 2.0,
+                            score: normalized_bm25, // 临时存储，后面用 RRF 重新计算
                             parent_id,
                             breadcrumbs,
                             source: SearchSource::Keyword,
@@ -448,10 +540,35 @@ impl KnotStore {
             Err(e) => eprintln!("[Tantivy] Query Error: {}", e),
         }
         if std::env::var("KNOT_QUIET").is_err() {
-            println!("[Search] Keyword search: {:?}", kw_start.elapsed());
+            println!(
+                "[Search] Keyword search: {:?}, found {} results",
+                kw_start.elapsed(),
+                keyword_ranks.len()
+            );
         }
 
-        // 3. Final Sort
+        // 3. RRF 融合计算最终分数
+        // RRF 公式: score = sum(1 / (k + rank))
+        // 加权 RRF: score = w_vec * (1 / (k + vec_rank)) + w_kw * (1 / (k + kw_rank))
+        for (id, result) in results_map.iter_mut() {
+            let vec_rank = vector_ranks.get(id).cloned();
+            let kw_rank = keyword_ranks.get(id).cloned();
+
+            let vec_rrf = vec_rank
+                .map(|r| VECTOR_WEIGHT / (RRF_K + r as f32))
+                .unwrap_or(0.0);
+            let kw_rrf = kw_rank
+                .map(|r| KEYWORD_WEIGHT / (RRF_K + r as f32))
+                .unwrap_or(0.0);
+
+            // RRF 分数转换到 0-100 范围（乘以缩放因子）
+            // 最高可能 RRF = 0.6/(60+1) + 0.4/(60+1) ≈ 0.0164
+            // 缩放到 100 分: 0.0164 * 6100 ≈ 100
+            let rrf_score = (vec_rrf + kw_rrf) * 6100.0;
+            result.score = rrf_score.min(100.0);
+        }
+
+        // 4. Final Sort by RRF score
         let mut final_results: Vec<SearchResult> = results_map.into_values().collect();
         final_results.sort_by(|a, b| {
             b.score
@@ -460,58 +577,99 @@ impl KnotStore {
         });
 
         if std::env::var("KNOT_QUIET").is_err() {
-            println!("[Search] Total search time: {:?}", total_start.elapsed());
+            println!(
+                "[Search] Total: {:?}, RRF fusion applied, {} results",
+                total_start.elapsed(),
+                final_results.len()
+            );
         }
         Ok(final_results.into_iter().take(10).collect())
     }
 
-    fn batches_to_results(&self, batches: Vec<RecordBatch>) -> Vec<SearchResult> {
-        let mut search_results = Vec::new();
+    /// 解析 LanceDB 向量搜索结果，提取 _distance 列
+    fn batches_to_results_with_distance(
+        &self,
+        batches: Vec<RecordBatch>,
+    ) -> Vec<CandidateWithDistance> {
+        let mut candidates = Vec::new();
         for batch in batches {
+            // 使用 column_by_name 获取列，更可靠
             let ids = batch
-                .column(0)
-                .as_any()
-                .downcast_ref::<StringArray>()
-                .unwrap();
+                .column_by_name("id")
+                .and_then(|c| c.as_any().downcast_ref::<StringArray>());
             let texts = batch
-                .column(1)
-                .as_any()
-                .downcast_ref::<StringArray>()
-                .unwrap();
+                .column_by_name("text")
+                .and_then(|c| c.as_any().downcast_ref::<StringArray>());
             let paths = batch
-                .column(3)
-                .as_any()
-                .downcast_ref::<StringArray>()
-                .unwrap();
+                .column_by_name("file_path")
+                .and_then(|c| c.as_any().downcast_ref::<StringArray>());
+            let parent_ids = batch
+                .column_by_name("parent_id")
+                .and_then(|c| c.as_any().downcast_ref::<StringArray>());
+            let breadcrumbs_col = batch
+                .column_by_name("breadcrumbs")
+                .and_then(|c| c.as_any().downcast_ref::<StringArray>());
 
-            let num_cols = batch.num_columns();
-            let parent_ids = if num_cols > 4 {
-                batch.column(4).as_any().downcast_ref::<StringArray>()
-            } else {
-                None
-            };
-            let breadcrumbs_col = if num_cols > 5 {
-                batch.column(5).as_any().downcast_ref::<StringArray>()
-            } else {
-                None
+            // LanceDB 向量搜索自动添加 _distance 列
+            let distances = batch
+                .column_by_name("_distance")
+                .and_then(|c| c.as_any().downcast_ref::<Float32Array>());
+
+            // 如果关键列缺失，跳过此 batch
+            let (ids, texts, paths) = match (ids, texts, paths) {
+                (Some(i), Some(t), Some(p)) => (i, t, p),
+                _ => continue,
             };
 
             for i in 0..batch.num_rows() {
-                let pid = parent_ids.map(|a| a.value(i).to_string());
-                let bc = breadcrumbs_col.map(|a| a.value(i).to_string());
+                let pid = parent_ids.and_then(|a| {
+                    if a.is_null(i) {
+                        None
+                    } else {
+                        Some(a.value(i).to_string())
+                    }
+                });
+                let bc = breadcrumbs_col.and_then(|a| {
+                    if a.is_null(i) {
+                        None
+                    } else {
+                        Some(a.value(i).to_string())
+                    }
+                });
+                let distance = distances.map(|d| d.value(i)).unwrap_or(f32::MAX);
 
-                search_results.push(SearchResult {
-                    id: ids.value(i).to_string(),
-                    text: texts.value(i).to_string(),
-                    file_path: paths.value(i).to_string(),
-                    score: 0.0,
-                    parent_id: pid,
-                    breadcrumbs: bc,
-                    source: SearchSource::Vector,
+                candidates.push(CandidateWithDistance {
+                    result: SearchResult {
+                        id: ids.value(i).to_string(),
+                        text: texts.value(i).to_string(),
+                        file_path: paths.value(i).to_string(),
+                        score: 0.0,
+                        parent_id: pid,
+                        breadcrumbs: bc,
+                        source: SearchSource::Vector,
+                    },
+                    distance,
                 });
             }
         }
-        search_results
+
+        // 打印调试信息（仅在非静默模式）
+        if std::env::var("KNOT_QUIET").is_err() && !candidates.is_empty() {
+            let min_dist = candidates
+                .iter()
+                .map(|c| c.distance)
+                .fold(f32::MAX, f32::min);
+            let max_dist = candidates
+                .iter()
+                .map(|c| c.distance)
+                .fold(f32::MIN, f32::max);
+            println!(
+                "[Search] Vector distances: min={:.3}, max={:.3}, threshold={:.1}",
+                min_dist, max_dist, VECTOR_DISTANCE_THRESHOLD
+            );
+        }
+
+        candidates
     }
 
     fn get_schema(&self) -> Arc<Schema> {

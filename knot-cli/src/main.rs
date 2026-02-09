@@ -729,7 +729,7 @@ async fn main() -> Result<()> {
             for index_path in &indexes_to_search {
                 let lance_path = index_path.join("knot_index.lance");
                 if let Ok(store) = KnotStore::new(lance_path.to_str().unwrap()).await {
-                    if let Ok(results) = store.search(query_vec.clone(), &text).await {
+                    if let Ok(results) = store.search(query_vec.clone(), &text, 1.5).await {
                         all_results.extend(results);
                     }
                 }
@@ -848,7 +848,7 @@ async fn main() -> Result<()> {
             for index_path in &indexes_to_search {
                 let lance_path = index_path.join("knot_index.lance");
                 if let Ok(store) = KnotStore::new(lance_path.to_str().unwrap()).await {
-                    if let Ok(results) = store.search(query_vec.clone(), &query).await {
+                    if let Ok(results) = store.search(query_vec.clone(), &query, 1.5).await {
                         all_results.extend(results);
                     }
                 }
@@ -931,7 +931,7 @@ async fn main() -> Result<()> {
 
             // 4. Stream response
             let client = LlamaClient::new(LLM_PORT);
-            let mut rx = client.generate_content_stream(&prompt).await?;
+            let mut rx = client.generate_content_stream(&prompt, 1024).await?;
 
             let mut answer = String::new();
 
@@ -1244,7 +1244,7 @@ async fn main() -> Result<()> {
                 for idx_path in &indexes_to_search {
                     let lance_path = idx_path.join("knot_index.lance");
                     if let Ok(store) = KnotStore::new(lance_path.to_str().unwrap()).await {
-                        if let Ok(results) = store.search(query_vec.clone(), query).await {
+                        if let Ok(results) = store.search(query_vec.clone(), query, 1.5).await {
                             all_results.extend(results);
                         }
                     }
@@ -1278,7 +1278,7 @@ async fn main() -> Result<()> {
 
                 // Stream the response
                 print!("\n");
-                let mut stream_rx = match llm_client.generate_content_stream(&prompt).await {
+                let mut stream_rx = match llm_client.generate_content_stream(&prompt, 1024).await {
                     Ok(rx) => rx,
                     Err(e) => {
                         eprintln!("LLM error: {}", e);

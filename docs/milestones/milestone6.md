@@ -11,26 +11,26 @@
 - **Table Name**: `vectors`
 - **Embedding Dimension**: 512 (Mock/BGE-M3)
 
-| Field Name | Type | Description |
-| :--- | :--- | :--- |
-| `id` | Utf8 | Unique content hash (or UUID) |
-| `text` | Utf8 | The actual content text (chunk) |
-| `vector` | FixedSizeList<Float32> [512] | Embedding vector of the `text` |
-| `file_path` | Utf8 | Absolute path to the source file |
-| `parent_id` | Utf8 (Nullable) | ID of the parent node (if hierarchical) |
-| `breadcrumbs` | Utf8 (Nullable) | Context path (e.g., "Chapter 1 > Section 2") |
+| Field Name    | Type                         | Description                                  |
+| :------------ | :--------------------------- | :------------------------------------------- |
+| `id`          | Utf8                         | Unique content hash (or UUID)                |
+| `text`        | Utf8                         | The actual content text (chunk)              |
+| `vector`      | FixedSizeList<Float32> [512] | Embedding vector of the `text`               |
+| `file_path`   | Utf8                         | Absolute path to the source file             |
+| `parent_id`   | Utf8 (Nullable)              | ID of the parent node (if hierarchical)      |
+| `breadcrumbs` | Utf8 (Nullable)              | Context path (e.g., "Chapter 1 > Section 2") |
 
 #### Tantivy Schema (Keyword Store)
 - **Initialization**: `knot-core/src/store.rs` -> `KnotStore::ensure_tantivy_index()`
 - **Tokenizer**: `jieba` (Chinese support), `LowerCaser`, `RemoveLongFilter(40)`, `StopWordFilter`.
 
-| Field Name | Type | Options | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | STRING | STORED | Unique ID (Exact match only) |
-| `file_path` | STRING | STORED | Absolute path (Exact match only) |
-| `text` | TEXT | INDEXED, STORED | Main content (Tokenized with Jieba) |
-| `parent_id` | STRING | STORED | Parent ID (Exact match only) |
-| `breadcrumbs` | STRING | STORED | Context path (Exact match only) |
+| Field Name    | Type   | Options         | Description                         |
+| :------------ | :----- | :-------------- | :---------------------------------- |
+| `id`          | STRING | STORED          | Unique ID (Exact match only)        |
+| `file_path`   | STRING | STORED          | Absolute path (Exact match only)    |
+| `text`        | TEXT   | INDEXED, STORED | Main content (Tokenized with Jieba) |
+| `parent_id`   | STRING | STORED          | Parent ID (Exact match only)        |
+| `breadcrumbs` | STRING | STORED          | Context path (Exact match only)     |
 
 ### 2. Data Flow & Initialization
 

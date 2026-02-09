@@ -23,6 +23,7 @@
 
     let modelStatus = $state("loading");
     let indexedDocs = $state(0);
+    let startupTimeMs = $state(null);
 
     onMount(() => {
         // Listen for model status updates
@@ -63,6 +64,16 @@
 
         refreshDocCount();
 
+        // Get startup time (time from app click to page ready)
+        invoke("get_startup_time")
+            .then((ms) => {
+                console.log("Startup Time:", ms, "ms");
+                startupTimeMs = ms;
+            })
+            .catch((e) => {
+                console.error("Failed to get startup time:", e);
+            });
+
         return () => {
             unlistenModelStatus.then((unlisten) => unlisten());
             unlistenIndexingStatus.then((unlisten) => unlisten());
@@ -71,6 +82,12 @@
     const formatCount = (num) => {
         if (num >= 10000) return (num / 1000).toFixed(1) + "k";
         return num.toLocaleString();
+    };
+
+    const formatStartupTime = (ms) => {
+        if (ms === null) return "";
+        if (ms < 1000) return `${ms}ms`;
+        return `${(ms / 1000).toFixed(2)}s`;
     };
 </script>
 
@@ -158,6 +175,21 @@
                     ></div>
                     Ready
                 </span>
+            </div>
+        {/if}
+
+        <!-- Startup Time -->
+        {#if startupTimeMs !== null}
+            <div
+                class="flex items-center gap-1.5 text-[var(--text-secondary)] opacity-60"
+                title="App startup time"
+            >
+                <span class="material-symbols-outlined text-[14px]"
+                    >rocket_launch</span
+                >
+                <span class="text-[10px]"
+                    >{formatStartupTime(startupTimeMs)}</span
+                >
             </div>
         {/if}
 

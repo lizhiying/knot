@@ -58,6 +58,28 @@
                     ></div>
                 </div>
             {/each}
+        {:else if results.length === 0}
+            <!-- 空结果提示 -->
+            <div
+                class="flex flex-col items-center justify-center h-full text-center px-4 py-8"
+            >
+                <div
+                    class="w-12 h-12 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] flex items-center justify-center mb-4"
+                >
+                    <span
+                        class="material-symbols-outlined text-xl text-[var(--text-muted)]"
+                        >search_off</span
+                    >
+                </div>
+                <p class="text-xs text-[var(--text-secondary)] mb-1">
+                    未找到相关结果
+                </p>
+                <p
+                    class="text-[10px] text-[var(--text-muted)] max-w-[180px] leading-relaxed"
+                >
+                    请尝试其他关键词或检查拼写
+                </p>
+            </div>
         {:else}
             <!-- 真实列表 -->
             {#each results as result, i (result.id)}

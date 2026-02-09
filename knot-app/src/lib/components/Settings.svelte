@@ -23,6 +23,10 @@
     // Config state
     let dataDir = $state("");
     let isStreamingEnabled = $state(true);
+    let distanceThreshold = $state(0.75);
+    let llmContextSize = $state(8192);
+    let llmMaxTokens = $state(1024);
+    let llmThinkEnabled = $state(false);
     let indexingStatus = $state("ready");
     let isRecording = $state(false);
     let shortcutKey = $state("");
@@ -188,6 +192,58 @@
         }
     }
 
+    async function updateDistanceThreshold(value) {
+        try {
+            distanceThreshold = value;
+            await invoke("set_vector_distance_threshold", { threshold: value });
+        } catch (err) {
+            console.error("Failed to update distance threshold:", err);
+            await message("Failed to update setting: " + err, {
+                title: "Error",
+                kind: "error",
+            });
+        }
+    }
+
+    async function updateLlmContextSize(value) {
+        try {
+            llmContextSize = value;
+            await invoke("set_llm_context_size", { size: value });
+        } catch (err) {
+            console.error("Failed to update LLM context size:", err);
+            await message("Failed to update setting: " + err, {
+                title: "Error",
+                kind: "error",
+            });
+        }
+    }
+
+    async function updateLlmMaxTokens(value) {
+        try {
+            llmMaxTokens = value;
+            await invoke("set_llm_max_tokens", { maxTokens: value });
+        } catch (err) {
+            console.error("Failed to update LLM max tokens:", err);
+            await message("Failed to update setting: " + err, {
+                title: "Error",
+                kind: "error",
+            });
+        }
+    }
+
+    async function updateLlmThinkEnabled(value) {
+        try {
+            llmThinkEnabled = value;
+            await invoke("set_llm_think_enabled", { enabled: value });
+        } catch (err) {
+            console.error("Failed to update LLM think mode:", err);
+            await message("Failed to update setting: " + err, {
+                title: "Error",
+                kind: "error",
+            });
+        }
+    }
+
     function handleKeyDown(e) {
         if (!isRecording) return;
         e.preventDefault();
@@ -220,6 +276,18 @@
             }
             if (config.streaming_enabled !== undefined) {
                 isStreamingEnabled = config.streaming_enabled;
+            }
+            if (config.vector_distance_threshold !== undefined) {
+                distanceThreshold = config.vector_distance_threshold;
+            }
+            if (config.llm_context_size !== undefined) {
+                llmContextSize = config.llm_context_size;
+            }
+            if (config.llm_max_tokens !== undefined) {
+                llmMaxTokens = config.llm_max_tokens;
+            }
+            if (config.llm_think_enabled !== undefined) {
+                llmThinkEnabled = config.llm_think_enabled;
             }
         } catch (e) {
             console.error("Failed to load config:", e);
@@ -487,6 +555,193 @@
                                     class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {isStreamingEnabled
                                         ? 'translate-x-6'
                                         : 'translate-x-1'}"
+                                ></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Vector Distance Threshold Section -->
+                    <div
+                        class="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] p-6 mb-6"
+                    >
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3
+                                    class="font-medium text-sm text-[var(--text-primary)]"
+                                >
+                                    搜索相似度阈值
+                                </h3>
+                                <p
+                                    class="text-[var(--text-secondary)] text-xs mt-1"
+                                >
+                                    控制搜索结果的相关性过滤。值越小，返回的结果越相关但可能更少。
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-4">
+                            <input
+                                type="range"
+                                min="0.5"
+                                max="2.0"
+                                step="0.1"
+                                value={distanceThreshold}
+                                class="flex-1 h-2 bg-[var(--bg-card)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
+                                oninput={(e) =>
+                                    updateDistanceThreshold(
+                                        parseFloat(e.target.value),
+                                    )}
+                            />
+                            <span
+                                class="text-sm font-mono text-[var(--text-primary)] w-12 text-right"
+                            >
+                                {distanceThreshold.toFixed(1)}
+                            </span>
+                        </div>
+                        <div
+                            class="mt-2 flex justify-between text-[10px] text-[var(--text-muted)]"
+                        >
+                            <span>更严格（高相关性）</span>
+                            <span>更宽松（更多结果）</span>
+                        </div>
+                    </div>
+
+                    <!-- LLM Configuration Section -->
+                    <div
+                        class="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] p-6 mb-6"
+                    >
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3
+                                    class="font-medium text-sm text-[var(--text-primary)]"
+                                >
+                                    LLM 配置
+                                </h3>
+                                <p
+                                    class="text-[var(--text-secondary)] text-xs mt-1"
+                                >
+                                    调整 AI 回答的生成参数
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Context Size -->
+                        <div class="mt-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span
+                                    class="text-xs text-[var(--text-secondary)]"
+                                    >上下文窗口大小</span
+                                >
+                                <span
+                                    class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-500"
+                                    >重启生效</span
+                                >
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <input
+                                    type="range"
+                                    min="4096"
+                                    max="16384"
+                                    step="1024"
+                                    value={llmContextSize}
+                                    class="flex-1 h-2 bg-[var(--bg-card)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
+                                    oninput={(e) =>
+                                        updateLlmContextSize(
+                                            parseInt(e.target.value),
+                                        )}
+                                />
+                                <span
+                                    class="text-sm font-mono text-[var(--text-primary)] w-16 text-right"
+                                >
+                                    {llmContextSize}
+                                </span>
+                            </div>
+                            <div
+                                class="mt-1 flex justify-between text-[10px] text-[var(--text-muted)]"
+                            >
+                                <span>4096</span>
+                                <span>16384</span>
+                            </div>
+                        </div>
+
+                        <!-- Max Tokens -->
+                        <div class="mt-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span
+                                    class="text-xs text-[var(--text-secondary)]"
+                                    >最大生成 Token 数</span
+                                >
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <input
+                                    type="range"
+                                    min="256"
+                                    max="2048"
+                                    step="128"
+                                    value={llmMaxTokens}
+                                    class="flex-1 h-2 bg-[var(--bg-card)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-primary)]"
+                                    oninput={(e) =>
+                                        updateLlmMaxTokens(
+                                            parseInt(e.target.value),
+                                        )}
+                                />
+                                <span
+                                    class="text-sm font-mono text-[var(--text-primary)] w-16 text-right"
+                                >
+                                    {llmMaxTokens}
+                                </span>
+                            </div>
+                            <div
+                                class="mt-1 flex justify-between text-[10px] text-[var(--text-muted)]"
+                            >
+                                <span>256（简短）</span>
+                                <span>2048（详细）</span>
+                            </div>
+                        </div>
+
+                        <!-- Computed hint -->
+                        <div
+                            class="mt-4 p-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)]"
+                        >
+                            <p class="text-[10px] text-[var(--text-muted)]">
+                                💡 根据当前配置，最大输入上下文约为 <span
+                                    class="font-mono text-[var(--text-secondary)]"
+                                    >{Math.floor(
+                                        (llmContextSize / 2 -
+                                            llmMaxTokens -
+                                            300) *
+                                            2,
+                                    )}</span
+                                > 字符。超过此长度将自动压缩。
+                            </p>
+                        </div>
+
+                        <!-- Think Mode Toggle -->
+                        <div
+                            class="mt-4 flex items-center justify-between p-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)]"
+                        >
+                            <div>
+                                <span
+                                    class="text-xs text-[var(--text-secondary)]"
+                                    >Think 模式</span
+                                >
+                                <p
+                                    class="text-[10px] text-[var(--text-muted)] mt-0.5"
+                                >
+                                    启用后 AI
+                                    会先思考再回答，可能提高质量但增加延迟
+                                </p>
+                            </div>
+                            <button
+                                class="relative w-11 h-6 rounded-full transition-colors {llmThinkEnabled
+                                    ? 'bg-[var(--accent-primary)]'
+                                    : 'bg-[var(--bg-secondary)]'}"
+                                onclick={() =>
+                                    updateLlmThinkEnabled(!llmThinkEnabled)}
+                            >
+                                <span
+                                    class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform {llmThinkEnabled
+                                        ? 'translate-x-5'
+                                        : ''}"
                                 ></span>
                             </button>
                         </div>

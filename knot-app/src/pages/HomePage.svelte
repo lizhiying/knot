@@ -23,7 +23,9 @@
             e.preventDefault();
             spotlightVisible = !spotlightVisible;
         }
-        if (e.key === "Escape") {
+        // ESC 或 Cmd+W (macOS) / Ctrl+W (Windows/Linux) 关闭窗口
+        if (e.key === "Escape" || ((e.metaKey || e.ctrlKey) && e.key === "w")) {
+            e.preventDefault();
             spotlightVisible = false;
             // 隐藏整个窗口
             const appWindow = getCurrentWebviewWindow();

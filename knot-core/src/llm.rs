@@ -31,7 +31,25 @@ impl LlamaSidecar {
         mmproj_path: Option<&str>,
         port: u16,
     ) -> Result<Self> {
-        Self::spawn_internal(model_path, bin_dir, mmproj_path, port, false)
+        Self::spawn_internal(model_path, bin_dir, mmproj_path, port, false, None)
+    }
+
+    /// Spawn with custom context size
+    pub fn spawn_with_context(
+        model_path: &str,
+        bin_dir: &Path,
+        mmproj_path: Option<&str>,
+        port: u16,
+        context_size: u32,
+    ) -> Result<Self> {
+        Self::spawn_internal(
+            model_path,
+            bin_dir,
+            mmproj_path,
+            port,
+            false,
+            Some(context_size),
+        )
     }
 
     /// Spawn without any console output (for CLI use)
@@ -41,7 +59,7 @@ impl LlamaSidecar {
         mmproj_path: Option<&str>,
         port: u16,
     ) -> Result<Self> {
-        Self::spawn_internal(model_path, bin_dir, mmproj_path, port, true)
+        Self::spawn_internal(model_path, bin_dir, mmproj_path, port, true, None)
     }
 
     fn spawn_internal(
@@ -50,6 +68,7 @@ impl LlamaSidecar {
         mmproj_path: Option<&str>,
         port: u16,
         quiet: bool,
+        context_size: Option<u32>,
     ) -> Result<Self> {
         // 根据平台选择正确的二进制文件
         #[cfg(target_os = "macos")]
@@ -69,6 +88,7 @@ impl LlamaSidecar {
         }
 
         let mut cmd = Command::new(&bin_path);
+        let ctx_size = context_size.unwrap_or(8192);
         cmd.arg("--model")
             .arg(model_path)
             .arg("--mmap")
@@ -77,7 +97,7 @@ impl LlamaSidecar {
             .arg("--n-gpu-layers")
             .arg("99")
             .arg("-c")
-            .arg("4096")
+            .arg(ctx_size.to_string())
             .arg("--parallel")
             .arg("2")
             .arg("-fa")
@@ -218,6 +238,7 @@ impl LlamaClient {
     pub async fn generate_content_stream(
         &self,
         prompt: &str,
+        max_tokens: u32,
     ) -> Result<tokio::sync::mpsc::Receiver<String>, PageIndexError> {
         let _guard = self.gate.lock_high().await;
 
@@ -233,7 +254,7 @@ impl LlamaClient {
         let body = json!({
             "prompt": formatted_prompt,
             "stream": true,
-            "n_predict": 1024,
+            "n_predict": max_tokens,
             "temperature": 0.1,
             "stop": ["<|im_end|>"]
         });
@@ -336,8 +357,14 @@ impl LlamaClient {
                             sleep(Duration::from_secs(1)).await;
                             continue;
                         } else {
-                            debug_println!("[LlamaClient] Error status: {}", response.status());
-                            let _ = tx.send(format!("Error: {}", response.status())).await;
+                            // 读取错误响应体以便调试
+                            let status = response.status();
+                            let error_body = response.text().await.unwrap_or_default();
+                            println!(
+                                "[LlamaClient] Error status: {} | Body: {}",
+                                status, error_body
+                            );
+                            let _ = tx.send(format!("Error: {} - {}", status, error_body)).await;
                             return;
                         }
                     }
