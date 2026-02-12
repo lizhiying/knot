@@ -68,31 +68,42 @@ impl KnotStore {
         Ok(store)
     }
 
+    /// Schema 版本号：每次修改 Schema 时递增，用于自动迁移检测
+    const SCHEMA_VERSION: u32 = 2; // v1: 基础字段, v2: +text_icu +file_name_std +en_knot
+
     /// Create and configure Tantivy Index (called once during initialization)
     fn create_tantivy_index(tantivy_path: &PathBuf) -> Result<Index> {
         use tantivy::directory::MmapDirectory;
 
         let mut schema_builder = t_schema::Schema::builder();
 
-        // 1. Text Options
-        // Jieba: Chinese Semantic Segmentation
+        // === 1. Text Fields ===
+
+        // Jieba: 中文主力分词
         let text_zh_options = TextOptions::default().set_indexing_options(
             TextFieldIndexing::default()
                 .set_tokenizer("jieba")
                 .set_index_option(IndexRecordOption::WithFreqsAndPositions),
-        ); // Not Stored
+        );
+        let _text_zh = schema_builder.add_text_field("text_zh", text_zh_options);
 
-        // Standard: General Multilingual (Simple)
+        // English: Lowercase + Stemmer
         let text_std_options = TextOptions::default().set_indexing_options(
             TextFieldIndexing::default()
-                .set_tokenizer("default")
+                .set_tokenizer("en_knot")
                 .set_index_option(IndexRecordOption::WithFreqsAndPositions),
         );
+        let _text_std = schema_builder.add_text_field("text_std", text_std_options);
 
-        // Define Fields
-        let _text_zh = schema_builder.add_text_field("text_zh", text_zh_options);
-        let _text_std = schema_builder.add_text_field("text_std", text_std_options.clone());
+        // ICU: 泛语言兜底
+        let text_icu_options = TextOptions::default().set_indexing_options(
+            TextFieldIndexing::default()
+                .set_tokenizer("icu")
+                .set_index_option(IndexRecordOption::WithFreqsAndPositions),
+        );
+        let _text_icu = schema_builder.add_text_field("text_icu", text_icu_options);
 
+        // file_name: Jieba（中文文件名）
         let file_name_options = TextOptions::default().set_indexing_options(
             TextFieldIndexing::default()
                 .set_tokenizer("jieba")
@@ -100,6 +111,15 @@ impl KnotStore {
         ) | t_schema::STORED;
         let _file_name = schema_builder.add_text_field("file_name", file_name_options);
 
+        // file_name_std: Default（英文文件名兜底）
+        let file_name_std_options = TextOptions::default().set_indexing_options(
+            TextFieldIndexing::default()
+                .set_tokenizer("en_knot")
+                .set_index_option(IndexRecordOption::WithFreqsAndPositions),
+        );
+        let _file_name_std = schema_builder.add_text_field("file_name_std", file_name_std_options);
+
+        // path_tags: Default
         let path_tags_options = TextOptions::default().set_indexing_options(
             TextFieldIndexing::default()
                 .set_tokenizer("default")
@@ -107,7 +127,7 @@ impl KnotStore {
         ) | t_schema::STORED;
         let _path_tags = schema_builder.add_text_field("path_tags", path_tags_options);
 
-        // 2. Schema Definition
+        // === 2. Metadata Fields ===
         schema_builder.add_text_field("id", t_schema::STRING | t_schema::STORED);
         schema_builder.add_text_field("file_path", t_schema::STRING | t_schema::STORED);
         schema_builder.add_text_field("content", t_schema::STORED);
@@ -116,11 +136,22 @@ impl KnotStore {
 
         let schema = schema_builder.build();
 
-        // Auto-Migration: Check if schema matches
+        // === 3. Auto-Migration: 检查新字段是否存在 ===
         let reset_needed = if tantivy_path.exists() {
             if let Ok(dir) = MmapDirectory::open(tantivy_path) {
                 if let Ok(idx) = Index::open(dir) {
-                    idx.schema().get_field("text_zh").is_err()
+                    // 检查新增字段是否存在，不存在则需要重建
+                    let missing_icu = idx.schema().get_field("text_icu").is_err();
+                    let missing_fn_std = idx.schema().get_field("file_name_std").is_err();
+                    if missing_icu || missing_fn_std {
+                        println!(
+                            "[FTS] Schema migration needed: text_icu={}, file_name_std={}",
+                            !missing_icu, !missing_fn_std
+                        );
+                        true
+                    } else {
+                        false
+                    }
                 } else {
                     false
                 }
@@ -132,6 +163,10 @@ impl KnotStore {
         };
 
         if reset_needed {
+            println!(
+                "[FTS] Rebuilding Tantivy index for schema v{}...",
+                Self::SCHEMA_VERSION
+            );
             let _ = std::fs::remove_dir_all(tantivy_path);
             let _ = std::fs::create_dir_all(tantivy_path);
         }
@@ -140,7 +175,9 @@ impl KnotStore {
         let dir = MmapDirectory::open(tantivy_path)?;
         let index = Index::open_or_create(dir, schema)?;
 
-        // Register Jieba Tokenizer (expensive operation, done once)
+        // === 4. Register Tokenizers ===
+
+        // Jieba: 中文分词 + Lowercase + 停用词
         let stop_words = include_str!("../../knot-app/stopwords.txt")
             .split_whitespace()
             .map(|s| s.to_string())
@@ -151,8 +188,153 @@ impl KnotStore {
             .filter(tantivy::tokenizer::RemoveLongFilter::limit(40))
             .filter(StopWordFilter::remove(stop_words))
             .build();
-
         index.tokenizers().register("jieba", jieba_tokenizer);
+
+        // en_knot: 英文分词 + Lowercase + Stemmer(English) + 英文停用词
+        let en_stop_words: Vec<String> = vec![
+            "a",
+            "an",
+            "the",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "being",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "may",
+            "might",
+            "shall",
+            "can",
+            "need",
+            "dare",
+            "ought",
+            "to",
+            "of",
+            "in",
+            "for",
+            "on",
+            "with",
+            "at",
+            "by",
+            "from",
+            "as",
+            "into",
+            "through",
+            "during",
+            "before",
+            "after",
+            "above",
+            "below",
+            "and",
+            "but",
+            "or",
+            "nor",
+            "not",
+            "so",
+            "yet",
+            "both",
+            "either",
+            "neither",
+            "each",
+            "every",
+            "all",
+            "any",
+            "few",
+            "more",
+            "most",
+            "other",
+            "some",
+            "such",
+            "no",
+            "only",
+            "own",
+            "same",
+            "than",
+            "too",
+            "very",
+            "just",
+            "because",
+            "if",
+            "when",
+            "while",
+            "how",
+            "what",
+            "which",
+            "who",
+            "whom",
+            "this",
+            "that",
+            "these",
+            "those",
+            "i",
+            "me",
+            "my",
+            "myself",
+            "we",
+            "our",
+            "ours",
+            "ourselves",
+            "you",
+            "your",
+            "yours",
+            "yourself",
+            "yourselves",
+            "he",
+            "him",
+            "his",
+            "himself",
+            "she",
+            "her",
+            "hers",
+            "herself",
+            "it",
+            "its",
+            "itself",
+            "they",
+            "them",
+            "their",
+            "theirs",
+            "themselves",
+        ]
+        .into_iter()
+        .map(|s| s.to_string())
+        .collect();
+
+        let en_tokenizer = tantivy::tokenizer::TextAnalyzer::builder(
+            tantivy::tokenizer::SimpleTokenizer::default(),
+        )
+        .filter(tantivy::tokenizer::RemoveLongFilter::limit(40))
+        .filter(tantivy::tokenizer::LowerCaser)
+        .filter(tantivy::tokenizer::Stemmer::new(
+            tantivy::tokenizer::Language::English,
+        ))
+        .filter(StopWordFilter::remove(en_stop_words))
+        .build();
+        index.tokenizers().register("en_knot", en_tokenizer);
+
+        // ICU: 泛语言分词 (Unicode 边界切分)
+        let icu_tokenizer =
+            tantivy::tokenizer::TextAnalyzer::builder(crate::tokenizer::ICUTokenizer)
+                .filter(tantivy::tokenizer::LowerCaser)
+                .filter(tantivy::tokenizer::RemoveLongFilter::limit(40))
+                .build();
+        index.tokenizers().register("icu", icu_tokenizer);
+
+        println!(
+            "[FTS] Tantivy index ready (schema v{}, 3 tokenizers: jieba, en_knot, icu)",
+            Self::SCHEMA_VERSION
+        );
 
         Ok(index)
     }
@@ -234,7 +416,9 @@ impl KnotStore {
         let f_content = schema.get_field("content").unwrap();
         let f_text_zh = schema.get_field("text_zh").unwrap();
         let f_text_std = schema.get_field("text_std").unwrap();
+        let f_text_icu = schema.get_field("text_icu").unwrap();
         let f_file_name = schema.get_field("file_name").unwrap();
+        let f_file_name_std = schema.get_field("file_name_std").unwrap();
         let f_path_tags = schema.get_field("path_tags").unwrap();
         let f_pid = schema.get_field("parent_id").unwrap();
         let f_bc = schema.get_field("breadcrumbs").unwrap();
@@ -248,12 +432,14 @@ impl KnotStore {
             let extracted_file_name = PathProcessor::extract_file_name(&record.file_path);
             let extracted_tags = PathProcessor::extract_directory_tags(&record.file_path);
 
-            doc.add_text(f_file_name, &extracted_file_name);
+            doc.add_text(f_file_name, &extracted_file_name); // 中文文件名 (Jieba)
+            doc.add_text(f_file_name_std, &extracted_file_name); // 英文文件名兜底 (en_knot)
             doc.add_text(f_path_tags, &extracted_tags);
 
             doc.add_text(f_content, &record.text); // Store original text
-            doc.add_text(f_text_zh, &record.text); // Index with Jieba
-            doc.add_text(f_text_std, &record.text); // Index with Standard
+            doc.add_text(f_text_zh, &record.text); // Index with Jieba (中文)
+            doc.add_text(f_text_std, &record.text); // Index with en_knot (英文+词干)
+            doc.add_text(f_text_icu, &record.text); // Index with ICU (泛语言兜底)
 
             if let Some(pid) = &record.parent_id {
                 doc.add_text(f_pid, pid);
@@ -328,27 +514,56 @@ impl KnotStore {
         Ok(())
     }
 
-    /// 预处理查询文本：在中英文边界插入空格以改善分词
-    fn preprocess_query(query: &str) -> String {
-        let mut result = String::with_capacity(query.len() * 2);
-        let mut prev_is_ascii = false;
+    /// 预处理查询文本：
+    /// 1. 在中英文/数字边界插入空格以改善分词
+    /// 2. 去除重复的短噪音 token（如 "s s s" → "s"）
+    ///
+    /// 注意：此函数应在生成向量嵌入之前调用，确保关键词和向量搜索使用一致的查询文本。
+    pub fn preprocess_query(query: &str) -> String {
+        // 第一步：在字符类型边界插入空格
+        let mut spaced = String::with_capacity(query.len() * 2);
+        let mut prev_is_ascii_alpha = false;
+        let mut prev_is_digit = false;
         let mut prev_is_cjk = false;
 
         for c in query.chars() {
-            let is_ascii = c.is_ascii_alphanumeric();
-            let is_cjk = c >= '\u{4e00}' && c <= '\u{9fff}'; // CJK 基本区
+            let is_ascii_alpha = c.is_ascii_alphabetic();
+            let is_digit = c.is_ascii_digit();
+            let is_cjk = ('\u{4e00}'..='\u{9fff}').contains(&c)       // CJK 基本区
+                || ('\u{3400}'..='\u{4dbf}').contains(&c)               // CJK 扩展 A
+                || ('\u{3040}'..='\u{309f}').contains(&c)               // 平假名
+                || ('\u{30a0}'..='\u{30ff}').contains(&c)               // 片假名
+                || ('\u{ac00}'..='\u{d7af}').contains(&c); // 韩文
 
-            // 在中英文边界插入空格
-            if (prev_is_ascii && is_cjk) || (prev_is_cjk && is_ascii) {
-                result.push(' ');
+            // 在不同字符类型边界插入空格
+            let need_space = (prev_is_ascii_alpha && is_cjk)
+                || (prev_is_cjk && is_ascii_alpha)
+                || (prev_is_digit && is_cjk)
+                || (prev_is_cjk && is_digit);
+
+            if need_space {
+                spaced.push(' ');
             }
 
-            result.push(c);
-            prev_is_ascii = is_ascii;
+            spaced.push(c);
+            prev_is_ascii_alpha = is_ascii_alpha;
+            prev_is_digit = is_digit;
             prev_is_cjk = is_cjk;
         }
 
-        result
+        // 第二步：去除重复的短噪音 token
+        // 将 "s s s 入门" 变成 "s 入门"
+        let tokens: Vec<&str> = spaced.split_whitespace().collect();
+        let mut deduped: Vec<&str> = Vec::with_capacity(tokens.len());
+        for token in &tokens {
+            // 如果 token 长度 ≤ 2 且已经在 deduped 中存在，跳过
+            if token.len() <= 2 && deduped.contains(token) {
+                continue;
+            }
+            deduped.push(token);
+        }
+
+        deduped.join(" ")
     }
 
     pub async fn search(
@@ -452,27 +667,35 @@ impl KnotStore {
         let f_pid = schema.get_field("parent_id").unwrap();
         let f_bc = schema.get_field("breadcrumbs").unwrap();
 
-        let query_parser =
-            if let (Ok(f_text_std_field), Ok(f_file_name_field), Ok(f_path_tags_field)) = (
-                index.schema().get_field("text_std"),
-                index.schema().get_field("file_name"),
-                index.schema().get_field("path_tags"),
-            ) {
-                let mut fields = vec![f_text_zh, f_text_std_field];
-                fields.push(f_file_name_field);
-                fields.push(f_path_tags_field);
+        let query_parser = {
+            // 获取所有搜索字段
+            let f_text_std = schema.get_field("text_std").unwrap();
+            let f_text_icu = schema.get_field("text_icu").unwrap();
+            let f_file_name = schema.get_field("file_name").unwrap();
+            let f_file_name_std = schema.get_field("file_name_std").unwrap();
+            let f_path_tags = schema.get_field("path_tags").unwrap();
 
-                let mut parser = QueryParser::for_index(&index, fields);
-                parser.set_field_boost(f_text_zh, 1.0);
-                parser.set_field_boost(f_text_std_field, 1.0);
-                parser.set_field_boost(f_file_name_field, 3.0);
-                parser.set_field_boost(f_path_tags_field, 1.5);
-                parser
-            } else {
-                let mut parser = QueryParser::for_index(&index, vec![f_text_zh]);
-                parser.set_field_boost(f_text_zh, 1.0);
-                parser
-            };
+            let fields = vec![
+                f_text_zh,
+                f_text_std,
+                f_text_icu,
+                f_file_name,
+                f_file_name_std,
+                f_path_tags,
+            ];
+
+            let mut parser = QueryParser::for_index(&index, fields);
+
+            // 分级权重：文件名 > 中文 > 英文 > 路径 > ICU兜底
+            parser.set_field_boost(f_file_name, 8.0); // 文件名中文匹配最高
+            parser.set_field_boost(f_text_zh, 5.0); // 中文正文
+            parser.set_field_boost(f_file_name_std, 5.0); // 文件名英文
+            parser.set_field_boost(f_text_std, 3.0); // 英文正文 (含 Stemmer)
+            parser.set_field_boost(f_path_tags, 2.0); // 路径标签
+            parser.set_field_boost(f_text_icu, 1.0); // ICU 泛语言兜底
+
+            parser
+        };
 
         match query_parser.parse_query(query_text) {
             Ok(q) => {

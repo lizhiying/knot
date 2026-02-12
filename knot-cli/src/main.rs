@@ -682,6 +682,9 @@ async fn main() -> Result<()> {
             // Initialize embedding engine for query
             let embedding_engine = init_embedding_engine(None)?;
 
+            // 预处理查询文本（中英文边界、噪音去重）
+            let text = KnotStore::preprocess_query(&text);
+
             // Generate query embedding
             use pageindex_rs::EmbeddingProvider;
             let query_vec = embedding_engine
@@ -805,6 +808,10 @@ async fn main() -> Result<()> {
 
             // 1. Search for relevant chunks
             let embedding_engine = init_embedding_engine(None)?;
+
+            // 预处理查询文本（中英文边界、噪音去重）
+            let query = KnotStore::preprocess_query(&query);
+
             use pageindex_rs::EmbeddingProvider;
             let query_vec = embedding_engine
                 .generate_embedding(&query)
@@ -1230,9 +1237,12 @@ async fn main() -> Result<()> {
                     break;
                 }
 
+                // 预处理查询文本（中英文边界、噪音去重）
+                let query = KnotStore::preprocess_query(query);
+
                 // Search for relevant chunks
                 use pageindex_rs::EmbeddingProvider;
-                let query_vec = match embedding_engine.generate_embedding(query).await {
+                let query_vec = match embedding_engine.generate_embedding(&query).await {
                     Ok(v) => v,
                     Err(e) => {
                         eprintln!("Embedding error: {}", e);
@@ -1244,7 +1254,7 @@ async fn main() -> Result<()> {
                 for idx_path in &indexes_to_search {
                     let lance_path = idx_path.join("knot_index.lance");
                     if let Ok(store) = KnotStore::new(lance_path.to_str().unwrap()).await {
-                        if let Ok(results) = store.search(query_vec.clone(), query, 1.5).await {
+                        if let Ok(results) = store.search(query_vec.clone(), &query, 1.5).await {
                             all_results.extend(results);
                         }
                     }

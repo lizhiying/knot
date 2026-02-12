@@ -1178,6 +1178,9 @@ async fn rag_search(
         query
     };
 
+    // 预处理查询文本（中英文边界、噪音去重）
+    let query = knot_core::store::KnotStore::preprocess_query(&query);
+
     let total_start = Instant::now();
     println!("[rag_search] Starting query: {}", query);
 
@@ -1486,6 +1489,9 @@ async fn rag_query(
     // KnotStore::search takes `query_vec: Vec<f32>` and `query_text: &str`.
     // So we MUST generate embedding for `query`.
     // We have `state.thread_safe_embedding`.
+
+    // 预处理查询文本（中英文边界、噪音去重）
+    let query = knot_core::store::KnotStore::preprocess_query(&query);
 
     println!("[rag_query] Acquiring embedding lock...");
     let embedding_provider = {
