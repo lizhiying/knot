@@ -48,7 +48,11 @@ pub fn has_enough_lines(lines: &[RawLine], rects: &[RawRect]) -> bool {
     let mut all_lines = normalize_lines(lines, rects);
     filter_noise(&mut all_lines);
     let (h, v) = classify_lines(&all_lines);
-    h.len() >= 2 && v.len() >= 2 && (h.len() + v.len()) >= MIN_RULED_LINES
+    // 传统 ruled（有水平线+垂直线）
+    let traditional = h.len() >= 2 && v.len() >= 2 && (h.len() + v.len()) >= MIN_RULED_LINES;
+    // 三线表 booktabs（只有水平线，无垂直线）
+    let booktabs = h.len() >= 3 && v.is_empty();
+    traditional || booktabs
 }
 
 /// 从线段/矩形 + 字符中抽取 ruled 表格
@@ -64,7 +68,16 @@ pub fn extract_ruled_table(
     filter_noise(&mut all_lines);
     let (mut h_lines, mut v_lines) = classify_lines(&all_lines);
 
-    if h_lines.len() < 2 || v_lines.len() < 2 {
+    if h_lines.len() < 2 {
+        return None;
+    }
+
+    // 如果没有垂直线但有 ≥3 条水平线，尝试三线表 (booktabs) 抽取
+    if v_lines.is_empty() && h_lines.len() >= 3 {
+        return extract_booktabs_table(&h_lines, chars, page_index, table_id);
+    }
+
+    if v_lines.len() < 2 {
         return None;
     }
 
@@ -768,6 +781,252 @@ fn compute_table_bbox(grid: &Grid) -> BBox {
     let w = grid.col_bounds.last().unwrap_or(&0.0) - x;
     let h = grid.row_bounds.last().unwrap_or(&0.0) - y;
     BBox::new(x, y, w, h)
+}
+
+// ─── 三线表 (Booktabs) 抽取 ───
+
+/// 从只有水平线的三线表中抽取表格
+///
+/// 学术论文中最常见的表格样式：只有 top/header-sep/bottom 三条水平线，
+/// 无垂直线。列边界通过文本对齐推断。
+fn extract_booktabs_table(
+    h_lines: &[NormalizedLine],
+    chars: &[RawChar],
+    page_index: usize,
+    table_id: &str,
+) -> Option<TableIR> {
+    let mut h_sorted = h_lines.to_vec();
+    merge_collinear(&mut h_sorted, true);
+    snap_lines(&mut h_sorted, true);
+    h_sorted.sort_by(|a, b| a.y.partial_cmp(&b.y).unwrap_or(std::cmp::Ordering::Equal));
+
+    if h_sorted.len() < 3 {
+        return None;
+    }
+
+    // 行边界 = 水平线的 y 坐标
+    let mut row_bounds: Vec<f32> = Vec::new();
+    for line in &h_sorted {
+        if !row_bounds
+            .iter()
+            .any(|&r| (r - line.y).abs() < SNAP_TOLERANCE)
+        {
+            row_bounds.push(line.y);
+        }
+    }
+    row_bounds.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+
+    if row_bounds.len() < 3 {
+        return None;
+    }
+
+    let row_count = row_bounds.len() - 1;
+
+    // 确定表格的 x 范围（取最长水平线的 start/end）
+    let table_x_min = h_sorted.iter().map(|l| l.start).fold(f32::MAX, f32::min);
+    let table_x_max = h_sorted.iter().map(|l| l.end).fold(f32::MIN, f32::max);
+
+    // 筛选表格区域内的字符
+    let y_top = row_bounds[0] - 2.0;
+    let y_bottom = *row_bounds.last().unwrap() + 2.0;
+    let table_chars: Vec<&RawChar> = chars
+        .iter()
+        .filter(|c| {
+            let cy = c.bbox.y + c.bbox.height / 2.0;
+            let cx = c.bbox.x + c.bbox.width / 2.0;
+            cy >= y_top && cy <= y_bottom && cx >= table_x_min - 10.0 && cx <= table_x_max + 10.0
+        })
+        .collect();
+
+    if table_chars.is_empty() {
+        return None;
+    }
+
+    // 先按水平线间区域分组，再在每个区域内按 y 坐标聚类出细分行
+    let mut region_chars: Vec<Vec<&RawChar>> = vec![Vec::new(); row_count];
+    for ch in &table_chars {
+        let cy = ch.bbox.y + ch.bbox.height / 2.0;
+        for r in 0..row_count {
+            if cy >= row_bounds[r] - 2.0 && cy < row_bounds[r + 1] + 2.0 {
+                region_chars[r].push(ch);
+                break;
+            }
+        }
+    }
+
+    // 在每个区域内按 y 坐标递增扫描聚类成子行
+    let mut row_chars: Vec<Vec<&RawChar>> = Vec::new();
+    for region in &region_chars {
+        if region.is_empty() {
+            continue;
+        }
+        // 按 y 坐标排序
+        let mut sorted: Vec<&RawChar> = region.clone();
+        sorted.sort_by(|a, b| {
+            a.bbox
+                .y
+                .partial_cmp(&b.bbox.y)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        // 递增扫描：当前行的基线 y 和容差
+        let mut current_row: Vec<&RawChar> = vec![sorted[0]];
+        let mut row_y = sorted[0].bbox.y;
+
+        for &ch in sorted.iter().skip(1) {
+            let delta = ch.bbox.y - row_y;
+            // 如果 y 跳变较大（超过典型上标偏移 ~6pt），开始新行
+            if delta > 6.0 {
+                row_chars.push(std::mem::take(&mut current_row));
+                row_y = ch.bbox.y;
+            }
+            current_row.push(ch);
+        }
+        if !current_row.is_empty() {
+            row_chars.push(current_row);
+        }
+    }
+
+    let row_count = row_chars.len();
+
+    // 对每行按 x 排序，检测列间隙（大于 MIN_COL_GAP 的间隔）
+    const MIN_COL_GAP: f32 = 20.0;
+
+    // 收集所有行的间隙 x 坐标
+    let mut all_gap_positions: Vec<f32> = Vec::new();
+
+    for row in &mut row_chars {
+        row.sort_by(|a, b| {
+            a.bbox
+                .x
+                .partial_cmp(&b.bbox.x)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        // 检测间隙
+        for i in 1..row.len() {
+            let prev_right = row[i - 1].bbox.x + row[i - 1].bbox.width;
+            let curr_left = row[i].bbox.x;
+            let gap = curr_left - prev_right;
+            if gap >= MIN_COL_GAP {
+                let gap_center = (prev_right + curr_left) / 2.0;
+                all_gap_positions.push(gap_center);
+            }
+        }
+    }
+
+    if all_gap_positions.is_empty() {
+        return None;
+    }
+
+    // 聚类间隙位置 → 列分隔 x 坐标
+    all_gap_positions.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+
+    let mut col_separators: Vec<f32> = Vec::new();
+    for &pos in &all_gap_positions {
+        if let Some(last) = col_separators.last() {
+            if (pos - last).abs() < MIN_COL_GAP {
+                // 更新为平均值
+                let n = col_separators.len();
+                col_separators[n - 1] = (col_separators[n - 1] + pos) / 2.0;
+                continue;
+            }
+        }
+        col_separators.push(pos);
+    }
+
+    // 构建列边界（表格左边 + 各列分隔 + 表格右边）
+    let mut col_bounds = vec![table_x_min];
+    col_bounds.extend(&col_separators);
+    col_bounds.push(table_x_max);
+
+    let col_count = col_bounds.len() - 1;
+
+    if col_count < 2 {
+        return None;
+    }
+
+    log::info!(
+        "Booktabs table detected on page {}: {} rows x {} cols, {} h-lines",
+        page_index,
+        row_count,
+        col_count,
+        h_sorted.len(),
+    );
+
+    // 将字符投影到 row×col 网格
+    let mut cell_texts: Vec<Vec<String>> = vec![vec![String::new(); col_count]; row_count];
+
+    for (r, row) in row_chars.iter().enumerate() {
+        for ch in row {
+            let cx = ch.bbox.x + ch.bbox.width / 2.0;
+            // 找到字符所属的列
+            for c in 0..col_count {
+                if cx >= col_bounds[c] - 2.0 && cx < col_bounds[c + 1] + 2.0 {
+                    cell_texts[r][c].push(ch.unicode);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Trim cell texts
+    for row in cell_texts.iter_mut() {
+        for cell in row.iter_mut() {
+            *cell = cell.trim().to_string();
+        }
+    }
+
+    // 表头推断：首行通常是表头
+    let headers: Vec<String> = cell_texts[0].iter().map(|s| s.trim().to_string()).collect();
+    let data_start = 1;
+
+    // CellType 推断
+    let column_types = infer_column_types(&cell_texts, data_start, col_count);
+
+    // 构建 TableRow/TableCell
+    let mut table_rows = Vec::new();
+    for row_idx in data_start..row_count {
+        let mut cells = Vec::new();
+        for col in 0..col_count {
+            cells.push(TableCell {
+                row: row_idx - data_start,
+                col,
+                text: cell_texts[row_idx][col].clone(),
+                cell_type: if col < column_types.len() {
+                    column_types[col]
+                } else {
+                    CellType::Unknown
+                },
+                rowspan: 1,
+                colspan: 1,
+            });
+        }
+        table_rows.push(TableRow {
+            row_index: row_idx - data_start,
+            cells,
+        });
+    }
+
+    let fallback_text = generate_fallback_text(&headers, &table_rows, table_id, page_index);
+
+    let table_bbox = BBox::new(
+        table_x_min,
+        row_bounds[0],
+        table_x_max - table_x_min,
+        row_bounds.last().unwrap() - row_bounds[0],
+    );
+
+    Some(TableIR {
+        table_id: table_id.to_string(),
+        page_index,
+        bbox: table_bbox,
+        extraction_mode: ExtractionMode::Ruled,
+        headers,
+        rows: table_rows,
+        column_types,
+        fallback_text,
+    })
 }
 
 // ─── 测试 ───

@@ -241,6 +241,127 @@ impl PdfBackend for PdfiumBackend {
             Ok(images)
         })
     }
+    fn extract_lines(&self, page_index: usize) -> Result<Vec<RawLine>, PdfError> {
+        use crate::backend::{LineOrientation, Point};
+
+        self.with_document(|doc| {
+            let page = doc
+                .pages()
+                .get(page_index as u16)
+                .map_err(|_| PdfError::PageNotFound(page_index))?;
+
+            let page_height = page.height().value;
+            let mut lines = Vec::new();
+
+            for obj in page.objects().iter() {
+                if let Some(path_obj) = obj.as_path_object() {
+                    let segment_count = path_obj.segments().len();
+                    // 只处理简单线段（1-2个 segment）
+                    if segment_count > 2 {
+                        continue;
+                    }
+
+                    if let Ok(rect) = obj.bounds() {
+                        let left = rect.left().value;
+                        let bottom = rect.bottom().value;
+                        let right = rect.right().value;
+                        let top = rect.top().value;
+
+                        let w = (right - left).abs();
+                        let h = (top - bottom).abs();
+
+                        // 转成 top-left origin
+                        let y1 = page_height - top;
+                        let y2 = page_height - bottom;
+
+                        let orientation = if h < 2.0 && w > 5.0 {
+                            LineOrientation::Horizontal
+                        } else if w < 2.0 && h > 5.0 {
+                            LineOrientation::Vertical
+                        } else {
+                            continue; // 忽略对角线或太短的
+                        };
+
+                        let stroke_width =
+                            path_obj.stroke_width().map(|sw| sw.value).unwrap_or(0.5);
+
+                        lines.push(RawLine {
+                            start: Point { x: left, y: y1 },
+                            end: Point { x: right, y: y2 },
+                            width: stroke_width.max(h.min(w)), // 使用 bbox 短边或 stroke_width
+                            orientation,
+                        });
+                    }
+                }
+            }
+
+            log::debug!(
+                "PdfiumBackend: page {} extracted {} lines",
+                page_index,
+                lines.len()
+            );
+
+            Ok(lines)
+        })
+    }
+
+    fn extract_rects(&self, page_index: usize) -> Result<Vec<RawRect>, PdfError> {
+        self.with_document(|doc| {
+            let page = doc
+                .pages()
+                .get(page_index as u16)
+                .map_err(|_| PdfError::PageNotFound(page_index))?;
+
+            let page_height = page.height().value;
+            let mut rects = Vec::new();
+
+            for obj in page.objects().iter() {
+                if let Some(path_obj) = obj.as_path_object() {
+                    let segment_count = path_obj.segments().len();
+                    // 矩形通常是 4-5 个 segment
+                    if segment_count < 3 || segment_count > 6 {
+                        continue;
+                    }
+
+                    if let Ok(rect) = obj.bounds() {
+                        let left = rect.left().value;
+                        let bottom = rect.bottom().value;
+                        let right = rect.right().value;
+                        let top = rect.top().value;
+
+                        let w = (right - left).abs();
+                        let h = (top - bottom).abs();
+
+                        // 只保留「窄矩形」（看起来像线段的矩形）
+                        if !(h < 3.0 && w > 5.0) && !(w < 3.0 && h > 5.0) {
+                            continue;
+                        }
+
+                        let stroke_width =
+                            path_obj.stroke_width().map(|sw| sw.value).unwrap_or(0.5);
+
+                        rects.push(RawRect {
+                            bbox: BBox {
+                                x: left,
+                                y: page_height - top,
+                                width: w,
+                                height: h,
+                            },
+                            width: stroke_width,
+                        });
+                    }
+                }
+            }
+
+            log::debug!(
+                "PdfiumBackend: page {} extracted {} rects",
+                page_index,
+                rects.len()
+            );
+
+            Ok(rects)
+        })
+    }
 
     fn extract_path_objects(&self, page_index: usize) -> Result<Vec<RawPathObject>, PdfError> {
         use crate::backend::traits::PathObjectKind;
