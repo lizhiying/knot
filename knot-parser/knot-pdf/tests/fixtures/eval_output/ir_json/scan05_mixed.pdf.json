@@ -1,0 +1,257 @@
+{
+  "doc_id": "3da017b4c9f321fea9fbd54f2cdc4b629d10165a14181c9bfc4299674999e4c8",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 172.91,
+            "y": 398.34003,
+            "width": 121.84799,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "[[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 398.34003,
+                "width": 121.84799,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "[[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 2,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.93212473,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 35,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24412160,
+        "rss_delta_bytes": 0
+      }
+    },
+    {
+      "page_index": 1,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 172.91,
+            "y": 398.34003,
+            "width": 121.84799,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "[[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 398.34003,
+                "width": 121.84799,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "[[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 2,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.93212473,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 33,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24412160,
+        "rss_delta_bytes": 0
+      }
+    },
+    {
+      "page_index": 2,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 172.91,
+            "y": 398.34003,
+            "width": 121.84799,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "[[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 398.34003,
+                "width": 121.84799,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "[[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 2,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.93212473,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 34,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24444928,
+        "rss_delta_bytes": 32768
+      }
+    },
+    {
+      "page_index": 3,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 172.91,
+            "y": 398.34003,
+            "width": 121.84799,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "[[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 398.34003,
+                "width": 121.84799,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "[[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 2,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.93212473,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 42,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24444928,
+        "rss_delta_bytes": 0
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [
+      "Header/footer detected: 1 header patterns, 0 footer patterns, 4 pages affected"
+    ],
+    "errors": []
+  }
+}

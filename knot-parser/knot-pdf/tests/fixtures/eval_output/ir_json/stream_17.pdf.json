@@ -1,0 +1,1337 @@
+{
+  "doc_id": "51473611ec6b6e2e6efb9abd80b79b94f19a7f2caf16dd228dee2c84ad2c9683",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 31.29004,
+            "width": 144.732,
+            "height": 12.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Stream Table Sample #17",
+                  "font_size": 12.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 31.29004,
+                "width": 144.732,
+                "height": 12.0
+              }
+            }
+          ],
+          "normalized_text": "Stream Table Sample #17"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 63.150024,
+            "width": 41.82,
+            "height": 202.87
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "R1",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 87.94,
+                "width": 10.223999,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "R2",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 104.95001,
+                "width": 10.223999,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "R3",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 121.96002,
+                "width": 10.223999,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "R4",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 138.97003,
+                "width": 10.223999,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "R5",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 155.97003,
+                "width": 10.223999,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "R6",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 172.98004,
+                "width": 10.223999,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "R7",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 189.98999,
+                "width": 10.223999,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "R8",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 207.0,
+                "width": 10.223999,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "R9",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 224.01001,
+                "width": 10.223999,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "R10",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 241.01001,
+                "width": 14.671997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "R11",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 258.02002,
+                "width": 14.671997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "ID",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 64.0,
+                "y": 63.150024,
+                "width": 9.0,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 ID"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 131.82,
+            "y": 63.150024,
+            "width": 54.32399,
+            "height": 202.87
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$8,465",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 161.68,
+                "y": 87.94,
+                "width": 24.464005,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "10%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 170.13,
+                "y": 104.95001,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "10%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 170.13,
+                "y": 121.96002,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "95%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 170.13,
+                "y": 138.97003,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$7,830",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 161.68,
+                "y": 155.97003,
+                "width": 24.464005,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$2,926",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 161.68,
+                "y": 172.98004,
+                "width": 24.464005,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "88%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 170.13,
+                "y": 189.98999,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "49%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 170.13,
+                "y": 207.0,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "58%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 170.13,
+                "y": 224.01001,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$3,975",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 161.68,
+                "y": 241.01001,
+                "width": 24.464005,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "36%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 170.13,
+                "y": 258.02002,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Amount",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 131.82,
+                "y": 63.150024,
+                "width": 35.496002,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "$8,465 10% 10% 95% $7,830 $2,926 88% 49% 58% $3,975 36% Amount"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 221.38,
+            "y": 63.150024,
+            "width": 45.079987,
+            "height": 202.87
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "35%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 250.45,
+                "y": 87.94,
+                "width": 16.00801,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$1,619",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 241.99,
+                "y": 104.95001,
+                "width": 24.464005,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$6,961",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 241.99,
+                "y": 121.96002,
+                "width": 24.464005,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "68%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 250.45,
+                "y": 138.97003,
+                "width": 16.00801,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$1,940",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 241.99,
+                "y": 155.97003,
+                "width": 24.464005,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$4,297",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 241.99,
+                "y": 172.98004,
+                "width": 24.464005,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "30%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 250.45,
+                "y": 189.98999,
+                "width": 16.00801,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$4,726",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 241.99,
+                "y": 207.0,
+                "width": 24.464005,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$9,174",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 241.99,
+                "y": 224.01001,
+                "width": 24.464005,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "24%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 250.45,
+                "y": 241.01001,
+                "width": 16.00801,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "1%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 254.9,
+                "y": 258.02002,
+                "width": 11.559998,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Tax",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 221.38,
+                "y": 63.150024,
+                "width": 15.507004,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "35% $1,619 $6,961 68% $1,940 $4,297 30% $4,726 $9,174 24% 1% Tax"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 296.698,
+            "y": 63.150024,
+            "width": 50.07599,
+            "height": 202.87
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "19%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 330.76,
+                "y": 87.94,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$3,065",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 322.31,
+                "y": 104.95001,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$1,880",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 322.31,
+                "y": 121.96002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$9,432",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 322.31,
+                "y": 138.97003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$4,680",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 322.31,
+                "y": 155.97003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$1,625",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 322.31,
+                "y": 172.98004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$6,920",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 322.31,
+                "y": 189.98999,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "87%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 330.76,
+                "y": 207.0,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$6,705",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 322.31,
+                "y": 224.01001,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$1,220",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 322.31,
+                "y": 241.01001,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$7,068",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 322.31,
+                "y": 258.02002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "iscount",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 296.698,
+                "y": 63.150024,
+                "width": 33.50702,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "19% $3,065 $1,880 $9,432 $4,680 $1,625 $6,920 87% $6,705 $1,220 $7,068 iscount"
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 382.51,
+            "y": 63.150024,
+            "width": 44.577972,
+            "height": 202.87
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "46%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 411.08,
+                "y": 87.94,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$144",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 409.29,
+                "y": 104.95001,
+                "width": 17.791992,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "60%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 411.08,
+                "y": 121.96002,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$5,574",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 402.62,
+                "y": 138.97003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "77%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 411.08,
+                "y": 155.97003,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$7,529",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 402.62,
+                "y": 172.98004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$1,650",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 402.62,
+                "y": 189.98999,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$9,547",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 402.62,
+                "y": 207.0,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$4,871",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 402.62,
+                "y": 224.01001,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$7,600",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 402.62,
+                "y": 241.01001,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "56%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 411.08,
+                "y": 258.02002,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Net",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.51,
+                "y": 63.150024,
+                "width": 16.002014,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "46% $144 60% $5,574 77% $7,529 $1,650 $9,547 $4,871 $7,600 56% Net"
+        },
+        {
+          "block_id": "blk_6",
+          "bbox": {
+            "x": 456.818,
+            "y": 63.150024,
+            "width": 50.586,
+            "height": 202.87
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "76%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 491.39,
+                "y": 87.94,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$6,865",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 482.94,
+                "y": 104.95001,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "80%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 491.39,
+                "y": 121.96002,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "81%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 491.39,
+                "y": 138.97003,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "67%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 491.39,
+                "y": 155.97003,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$9,568",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 482.94,
+                "y": 172.98004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "7%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 495.84,
+                "y": 189.98999,
+                "width": 11.559998,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "10%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 491.39,
+                "y": 207.0,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$1,525",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 482.94,
+                "y": 224.01001,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "36%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 491.39,
+                "y": 241.01001,
+                "width": 16.007996,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$4,664",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 482.94,
+                "y": 258.02002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "urrency",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 456.818,
+                "y": 63.150024,
+                "width": 33.012024,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "76% $6,865 80% 81% 67% $9,568 7% 10% $1,525 36% $4,664 urrency"
+        },
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 31.18,
+            "y": 78.0,
+            "width": 240.762,
+            "height": 6.0
+          },
+          "role": "List",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "------------------------------------------------------------------------------------------------------------------------",
+                  "font_size": 6.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 78.0,
+                "width": 240.762,
+                "height": 6.0
+              }
+            }
+          ],
+          "normalized_text": "------------------------------------------------------------------------------------------------------------------------"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 8,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.94315827,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 18,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 23609344,
+        "rss_delta_bytes": 0
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

@@ -1,0 +1,953 @@
+{
+  "doc_id": "e31efdd32fd42349d809cda22542918dcc8259e4c3507ab3185c490916abd931",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 470.72,
+            "y": 32.75,
+            "width": 93.379974,
+            "height": 41.119995
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "INVOICE",
+                  "font_size": 18.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 490.08,
+                "y": 32.75,
+                "width": 74.01596,
+                "height": 18.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Invoice #: INV-29747",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 470.72,
+                "y": 63.869995,
+                "width": 93.379974,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "INVOICE Invoice #: INV-29747"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 486.28,
+            "y": 80.869995,
+            "width": 77.81998,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Date: 2024-06-15",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 486.28,
+                "y": 80.869995,
+                "width": 77.81998,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Date: 2024-06-15"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 131.45,
+            "y": 129.06,
+            "width": 20.559998,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Item",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 131.45,
+                "y": 129.06,
+                "width": 20.559998,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Item"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 275.13,
+            "y": 129.06,
+            "width": 16.669983,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Qty",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 275.13,
+                "y": 129.06,
+                "width": 16.669983,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Qty"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 338.08,
+            "y": 129.06,
+            "width": 46.679993,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Unit Price",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 338.08,
+                "y": 129.06,
+                "width": 46.679993,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Unit Price"
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 448.68,
+            "y": 129.06,
+            "width": 26.109985,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Total",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 448.68,
+                "y": 129.06,
+                "width": 26.109985,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Total"
+        },
+        {
+          "block_id": "blk_6",
+          "bbox": {
+            "x": 31.18,
+            "y": 150.32,
+            "width": 76.7,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Software License",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 150.32,
+                "width": 76.7,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Software License"
+        },
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 377.61,
+            "y": 150.32,
+            "width": 30.579987,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$2,430",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 377.61,
+                "y": 150.32,
+                "width": 30.579987,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$2,430"
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 471.26,
+            "y": 150.32,
+            "width": 36.139984,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$19,440",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 471.26,
+                "y": 150.32,
+                "width": 36.139984,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$19,440"
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 31.18,
+            "y": 170.17004,
+            "width": 57.809998,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Support Plan",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 170.17004,
+                "width": 57.809998,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Support Plan"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 377.61,
+            "y": 170.17004,
+            "width": 30.579987,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$2,372",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 377.61,
+                "y": 170.17004,
+                "width": 30.579987,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$2,372"
+        },
+        {
+          "block_id": "blk_11",
+          "bbox": {
+            "x": 471.26,
+            "y": 170.17004,
+            "width": 36.139984,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$14,232",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 471.26,
+                "y": 170.17004,
+                "width": 36.139984,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$14,232"
+        },
+        {
+          "block_id": "blk_12",
+          "bbox": {
+            "x": 31.18,
+            "y": 190.01001,
+            "width": 76.69,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Training (3 days)",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 190.01001,
+                "width": 76.69,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Training (3 days)"
+        },
+        {
+          "block_id": "blk_13",
+          "bbox": {
+            "x": 377.61,
+            "y": 190.01001,
+            "width": 30.579987,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$2,102",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 377.61,
+                "y": 190.01001,
+                "width": 30.579987,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$2,102"
+        },
+        {
+          "block_id": "blk_14",
+          "bbox": {
+            "x": 476.82,
+            "y": 190.01001,
+            "width": 30.579987,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$4,204",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 476.82,
+                "y": 190.01001,
+                "width": 30.579987,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$4,204"
+        },
+        {
+          "block_id": "blk_15",
+          "bbox": {
+            "x": 31.18,
+            "y": 209.85004,
+            "width": 84.479996,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Custom Integration",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 209.85004,
+                "width": 84.479996,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Custom Integration"
+        },
+        {
+          "block_id": "blk_16",
+          "bbox": {
+            "x": 377.61,
+            "y": 209.85004,
+            "width": 30.579987,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$2,460",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 377.61,
+                "y": 209.85004,
+                "width": 30.579987,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$2,460"
+        },
+        {
+          "block_id": "blk_17",
+          "bbox": {
+            "x": 471.26,
+            "y": 209.85004,
+            "width": 36.139984,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$12,300",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 471.26,
+                "y": 209.85004,
+                "width": 36.139984,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$12,300"
+        },
+        {
+          "block_id": "blk_18",
+          "bbox": {
+            "x": 31.18,
+            "y": 229.69,
+            "width": 378.68,
+            "height": 69.53003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Subtotal:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 364.86,
+                "y": 249.54004,
+                "width": 45.0,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Tax (8%):",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 363.74,
+                "y": 269.38,
+                "width": 46.119995,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "TOTAL:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 371.53,
+                "y": 289.22003,
+                "width": 38.329987,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Data Migration 8 $2,659",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 229.69,
+                "width": 377.00998,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Subtotal: Tax (8%): TOTAL: Data Migration 8 $2,659"
+        },
+        {
+          "block_id": "blk_19",
+          "bbox": {
+            "x": 471.26,
+            "y": 229.69,
+            "width": 36.139984,
+            "height": 69.53003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$71,448",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 471.26,
+                "y": 249.54004,
+                "width": 36.139984,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$5,715",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 476.82,
+                "y": 269.38,
+                "width": 30.579987,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$77,163",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 471.26,
+                "y": 289.22003,
+                "width": 36.139984,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$21,272",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 471.26,
+                "y": 229.69,
+                "width": 36.139984,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$71,448 $5,715 $77,163 $21,272"
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t0_0",
+          "page_index": 0,
+          "bbox": {
+            "x": 31.18,
+            "y": 150.32,
+            "width": 476.22,
+            "height": 89.369995
+          },
+          "extraction_mode": "Stream",
+          "headers": [
+            "col_0",
+            "col_1",
+            "col_2",
+            "col_3"
+          ],
+          "rows": [
+            {
+              "row_index": 0,
+              "cells": [
+                {
+                  "row": 0,
+                  "col": 0,
+                  "text": "Software License",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 1,
+                  "text": "8",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 2,
+                  "text": "$2,430",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 3,
+                  "text": "$19,440",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 1,
+              "cells": [
+                {
+                  "row": 1,
+                  "col": 0,
+                  "text": "Support Plan",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "6",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "$2,372",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 3,
+                  "text": "$14,232",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 2,
+              "cells": [
+                {
+                  "row": 2,
+                  "col": 0,
+                  "text": "Training (3 days)",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "2",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "$2,102",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 3,
+                  "text": "$4,204",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 3,
+              "cells": [
+                {
+                  "row": 3,
+                  "col": 0,
+                  "text": "Custom Integration",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "text": "5",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "text": "$2,460",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 3,
+                  "text": "$12,300",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 4,
+              "cells": [
+                {
+                  "row": 4,
+                  "col": 0,
+                  "text": "Data Migration",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 1,
+                  "text": "8",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 2,
+                  "text": "$2,659",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 3,
+                  "text": "$21,272",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            }
+          ],
+          "column_types": [
+            "Text",
+            "Number",
+            "Currency",
+            "Currency"
+          ],
+          "fallback_text": "[表t0_0 页0]\n行1: col_0=Software License col_1=8 col_2=$2,430 col_3=$19,440\n行2: col_0=Support Plan col_1=6 col_2=$2,372 col_3=$14,232\n行3: col_0=Training (3 days) col_1=2 col_2=$2,102 col_3=$4,204\n行4: col_0=Custom Integration col_1=5 col_2=$2,460 col_3=$12,300\n行5: col_0=Data Migration col_1=8 col_2=$2,659 col_3=$21,272"
+        }
+      ],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 20,
+        "table_count": 1,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.9660015,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 20,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24281088,
+        "rss_delta_bytes": 0
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

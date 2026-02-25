@@ -1,0 +1,56 @@
+[package]
+name = "knot-pdf"
+version = "0.1.0"
+edition = "2021"
+description = "Rust-native offline PDF parser for RAG applications"
+license = "MIT OR Apache-2.0"
+
+[features]
+default = []
+async = ["dep:tokio"]
+store_sled = ["dep:sled"]
+pdfium = ["dep:pdfium-render", "dep:image"]
+ocr_tesseract = ["dep:leptess"]
+ocr_paddle = ["dep:pure-onnx-ocr", "dep:image"]
+vision = ["dep:ureq", "dep:base64"]
+cli = ["dep:clap", "dep:env_logger"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+uuid = { version = "1", features = ["v4"] }
+thiserror = "2"
+log = "0.4"
+regex-lite = "0.1"
+pdf-extract = "0.10"
+lopdf = "0.38"
+toml = "0.8"
+
+# optional
+tokio = { version = "1", features = ["full"], optional = true }
+sled = { version = "0.34", optional = true }
+leptess = { version = "0.14", optional = true }
+pure-onnx-ocr = { version = "0.1.0", optional = true }
+image = { version = "0.25", optional = true }
+pdfium-render = { version = "0.8", optional = true }
+ureq = { version = "2", features = ["json"], optional = true }
+base64 = { version = "0.22", optional = true }
+
+# cli
+clap = { version = "4", features = ["derive"], optional = true }
+env_logger = { version = "0.11", optional = true }
+
+[dev-dependencies]
+criterion = { version = "0.8.2", features = ["html_reports"] }
+tempfile = "3"
+tokio = { version = "1", features = ["full"] }
+
+[[bin]]
+name = "knot-pdf-cli"
+path = "src/bin/knot_pdf_cli/main.rs"
+required-features = ["cli"]
+
+[[bench]]
+name = "pipeline_bench"
+harness = false

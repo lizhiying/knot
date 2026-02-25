@@ -1,0 +1,385 @@
+{
+  "doc_id": "265648f06a3ad2ceceb9083b8bb472accd6825e63a4521aa08e1bfe77df78dfb",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 32.72003,
+            "width": 196.02798,
+            "height": 14.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Two-Column Layout Example",
+                  "font_size": 14.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 32.72003,
+                "width": 196.02798,
+                "height": 14.0
+              }
+            }
+          ],
+          "normalized_text": "Two-Column Layout Example"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 71.650024,
+            "width": 237.272,
+            "height": 37.349976
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Column 1 content. Machine learning models process 9164",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 71.650024,
+                "width": 235.27899,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "documents per hour with 95% accuracy. The throughput",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 85.83002,
+                "width": 237.272,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "depends on document complexity and hardware.",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 100.0,
+                "width": 196.09201,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "Column 1 content. Machine learning models process 9164 documents per hour with 95% accuracy. The throughput depends on document complexity and hardware."
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 300.47,
+            "y": 71.650024,
+            "width": 237.272,
+            "height": 37.349976
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Column 2 content. Machine learning models process 9509",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 300.47,
+                "y": 71.650024,
+                "width": 235.27902,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "documents per hour with 91% accuracy. The throughput",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 300.47,
+                "y": 85.83002,
+                "width": 237.272,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "depends on document complexity and hardware.",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 300.47,
+                "y": 100.0,
+                "width": 196.09201,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "Column 2 content. Machine learning models process 9509 documents per hour with 91% accuracy. The throughput depends on document complexity and hardware."
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 31.18,
+            "y": 119.84003,
+            "width": 237.272,
+            "height": 37.349976
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "CCoolluummnn  12  ccoonntteenntt..  MMaacchhiinnee  lleeaarrnniinngg  mmooddeellss  pprroocceessss  74831831",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 119.84003,
+                "width": 235.27899,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "ddooccuummeennttss  ppeerr  hhoouurr  wwiitthh  9987%%  aaccccuurraaccyy..  TThhee  tthhrroouugghhppuutt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 134.01001,
+                "width": 237.272,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "ddeeppeennddss  oonn  ddooccuummeenntt  ccoommpplleexxiittyy  aanndd  hhaarrddwwaarree..",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 148.19,
+                "width": 196.09201,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "CCoolluummnn  12  ccoonntteenntt..  MMaacchhiinnee  lleeaarrnniinngg  mmooddeellss  pprroocceessss  74831831 ddooccuummeennttss  ppeerr  hhoouurr  wwiitthh  9987%%  aaccccuurraaccyy..  TThhee  tthhrroouugghhppuutt ddeeppeennddss  oonn  ddooccuummeenntt  ccoommpplleexxiittyy  aanndd  hhaarrddwwaarree.."
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 31.18,
+            "y": 168.03003,
+            "width": 237.272,
+            "height": 37.349976
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "CCoolluummnn  12  ccoonntteenntt..  MMaacchhiinnee  lleeaarrnniinngg  mmooddeellss  pprroocceessss  43547330",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 168.03003,
+                "width": 235.27899,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "ddooccuummeennttss  ppeerr  hhoouurr  wwiitthh  9948%%  aaccccuurraaccyy..  TThhee  tthhrroouugghhppuutt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 182.20001,
+                "width": 237.272,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "ddeeppeennddss  oonn  ddooccuummeenntt  ccoommpplleexxiittyy  aanndd  hhaarrddwwaarree..",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 196.38,
+                "width": 196.09201,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "CCoolluummnn  12  ccoonntteenntt..  MMaacchhiinnee  lleeaarrnniinngg  mmooddeellss  pprroocceessss  43547330 ddooccuummeennttss  ppeerr  hhoouurr  wwiitthh  9948%%  aaccccuurraaccyy..  TThhee  tthhrroouugghhppuutt ddeeppeennddss  oonn  ddooccuummeenntt  ccoommpplleexxiittyy  aanndd  hhaarrddwwaarree.."
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 31.18,
+            "y": 216.22003,
+            "width": 237.272,
+            "height": 37.349976
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "CCoolluummnn  12  ccoonntteenntt..  MMaacchhiinnee  lleeaarrnniinngg  mmooddeellss  pprroocceessss  94941803",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 216.22003,
+                "width": 235.27899,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "ddooccuummeennttss  ppeerr  hhoouurr  wwiitthh  9956%%  aaccccuurraaccyy..  TThhee  tthhrroouugghhppuutt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 230.39001,
+                "width": 237.272,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "ddeeppeennddss  oonn  ddooccuummeenntt  ccoommpplleexxiittyy  aanndd  hhaarrddwwaarree..",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 244.57,
+                "width": 196.09201,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "CCoolluummnn  12  ccoonntteenntt..  MMaacchhiinnee  lleeaarrnniinngg  mmooddeellss  pprroocceessss  94941803 ddooccuummeennttss  ppeerr  hhoouurr  wwiitthh  9956%%  aaccccuurraaccyy..  TThhee  tthhrroouugghhppuutt ddeeppeennddss  oonn  ddooccuummeenntt  ccoommpplleexxiittyy  aanndd  hhaarrddwwaarree.."
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [
+          "PageScore flag: LowEntropy"
+        ],
+        "errors": [],
+        "block_count": 6,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.9335741,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 23,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 23691264,
+        "rss_delta_bytes": 180224
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

@@ -1,0 +1,40 @@
+页=1 bbox=(31,33,93,10) Mixed Border Table
+页=1 bbox=(31,55,30,188) Item 1 Item 2 Item 3 Item 4 Item 5 Item 6 Item 7 Item 8 Item 9 Item 10
+页=1 bbox=(253,55,28,188) $1,643 $4,369 $4,453 $2,582 $1,190 $4,481 $9,369 $8,829 $1,960 $1,302
+页=1 bbox=(362,55,32,188) 98 units 51 units 59 units 1 units 38 units 16 units 35 units 97 units 58 units 14 units
+表=t0_0 页=0 Item 1=Item 2 $1,643=$4,369 98 units=51 units
+表=t0_0 页=0 Item 1=Item 3 $1,643=$4,453 98 units=59 units
+表=t0_0 页=0 Item 1=Item 4 $1,643=$2,582 98 units=1 units
+表=t0_0 页=0 Item 1=Item 5 $1,643=$1,190 98 units=38 units
+表=t0_0 页=0 Item 1=Item 6 $1,643=$4,481 98 units=16 units
+表=t0_0 页=0 Item 1=Item 7 $1,643=$9,369 98 units=35 units
+表=t0_0 页=0 Item 1=Item 8 $1,643=$8,829 98 units=97 units
+表=t0_0 页=0 Item 1=Item 9 $1,643=$1,960 98 units=58 units
+表=t0_0 页=0 Item 1=Item 10 $1,643=$1,302 98 units=14 units
+表=t0_0 页=0 行=0 列=Item 1 值=Item 2 类型=Text
+表=t0_0 页=0 行=0 列=$1,643 值=$4,369 类型=Currency
+表=t0_0 页=0 行=0 列=98 units 值=51 units 类型=Text
+表=t0_0 页=0 行=1 列=Item 1 值=Item 3 类型=Text
+表=t0_0 页=0 行=1 列=$1,643 值=$4,453 类型=Currency
+表=t0_0 页=0 行=1 列=98 units 值=59 units 类型=Text
+表=t0_0 页=0 行=2 列=Item 1 值=Item 4 类型=Text
+表=t0_0 页=0 行=2 列=$1,643 值=$2,582 类型=Currency
+表=t0_0 页=0 行=2 列=98 units 值=1 units 类型=Text
+表=t0_0 页=0 行=3 列=Item 1 值=Item 5 类型=Text
+表=t0_0 页=0 行=3 列=$1,643 值=$1,190 类型=Currency
+表=t0_0 页=0 行=3 列=98 units 值=38 units 类型=Text
+表=t0_0 页=0 行=4 列=Item 1 值=Item 6 类型=Text
+表=t0_0 页=0 行=4 列=$1,643 值=$4,481 类型=Currency
+表=t0_0 页=0 行=4 列=98 units 值=16 units 类型=Text
+表=t0_0 页=0 行=5 列=Item 1 值=Item 7 类型=Text
+表=t0_0 页=0 行=5 列=$1,643 值=$9,369 类型=Currency
+表=t0_0 页=0 行=5 列=98 units 值=35 units 类型=Text
+表=t0_0 页=0 行=6 列=Item 1 值=Item 8 类型=Text
+表=t0_0 页=0 行=6 列=$1,643 值=$8,829 类型=Currency
+表=t0_0 页=0 行=6 列=98 units 值=97 units 类型=Text
+表=t0_0 页=0 行=7 列=Item 1 值=Item 9 类型=Text
+表=t0_0 页=0 行=7 列=$1,643 值=$1,960 类型=Currency
+表=t0_0 页=0 行=7 列=98 units 值=58 units 类型=Text
+表=t0_0 页=0 行=8 列=Item 1 值=Item 10 类型=Text
+表=t0_0 页=0 行=8 列=$1,643 值=$1,302 类型=Currency
+表=t0_0 页=0 行=8 列=98 units 值=14 units 类型=Text

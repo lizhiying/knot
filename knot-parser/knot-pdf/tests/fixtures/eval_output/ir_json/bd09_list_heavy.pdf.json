@@ -1,0 +1,810 @@
+{
+  "doc_id": "d2aee57bad74485662c25104d6538fecd689abea708c2419070b848f1d997e36",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 32.72003,
+            "width": 119.042,
+            "height": 14.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Feature Checklist",
+                  "font_size": 14.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 32.72003,
+                "width": 119.042,
+                "height": 14.0
+              }
+            }
+          ],
+          "normalized_text": "Feature Checklist"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 60.330017,
+            "width": 79.464,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Text Extraction",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 60.330017,
+                "width": 79.464,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "Text Extraction"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 31.18,
+            "y": 80.869995,
+            "width": 112.71,
+            "height": 61.03003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "- Character extraction",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 80.869995,
+                "width": 112.71,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Font info",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 97.880005,
+                "width": 61.589996,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Reading order",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 114.890015,
+                "width": 87.71,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Multi-column",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 131.90002,
+                "width": 79.35,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "- Character extraction - Font info - Reading order - Multi-column"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 280.63,
+            "y": 80.869995,
+            "width": 36.670013,
+            "height": 61.03003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "[TODO]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 80.869995,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[TODO]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 97.880005,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 114.890015,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 131.90002,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "[TODO] [TODO] [DONE] [DONE]"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 31.18,
+            "y": 151.04004,
+            "width": 85.58,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Table Extraction",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 151.04004,
+                "width": 85.58,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "Table Extraction"
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 31.18,
+            "y": 171.58002,
+            "width": 98.829994,
+            "height": 61.02997
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "- Stream detection",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 171.58002,
+                "width": 98.27,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Ruled detection",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 188.59003,
+                "width": 92.159996,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Cell merging",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 205.60004,
+                "width": 78.799995,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Header detection",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 222.60999,
+                "width": 98.829994,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "- Stream detection - Ruled detection - Cell merging - Header detection"
+        },
+        {
+          "block_id": "blk_6",
+          "bbox": {
+            "x": 280.63,
+            "y": 171.58002,
+            "width": 36.670013,
+            "height": 61.02997
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 171.58002,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 188.59003,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 205.60004,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 222.60999,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "[DONE] [DONE] [DONE] [DONE]"
+        },
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 31.18,
+            "y": 241.75,
+            "width": 24.442001,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "OCR",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 241.75,
+                "width": 24.442001,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "OCR"
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 31.18,
+            "y": 262.29004,
+            "width": 97.72001,
+            "height": 61.01996
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "- Page scoring",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 262.29004,
+                "width": 81.04,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Region detection",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 279.3,
+                "width": 97.72001,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- PaddleOCR",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 296.31,
+                "width": 76.03,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Result merging",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 313.31,
+                "width": 89.92,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "- Page scoring - Region detection - PaddleOCR - Result merging"
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 280.63,
+            "y": 262.29004,
+            "width": 77.23999,
+            "height": 61.01996
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "[IN PROGRESS]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 262.29004,
+                "width": 77.23999,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 279.3,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[IN PROGRESS]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 296.31,
+                "width": 77.23999,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 313.31,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "[IN PROGRESS] [DONE] [IN PROGRESS] [DONE]"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 31.18,
+            "y": 332.46002,
+            "width": 67.243,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Performance",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 332.46002,
+                "width": 67.243,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "Performance"
+        },
+        {
+          "block_id": "blk_11",
+          "bbox": {
+            "x": 31.18,
+            "y": 353.0,
+            "width": 96.579994,
+            "height": 61.02002
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "- Per-page timing",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 353.0,
+                "width": 93.259995,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Memory tracking",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 370.01,
+                "width": 96.579994,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Async API",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 387.02002,
+                "width": 71.03,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "- Backpressure",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 404.02002,
+                "width": 83.81,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "- Per-page timing - Memory tracking - Async API - Backpressure"
+        },
+        {
+          "block_id": "blk_12",
+          "bbox": {
+            "x": 280.63,
+            "y": 353.0,
+            "width": 36.670013,
+            "height": 61.02002
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "[TODO]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 353.0,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 370.01,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 387.02002,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[TODO]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 404.02002,
+                "width": 36.670013,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "[TODO] [DONE] [DONE] [TODO]"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 13,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.9609617,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 17,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24133632,
+        "rss_delta_bytes": 0
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

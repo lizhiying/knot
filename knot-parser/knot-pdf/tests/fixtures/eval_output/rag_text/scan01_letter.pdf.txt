@@ -1,0 +1,2 @@
+页=1 bbox=(173,398,122,8) [[SSccaannnneedd  iimmaaggee  ccoonntteenntt  --  ppaaggee  12]]
+页=2 bbox=(173,398,122,8) [[SSccaannnneedd  iimmaaggee  ccoonntteenntt  --  ppaaggee  12]]

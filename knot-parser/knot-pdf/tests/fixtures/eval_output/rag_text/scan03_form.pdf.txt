@@ -1,0 +1,3 @@
+页=1 bbox=(173,398,122,8) [[[SSScccaaannnnnneeeddd   iiimmmaaagggeee   cccooonnnttteeennnttt   ---   pppaaagggeee   123]]]
+页=2 bbox=(173,398,122,8) [[[SSScccaaannnnnneeeddd   iiimmmaaagggeee   cccooonnnttteeennnttt   ---   pppaaagggeee   123]]]
+页=3 bbox=(173,398,122,8) [[[SSScccaaannnnnneeeddd   iiimmmaaagggeee   cccooonnnttteeennnttt   ---   pppaaagggeee   123]]]

@@ -1,0 +1,556 @@
+{
+  "doc_id": "4b3bf05e05475aabb307c162f50f0cafb2a99875dd017955efdbeb3da7c0a3fe",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 32.690002,
+            "width": 121.700005,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Tables with Text Between",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 32.690002,
+                "width": 121.700005,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Tables with Text Between"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 51.109985,
+            "width": 145.04999,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "The first table shows Q1 results:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 51.109985,
+                "width": 145.04999,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "The first table shows Q1 results:"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 31.18,
+            "y": 73.77002,
+            "width": 143.94,
+            "height": 72.380005
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Q1 Item 1",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 73.77002,
+                "width": 35.128,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Q1 Item 2",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 90.78003,
+                "width": 35.128,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Q1 Item 3",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 107.79004,
+                "width": 35.128,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "The following table shows Q2 im",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 136.15002,
+                "width": 143.94,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Q1 Item 1 Q1 Item 2 Q1 Item 3 The following table shows Q2 im"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 175.12,
+            "y": 73.77002,
+            "width": 133.854,
+            "height": 72.380005
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$2,599",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 284.51,
+                "y": 73.77002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$5,416",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 284.51,
+                "y": 90.78003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$5,618",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 284.51,
+                "y": 107.79004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "provement over Q1:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 175.12,
+                "y": 136.15002,
+                "width": 90.59,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$2,599 $5,416 $5,618 provement over Q1:"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 31.18,
+            "y": 158.81,
+            "width": 35.128,
+            "height": 42.02002
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Q2 Item 1",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 158.81,
+                "width": 35.128,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Q2 Item 2",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 175.82,
+                "width": 35.128,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Q2 Item 3",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 192.83002,
+                "width": 35.128,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Q2 Item 1 Q2 Item 2 Q2 Item 3"
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 284.51,
+            "y": 158.81,
+            "width": 24.46399,
+            "height": 42.02002
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5,350",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 284.51,
+                "y": 158.81,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$2,991",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 284.51,
+                "y": 175.82,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$5,922",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 284.51,
+                "y": 192.83002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5,350 $2,991 $5,922"
+        },
+        {
+          "block_id": "blk_6",
+          "bbox": {
+            "x": 373.34,
+            "y": 158.81,
+            "width": 20.679993,
+            "height": 42.02002
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "+13%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 373.34,
+                "y": 158.81,
+                "width": 20.679993,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "+13%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 373.34,
+                "y": 175.82,
+                "width": 20.679993,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "+10%",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 373.34,
+                "y": 192.83002,
+                "width": 20.679993,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "+13% +13% +10%"
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t0_2",
+          "page_index": 0,
+          "bbox": {
+            "x": 31.18,
+            "y": 158.81,
+            "width": 362.84,
+            "height": 42.02002
+          },
+          "extraction_mode": "Stream",
+          "headers": [
+            "col_0",
+            "col_1",
+            "col_2"
+          ],
+          "rows": [
+            {
+              "row_index": 0,
+              "cells": [
+                {
+                  "row": 0,
+                  "col": 0,
+                  "text": "Q2 Item 1",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 1,
+                  "text": "$5,350",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 2,
+                  "text": "+13%",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 1,
+              "cells": [
+                {
+                  "row": 1,
+                  "col": 0,
+                  "text": "Q2 Item 2",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "$2,991",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "+13%",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 2,
+              "cells": [
+                {
+                  "row": 2,
+                  "col": 0,
+                  "text": "Q2 Item 3",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "$5,922",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "+10%",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            }
+          ],
+          "column_types": [
+            "Text",
+            "Currency",
+            "Percent"
+          ],
+          "fallback_text": "[表t0_2 页0]\n行1: col_0=Q2 Item 1 col_1=$5,350 col_2=+13%\n行2: col_0=Q2 Item 2 col_1=$2,991 col_2=+13%\n行3: col_0=Q2 Item 3 col_1=$5,922 col_2=+10%"
+        }
+      ],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 7,
+        "table_count": 1,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.9143338,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 14,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24281088,
+        "rss_delta_bytes": 0
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

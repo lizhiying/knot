@@ -1,0 +1,4 @@
+页=1 bbox=(173,398,122,8) [[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]
+页=2 bbox=(173,398,122,8) [[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]
+页=3 bbox=(173,398,122,8) [[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]
+页=4 bbox=(173,398,122,8) [[[[SSSSccccaaaannnnnnnneeeedddd    iiiimmmmaaaaggggeeee    ccccoooonnnntttteeeennnntttt    ----    ppppaaaaggggeeee    1234]]]]

@@ -1,0 +1,397 @@
+{
+  "doc_id": "32f853783898f943474658cb0ca0cd8bc00ff3b2bf28c9889b679ffd57ccc9aa",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 220.24,
+            "y": 32.72003,
+            "width": 154.79799,
+            "height": 14.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "SERVICE AGREEMENT",
+                  "font_size": 14.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 220.24,
+                "y": 32.72003,
+                "width": 154.79799,
+                "height": 14.0
+              }
+            }
+          ],
+          "normalized_text": "SERVICE AGREEMENT"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 72.369995,
+            "width": 334.02002,
+            "height": 10.0
+          },
+          "role": "List",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "1. DEFINITIONS. In this Agreement, unless the context otherwise requires:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 72.369995,
+                "width": 334.02002,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "1. DEFINITIONS. In this Agreement, unless the context otherwise requires:"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 31.18,
+            "y": 95.04999,
+            "width": 368.34,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "   1.1 \"Service\" means the software-as-a-service platform provided by the Provider.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 95.04999,
+                "width": 368.34,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "1.1 \"Service\" means the software-as-a-service platform provided by the Provider."
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 31.18,
+            "y": 117.72003,
+            "width": 344.47,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "   1.2 \"Customer Data\" means all data submitted by or on behalf of Customer.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 117.72003,
+                "width": 344.47,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "1.2 \"Customer Data\" means all data submitted by or on behalf of Customer."
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 31.18,
+            "y": 140.40002,
+            "width": 140.01001,
+            "height": 10.0
+          },
+          "role": "List",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "2. TERM AND TERMINATION.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 140.40002,
+                "width": 140.01001,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "2. TERM AND TERMINATION."
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 31.18,
+            "y": 163.08002,
+            "width": 381.85,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "   2.1 This Agreement commences on the Effective Date and continues for 12 months.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 163.08002,
+                "width": 381.85,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "2.1 This Agreement commences on the Effective Date and continues for 12 months."
+        },
+        {
+          "block_id": "blk_6",
+          "bbox": {
+            "x": 31.18,
+            "y": 185.76001,
+            "width": 267.33002,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "   2.2 Either party may terminate with 30 days written notice.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 185.76001,
+                "width": 267.33002,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "2.2 Either party may terminate with 30 days written notice."
+        },
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 31.18,
+            "y": 208.43,
+            "width": 117.24999,
+            "height": 10.0
+          },
+          "role": "List",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "3. FEES AND PAYMENT.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 208.43,
+                "width": 117.24999,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "3. FEES AND PAYMENT."
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 31.18,
+            "y": 231.10999,
+            "width": 196.76001,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "   3.1 Customer shall pay $1,282 per month.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 231.10999,
+                "width": 196.76001,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "3.1 Customer shall pay $1,282 per month."
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 31.18,
+            "y": 253.79004,
+            "width": 240.12,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "   3.2 Late payments incur interest at 1.5% per month.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 253.79004,
+                "width": 240.12,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "3.2 Late payments incur interest at 1.5% per month."
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 31.18,
+            "y": 276.46002,
+            "width": 137.26999,
+            "height": 10.0
+          },
+          "role": "List",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "4. LIMITATION OF LIABILITY.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 276.46002,
+                "width": 137.26999,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "4. LIMITATION OF LIABILITY."
+        },
+        {
+          "block_id": "blk_11",
+          "bbox": {
+            "x": 31.18,
+            "y": 299.14,
+            "width": 392.65,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "   4.1 Neither party's aggregate liability shall exceed the fees paid in the prior 12 months.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 299.14,
+                "width": 392.65,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "4.1 Neither party's aggregate liability shall exceed the fees paid in the prior 12 months."
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 12,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.92446184,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 15,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24281088,
+        "rss_delta_bytes": 0
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

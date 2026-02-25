@@ -1,0 +1,5 @@
+页=1 bbox=(31,33,108,10) Table Without Headers
+页=1 bbox=(31,55,44,148) Category 1 Category 2 Category 3 Category 4 Category 5 Category 6 Category 7 Category 8
+页=1 bbox=(206,55,33,148) $43,547 $15,525 $24,822 $13,752 $48,396 $5,648 $18,197 $14,310
+页=1 bbox=(319,55,18,148) 4% 35% 14% 34% 15% 78% 75% 32%
+页=1 bbox=(379,55,39,148) Excellent Good Excellent Fair Fair Good Good Fair

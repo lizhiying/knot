@@ -1,0 +1,12 @@
+页=1 bbox=(220,33,155,14) SERVICE AGREEMENT
+页=1 bbox=(31,72,334,10) 1. DEFINITIONS. In this Agreement, unless the context otherwise requires:
+页=1 bbox=(31,95,368,10) 1.1 "Service" means the software-as-a-service platform provided by the Provider.
+页=1 bbox=(31,118,344,10) 1.2 "Customer Data" means all data submitted by or on behalf of Customer.
+页=1 bbox=(31,140,140,10) 2. TERM AND TERMINATION.
+页=1 bbox=(31,163,382,10) 2.1 This Agreement commences on the Effective Date and continues for 12 months.
+页=1 bbox=(31,186,267,10) 2.2 Either party may terminate with 30 days written notice.
+页=1 bbox=(31,208,117,10) 3. FEES AND PAYMENT.
+页=1 bbox=(31,231,197,10) 3.1 Customer shall pay $1,282 per month.
+页=1 bbox=(31,254,240,10) 3.2 Late payments incur interest at 1.5% per month.
+页=1 bbox=(31,276,137,10) 4. LIMITATION OF LIABILITY.
+页=1 bbox=(31,299,393,10) 4.1 Neither party's aggregate liability shall exceed the fees paid in the prior 12 months.

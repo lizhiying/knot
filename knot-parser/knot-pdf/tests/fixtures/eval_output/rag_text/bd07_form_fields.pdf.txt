@@ -1,0 +1,4 @@
+页=1 bbox=(228,33,140,14) APPLICATION FORM
+页=1 bbox=(31,75,84,169) Full Name: Date of Birth: Email: Phone: Address: Position Applied: Expected Salary:
+页=1 bbox=(173,75,200,169) John Smith 1990-05-15 john.smith@example.com +1-555-0123 123 Main St, Suite 400, New York, NY 10001 Senior Software Engineer $150,000
+页=1 bbox=(31,211,94,10) Experience (years):

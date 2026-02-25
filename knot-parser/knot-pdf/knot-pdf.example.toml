@@ -1,0 +1,100 @@
+# knot-pdf 配置文件
+# 将此文件命名为 knot-pdf.toml 放置在以下位置之一：
+# 1. 当前工作目录
+# 2. 可执行文件同级目录
+# 3. ~/.config/knot-pdf/knot-pdf.toml
+
+# ── 文本抽取 ──────────────────────────────────────────
+
+# 文本质量评分阈值（低于此值判定为扫描页，触发 OCR）
+# 范围：0.0 ~ 1.0
+scoring_text_threshold = 0.3
+
+# 乱码率阈值
+garbled_threshold = 0.2
+
+# 是否剔除页眉页脚
+strip_headers_footers = true
+
+# 最大列数（多列检测）
+max_columns = 3
+
+# ── 输出控制 ──────────────────────────────────────────
+
+# 是否输出 Markdown
+emit_markdown = true
+
+# 是否输出 IR JSON
+emit_ir_json = false
+
+# ── OCR 配置 ──────────────────────────────────────────
+
+# 是否启用 OCR（需编译时启用 ocr_paddle feature）
+ocr_enabled = false
+
+# OCR 触发模式：auto / force_all / disabled
+# - auto:      仅对扫描页触发（text_score < scoring_text_threshold）
+# - force_all: 对所有页面强制 OCR
+# - disabled:  完全禁用
+ocr_mode = "disabled"
+
+# OCR 识别语言
+ocr_languages = ["eng"]
+
+# OCR 页面渲染宽度（像素，越大越精确但越慢）
+ocr_render_width = 1024
+
+# OCR 并发数
+ocr_workers = 1
+
+# OCR 模型目录（包含 det.onnx / rec.onnx / ppocrv5_dict.txt）
+# 留空则自动探测 models/ppocrv5/
+# ocr_model_dir = "models/ppocrv5"
+
+# ── Store / 断点续传 ─────────────────────────────────
+
+# 是否启用断点续传（需编译时启用 store_sled feature）
+store_enabled = false
+
+# 存储路径
+# store_path = "/tmp/knot-pdf-store"
+
+# ── 资源控制 ──────────────────────────────────────────
+
+# 内存峰值限制（MB）
+max_memory_mb = 200
+
+# Pipeline 页面队列大小
+page_queue_size = 4
+
+# 渲染并发数
+render_workers = 2
+
+# 单页处理超时（秒，0 = 不超时）
+page_timeout_secs = 0
+
+# ── 图表检测 ──────────────────────────────────────────
+
+# 是否启用图表区域检测
+figure_detection_enabled = true
+
+# 图表区域最小面积（占页面面积比例）
+figure_min_area_ratio = 0.05
+
+# 图表区域最小 Path objects 数量
+figure_min_path_count = 10
+
+# 图表渲染分辨率（宽度像素）
+figure_render_width = 800
+
+# ── Vision LLM（图表语义理解）────────────────────────
+
+# Vision LLM API URL（OpenAI 兼容 Chat Completions 格式）
+# 支持: OpenAI, Claude (via proxy), Gemini (via proxy), Ollama 等
+# vision_api_url = "http://localhost:11434/v1/chat/completions"
+
+# Vision LLM API Key（也可通过环境变量 KNOT_VISION_API_KEY 设置）
+# vision_api_key = "sk-..."
+
+# Vision LLM 模型名称
+vision_model = "glm-ocr:latest"

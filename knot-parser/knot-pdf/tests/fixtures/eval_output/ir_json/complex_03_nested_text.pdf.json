@@ -1,0 +1,464 @@
+{
+  "doc_id": "60044f71093c3841d8e82654578474a739bf9e999916bb574d77aeda77b948ac",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 32.690002,
+            "width": 107.23,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Multi-line Cell Content",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 32.690002,
+                "width": 107.23,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Multi-line Cell Content"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 59.97,
+            "y": 55.340027,
+            "width": 21.783997,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Name",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 59.97,
+                "y": 55.340027,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Name"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 218.94,
+            "y": 55.340027,
+            "width": 44.007996,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Description",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 218.94,
+                "y": 55.340027,
+                "width": 44.007996,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Description"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 401.24,
+            "y": 55.340027,
+            "width": 19.567993,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Price",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 401.24,
+                "y": 55.340027,
+                "width": 19.567993,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Price"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 31.18,
+            "y": 72.35004,
+            "width": 35.128,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Product A",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 72.35004,
+                "width": 35.128,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Product A"
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 116.22,
+            "y": 72.35004,
+            "width": 103.144,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "High-performance computing",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 116.22,
+                "y": 72.35004,
+                "width": 103.144,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "High-performance computing"
+        },
+        {
+          "block_id": "blk_6",
+          "bbox": {
+            "x": 31.18,
+            "y": 72.35004,
+            "width": 369.072,
+            "height": 36.349976
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$12,500",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 371.34,
+                "y": 72.35004,
+                "width": 28.911987,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "solution for enterprise",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 116.22,
+                "y": 86.53003,
+                "width": 76.92,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Product B",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 100.70001,
+                "width": 35.128,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$12,500 solution for enterprise Product B"
+        },
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 116.22,
+            "y": 100.70001,
+            "width": 76.024,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Cloud-native platform",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 116.22,
+                "y": 100.70001,
+                "width": 76.024,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Cloud-native platform"
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 31.18,
+            "y": 100.70001,
+            "width": 364.624,
+            "height": 50.52002
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$8,900",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 371.34,
+                "y": 100.70001,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "with auto-scaling",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 116.22,
+                "y": 114.869995,
+                "width": 59.576004,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "and monitoring",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 116.22,
+                "y": 129.04999,
+                "width": 52.912003,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Product C",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 143.22003,
+                "width": 35.568,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$8,900 with auto-scaling and monitoring Product C"
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 116.22,
+            "y": 143.22003,
+            "width": 69.808,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Desktop application",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 116.22,
+                "y": 143.22003,
+                "width": 69.808,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Desktop application"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 116.22,
+            "y": 143.22003,
+            "width": 279.58398,
+            "height": 22.169983
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$3,200",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 371.34,
+                "y": 143.22003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "for data analysis",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 116.22,
+                "y": 157.39001,
+                "width": 58.248,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$3,200 for data analysis"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 11,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.915607,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 11,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24412160,
+        "rss_delta_bytes": 0
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

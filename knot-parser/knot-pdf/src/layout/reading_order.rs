@@ -1,0 +1,1160 @@
+//! 阅读顺序重建：行聚类、列检测、段落合并、隐式网格检测
+//!
+//! 将从 PDF 提取的原始字符转换为按阅读顺序排列的文本块
+
+use crate::backend::RawChar;
+use crate::ir::{BBox, BlockIR, BlockRole, TableIR, TextLine, TextSpan};
+
+/// 行聚类容差（y 坐标差异在此范围内视为同一行）
+const LINE_Y_TOLERANCE: f32 = 3.0;
+
+/// 列间隙阈值（x 方向间隙超过此比例视为分列）
+const COLUMN_GAP_RATIO: f32 = 0.06;
+
+/// 段落行距倍率（行距超过字号的此倍率视为新段落）
+const PARAGRAPH_LINE_SPACING_RATIO: f32 = 1.8;
+
+/// 词间距阈值（字符间距超过字号的此倍率视为空格）
+/// PDFium 的字符 bbox 较紧凑，正常词间距的 ratio 约为 0.2~0.3，
+/// 所以阈值取 0.15 以确保词间空格被正确检测。
+const WORD_SPACING_RATIO: f32 = 0.15;
+
+/// 最小行字符数（少于此数的行片段被视为噪声/侧边栏文字并过滤掉）
+const MIN_LINE_CHAR_COUNT: usize = 2;
+
+/// 横幅阈值：行宽度超过页面宽度的此比例视为横幅（不参与列分割）
+const BANNER_WIDTH_RATIO: f32 = 0.7;
+
+/// 最小列宽占页面宽度的比例
+const MIN_COLUMN_WIDTH_RATIO: f32 = 0.15;
+
+/// 网格检测：列 x 位置对齐容差（占页面宽度的比例）
+const GRID_X_ALIGN_RATIO: f32 = 0.05;
+
+/// 网格检测：最少需要的行数
+const GRID_MIN_ROWS: usize = 2;
+
+/// 网格检测：最少需要的列数
+const GRID_MIN_COLS: usize = 2;
+
+/// 常见列表项前缀模式
+const BULLET_CHARS: &[char] = &['•', '·', '▪', '▸', '►', '◦', '‣', '⁃', '-', '–', '—'];
+
+/// 从原始字符构建文本块（核心入口）
+pub fn build_blocks(chars: &[RawChar], page_width: f32, page_height: f32) -> Vec<BlockIR> {
+    let (blocks, _) = build_blocks_and_grids(chars, page_width, page_height, 0);
+    blocks
+}
+
+/// 从原始字符构建文本块 + 隐式网格检测
+///
+/// 在行聚类后检测隐式网格布局（多行列对齐），按列优先阅读顺序输出。
+pub fn build_blocks_and_grids(
+    chars: &[RawChar],
+    page_width: f32,
+    _page_height: f32,
+    page_index: usize,
+) -> (Vec<BlockIR>, Vec<TableIR>) {
+    if chars.is_empty() {
+        return (Vec::new(), Vec::new());
+    }
+
+    // 1. 行聚类（仅 y 分组，不拆分间隙）
+    let raw_lines = cluster_lines_raw(chars);
+
+    // 2. 隐式网格检测：在原始行上分析内部间隙模式
+    //    返回列优先的 BlockIR（每列一个块）和剩余行
+    let (grid_blocks, remaining_raw_lines) =
+        detect_implicit_grids(&raw_lines, page_index, page_width);
+
+    // 3. 对剩余行进行间隙拆分 + 短行过滤
+    let lines = gap_split_and_filter(remaining_raw_lines, page_width);
+
+    // 4. 分离横幅行（宽度跨越多列的行，如标题、页眉）
+    let (banner_lines, narrow_lines) = separate_banners(&lines, page_width);
+
+    // 5. 列检测（仅用窄行）
+    let columns = detect_columns(&narrow_lines, page_width);
+
+    // 6. 按列分组，每列内按 y 排序
+    let column_lines = split_lines_by_columns(&narrow_lines, &columns);
+
+    // 7. 构建块列表：按 y 位置交错横幅、网格块和列内容
+    let mut blocks = Vec::new();
+    let mut block_idx = 0;
+
+    // 收集所有段落块及其 y 起始位置
+    let mut positioned_blocks: Vec<(f32, BlockIR)> = Vec::new();
+
+    // 网格块（列优先阅读顺序）
+    for blk in grid_blocks {
+        positioned_blocks.push((blk.bbox.y, blk));
+    }
+
+    // 横幅行作为独立段落
+    for banner in &banner_lines {
+        let text_lines = vec![TextLine {
+            spans: line_to_spans(banner),
+            bbox: Some(compute_line_bbox(banner)),
+        }];
+        let normalized_text = text_lines
+            .iter()
+            .map(|l| l.text())
+            .collect::<Vec<_>>()
+            .join(" ")
+            .trim()
+            .to_string();
+
+        if normalized_text.is_empty() {
+            continue;
+        }
+
+        let bbox = compute_line_bbox(banner);
+        let role = detect_block_role(&text_lines, &bbox, page_width);
+        positioned_blocks.push((
+            banner.y_center,
+            BlockIR {
+                block_id: String::new(),
+                bbox,
+                role,
+                lines: text_lines,
+                normalized_text,
+            },
+        ));
+    }
+
+    // 列内段落
+    for col_lines in &column_lines {
+        let paragraphs = merge_paragraphs(col_lines);
+        for para in paragraphs {
+            let bbox = compute_block_bbox(&para);
+            let text_lines: Vec<TextLine> = para
+                .iter()
+                .map(|line| TextLine {
+                    spans: line_to_spans(line),
+                    bbox: Some(compute_line_bbox(line)),
+                })
+                .collect();
+
+            let normalized_text = text_lines
+                .iter()
+                .map(|l| l.text())
+                .collect::<Vec<_>>()
+                .join(" ")
+                .trim()
+                .to_string();
+
+            if normalized_text.is_empty() {
+                continue;
+            }
+
+            let role = detect_block_role(&text_lines, &bbox, page_width);
+            positioned_blocks.push((
+                bbox.y,
+                BlockIR {
+                    block_id: String::new(),
+                    bbox,
+                    role,
+                    lines: text_lines,
+                    normalized_text,
+                },
+            ));
+        }
+    }
+
+    // 按 y 位置排序（保持阅读顺序）
+    positioned_blocks.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+
+    // 重新编号
+    for (_, mut blk) in positioned_blocks {
+        blk.block_id = format!("blk_{}", block_idx);
+        blocks.push(blk);
+        block_idx += 1;
+    }
+
+    // 方案B不生成 TableIR，网格直接转为 BlockIR
+    (blocks, Vec::new())
+}
+
+/// 分离横幅行（宽度跨越多列）和窄行
+fn separate_banners(lines: &[CharLine], page_width: f32) -> (Vec<CharLine>, Vec<CharLine>) {
+    let banner_threshold = page_width * BANNER_WIDTH_RATIO;
+    let mut banners = Vec::new();
+    let mut narrow = Vec::new();
+
+    for line in lines {
+        if line.bbox.width > banner_threshold {
+            banners.push(line.clone());
+        } else {
+            narrow.push(line.clone());
+        }
+    }
+
+    (banners, narrow)
+}
+
+/// 检测文本块角色（Title / List / Body）
+fn detect_block_role(text_lines: &[TextLine], bbox: &BBox, page_width: f32) -> BlockRole {
+    if text_lines.is_empty() {
+        return BlockRole::Unknown;
+    }
+
+    let first_line_text = text_lines[0].text();
+    let trimmed = first_line_text.trim();
+
+    // 列表项检测
+    if is_list_item(trimmed) {
+        return BlockRole::List;
+    }
+
+    // 标题检测：单行 + 较大字体 + 宽度较窄（居中或左对齐）
+    if text_lines.len() <= 2 {
+        let avg_font = text_lines
+            .iter()
+            .flat_map(|l| l.spans.iter())
+            .filter_map(|s| s.font_size)
+            .sum::<f32>()
+            / text_lines
+                .iter()
+                .flat_map(|l| l.spans.iter())
+                .filter_map(|s| s.font_size)
+                .count()
+                .max(1) as f32;
+
+        let is_bold = text_lines
+            .iter()
+            .flat_map(|l| l.spans.iter())
+            .any(|s| s.is_bold);
+
+        // 字体大于 14pt 或加粗，且行数少，视为标题
+        if (avg_font > 14.0 || is_bold) && bbox.width < page_width * 0.8 {
+            return BlockRole::Title;
+        }
+    }
+
+    BlockRole::Body
+}
+
+/// 判断文本是否为列表项
+fn is_list_item(text: &str) -> bool {
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        return false;
+    }
+
+    let first_char = trimmed.chars().next().unwrap();
+
+    // bullet 字符开头
+    if BULLET_CHARS.contains(&first_char) {
+        return true;
+    }
+
+    // 数字编号开头：1. 2. 3. / 1) 2) 3) / (1) (2) (3)
+    if first_char.is_ascii_digit() {
+        let rest = trimmed.trim_start_matches(|c: char| c.is_ascii_digit());
+        if rest.starts_with(". ") || rest.starts_with(") ") || rest.starts_with("、") {
+            return true;
+        }
+    }
+
+    // (1) (a) 模式
+    if trimmed.starts_with('(') {
+        if let Some(close_pos) = trimmed.find(')') {
+            let inner = &trimmed[1..close_pos];
+            if inner.len() <= 3
+                && (inner.chars().all(|c| c.is_ascii_digit())
+                    || inner.chars().all(|c| c.is_ascii_alphabetic()))
+            {
+                return true;
+            }
+        }
+    }
+
+    false
+}
+
+/// 判断是否为序号后缀的首字符（st/nd/rd/th）
+///
+/// 例如 1st, 2nd, 3rd, 4th
+fn is_ordinal_suffix(c: char, next: Option<char>) -> bool {
+    match (c, next) {
+        ('s', Some('t')) => true, // 1st, 21st, 31st
+        ('n', Some('d')) => true, // 2nd, 22nd
+        ('r', Some('d')) => true, // 3rd, 23rd
+        ('t', Some('h')) => true, // 4th, 5th, ...
+        _ => false,
+    }
+}
+
+/// 聚类后的行
+#[derive(Debug, Clone)]
+pub struct CharLine {
+    pub chars: Vec<RawChar>,
+    pub y_center: f32,
+    pub bbox: BBox,
+}
+
+/// 列边界
+#[derive(Debug, Clone)]
+struct ColumnBound {
+    x_min: f32,
+    x_max: f32,
+}
+
+/// 行聚类：按 y 坐标将字符分组到行（不做间隙拆分）
+fn cluster_lines_raw(chars: &[RawChar]) -> Vec<CharLine> {
+    let mut sorted_chars: Vec<&RawChar> = chars.iter().collect();
+    sorted_chars.sort_by(|a, b| {
+        a.bbox
+            .y
+            .partial_cmp(&b.bbox.y)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    let mut lines: Vec<CharLine> = Vec::new();
+
+    for ch in sorted_chars {
+        let ch_y_center = ch.bbox.y + ch.bbox.height / 2.0;
+
+        // 查找是否有已有行可以归入
+        let mut found = false;
+        for line in lines.iter_mut() {
+            if (line.y_center - ch_y_center).abs() < LINE_Y_TOLERANCE {
+                line.chars.push(ch.clone());
+                // 更新 y_center 为加权平均
+                let n = line.chars.len() as f32;
+                line.y_center = line.y_center * (n - 1.0) / n + ch_y_center / n;
+                found = true;
+                break;
+            }
+        }
+
+        if !found {
+            lines.push(CharLine {
+                chars: vec![ch.clone()],
+                y_center: ch_y_center,
+                bbox: ch.bbox,
+            });
+        }
+    }
+
+    // 每行内按 x 排序
+    for line in lines.iter_mut() {
+        line.chars.sort_by(|a, b| {
+            a.bbox
+                .x
+                .partial_cmp(&b.bbox.x)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        line.bbox = compute_chars_bbox(&line.chars);
+    }
+
+    // 按 y 排序
+    lines.sort_by(|a, b| {
+        a.y_center
+            .partial_cmp(&b.y_center)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    lines
+}
+
+/// 对行执行间隙拆分 + 短行过滤
+fn gap_split_and_filter(lines: Vec<CharLine>, page_width: f32) -> Vec<CharLine> {
+    let gap_threshold = page_width * COLUMN_GAP_RATIO;
+    let mut split_lines: Vec<CharLine> = Vec::new();
+    for line in lines {
+        let sub_lines = split_line_by_gap(&line, gap_threshold);
+        split_lines.extend(sub_lines);
+    }
+
+    // 过滤掉字符数过少的行片段
+    split_lines.retain(|line| line.chars.len() >= MIN_LINE_CHAR_COUNT);
+
+    // 行按 y 排序
+    split_lines.sort_by(|a, b| {
+        a.y_center
+            .partial_cmp(&b.y_center)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    split_lines
+}
+
+/// 行聚类 + 间隙拆分（兼容旧接口）
+fn cluster_lines(chars: &[RawChar], page_width: f32) -> Vec<CharLine> {
+    let raw_lines = cluster_lines_raw(chars);
+    gap_split_and_filter(raw_lines, page_width)
+}
+
+/// 按行内大间隙拆分行（用于分离同一 y 坐标的多列文本）
+fn split_line_by_gap(line: &CharLine, gap_threshold: f32) -> Vec<CharLine> {
+    if line.chars.len() < 2 {
+        return vec![line.clone()];
+    }
+
+    let mut result = Vec::new();
+    let mut current_chars: Vec<RawChar> = vec![line.chars[0].clone()];
+
+    for i in 1..line.chars.len() {
+        let prev = &line.chars[i - 1];
+        let curr = &line.chars[i];
+        let gap = curr.bbox.x - (prev.bbox.x + prev.bbox.width);
+
+        if gap > gap_threshold {
+            // 大间隙：拆分
+            let bbox = compute_chars_bbox(&current_chars);
+            let y_center = bbox.y + bbox.height / 2.0;
+            result.push(CharLine {
+                chars: current_chars,
+                y_center,
+                bbox,
+            });
+            current_chars = vec![curr.clone()];
+        } else {
+            current_chars.push(curr.clone());
+        }
+    }
+
+    // 收尾
+    if !current_chars.is_empty() {
+        let bbox = compute_chars_bbox(&current_chars);
+        let y_center = bbox.y + bbox.height / 2.0;
+        result.push(CharLine {
+            chars: current_chars,
+            y_center,
+            bbox,
+        });
+    }
+
+    result
+}
+
+/// 列检测：分析行的 x 分布，检测列分隔
+///
+/// 改进算法：
+/// - 使用间隙聚类分析，找到稳定的列间隙
+/// - 支持 2 列、3 列常见布局
+/// - 混合布局处理（已通过横幅分离预处理）
+fn detect_columns(lines: &[CharLine], page_width: f32) -> Vec<ColumnBound> {
+    if lines.is_empty() {
+        return vec![ColumnBound {
+            x_min: 0.0,
+            x_max: page_width,
+        }];
+    }
+
+    let gap_threshold = page_width * COLUMN_GAP_RATIO;
+    let min_col_width = page_width * MIN_COLUMN_WIDTH_RATIO;
+
+    // 收集所有行的 x 范围，按左边界排序
+    let mut x_ranges: Vec<(f32, f32)> = lines.iter().map(|l| (l.bbox.x, l.bbox.right())).collect();
+    x_ranges.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+
+    // 合并重叠的 x 区间，找出连续覆盖区域
+    let mut merged_ranges: Vec<(f32, f32)> = Vec::new();
+    let mut cur_min = x_ranges[0].0;
+    let mut cur_max = x_ranges[0].1;
+
+    for &(x_min, x_max) in &x_ranges[1..] {
+        if x_min - cur_max > gap_threshold {
+            merged_ranges.push((cur_min, cur_max));
+            cur_min = x_min;
+            cur_max = x_max;
+        } else {
+            cur_max = cur_max.max(x_max);
+        }
+    }
+    merged_ranges.push((cur_min, cur_max));
+
+    // 过滤掉太窄的区域
+    let columns: Vec<ColumnBound> = merged_ranges
+        .iter()
+        .filter(|(min, max)| max - min >= min_col_width)
+        .map(|&(x_min, x_max)| ColumnBound { x_min, x_max })
+        .collect();
+
+    // 如果没有有效列或只有一列，返回单列
+    if columns.len() <= 1 {
+        return vec![ColumnBound {
+            x_min: 0.0,
+            x_max: page_width,
+        }];
+    }
+
+    // 验证列间隙的一致性：各列宽度不应差异过大
+    let widths: Vec<f32> = columns.iter().map(|c| c.x_max - c.x_min).collect();
+    let max_width = widths.iter().cloned().fold(f32::MIN, f32::max);
+    let min_width = widths.iter().cloned().fold(f32::MAX, f32::min);
+
+    // 如果最宽列是最窄列的 3 倍以上，可能不是真正的多列
+    if max_width > min_width * 3.0 {
+        return vec![ColumnBound {
+            x_min: 0.0,
+            x_max: page_width,
+        }];
+    }
+
+    columns
+}
+
+/// 按列分割行
+fn split_lines_by_columns(lines: &[CharLine], columns: &[ColumnBound]) -> Vec<Vec<CharLine>> {
+    let mut result: Vec<Vec<CharLine>> = columns.iter().map(|_| Vec::new()).collect();
+
+    for line in lines {
+        let line_center_x = line.bbox.center_x();
+        let mut best_col = 0;
+        let mut best_dist = f32::MAX;
+
+        for (i, col) in columns.iter().enumerate() {
+            let col_center = (col.x_min + col.x_max) / 2.0;
+            let dist = (line_center_x - col_center).abs();
+            if dist < best_dist {
+                best_dist = dist;
+                best_col = i;
+            }
+        }
+
+        result[best_col].push(line.clone());
+    }
+
+    // 每列内按 y 排序
+    for col_lines in result.iter_mut() {
+        col_lines.sort_by(|a, b| {
+            a.y_center
+                .partial_cmp(&b.y_center)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+    }
+
+    result
+}
+
+/// 段落合并增强：根据行距 + 缩进 + 列表项判断段落边界
+///
+/// 改进点：
+/// - 行距自适应（使用局部行距统计）
+/// - 缩进检测（区分段首/续行）
+/// - 列表项检测（bullet / number prefix 自动断段）
+fn merge_paragraphs(lines: &[CharLine]) -> Vec<Vec<&CharLine>> {
+    if lines.is_empty() {
+        return Vec::new();
+    }
+
+    // 先计算局部中位行距，用于自适应阈值
+    let median_line_gap = compute_median_line_gap(lines);
+
+    let mut paragraphs: Vec<Vec<&CharLine>> = Vec::new();
+    let mut current_para: Vec<&CharLine> = vec![&lines[0]];
+
+    for i in 1..lines.len() {
+        let prev = &lines[i - 1];
+        let curr = &lines[i];
+
+        let should_break = should_break_paragraph(prev, curr, median_line_gap);
+
+        if should_break {
+            paragraphs.push(current_para);
+            current_para = vec![&lines[i]];
+        } else {
+            current_para.push(&lines[i]);
+        }
+    }
+
+    if !current_para.is_empty() {
+        paragraphs.push(current_para);
+    }
+
+    paragraphs
+}
+
+/// 判断是否应该在两行之间断段
+fn should_break_paragraph(prev: &CharLine, curr: &CharLine, median_gap: f32) -> bool {
+    let line_gap = curr.y_center - prev.y_center;
+    let avg_font_size = avg_char_font_size(&prev.chars)
+        .max(avg_char_font_size(&curr.chars))
+        .max(1.0);
+
+    // 1. 行距过大 → 断段
+    if line_gap > avg_font_size * PARAGRAPH_LINE_SPACING_RATIO {
+        return true;
+    }
+
+    // 2. 行距显著大于中位行距（1.5 倍）→ 断段
+    if median_gap > 0.0 && line_gap > median_gap * 1.5 {
+        return true;
+    }
+
+    // 3. 当前行是列表项开头 → 断段
+    let curr_text = line_to_text(curr);
+    if is_list_item(curr_text.trim()) {
+        return true;
+    }
+
+    // 4. 缩进检测：当前行明显缩进（段首缩进）
+    let indent_diff = curr.bbox.x - prev.bbox.x;
+    if indent_diff > avg_font_size * 1.5 {
+        // 明显缩进，可能是新段落
+        return true;
+    }
+
+    false
+}
+
+/// 计算行间距的中位数
+fn compute_median_line_gap(lines: &[CharLine]) -> f32 {
+    if lines.len() < 2 {
+        return 0.0;
+    }
+
+    let mut gaps: Vec<f32> = Vec::new();
+    for i in 1..lines.len() {
+        let gap = lines[i].y_center - lines[i - 1].y_center;
+        if gap > 0.0 {
+            gaps.push(gap);
+        }
+    }
+
+    if gaps.is_empty() {
+        return 0.0;
+    }
+
+    gaps.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    gaps[gaps.len() / 2]
+}
+
+/// 将 CharLine 转为文本（快速版本，用于检测）
+fn line_to_text(line: &CharLine) -> String {
+    line.chars.iter().map(|c| c.unicode).collect()
+}
+
+/// 将一行字符转换为 TextSpan 列表（按词间距分割）
+fn line_to_spans(line: &CharLine) -> Vec<TextSpan> {
+    if line.chars.is_empty() {
+        return Vec::new();
+    }
+
+    let mut spans = Vec::new();
+    let mut current_text = String::new();
+    let mut current_font_size: Option<f32> = None;
+    let mut current_is_bold = false;
+
+    for (i, ch) in line.chars.iter().enumerate() {
+        // 检测词间距
+        if i > 0 {
+            let prev = &line.chars[i - 1];
+            let gap = ch.bbox.x - prev.bbox.right();
+            let font_size = prev.font_size.max(1.0);
+
+            // 紧凑间距规则：
+            // 1. `@` 两侧总是紧凑（邮箱）
+            // 2. `.` 仅当两侧都是字母/数字时紧凑（域名如 google.com）
+            //    句号后跟大写字母时应保持正常间距
+            // 3. 数字-数字相邻总是紧凑（数字内部不应有空格）
+            // 4. 数字后跟序号后缀（st/nd/rd/th）时紧凑
+            let tight = if prev.unicode == '@' || ch.unicode == '@' {
+                true
+            } else if prev.unicode == '.' && ch.unicode.is_alphanumeric() {
+                true
+            } else if ch.unicode == '.' && prev.unicode.is_alphanumeric() {
+                let next_is_lower = line
+                    .chars
+                    .get(i + 1)
+                    .map_or(false, |nc| nc.unicode.is_lowercase());
+                next_is_lower
+            } else if prev.unicode.is_ascii_digit() && ch.unicode.is_ascii_digit() {
+                // 数字之间永远紧凑
+                true
+            } else if prev.unicode.is_ascii_digit() && ch.unicode.is_lowercase() {
+                // 数字后跟序号后缀（st/nd/rd/th）
+                is_ordinal_suffix(ch.unicode, line.chars.get(i + 1).map(|c| c.unicode))
+            } else {
+                false
+            };
+
+            let ratio = if tight {
+                WORD_SPACING_RATIO * 3.0
+            } else {
+                WORD_SPACING_RATIO
+            };
+
+            if gap > font_size * ratio {
+                current_text.push(' ');
+            }
+        }
+
+        current_text.push(ch.unicode);
+        if current_font_size.is_none() {
+            current_font_size = Some(ch.font_size);
+            current_is_bold = ch.is_bold;
+        }
+    }
+
+    if !current_text.is_empty() {
+        spans.push(TextSpan {
+            text: current_text,
+            font_size: current_font_size,
+            is_bold: current_is_bold,
+            font_name: None,
+        });
+    }
+
+    spans
+}
+
+/// 计算字符列表的 BBox
+fn compute_chars_bbox(chars: &[RawChar]) -> BBox {
+    if chars.is_empty() {
+        return BBox::new(0.0, 0.0, 0.0, 0.0);
+    }
+
+    let mut x_min = f32::MAX;
+    let mut y_min = f32::MAX;
+    let mut x_max = f32::MIN;
+    let mut y_max = f32::MIN;
+
+    for ch in chars {
+        x_min = x_min.min(ch.bbox.x);
+        y_min = y_min.min(ch.bbox.y);
+        x_max = x_max.max(ch.bbox.right());
+        y_max = y_max.max(ch.bbox.bottom());
+    }
+
+    BBox::new(x_min, y_min, x_max - x_min, y_max - y_min)
+}
+
+/// 计算一行的 BBox
+fn compute_line_bbox(line: &CharLine) -> BBox {
+    compute_chars_bbox(&line.chars)
+}
+
+/// 计算段落（多行）的 BBox
+fn compute_block_bbox(lines: &[&CharLine]) -> BBox {
+    if lines.is_empty() {
+        return BBox::new(0.0, 0.0, 0.0, 0.0);
+    }
+
+    let mut x_min = f32::MAX;
+    let mut y_min = f32::MAX;
+    let mut x_max = f32::MIN;
+    let mut y_max = f32::MIN;
+
+    for line in lines {
+        x_min = x_min.min(line.bbox.x);
+        y_min = y_min.min(line.bbox.y);
+        x_max = x_max.max(line.bbox.right());
+        y_max = y_max.max(line.bbox.bottom());
+    }
+
+    BBox::new(x_min, y_min, x_max - x_min, y_max - y_min)
+}
+
+/// 计算字符列表的平均字体大小
+fn avg_char_font_size(chars: &[RawChar]) -> f32 {
+    if chars.is_empty() {
+        return 12.0;
+    }
+    let sum: f32 = chars.iter().map(|c| c.font_size).sum();
+    sum / chars.len() as f32
+}
+
+/// 行的间隙分析结果
+#[derive(Clone)]
+struct LineGapProfile {
+    /// 原始行索引
+    line_idx: usize,
+    /// 间隙中心的 x 坐标列表
+    gap_centers: Vec<f32>,
+    /// 按间隙拆分后的字符段
+    segments: Vec<Vec<RawChar>>,
+    /// 原始行的 y 中心
+    y_center: f32,
+}
+
+/// 检测隐式网格布局（基于行内间隙模式）
+///
+/// 对每行分析内部显著间隙位置。当连续行有相同数量的间隙且位置对齐时，
+/// 识别为网格区域，按列优先顺序生成 BlockIR。
+fn detect_implicit_grids(
+    lines: &[CharLine],
+    _page_index: usize,
+    page_width: f32,
+) -> (Vec<BlockIR>, Vec<CharLine>) {
+    if lines.len() < GRID_MIN_ROWS {
+        return (Vec::new(), lines.to_vec());
+    }
+
+    // 间隙阈值：使用较小值以捕获更紧凑的网格
+    let min_gap = page_width * 0.03;
+
+    // Step 1: 分析每行的间隙模式
+    let profiles: Vec<LineGapProfile> = lines
+        .iter()
+        .enumerate()
+        .map(|(idx, line)| analyze_line_gaps(line, idx, min_gap))
+        // 过滤：排除空段 profile 和包含单字符段的行（侧边栏噪声）
+        .filter(|p| {
+            !p.segments.is_empty()
+                && p.segments
+                    .iter()
+                    .all(|seg| seg.len() >= MIN_LINE_CHAR_COUNT)
+        })
+        .collect();
+
+    // 对齐容差（基于页宽的百分比）
+    let x_tolerance = page_width * GRID_X_ALIGN_RATIO;
+
+    // Step 2: 找到连续行中间隙模式匹配的区域
+    let mut grid_blocks: Vec<BlockIR> = Vec::new();
+    let mut consumed_indices: Vec<bool> = vec![false; lines.len()];
+
+    let mut i = 0;
+    while i < profiles.len() {
+        let ref_gap_count = profiles[i].gap_centers.len();
+
+        // 至少需要 GRID_MIN_COLS - 1 个间隙
+        if ref_gap_count < GRID_MIN_COLS - 1 {
+            i += 1;
+            continue;
+        }
+
+        // 用平均间隙位置做参考（随新行加入不断更新）
+        let mut avg_gap_centers: Vec<f32> = profiles[i].gap_centers.clone();
+        let mut row_count: f32 = 1.0;
+
+        // 向后扫描匹配行
+        let mut end = i + 1;
+        while end < profiles.len() {
+            let profile = &profiles[end];
+
+            if profile.gap_centers.len() != ref_gap_count {
+                break;
+            }
+
+            // 与当前平均间隙位置比较
+            let aligned = avg_gap_centers
+                .iter()
+                .zip(profile.gap_centers.iter())
+                .all(|(avg, b)| (avg - b).abs() < x_tolerance);
+
+            if !aligned {
+                break;
+            }
+
+            // 更新平均间隙位置
+            row_count += 1.0;
+            for (j, gc) in profile.gap_centers.iter().enumerate() {
+                avg_gap_centers[j] =
+                    avg_gap_centers[j] * (row_count - 1.0) / row_count + gc / row_count;
+            }
+
+            end += 1;
+        }
+
+        let grid_rows = end - i;
+
+        if grid_rows >= GRID_MIN_ROWS {
+            let mut all_grid_profiles: Vec<LineGapProfile> = profiles[i..end].to_vec();
+
+            // 网格延伸：用已知间隙位置尝试拆分紧邻的原始行
+            let grid_y_min = all_grid_profiles.first().map(|p| p.y_center).unwrap_or(0.0);
+            let grid_y_max = all_grid_profiles.last().map(|p| p.y_center).unwrap_or(0.0);
+            let avg_line_height = if all_grid_profiles.len() >= 2 {
+                (grid_y_max - grid_y_min) / (all_grid_profiles.len() - 1) as f32
+            } else {
+                15.0
+            };
+
+            // 向上延伸：检查网格之前紧邻的原始行
+            for line in lines.iter() {
+                let gap_to_grid = grid_y_min - line.y_center;
+                if gap_to_grid <= 0.0 || gap_to_grid > avg_line_height * 2.0 {
+                    continue;
+                }
+                let forced_profile =
+                    force_split_by_gaps(line, &avg_gap_centers, MIN_LINE_CHAR_COUNT);
+                if let Some(fp) = forced_profile {
+                    if fp.segments.len() == ref_gap_count + 1 {
+                        for (li, orig_line) in lines.iter().enumerate() {
+                            if (orig_line.y_center - line.y_center).abs() < 0.5 {
+                                consumed_indices[li] = true;
+                                break;
+                            }
+                        }
+                        all_grid_profiles.push(fp);
+                    }
+                }
+            }
+
+            // 向下延伸：检查网格之后紧邻的原始行
+            for line in lines.iter() {
+                let gap_to_grid = line.y_center - grid_y_max;
+                if gap_to_grid <= 0.0 || gap_to_grid > avg_line_height * 2.0 {
+                    continue;
+                }
+                let forced_profile =
+                    force_split_by_gaps(line, &avg_gap_centers, MIN_LINE_CHAR_COUNT);
+                if let Some(fp) = forced_profile {
+                    if fp.segments.len() == ref_gap_count + 1 {
+                        for (li, orig_line) in lines.iter().enumerate() {
+                            if (orig_line.y_center - line.y_center).abs() < 0.5 {
+                                consumed_indices[li] = true;
+                                break;
+                            }
+                        }
+                        all_grid_profiles.push(fp);
+                    }
+                }
+            }
+
+            let mut col_blocks = build_column_blocks_from_profiles(&all_grid_profiles);
+            grid_blocks.append(&mut col_blocks);
+
+            for idx in i..end {
+                consumed_indices[profiles[idx].line_idx] = true;
+            }
+            i = end;
+        } else {
+            i += 1;
+        }
+    }
+
+    // Step 3: 返回未消耗的行
+    let remaining: Vec<CharLine> = lines
+        .iter()
+        .enumerate()
+        .filter(|(idx, _)| !consumed_indices[*idx])
+        .map(|(_, line)| line.clone())
+        .collect();
+
+    (grid_blocks, remaining)
+}
+
+/// 用已知的间隙位置强制拆分一行
+///
+/// 当一行的自动间隙检测失败（例如邮箱行间距过小），但我们已经知道
+/// 列分界位置（来自已检测的网格），用这些位置强制拆分字符。
+fn force_split_by_gaps(
+    line: &CharLine,
+    gap_centers: &[f32],
+    min_chars: usize,
+) -> Option<LineGapProfile> {
+    if line.chars.is_empty() || gap_centers.is_empty() {
+        return None;
+    }
+
+    let num_cols = gap_centers.len() + 1;
+    let mut segments: Vec<Vec<RawChar>> = vec![Vec::new(); num_cols];
+
+    // 每个字符按其 x 中心分配到对应列
+    for ch in &line.chars {
+        let ch_center = ch.bbox.center_x();
+        let mut col = 0;
+        for (j, &gc) in gap_centers.iter().enumerate() {
+            if ch_center > gc {
+                col = j + 1;
+            } else {
+                break;
+            }
+        }
+        segments[col].push(ch.clone());
+    }
+
+    // 每段内按 x 排序
+    for seg in segments.iter_mut() {
+        seg.sort_by(|a, b| {
+            a.bbox
+                .x
+                .partial_cmp(&b.bbox.x)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+    }
+
+    // 过滤段首/尾的离群噪声字符
+    for seg in segments.iter_mut() {
+        // 如果段首字符与后续字符间隔过大，视为噪声
+        while seg.len() > min_chars {
+            let gap = seg[1].bbox.x - (seg[0].bbox.x + seg[0].bbox.width);
+            let avg_width = seg.iter().map(|c| c.bbox.width).sum::<f32>() / seg.len() as f32;
+            if gap > avg_width * 3.0 {
+                seg.remove(0);
+            } else {
+                break;
+            }
+        }
+        // 段尾同理
+        while seg.len() > min_chars {
+            let last = seg.len() - 1;
+            let gap = seg[last].bbox.x - (seg[last - 1].bbox.x + seg[last - 1].bbox.width);
+            let avg_width = seg.iter().map(|c| c.bbox.width).sum::<f32>() / seg.len() as f32;
+            if gap > avg_width * 3.0 {
+                seg.pop();
+            } else {
+                break;
+            }
+        }
+    }
+
+    // 检查每段是否有足够字符
+    if segments.iter().any(|seg| seg.len() < min_chars) {
+        return None;
+    }
+
+    Some(LineGapProfile {
+        line_idx: usize::MAX, // 延伸行不在 profiles 索引中
+        gap_centers: gap_centers.to_vec(),
+        segments,
+        y_center: line.y_center,
+    })
+}
+
+/// 分析一行的内部间隙模式
+fn analyze_line_gaps(line: &CharLine, line_idx: usize, min_gap: f32) -> LineGapProfile {
+    let mut gap_centers = Vec::new();
+    let mut segments: Vec<Vec<RawChar>> = Vec::new();
+    let mut current_segment: Vec<RawChar> = Vec::new();
+
+    if line.chars.is_empty() {
+        return LineGapProfile {
+            line_idx,
+            gap_centers,
+            segments,
+            y_center: line.y_center,
+        };
+    }
+
+    current_segment.push(line.chars[0].clone());
+
+    for i in 1..line.chars.len() {
+        let prev = &line.chars[i - 1];
+        let curr = &line.chars[i];
+        let gap = curr.bbox.x - (prev.bbox.x + prev.bbox.width);
+
+        if gap > min_gap {
+            let gap_center = (prev.bbox.x + prev.bbox.width + curr.bbox.x) / 2.0;
+            gap_centers.push(gap_center);
+            segments.push(current_segment);
+            current_segment = vec![curr.clone()];
+        } else {
+            current_segment.push(curr.clone());
+        }
+    }
+
+    if !current_segment.is_empty() {
+        segments.push(current_segment);
+    }
+
+    // 修剪首尾的单字符段（通常是侧边栏噪声，如 arXiv 编号的竖排字符）
+    while !segments.is_empty()
+        && segments
+            .first()
+            .map_or(false, |s| s.len() < MIN_LINE_CHAR_COUNT)
+    {
+        segments.remove(0);
+        if !gap_centers.is_empty() {
+            gap_centers.remove(0);
+        }
+    }
+    while !segments.is_empty()
+        && segments
+            .last()
+            .map_or(false, |s| s.len() < MIN_LINE_CHAR_COUNT)
+    {
+        segments.pop();
+        gap_centers.pop();
+    }
+
+    LineGapProfile {
+        line_idx,
+        gap_centers,
+        segments,
+        y_center: line.y_center,
+    }
+}
+
+/// 方案B：从间隙分析结果构建列优先的 BlockIR
+///
+/// 每列生成一个独立的 BlockIR，列内各行逐行拼接。
+/// 例如：作者名 → 机构 → 邮箱，纵向保持在同一个 Block 中。
+fn build_column_blocks_from_profiles(profiles: &[LineGapProfile]) -> Vec<BlockIR> {
+    if profiles.is_empty() {
+        return Vec::new();
+    }
+
+    let num_cols = profiles[0].segments.len();
+    if num_cols < GRID_MIN_COLS {
+        return Vec::new();
+    }
+
+    let mut blocks: Vec<BlockIR> = Vec::new();
+
+    // 逐列处理
+    for col_idx in 0..num_cols {
+        let mut text_lines: Vec<TextLine> = Vec::new();
+        let mut col_chars: Vec<&RawChar> = Vec::new();
+
+        for profile in profiles {
+            if col_idx >= profile.segments.len() {
+                continue;
+            }
+
+            let seg_chars = &profile.segments[col_idx];
+            let temp_line = CharLine {
+                chars: seg_chars.clone(),
+                y_center: profile.y_center,
+                bbox: compute_chars_bbox(seg_chars),
+            };
+
+            let spans = line_to_spans(&temp_line);
+            if !spans.is_empty() {
+                text_lines.push(TextLine {
+                    spans,
+                    bbox: Some(compute_chars_bbox(seg_chars)),
+                });
+            }
+
+            // 收集字符用于计算 bbox
+            for ch in seg_chars {
+                col_chars.push(ch);
+            }
+        }
+
+        if text_lines.is_empty() || col_chars.is_empty() {
+            continue;
+        }
+
+        // 计算列的 bbox
+        let mut x_min = f32::MAX;
+        let mut y_min = f32::MAX;
+        let mut x_max = f32::MIN;
+        let mut y_max = f32::MIN;
+        for ch in &col_chars {
+            x_min = x_min.min(ch.bbox.x);
+            y_min = y_min.min(ch.bbox.y);
+            x_max = x_max.max(ch.bbox.right());
+            y_max = y_max.max(ch.bbox.bottom());
+        }
+        let bbox = BBox::new(x_min, y_min, x_max - x_min, y_max - y_min);
+
+        let normalized_text = text_lines
+            .iter()
+            .map(|l| l.text())
+            .collect::<Vec<_>>()
+            .join(" ")
+            .trim()
+            .to_string();
+
+        if !normalized_text.is_empty() {
+            blocks.push(BlockIR {
+                block_id: String::new(),
+                bbox,
+                role: BlockRole::Body,
+                lines: text_lines,
+                normalized_text,
+            });
+        }
+    }
+
+    blocks
+}

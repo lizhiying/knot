@@ -1,0 +1,2141 @@
+{
+  "doc_id": "2c1bb23b936abd63b707be25d5e3faaf7ec6e9d83d648e312ff0082553306ff9",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 82.98999,
+            "width": 91.453995,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "IIIItttteeeemmmm",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 104.13,
+                "y": 82.98999,
+                "width": 18.503998,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "RRRReeeevvvveeeennnnuuuueeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 101.420044,
+                "width": 36.017998,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "CCCCOOOOGGGGSSSS",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 118.420044,
+                "width": 26.504997,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 135.43,
+                "width": 49.509003,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "OOOOppppEEEExxxx",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 152.44,
+                "width": 22.508999,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "EEEEBBBBIIIITTTTDDDDAAAA",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 169.45001,
+                "width": 32.508,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "NNNNeeeetttt    IIIInnnnccccoooommmmeeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 186.46002,
+                "width": 46.017,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "IIIItttteeeemmmm RRRReeeevvvveeeennnnuuuueeee CCCCOOOOGGGGSSSS GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt OOOOppppEEEExxxx EEEEBBBBIIIITTTTDDDDAAAA NNNNeeeetttt    IIIInnnnccccoooommmmeeee"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 234.28,
+            "y": 82.98999,
+            "width": 60.526,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "AAAAccccttttuuuuaaaallll",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 234.28,
+                "y": 82.98999,
+                "width": 29.502014,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$4947583,,,,733565905821",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 101.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$84972299,,,,579606621161",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 118.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$65331441,,,,140061344413",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 135.43,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$97445418,,,,159060438814",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 152.44,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$15928326,,,,345714214369",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 169.45001,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$52861604,,,,295750368373",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 186.46002,
+                "width": 32.526,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "AAAAccccttttuuuuaaaallll $$$$4947583,,,,733565905821 $$$$84972299,,,,579606621161 $$$$65331441,,,,140061344413 $$$$97445418,,,,159060438814 $$$$15928326,,,,345714214369 $$$$52861604,,,,295750368373"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 331.75,
+            "y": 82.98999,
+            "width": 62.26599,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "BBBBuuuuddddggggeeeetttt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 331.75,
+                "y": 82.98999,
+                "width": 32.498993,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$42285695,,,,946606152494",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 101.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$5532460,,,,670340425025",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 118.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$14666160,,,,353977756852",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 135.43,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$92717847,,,,518955332639",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 152.44,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$43542058,,,,912472835876",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 169.45001,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$4175348,,,,447106856241",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 186.46002,
+                "width": 32.526,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "BBBBuuuuddddggggeeeetttt $$$$42285695,,,,946606152494 $$$$5532460,,,,670340425025 $$$$14666160,,,,353977756852 $$$$92717847,,,,518955332639 $$$$43542058,,,,912472835876 $$$$4175348,,,,447106856241"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 427.7,
+            "y": 82.98999,
+            "width": 65.53299,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "VVVVaaaarrrriiiiaaaannnncccceeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 427.7,
+                "y": 82.98999,
+                "width": 37.520996,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--16348882,,,,871197354373",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 101.420044,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$-29417793,,,,832202981161",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 118.420044,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--41324229,,,,783983408649",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 135.43,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$-433-6022,,,,303859892542",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 152.44,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--23223741,,,,326713615917",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 169.45001,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$-26$11573,,,,477395987368",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 186.46002,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "VVVVaaaarrrriiiiaaaannnncccceeee $$$$--16348882,,,,871197354373 $$$$-29417793,,,,832202981161 $$$$--41324229,,,,783983408649 $$$$-433-6022,,,,303859892542 $$$$--23223741,,,,326713615917 $$$-26$11573,,,,477395987368"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 5,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.94033957,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 53,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24068096,
+        "rss_delta_bytes": 327680
+      }
+    },
+    {
+      "page_index": 1,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 82.98999,
+            "width": 91.453995,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "IIIItttteeeemmmm",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 104.13,
+                "y": 82.98999,
+                "width": 18.503998,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "RRRReeeevvvveeeennnnuuuueeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 101.420044,
+                "width": 36.017998,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "CCCCOOOOGGGGSSSS",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 118.420044,
+                "width": 26.504997,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 135.43,
+                "width": 49.509003,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "OOOOppppEEEExxxx",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 152.44,
+                "width": 22.508999,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "EEEEBBBBIIIITTTTDDDDAAAA",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 169.45001,
+                "width": 32.508,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "NNNNeeeetttt    IIIInnnnccccoooommmmeeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 186.46002,
+                "width": 46.017,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "IIIItttteeeemmmm RRRReeeevvvveeeennnnuuuueeee CCCCOOOOGGGGSSSS GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt OOOOppppEEEExxxx EEEEBBBBIIIITTTTDDDDAAAA NNNNeeeetttt    IIIInnnnccccoooommmmeeee"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 234.28,
+            "y": 82.98999,
+            "width": 60.526,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "AAAAccccttttuuuuaaaallll",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 234.28,
+                "y": 82.98999,
+                "width": 29.502014,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$4947583,,,,733565905821",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 101.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$84972299,,,,579606621161",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 118.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$65331441,,,,140061344413",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 135.43,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$97445418,,,,159060438814",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 152.44,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$15928326,,,,345714214369",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 169.45001,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$52861604,,,,295750368373",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 186.46002,
+                "width": 32.526,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "AAAAccccttttuuuuaaaallll $$$$4947583,,,,733565905821 $$$$84972299,,,,579606621161 $$$$65331441,,,,140061344413 $$$$97445418,,,,159060438814 $$$$15928326,,,,345714214369 $$$$52861604,,,,295750368373"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 331.75,
+            "y": 82.98999,
+            "width": 62.26599,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "BBBBuuuuddddggggeeeetttt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 331.75,
+                "y": 82.98999,
+                "width": 32.498993,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$42285695,,,,946606152494",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 101.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$5532460,,,,670340425025",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 118.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$14666160,,,,353977756852",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 135.43,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$92717847,,,,518955332639",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 152.44,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$43542058,,,,912472835876",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 169.45001,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$4175348,,,,447106856241",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 186.46002,
+                "width": 32.526,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "BBBBuuuuddddggggeeeetttt $$$$42285695,,,,946606152494 $$$$5532460,,,,670340425025 $$$$14666160,,,,353977756852 $$$$92717847,,,,518955332639 $$$$43542058,,,,912472835876 $$$$4175348,,,,447106856241"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 427.7,
+            "y": 82.98999,
+            "width": 65.53299,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "VVVVaaaarrrriiiiaaaannnncccceeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 427.7,
+                "y": 82.98999,
+                "width": 37.520996,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--16348882,,,,871197354373",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 101.420044,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$-29417793,,,,832202981161",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 118.420044,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--41324229,,,,783983408649",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 135.43,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$-433-6022,,,,303859892542",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 152.44,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--23223741,,,,326713615917",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 169.45001,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$-26$11573,,,,477395987368",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 186.46002,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "VVVVaaaarrrriiiiaaaannnncccceeee $$$$--16348882,,,,871197354373 $$$$-29417793,,,,832202981161 $$$$--41324229,,,,783983408649 $$$$-433-6022,,,,303859892542 $$$$--23223741,,,,326713615917 $$$-26$11573,,,,477395987368"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 5,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.94033957,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 60,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24363008,
+        "rss_delta_bytes": 294912
+      }
+    },
+    {
+      "page_index": 2,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 82.98999,
+            "width": 91.453995,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "IIIItttteeeemmmm",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 104.13,
+                "y": 82.98999,
+                "width": 18.503998,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "RRRReeeevvvveeeennnnuuuueeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 101.420044,
+                "width": 36.017998,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "CCCCOOOOGGGGSSSS",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 118.420044,
+                "width": 26.504997,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 135.43,
+                "width": 49.509003,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "OOOOppppEEEExxxx",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 152.44,
+                "width": 22.508999,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "EEEEBBBBIIIITTTTDDDDAAAA",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 169.45001,
+                "width": 32.508,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "NNNNeeeetttt    IIIInnnnccccoooommmmeeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 186.46002,
+                "width": 46.017,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "IIIItttteeeemmmm RRRReeeevvvveeeennnnuuuueeee CCCCOOOOGGGGSSSS GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt OOOOppppEEEExxxx EEEEBBBBIIIITTTTDDDDAAAA NNNNeeeetttt    IIIInnnnccccoooommmmeeee"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 234.28,
+            "y": 82.98999,
+            "width": 60.526,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "AAAAccccttttuuuuaaaallll",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 234.28,
+                "y": 82.98999,
+                "width": 29.502014,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$4947583,,,,733565905821",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 101.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$84972299,,,,579606621161",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 118.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$65331441,,,,140061344413",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 135.43,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$97445418,,,,159060438814",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 152.44,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$15928326,,,,345714214369",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 169.45001,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$52861604,,,,295750368373",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 186.46002,
+                "width": 32.526,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "AAAAccccttttuuuuaaaallll $$$$4947583,,,,733565905821 $$$$84972299,,,,579606621161 $$$$65331441,,,,140061344413 $$$$97445418,,,,159060438814 $$$$15928326,,,,345714214369 $$$$52861604,,,,295750368373"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 331.75,
+            "y": 82.98999,
+            "width": 62.26599,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "BBBBuuuuddddggggeeeetttt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 331.75,
+                "y": 82.98999,
+                "width": 32.498993,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$42285695,,,,946606152494",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 101.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$5532460,,,,670340425025",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 118.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$14666160,,,,353977756852",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 135.43,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$92717847,,,,518955332639",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 152.44,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$43542058,,,,912472835876",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 169.45001,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$4175348,,,,447106856241",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 186.46002,
+                "width": 32.526,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "BBBBuuuuddddggggeeeetttt $$$$42285695,,,,946606152494 $$$$5532460,,,,670340425025 $$$$14666160,,,,353977756852 $$$$92717847,,,,518955332639 $$$$43542058,,,,912472835876 $$$$4175348,,,,447106856241"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 427.7,
+            "y": 82.98999,
+            "width": 65.53299,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "VVVVaaaarrrriiiiaaaannnncccceeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 427.7,
+                "y": 82.98999,
+                "width": 37.520996,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--16348882,,,,871197354373",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 101.420044,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$-29417793,,,,832202981161",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 118.420044,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--41324229,,,,783983408649",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 135.43,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$-433-6022,,,,303859892542",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 152.44,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--23223741,,,,326713615917",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 169.45001,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$-26$11573,,,,477395987368",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 186.46002,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "VVVVaaaarrrriiiiaaaannnncccceeee $$$$--16348882,,,,871197354373 $$$$-29417793,,,,832202981161 $$$$--41324229,,,,783983408649 $$$$-433-6022,,,,303859892542 $$$$--23223741,,,,326713615917 $$$-26$11573,,,,477395987368"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 5,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.94033957,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 82,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24412160,
+        "rss_delta_bytes": 49152
+      }
+    },
+    {
+      "page_index": 3,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 82.98999,
+            "width": 91.453995,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "IIIItttteeeemmmm",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 104.13,
+                "y": 82.98999,
+                "width": 18.503998,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "RRRReeeevvvveeeennnnuuuueeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 101.420044,
+                "width": 36.017998,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "CCCCOOOOGGGGSSSS",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 118.420044,
+                "width": 26.504997,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 135.43,
+                "width": 49.509003,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "OOOOppppEEEExxxx",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 152.44,
+                "width": 22.508999,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "EEEEBBBBIIIITTTTDDDDAAAA",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 169.45001,
+                "width": 32.508,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "NNNNeeeetttt    IIIInnnnccccoooommmmeeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 186.46002,
+                "width": 46.017,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "IIIItttteeeemmmm RRRReeeevvvveeeennnnuuuueeee CCCCOOOOGGGGSSSS GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt OOOOppppEEEExxxx EEEEBBBBIIIITTTTDDDDAAAA NNNNeeeetttt    IIIInnnnccccoooommmmeeee"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 234.28,
+            "y": 82.98999,
+            "width": 60.526,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "AAAAccccttttuuuuaaaallll",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 234.28,
+                "y": 82.98999,
+                "width": 29.502014,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$4947583,,,,733565905821",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 101.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$84972299,,,,579606621161",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 118.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$65331441,,,,140061344413",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 135.43,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$97445418,,,,159060438814",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 152.44,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$15928326,,,,345714214369",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 169.45001,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$52861604,,,,295750368373",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 262.28,
+                "y": 186.46002,
+                "width": 32.526,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "AAAAccccttttuuuuaaaallll $$$$4947583,,,,733565905821 $$$$84972299,,,,579606621161 $$$$65331441,,,,140061344413 $$$$97445418,,,,159060438814 $$$$15928326,,,,345714214369 $$$$52861604,,,,295750368373"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 331.75,
+            "y": 82.98999,
+            "width": 62.26599,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "BBBBuuuuddddggggeeeetttt",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 331.75,
+                "y": 82.98999,
+                "width": 32.498993,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$42285695,,,,946606152494",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 101.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$5532460,,,,670340425025",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 118.420044,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$14666160,,,,353977756852",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 135.43,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$92717847,,,,518955332639",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 152.44,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$43542058,,,,912472835876",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 169.45001,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$4175348,,,,447106856241",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 361.49,
+                "y": 186.46002,
+                "width": 32.526,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "BBBBuuuuddddggggeeeetttt $$$$42285695,,,,946606152494 $$$$5532460,,,,670340425025 $$$$14666160,,,,353977756852 $$$$92717847,,,,518955332639 $$$$43542058,,,,912472835876 $$$$4175348,,,,447106856241"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 427.7,
+            "y": 82.98999,
+            "width": 65.53299,
+            "height": 112.47003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "VVVVaaaarrrriiiiaaaannnncccceeee",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 427.7,
+                "y": 82.98999,
+                "width": 37.520996,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--16348882,,,,871197354373",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 101.420044,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$-29417793,,,,832202981161",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 118.420044,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--41324229,,,,783983408649",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 135.43,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$-433-6022,,,,303859892542",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 152.44,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$$--23223741,,,,326713615917",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 169.45001,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$$$-26$11573,,,,477395987368",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 457.71,
+                "y": 186.46002,
+                "width": 35.52301,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "VVVVaaaarrrriiiiaaaannnncccceeee $$$$--16348882,,,,871197354373 $$$$-29417793,,,,832202981161 $$$$--41324229,,,,783983408649 $$$$-433-6022,,,,303859892542 $$$$--23223741,,,,326713615917 $$$-26$11573,,,,477395987368"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 5,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.94033957,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 105,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24444928,
+        "rss_delta_bytes": 32768
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [
+      "Header/footer detected: 1 header patterns, 0 footer patterns, 4 pages affected"
+    ],
+    "errors": []
+  }
+}

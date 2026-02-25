@@ -1,0 +1,3 @@
+# ONNX 模型文件（不提交到 git，需要单独下载）
+models/ppocrv5/*.onnx
+libpdfium.dylib

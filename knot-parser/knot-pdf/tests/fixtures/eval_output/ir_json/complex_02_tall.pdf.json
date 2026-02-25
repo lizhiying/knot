@@ -1,0 +1,4065 @@
+{
+  "doc_id": "58cd624083eff63ea43071a3af22d7a279cfd46acdc0c356d8e7d07e35055fc1",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 312.86,
+            "y": 65.27002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$3$,923965",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 65.27002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$3$,923965"
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 54.47,
+            "y": 65.27002,
+            "width": 353.274,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ADcotnivee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 65.27002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "1 Item description #1",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 73.77002,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "ADcotnivee 1 Item description #1"
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 312.86,
+            "y": 73.77002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5,379",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 73.77002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5,379"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 52.24,
+            "y": 73.77002,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 73.77002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4960 IItteemm  ddeessccrriippttiioonn  ##4960",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 82.27002,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 4960 IItteemm  ddeessccrriippttiioonn  ##4960"
+        },
+        {
+          "block_id": "blk_11",
+          "bbox": {
+            "x": 312.86,
+            "y": 82.27002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$52,,539719",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 82.27002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$52,,539719"
+        },
+        {
+          "block_id": "blk_12",
+          "bbox": {
+            "x": 54.47,
+            "y": 82.27002,
+            "width": 353.274,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ADcotnivee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 82.27002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "2 Item description #2",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 90.78003,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "ADcotnivee 2 Item description #2"
+        },
+        {
+          "block_id": "blk_13",
+          "bbox": {
+            "x": 312.86,
+            "y": 90.78003,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$6,747",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 90.78003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$6,747"
+        },
+        {
+          "block_id": "blk_14",
+          "bbox": {
+            "x": 52.24,
+            "y": 90.78003,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 90.78003,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4971 IItteemm  ddeessccrriippttiioonn  ##4971",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 99.28003,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 4971 IItteemm  ddeessccrriippttiioonn  ##4971"
+        },
+        {
+          "block_id": "blk_15",
+          "bbox": {
+            "x": 312.86,
+            "y": 99.28003,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$58,,314281",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 99.28003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$58,,314281"
+        },
+        {
+          "block_id": "blk_16",
+          "bbox": {
+            "x": 54.47,
+            "y": 99.28003,
+            "width": 353.274,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ADcotnivee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 99.28003,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "3 Item description #3",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 107.79004,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "ADcotnivee 3 Item description #3"
+        },
+        {
+          "block_id": "blk_17",
+          "bbox": {
+            "x": 312.86,
+            "y": 107.79004,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5,953",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 107.79004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5,953"
+        },
+        {
+          "block_id": "blk_18",
+          "bbox": {
+            "x": 52.24,
+            "y": 107.79004,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 107.79004,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4982 IItteemm  ddeessccrriippttiioonn  ##4982",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 116.29004,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 4982 IItteemm  ddeessccrriippttiioonn  ##4982"
+        },
+        {
+          "block_id": "blk_19",
+          "bbox": {
+            "x": 312.86,
+            "y": 116.29004,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$16,,067540",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 116.29004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$16,,067540"
+        },
+        {
+          "block_id": "blk_20",
+          "bbox": {
+            "x": 54.47,
+            "y": 116.29004,
+            "width": 357.052,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PDenodnieng",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 116.29004,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4 Item description #4",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 124.79004,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PDenodnieng 4 Item description #4"
+        },
+        {
+          "block_id": "blk_21",
+          "bbox": {
+            "x": 312.86,
+            "y": 124.79004,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$3,822",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 124.79004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$3,822"
+        },
+        {
+          "block_id": "blk_22",
+          "bbox": {
+            "x": 52.24,
+            "y": 124.79004,
+            "width": 354.17,
+            "height": 16.509949
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Done",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 124.79004,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4993 IItteemm  ddeessccrriippttiioonn  ##4993",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 133.29999,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Done 4993 IItteemm  ddeessccrriippttiioonn  ##4993"
+        },
+        {
+          "block_id": "blk_23",
+          "bbox": {
+            "x": 312.86,
+            "y": 133.29999,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$69,,764908",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 133.29999,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$69,,764908"
+        },
+        {
+          "block_id": "blk_24",
+          "bbox": {
+            "x": 54.47,
+            "y": 133.29999,
+            "width": 357.052,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PDenodnieng",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 133.29999,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5 Item description #5",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 141.79999,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PDenodnieng 5 Item description #5"
+        },
+        {
+          "block_id": "blk_25",
+          "bbox": {
+            "x": 312.86,
+            "y": 141.79999,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5,808",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 141.79999,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5,808"
+        },
+        {
+          "block_id": "blk_26",
+          "bbox": {
+            "x": 52.24,
+            "y": 141.79999,
+            "width": 359.282,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Pending",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 141.79999,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5904 IItteemm  ddeessccrriippttiioonn  ##5904",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 150.31,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Pending 5904 IItteemm  ddeessccrriippttiioonn  ##5904"
+        },
+        {
+          "block_id": "blk_27",
+          "bbox": {
+            "x": 312.86,
+            "y": 150.31,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5$,130270",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 150.31,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5$,130270"
+        },
+        {
+          "block_id": "blk_28",
+          "bbox": {
+            "x": 54.47,
+            "y": 150.31,
+            "width": 351.94,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "DDoonnee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 150.31,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "6 Item description #6",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 158.81,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "DDoonnee 6 Item description #6"
+        },
+        {
+          "block_id": "blk_29",
+          "bbox": {
+            "x": 312.86,
+            "y": 158.81,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$2,213",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 158.81,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$2,213"
+        },
+        {
+          "block_id": "blk_30",
+          "bbox": {
+            "x": 52.24,
+            "y": 158.81,
+            "width": 359.282,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Pending",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 158.81,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5915 IItteemm  ddeessccrriippttiioonn  ##5915",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 167.31,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Pending 5915 IItteemm  ddeessccrriippttiioonn  ##5915"
+        },
+        {
+          "block_id": "blk_31",
+          "bbox": {
+            "x": 312.86,
+            "y": 167.31,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$77,,602995",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 167.31,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$77,,602995"
+        },
+        {
+          "block_id": "blk_32",
+          "bbox": {
+            "x": 54.47,
+            "y": 167.31,
+            "width": 357.052,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PAecntdivineg",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 167.31,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "7 Item description #7",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 175.82,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PAecntdivineg 7 Item description #7"
+        },
+        {
+          "block_id": "blk_33",
+          "bbox": {
+            "x": 312.86,
+            "y": 175.82,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$7,157",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 175.82,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$7,157"
+        },
+        {
+          "block_id": "blk_34",
+          "bbox": {
+            "x": 52.24,
+            "y": 175.82,
+            "width": 354.17,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Done",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 175.82,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5926 IItteemm  ddeessccrriippttiioonn  ##5926",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 184.32,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Done 5926 IItteemm  ddeessccrriippttiioonn  ##5926"
+        },
+        {
+          "block_id": "blk_35",
+          "bbox": {
+            "x": 312.86,
+            "y": 184.32,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$71,,941898",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 184.32,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$71,,941898"
+        },
+        {
+          "block_id": "blk_36",
+          "bbox": {
+            "x": 54.47,
+            "y": 184.32,
+            "width": 353.274,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "AAccttiivvee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 184.32,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "8 Item description #8",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 192.83002,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "AAccttiivvee 8 Item description #8"
+        },
+        {
+          "block_id": "blk_37",
+          "bbox": {
+            "x": 312.86,
+            "y": 192.83002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$3,534",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 192.83002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$3,534"
+        },
+        {
+          "block_id": "blk_38",
+          "bbox": {
+            "x": 52.24,
+            "y": 192.83002,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 192.83002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5937 IItteemm  ddeessccrriippttiioonn  ##5937",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 201.33002,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 5937 IItteemm  ddeessccrriippttiioonn  ##5937"
+        },
+        {
+          "block_id": "blk_39",
+          "bbox": {
+            "x": 312.86,
+            "y": 201.33002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$21,,402580",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 201.33002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$21,,402580"
+        },
+        {
+          "block_id": "blk_40",
+          "bbox": {
+            "x": 54.47,
+            "y": 201.33002,
+            "width": 357.052,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PDenodnieng",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 201.33002,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "9 Item description #9",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 209.83002,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PDenodnieng 9 Item description #9"
+        },
+        {
+          "block_id": "blk_41",
+          "bbox": {
+            "x": 312.86,
+            "y": 209.83002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$4,729",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 209.83002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$4,729"
+        },
+        {
+          "block_id": "blk_42",
+          "bbox": {
+            "x": 387.29,
+            "y": 209.83002,
+            "width": 19.119995,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Done",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 209.83002,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Done"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [
+          "PageScore flag: LowEntropy"
+        ],
+        "errors": [],
+        "block_count": 47,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.9705864,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 96,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 23691264,
+        "rss_delta_bytes": 1114112
+      }
+    },
+    {
+      "page_index": 1,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 312.86,
+            "y": 65.27002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$3$,923965",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 65.27002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$3$,923965"
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 54.47,
+            "y": 65.27002,
+            "width": 353.274,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ADcotnivee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 65.27002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "1 Item description #1",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 73.77002,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "ADcotnivee 1 Item description #1"
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 312.86,
+            "y": 73.77002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5,379",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 73.77002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5,379"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 52.24,
+            "y": 73.77002,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 73.77002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4960 IItteemm  ddeessccrriippttiioonn  ##4960",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 82.27002,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 4960 IItteemm  ddeessccrriippttiioonn  ##4960"
+        },
+        {
+          "block_id": "blk_11",
+          "bbox": {
+            "x": 312.86,
+            "y": 82.27002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$52,,539719",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 82.27002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$52,,539719"
+        },
+        {
+          "block_id": "blk_12",
+          "bbox": {
+            "x": 54.47,
+            "y": 82.27002,
+            "width": 353.274,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ADcotnivee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 82.27002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "2 Item description #2",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 90.78003,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "ADcotnivee 2 Item description #2"
+        },
+        {
+          "block_id": "blk_13",
+          "bbox": {
+            "x": 312.86,
+            "y": 90.78003,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$6,747",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 90.78003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$6,747"
+        },
+        {
+          "block_id": "blk_14",
+          "bbox": {
+            "x": 52.24,
+            "y": 90.78003,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 90.78003,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4971 IItteemm  ddeessccrriippttiioonn  ##4971",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 99.28003,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 4971 IItteemm  ddeessccrriippttiioonn  ##4971"
+        },
+        {
+          "block_id": "blk_15",
+          "bbox": {
+            "x": 312.86,
+            "y": 99.28003,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$58,,314281",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 99.28003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$58,,314281"
+        },
+        {
+          "block_id": "blk_16",
+          "bbox": {
+            "x": 54.47,
+            "y": 99.28003,
+            "width": 353.274,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ADcotnivee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 99.28003,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "3 Item description #3",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 107.79004,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "ADcotnivee 3 Item description #3"
+        },
+        {
+          "block_id": "blk_17",
+          "bbox": {
+            "x": 312.86,
+            "y": 107.79004,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5,953",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 107.79004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5,953"
+        },
+        {
+          "block_id": "blk_18",
+          "bbox": {
+            "x": 52.24,
+            "y": 107.79004,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 107.79004,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4982 IItteemm  ddeessccrriippttiioonn  ##4982",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 116.29004,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 4982 IItteemm  ddeessccrriippttiioonn  ##4982"
+        },
+        {
+          "block_id": "blk_19",
+          "bbox": {
+            "x": 312.86,
+            "y": 116.29004,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$16,,067540",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 116.29004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$16,,067540"
+        },
+        {
+          "block_id": "blk_20",
+          "bbox": {
+            "x": 54.47,
+            "y": 116.29004,
+            "width": 357.052,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PDenodnieng",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 116.29004,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4 Item description #4",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 124.79004,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PDenodnieng 4 Item description #4"
+        },
+        {
+          "block_id": "blk_21",
+          "bbox": {
+            "x": 312.86,
+            "y": 124.79004,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$3,822",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 124.79004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$3,822"
+        },
+        {
+          "block_id": "blk_22",
+          "bbox": {
+            "x": 52.24,
+            "y": 124.79004,
+            "width": 354.17,
+            "height": 16.509949
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Done",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 124.79004,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4993 IItteemm  ddeessccrriippttiioonn  ##4993",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 133.29999,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Done 4993 IItteemm  ddeessccrriippttiioonn  ##4993"
+        },
+        {
+          "block_id": "blk_23",
+          "bbox": {
+            "x": 312.86,
+            "y": 133.29999,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$69,,764908",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 133.29999,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$69,,764908"
+        },
+        {
+          "block_id": "blk_24",
+          "bbox": {
+            "x": 54.47,
+            "y": 133.29999,
+            "width": 357.052,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PDenodnieng",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 133.29999,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5 Item description #5",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 141.79999,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PDenodnieng 5 Item description #5"
+        },
+        {
+          "block_id": "blk_25",
+          "bbox": {
+            "x": 312.86,
+            "y": 141.79999,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5,808",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 141.79999,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5,808"
+        },
+        {
+          "block_id": "blk_26",
+          "bbox": {
+            "x": 52.24,
+            "y": 141.79999,
+            "width": 359.282,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Pending",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 141.79999,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5904 IItteemm  ddeessccrriippttiioonn  ##5904",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 150.31,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Pending 5904 IItteemm  ddeessccrriippttiioonn  ##5904"
+        },
+        {
+          "block_id": "blk_27",
+          "bbox": {
+            "x": 312.86,
+            "y": 150.31,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5$,130270",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 150.31,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5$,130270"
+        },
+        {
+          "block_id": "blk_28",
+          "bbox": {
+            "x": 54.47,
+            "y": 150.31,
+            "width": 351.94,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "DDoonnee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 150.31,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "6 Item description #6",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 158.81,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "DDoonnee 6 Item description #6"
+        },
+        {
+          "block_id": "blk_29",
+          "bbox": {
+            "x": 312.86,
+            "y": 158.81,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$2,213",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 158.81,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$2,213"
+        },
+        {
+          "block_id": "blk_30",
+          "bbox": {
+            "x": 52.24,
+            "y": 158.81,
+            "width": 359.282,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Pending",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 158.81,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5915 IItteemm  ddeessccrriippttiioonn  ##5915",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 167.31,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Pending 5915 IItteemm  ddeessccrriippttiioonn  ##5915"
+        },
+        {
+          "block_id": "blk_31",
+          "bbox": {
+            "x": 312.86,
+            "y": 167.31,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$77,,602995",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 167.31,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$77,,602995"
+        },
+        {
+          "block_id": "blk_32",
+          "bbox": {
+            "x": 54.47,
+            "y": 167.31,
+            "width": 357.052,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PAecntdivineg",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 167.31,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "7 Item description #7",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 175.82,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PAecntdivineg 7 Item description #7"
+        },
+        {
+          "block_id": "blk_33",
+          "bbox": {
+            "x": 312.86,
+            "y": 175.82,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$7,157",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 175.82,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$7,157"
+        },
+        {
+          "block_id": "blk_34",
+          "bbox": {
+            "x": 52.24,
+            "y": 175.82,
+            "width": 354.17,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Done",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 175.82,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5926 IItteemm  ddeessccrriippttiioonn  ##5926",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 184.32,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Done 5926 IItteemm  ddeessccrriippttiioonn  ##5926"
+        },
+        {
+          "block_id": "blk_35",
+          "bbox": {
+            "x": 312.86,
+            "y": 184.32,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$71,,941898",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 184.32,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$71,,941898"
+        },
+        {
+          "block_id": "blk_36",
+          "bbox": {
+            "x": 54.47,
+            "y": 184.32,
+            "width": 353.274,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "AAccttiivvee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 184.32,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "8 Item description #8",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 192.83002,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "AAccttiivvee 8 Item description #8"
+        },
+        {
+          "block_id": "blk_37",
+          "bbox": {
+            "x": 312.86,
+            "y": 192.83002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$3,534",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 192.83002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$3,534"
+        },
+        {
+          "block_id": "blk_38",
+          "bbox": {
+            "x": 52.24,
+            "y": 192.83002,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 192.83002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5937 IItteemm  ddeessccrriippttiioonn  ##5937",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 201.33002,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 5937 IItteemm  ddeessccrriippttiioonn  ##5937"
+        },
+        {
+          "block_id": "blk_39",
+          "bbox": {
+            "x": 312.86,
+            "y": 201.33002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$21,,402580",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 201.33002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$21,,402580"
+        },
+        {
+          "block_id": "blk_40",
+          "bbox": {
+            "x": 54.47,
+            "y": 201.33002,
+            "width": 357.052,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PDenodnieng",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 201.33002,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "9 Item description #9",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 209.83002,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PDenodnieng 9 Item description #9"
+        },
+        {
+          "block_id": "blk_41",
+          "bbox": {
+            "x": 312.86,
+            "y": 209.83002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$4,729",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 209.83002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$4,729"
+        },
+        {
+          "block_id": "blk_42",
+          "bbox": {
+            "x": 387.29,
+            "y": 209.83002,
+            "width": 19.119995,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Done",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 209.83002,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Done"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [
+          "PageScore flag: LowEntropy"
+        ],
+        "errors": [],
+        "block_count": 47,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.9705864,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 82,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24281088,
+        "rss_delta_bytes": 589824
+      }
+    },
+    {
+      "page_index": 2,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 312.86,
+            "y": 65.27002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$3$,923965",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 65.27002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$3$,923965"
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 54.47,
+            "y": 65.27002,
+            "width": 353.274,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ADcotnivee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 65.27002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "1 Item description #1",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 73.77002,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "ADcotnivee 1 Item description #1"
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 312.86,
+            "y": 73.77002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5,379",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 73.77002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5,379"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 52.24,
+            "y": 73.77002,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 73.77002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4960 IItteemm  ddeessccrriippttiioonn  ##4960",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 82.27002,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 4960 IItteemm  ddeessccrriippttiioonn  ##4960"
+        },
+        {
+          "block_id": "blk_11",
+          "bbox": {
+            "x": 312.86,
+            "y": 82.27002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$52,,539719",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 82.27002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$52,,539719"
+        },
+        {
+          "block_id": "blk_12",
+          "bbox": {
+            "x": 54.47,
+            "y": 82.27002,
+            "width": 353.274,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ADcotnivee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 82.27002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "2 Item description #2",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 90.78003,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "ADcotnivee 2 Item description #2"
+        },
+        {
+          "block_id": "blk_13",
+          "bbox": {
+            "x": 312.86,
+            "y": 90.78003,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$6,747",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 90.78003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$6,747"
+        },
+        {
+          "block_id": "blk_14",
+          "bbox": {
+            "x": 52.24,
+            "y": 90.78003,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 90.78003,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4971 IItteemm  ddeessccrriippttiioonn  ##4971",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 99.28003,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 4971 IItteemm  ddeessccrriippttiioonn  ##4971"
+        },
+        {
+          "block_id": "blk_15",
+          "bbox": {
+            "x": 312.86,
+            "y": 99.28003,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$58,,314281",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 99.28003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$58,,314281"
+        },
+        {
+          "block_id": "blk_16",
+          "bbox": {
+            "x": 54.47,
+            "y": 99.28003,
+            "width": 353.274,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ADcotnivee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 99.28003,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "3 Item description #3",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 107.79004,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "ADcotnivee 3 Item description #3"
+        },
+        {
+          "block_id": "blk_17",
+          "bbox": {
+            "x": 312.86,
+            "y": 107.79004,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5,953",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 107.79004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5,953"
+        },
+        {
+          "block_id": "blk_18",
+          "bbox": {
+            "x": 52.24,
+            "y": 107.79004,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 107.79004,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4982 IItteemm  ddeessccrriippttiioonn  ##4982",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 116.29004,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 4982 IItteemm  ddeessccrriippttiioonn  ##4982"
+        },
+        {
+          "block_id": "blk_19",
+          "bbox": {
+            "x": 312.86,
+            "y": 116.29004,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$16,,067540",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 116.29004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$16,,067540"
+        },
+        {
+          "block_id": "blk_20",
+          "bbox": {
+            "x": 54.47,
+            "y": 116.29004,
+            "width": 357.052,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PDenodnieng",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 116.29004,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4 Item description #4",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 124.79004,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PDenodnieng 4 Item description #4"
+        },
+        {
+          "block_id": "blk_21",
+          "bbox": {
+            "x": 312.86,
+            "y": 124.79004,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$3,822",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 124.79004,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$3,822"
+        },
+        {
+          "block_id": "blk_22",
+          "bbox": {
+            "x": 52.24,
+            "y": 124.79004,
+            "width": 354.17,
+            "height": 16.509949
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Done",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 124.79004,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "4993 IItteemm  ddeessccrriippttiioonn  ##4993",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 133.29999,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Done 4993 IItteemm  ddeessccrriippttiioonn  ##4993"
+        },
+        {
+          "block_id": "blk_23",
+          "bbox": {
+            "x": 312.86,
+            "y": 133.29999,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$69,,764908",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 133.29999,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$69,,764908"
+        },
+        {
+          "block_id": "blk_24",
+          "bbox": {
+            "x": 54.47,
+            "y": 133.29999,
+            "width": 357.052,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PDenodnieng",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 133.29999,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5 Item description #5",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 141.79999,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PDenodnieng 5 Item description #5"
+        },
+        {
+          "block_id": "blk_25",
+          "bbox": {
+            "x": 312.86,
+            "y": 141.79999,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5,808",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 141.79999,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5,808"
+        },
+        {
+          "block_id": "blk_26",
+          "bbox": {
+            "x": 52.24,
+            "y": 141.79999,
+            "width": 359.282,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Pending",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 141.79999,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5904 IItteemm  ddeessccrriippttiioonn  ##5904",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 150.31,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Pending 5904 IItteemm  ddeessccrriippttiioonn  ##5904"
+        },
+        {
+          "block_id": "blk_27",
+          "bbox": {
+            "x": 312.86,
+            "y": 150.31,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$5$,130270",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 150.31,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$5$,130270"
+        },
+        {
+          "block_id": "blk_28",
+          "bbox": {
+            "x": 54.47,
+            "y": 150.31,
+            "width": 351.94,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "DDoonnee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 150.31,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "6 Item description #6",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 158.81,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "DDoonnee 6 Item description #6"
+        },
+        {
+          "block_id": "blk_29",
+          "bbox": {
+            "x": 312.86,
+            "y": 158.81,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$2,213",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 158.81,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$2,213"
+        },
+        {
+          "block_id": "blk_30",
+          "bbox": {
+            "x": 52.24,
+            "y": 158.81,
+            "width": 359.282,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Pending",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 158.81,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5915 IItteemm  ddeessccrriippttiioonn  ##5915",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 167.31,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Pending 5915 IItteemm  ddeessccrriippttiioonn  ##5915"
+        },
+        {
+          "block_id": "blk_31",
+          "bbox": {
+            "x": 312.86,
+            "y": 167.31,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$77,,602995",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 167.31,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$77,,602995"
+        },
+        {
+          "block_id": "blk_32",
+          "bbox": {
+            "x": 54.47,
+            "y": 167.31,
+            "width": 357.052,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PAecntdivineg",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 167.31,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "7 Item description #7",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 175.82,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PAecntdivineg 7 Item description #7"
+        },
+        {
+          "block_id": "blk_33",
+          "bbox": {
+            "x": 312.86,
+            "y": 175.82,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$7,157",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 175.82,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$7,157"
+        },
+        {
+          "block_id": "blk_34",
+          "bbox": {
+            "x": 52.24,
+            "y": 175.82,
+            "width": 354.17,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Done",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 175.82,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5926 IItteemm  ddeessccrriippttiioonn  ##5926",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 184.32,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Done 5926 IItteemm  ddeessccrriippttiioonn  ##5926"
+        },
+        {
+          "block_id": "blk_35",
+          "bbox": {
+            "x": 312.86,
+            "y": 184.32,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$71,,941898",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 184.32,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$71,,941898"
+        },
+        {
+          "block_id": "blk_36",
+          "bbox": {
+            "x": 54.47,
+            "y": 184.32,
+            "width": 353.274,
+            "height": 16.51001
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "AAccttiivvee",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 184.32,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "8 Item description #8",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 192.83002,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "AAccttiivvee 8 Item description #8"
+        },
+        {
+          "block_id": "blk_37",
+          "bbox": {
+            "x": 312.86,
+            "y": 192.83002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$3,534",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 192.83002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$3,534"
+        },
+        {
+          "block_id": "blk_38",
+          "bbox": {
+            "x": 52.24,
+            "y": 192.83002,
+            "width": 355.504,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Active",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 385.96,
+                "y": 192.83002,
+                "width": 21.783997,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "5937 IItteemm  ddeessccrriippttiioonn  ##5937",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 52.24,
+                "y": 201.33002,
+                "width": 107.662,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Active 5937 IItteemm  ddeessccrriippttiioonn  ##5937"
+        },
+        {
+          "block_id": "blk_39",
+          "bbox": {
+            "x": 312.86,
+            "y": 201.33002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$$21,,402580",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 201.33002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$$21,,402580"
+        },
+        {
+          "block_id": "blk_40",
+          "bbox": {
+            "x": 54.47,
+            "y": 201.33002,
+            "width": 357.052,
+            "height": 16.5
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "PDenodnieng",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 382.17,
+                "y": 201.33002,
+                "width": 29.35199,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "9 Item description #9",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 54.47,
+                "y": 209.83002,
+                "width": 100.98399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "PDenodnieng 9 Item description #9"
+        },
+        {
+          "block_id": "blk_41",
+          "bbox": {
+            "x": 312.86,
+            "y": 209.83002,
+            "width": 24.46399,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$4,729",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 312.86,
+                "y": 209.83002,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "$4,729"
+        },
+        {
+          "block_id": "blk_42",
+          "bbox": {
+            "x": 387.29,
+            "y": 209.83002,
+            "width": 19.119995,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Done",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 387.29,
+                "y": 209.83002,
+                "width": 19.119995,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Done"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [
+          "PageScore flag: LowEntropy"
+        ],
+        "errors": [],
+        "block_count": 47,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.9705864,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 73,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24412160,
+        "rss_delta_bytes": 131072
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [
+      "Header/footer detected: 7 header patterns, 4 footer patterns, 3 pages affected"
+    ],
+    "errors": []
+  }
+}

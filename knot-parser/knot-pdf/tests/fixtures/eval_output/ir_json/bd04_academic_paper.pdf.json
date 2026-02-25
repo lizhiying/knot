@@ -1,0 +1,805 @@
+{
+  "doc_id": "88550d163bd73d7b78e419ff0e49b7882cc57e0e1a5933a4eb62bb4f487b0565",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 137.62,
+            "y": 31.320007,
+            "width": 320.048,
+            "height": 16.0
+          },
+          "role": "Title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "A Study on PDF Table Extraction Methods",
+                  "font_size": 16.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 137.62,
+                "y": 31.320007,
+                "width": 320.048,
+                "height": 16.0
+              }
+            }
+          ],
+          "normalized_text": "A Study on PDF Table Extraction Methods"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 233.44,
+            "y": 58.200012,
+            "width": 128.4,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Author A, Author B, Author C",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 233.44,
+                "y": 58.200012,
+                "width": 128.4,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Author A, Author B, Author C"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 31.18,
+            "y": 90.81,
+            "width": 50.676003,
+            "height": 12.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Abstract",
+                  "font_size": 12.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 90.81,
+                "width": 50.676003,
+                "height": 12.0
+              }
+            }
+          ],
+          "normalized_text": "Abstract"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 31.18,
+            "y": 110.640015,
+            "width": 532.925,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "This paper presents a comprehensive evaluation of table extraction techniques applied to PDF documents. We compare",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 110.640015,
+                "width": 532.925,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "This paper presents a comprehensive evaluation of table extraction techniques applied to PDF documents. We compare"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 31.18,
+            "y": 124.81,
+            "width": 535.142,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ruled-based and stream-based approaches across diverse document types including financial reports, academic papers,",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 124.81,
+                "width": 535.142,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "ruled-based and stream-based approaches across diverse document types including financial reports, academic papers,"
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 31.18,
+            "y": 138.98004,
+            "width": 60.58,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "and invoices.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 138.98004,
+                "width": 60.58,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "and invoices."
+        },
+        {
+          "block_id": "blk_6",
+          "bbox": {
+            "x": 31.18,
+            "y": 164.51001,
+            "width": 83.340004,
+            "height": 12.0
+          },
+          "role": "List",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "1. Introduction",
+                  "font_size": 12.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 164.51001,
+                "width": 83.340004,
+                "height": 12.0
+              }
+            }
+          ],
+          "normalized_text": "1. Introduction"
+        },
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 31.18,
+            "y": 184.34003,
+            "width": 532.914,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Content for section 1. Our experiments show improvements of 25% over baseline methods. The dataset contains 1258",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 184.34003,
+                "width": 532.914,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Content for section 1. Our experiments show improvements of 25% over baseline methods. The dataset contains 1258"
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 31.18,
+            "y": 198.51001,
+            "width": 78.94,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "annotated tables.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 198.51001,
+                "width": 78.94,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "annotated tables."
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 31.18,
+            "y": 218.35004,
+            "width": 532.914,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Content for section 1. Our experiments show improvements of 13% over baseline methods. The dataset contains 3272",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 218.35004,
+                "width": 532.914,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Content for section 1. Our experiments show improvements of 13% over baseline methods. The dataset contains 3272"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 31.18,
+            "y": 232.53003,
+            "width": 78.94,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "annotated tables.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 232.53003,
+                "width": 78.94,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "annotated tables."
+        },
+        {
+          "block_id": "blk_11",
+          "bbox": {
+            "x": 31.18,
+            "y": 255.22003,
+            "width": 90.023994,
+            "height": 12.0
+          },
+          "role": "List",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "2. Related Work",
+                  "font_size": 12.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 255.22003,
+                "width": 90.023994,
+                "height": 12.0
+              }
+            }
+          ],
+          "normalized_text": "2. Related Work"
+        },
+        {
+          "block_id": "blk_12",
+          "bbox": {
+            "x": 31.18,
+            "y": 275.05,
+            "width": 532.914,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Content for section 2. Our experiments show improvements of 24% over baseline methods. The dataset contains 2862",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 275.05,
+                "width": 532.914,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Content for section 2. Our experiments show improvements of 24% over baseline methods. The dataset contains 2862"
+        },
+        {
+          "block_id": "blk_13",
+          "bbox": {
+            "x": 31.18,
+            "y": 289.22003,
+            "width": 78.94,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "annotated tables.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 289.22003,
+                "width": 78.94,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "annotated tables."
+        },
+        {
+          "block_id": "blk_14",
+          "bbox": {
+            "x": 31.18,
+            "y": 309.06,
+            "width": 532.914,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Content for section 2. Our experiments show improvements of 15% over baseline methods. The dataset contains 3908",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 309.06,
+                "width": 532.914,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Content for section 2. Our experiments show improvements of 15% over baseline methods. The dataset contains 3908"
+        },
+        {
+          "block_id": "blk_15",
+          "bbox": {
+            "x": 31.18,
+            "y": 323.24002,
+            "width": 78.94,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "annotated tables.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 323.24002,
+                "width": 78.94,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "annotated tables."
+        },
+        {
+          "block_id": "blk_16",
+          "bbox": {
+            "x": 31.18,
+            "y": 345.93002,
+            "width": 88.007996,
+            "height": 12.0
+          },
+          "role": "List",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "3. Methodology",
+                  "font_size": 12.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 345.93002,
+                "width": 88.007996,
+                "height": 12.0
+              }
+            }
+          ],
+          "normalized_text": "3. Methodology"
+        },
+        {
+          "block_id": "blk_17",
+          "bbox": {
+            "x": 31.18,
+            "y": 365.76,
+            "width": 532.914,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Content for section 3. Our experiments show improvements of 10% over baseline methods. The dataset contains 1181",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 365.76,
+                "width": 532.914,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Content for section 3. Our experiments show improvements of 10% over baseline methods. The dataset contains 1181"
+        },
+        {
+          "block_id": "blk_18",
+          "bbox": {
+            "x": 31.18,
+            "y": 379.93002,
+            "width": 78.94,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "annotated tables.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 379.93002,
+                "width": 78.94,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "annotated tables."
+        },
+        {
+          "block_id": "blk_19",
+          "bbox": {
+            "x": 31.18,
+            "y": 399.77002,
+            "width": 532.914,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Content for section 3. Our experiments show improvements of 15% over baseline methods. The dataset contains 1795",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 399.77002,
+                "width": 532.914,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Content for section 3. Our experiments show improvements of 15% over baseline methods. The dataset contains 1795"
+        },
+        {
+          "block_id": "blk_20",
+          "bbox": {
+            "x": 31.18,
+            "y": 413.94,
+            "width": 78.94,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "annotated tables.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 413.94,
+                "width": 78.94,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "annotated tables."
+        },
+        {
+          "block_id": "blk_21",
+          "bbox": {
+            "x": 31.18,
+            "y": 436.64,
+            "width": 56.687996,
+            "height": 12.0
+          },
+          "role": "List",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "4. Results",
+                  "font_size": 12.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 436.64,
+                "width": 56.687996,
+                "height": 12.0
+              }
+            }
+          ],
+          "normalized_text": "4. Results"
+        },
+        {
+          "block_id": "blk_22",
+          "bbox": {
+            "x": 31.18,
+            "y": 456.46002,
+            "width": 532.922,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Content for section 4. Our experiments show improvements of 23% over baseline methods. The dataset contains 636",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 456.46002,
+                "width": 532.922,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Content for section 4. Our experiments show improvements of 23% over baseline methods. The dataset contains 636"
+        },
+        {
+          "block_id": "blk_23",
+          "bbox": {
+            "x": 31.18,
+            "y": 470.64,
+            "width": 78.94,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "annotated tables.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 470.64,
+                "width": 78.94,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "annotated tables."
+        },
+        {
+          "block_id": "blk_24",
+          "bbox": {
+            "x": 31.18,
+            "y": 490.48,
+            "width": 532.922,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Content for section 4. Our experiments show improvements of 8% over baseline methods. The dataset contains 1523",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 490.48,
+                "width": 532.922,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Content for section 4. Our experiments show improvements of 8% over baseline methods. The dataset contains 1523"
+        },
+        {
+          "block_id": "blk_25",
+          "bbox": {
+            "x": 31.18,
+            "y": 504.65002,
+            "width": 78.94,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "annotated tables.",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 504.65002,
+                "width": 78.94,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "annotated tables."
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [
+          "PageScore flag: LowEntropy"
+        ],
+        "errors": [],
+        "block_count": 26,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.94257855,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 34,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24281088,
+        "rss_delta_bytes": -163840
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

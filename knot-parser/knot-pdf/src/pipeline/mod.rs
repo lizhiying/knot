@@ -1,0 +1,975 @@
+//! 解析 Pipeline：逐页处理核心流程
+
+#[cfg(feature = "async")]
+pub mod async_pipeline;
+
+use std::path::Path;
+use std::time::Instant;
+
+use sha2::{Digest, Sha256};
+
+use crate::backend::{PdfBackend, PdfExtractBackend};
+use crate::config::Config;
+use crate::error::PdfError;
+use crate::hf_detect::detect_and_mark_headers_footers;
+use crate::ir::{
+    Diagnostics, DocumentIR, ImageFormat, ImageIR, ImageSource, PageDiagnostics, PageIR,
+    PageSource, Timings,
+};
+use crate::layout::build_blocks_and_grids;
+use crate::scoring::compute_page_score;
+use crate::table::extract_tables_with_graphics;
+
+use crate::ocr::{self, MockOcrBackend, OcrBackend};
+use crate::render::{MockOcrRenderer, OcrRenderer};
+use crate::store::{PageStatus, Store};
+
+/// 解析 Pipeline
+pub struct Pipeline {
+    config: Config,
+    store: Option<Box<dyn Store>>,
+    ocr_backend: Option<Box<dyn OcrBackend>>,
+    ocr_renderer: Option<Box<dyn OcrRenderer>>,
+    /// Vision LLM 描述器（用于图表语义理解）
+    #[cfg(feature = "vision")]
+    vision_describer: Option<Box<dyn crate::vision::VisionDescriber>>,
+    /// OCR 最大并发数（同步模式下天然为 1，为 async 预留）
+    max_ocr_workers: usize,
+}
+
+impl Pipeline {
+    pub fn new(config: Config) -> Self {
+        let store = if config.store_enabled {
+            if let Some(path) = &config.store_path {
+                #[cfg(feature = "store_sled")]
+                {
+                    crate::store::SledStore::open(path)
+                        .ok()
+                        .map(|s| Box::new(s) as Box<dyn Store>)
+                }
+                #[cfg(not(feature = "store_sled"))]
+                {
+                    let _ = path;
+                    None
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        let ocr_backend: Option<Box<dyn OcrBackend>> = if config.ocr_enabled {
+            // 优先使用 PaddleOCR（Pure Rust，零依赖）
+            #[cfg(feature = "ocr_paddle")]
+            {
+                let model_dir = config.ocr_model_dir.clone().or_else(|| {
+                    // 自动探测模型目录
+                    let candidates = [
+                        // 1. 可执行文件同级目录
+                        std::env::current_exe()
+                            .ok()
+                            .and_then(|p| p.parent().map(|d| d.join("models/ppocrv5"))),
+                        // 2. 当前工作目录
+                        Some(std::path::PathBuf::from("models/ppocrv5")),
+                    ];
+                    for candidate in candidates.iter().flatten() {
+                        if candidate.join("det.onnx").exists() {
+                            log::info!("Auto-detected OCR model dir: {}", candidate.display());
+                            return Some(candidate.clone());
+                        }
+                    }
+                    None
+                });
+
+                if let Some(dir) = model_dir {
+                    match crate::ocr::PaddleOcrBackend::new(&dir) {
+                        Ok(b) => {
+                            log::info!("PaddleOCR backend initialized from: {}", dir.display());
+                            Some(Box::new(b) as Box<dyn OcrBackend>)
+                        }
+                        Err(e) => {
+                            log::warn!("PaddleOCR init failed: {}, falling back to mock", e);
+                            Some(Box::new(MockOcrBackend) as Box<dyn OcrBackend>)
+                        }
+                    }
+                } else {
+                    log::warn!("OCR enabled but no model dir found, falling back to mock");
+                    Some(Box::new(MockOcrBackend) as Box<dyn OcrBackend>)
+                }
+            }
+            // 其次使用 Tesseract（需系统安装）
+            #[cfg(all(feature = "ocr_tesseract", not(feature = "ocr_paddle")))]
+            {
+                crate::ocr::TesseractBackend::new(&config.ocr_languages)
+                    .ok()
+                    .map(|b| Box::new(b) as Box<dyn OcrBackend>)
+            }
+            // 都没有则用 Mock
+            #[cfg(not(any(feature = "ocr_paddle", feature = "ocr_tesseract")))]
+            {
+                Some(Box::new(MockOcrBackend) as Box<dyn OcrBackend>)
+            }
+        } else {
+            None
+        };
+
+        let ocr_renderer: Option<Box<dyn OcrRenderer>> = if config.ocr_enabled {
+            // 当 pdfium feature 启用时，不创建 PdfiumOcrRenderer
+            // 因为 PdfiumBackend 会作为主后端提供高质量文本抽取
+            // 两个 Pdfium 实例会导致 libpdfium 全局状态冲突/死锁
+            #[cfg(feature = "pdfium")]
+            {
+                log::info!("PdfiumBackend available, skipping PdfiumOcrRenderer to avoid conflict");
+                None
+            }
+            #[cfg(not(feature = "pdfium"))]
+            {
+                Some(Box::new(MockOcrRenderer) as Box<dyn OcrRenderer>)
+            }
+        } else {
+            None
+        };
+
+        let max_ocr_workers = config.ocr_workers.max(1);
+
+        // Vision LLM 描述器初始化
+        #[cfg(feature = "vision")]
+        let vision_describer: Option<Box<dyn crate::vision::VisionDescriber>> = {
+            let api_url = config.vision_api_url.clone();
+            let api_key = config
+                .vision_api_key
+                .clone()
+                .or_else(|| std::env::var("KNOT_VISION_API_KEY").ok())
+                .unwrap_or_default(); // Ollama 等本地模型不需要 API Key
+
+            if let Some(url) = api_url {
+                log::info!(
+                    "Vision LLM initialized: model={}, url={}",
+                    config.vision_model,
+                    url
+                );
+                Some(Box::new(crate::vision::OpenAiVisionDescriber::new(
+                    &url,
+                    &api_key,
+                    &config.vision_model,
+                )))
+            } else {
+                log::debug!("Vision LLM not configured (set vision_api_url in config)");
+                None
+            }
+        };
+
+        Self {
+            config,
+            store,
+            ocr_backend,
+            ocr_renderer,
+            #[cfg(feature = "vision")]
+            vision_describer,
+            max_ocr_workers,
+        }
+    }
+
+    /// 解析 PDF 文件，返回完整的 DocumentIR
+    pub fn parse(&self, path: &Path) -> Result<DocumentIR, PdfError> {
+        // 当 pdfium feature 启用时，优先使用 PdfiumBackend（文本抽取更准确）
+        // 注意：PdfiumBackend 成功时不使用 OCR（避免两个 Pdfium 实例冲突）
+        #[cfg(feature = "pdfium")]
+        let (backend, page_count, skip_ocr) = {
+            match crate::backend::PdfiumBackend::new() {
+                Ok(mut b) => match b.open(path) {
+                    Ok(count) => {
+                        log::info!("Using PdfiumBackend for text extraction (OCR disabled to avoid Pdfium conflict)");
+                        (Box::new(b) as Box<dyn PdfBackend>, count, true)
+                    }
+                    Err(e) => {
+                        log::warn!(
+                            "PdfiumBackend open failed: {}, falling back to PdfExtract",
+                            e
+                        );
+                        let mut fb = PdfExtractBackend::new();
+                        let count = fb.open(path)?;
+                        (Box::new(fb) as Box<dyn PdfBackend>, count, false)
+                    }
+                },
+                Err(e) => {
+                    log::warn!(
+                        "PdfiumBackend init failed: {}, falling back to PdfExtract",
+                        e
+                    );
+                    let mut fb = PdfExtractBackend::new();
+                    let count = fb.open(path)?;
+                    (Box::new(fb) as Box<dyn PdfBackend>, count, false)
+                }
+            }
+        };
+
+        #[cfg(not(feature = "pdfium"))]
+        let (backend, page_count) = {
+            let mut b = PdfExtractBackend::new();
+            let count = b.open(path)?;
+            (Box::new(b) as Box<dyn PdfBackend>, count)
+        };
+
+        // 计算 doc_id（文件内容 hash）
+        let file_data = std::fs::read(path)?;
+        let doc_id = compute_doc_id(&file_data);
+
+        // 获取元数据
+        let metadata = backend.metadata().unwrap_or_default();
+        let outline = backend.outline().unwrap_or_default();
+
+        // 检查断点继续
+        let start_page = if let Some(s) = &self.store {
+            s.get_last_completed_page(&doc_id)?
+                .map(|idx| idx + 1)
+                .unwrap_or(0)
+        } else {
+            0
+        };
+
+        // 逐页处理
+        let mut pages = Vec::with_capacity(page_count);
+
+        // 如果是从中间开始，先尝试加载前面的页面
+        if start_page > 0 {
+            if let Some(s) = &self.store {
+                for i in 0..start_page {
+                    if let Some(p) = s.load_page(&doc_id, i)? {
+                        pages.push(p);
+                    }
+                }
+            }
+        }
+
+        let mut diagnostics = Diagnostics::default();
+
+        // 通知 OCR 渲染器当前 PDF 路径（PdfiumOcrRenderer 需要）
+        if let Some(ocr_r) = &self.ocr_renderer {
+            ocr_r.set_pdf_path(path);
+        }
+
+        for page_idx in start_page..page_count {
+            // 如果指定了页码过滤，跳过不在列表中的页面
+            if let Some(ref indices) = self.config.page_indices {
+                if !indices.contains(&page_idx) {
+                    continue;
+                }
+            }
+            // 设置状态为 InProgress
+            if let Some(s) = &self.store {
+                s.update_status(&doc_id, page_idx, PageStatus::InProgress)?;
+            }
+
+            // 带超时的单页处理
+            let page_result = if self.config.page_timeout_secs > 0 {
+                self.process_page_with_timeout(backend.as_ref(), page_idx)
+            } else {
+                self.process_page(backend.as_ref(), page_idx)
+            };
+
+            match page_result {
+                Ok(mut page_ir) => {
+                    // OCR 触发逻辑
+                    // 当使用 PdfiumBackend 时跳过 OCR（避免两个 Pdfium 实例冲突）
+                    #[cfg(feature = "pdfium")]
+                    let should_try_ocr = !skip_ocr;
+                    #[cfg(not(feature = "pdfium"))]
+                    let should_try_ocr = true;
+
+                    if should_try_ocr {
+                        if let (Some(ocr_b), Some(ocr_r)) = (&self.ocr_backend, &self.ocr_renderer)
+                        {
+                            if ocr::should_trigger_ocr(&page_ir, &self.config) {
+                                log::debug!(
+                                    "OCR triggered for page {} (max_workers={})",
+                                    page_idx,
+                                    self.max_ocr_workers
+                                );
+                                let img_data = ocr_r
+                                    .render_page_to_image(page_idx, self.config.ocr_render_width)?;
+                                let force_replace =
+                                    self.config.ocr_mode == crate::config::OcrMode::ForceAll;
+                                ocr::run_ocr_and_update_page(
+                                    &mut page_ir,
+                                    ocr_b.as_ref(),
+                                    &img_data,
+                                    force_replace,
+                                )?;
+                            }
+                        }
+                    }
+
+                    // 保存进度
+                    if let Some(s) = &self.store {
+                        s.save_page(&doc_id, page_idx, &page_ir)?;
+                        s.update_status(&doc_id, page_idx, PageStatus::Done)?;
+                    }
+
+                    pages.push(page_ir);
+                }
+                Err(e) => {
+                    let err_msg = format!("Page {} failed: {}", page_idx, e);
+                    diagnostics.warnings.push(err_msg.clone());
+
+                    if let Some(s) = &self.store {
+                        s.update_status(&doc_id, page_idx, PageStatus::Failed(err_msg))?;
+                    }
+                }
+            }
+        }
+
+        // 页眉页脚检测（需要跨页比较）
+        let hf_result =
+            detect_and_mark_headers_footers(&mut pages, self.config.strip_headers_footers);
+        if hf_result.header_patterns > 0 || hf_result.footer_patterns > 0 {
+            diagnostics.warnings.push(format!(
+                "Header/footer detected: {} header patterns, {} footer patterns, {} pages affected",
+                hf_result.header_patterns, hf_result.footer_patterns, hf_result.affected_page_count
+            ));
+        }
+
+        Ok(DocumentIR {
+            doc_id,
+            metadata,
+            outline,
+            pages,
+            diagnostics,
+        })
+    }
+
+    /// 逐页解析，返回迭代器
+    pub fn parse_pages(&self, path: &Path) -> Result<PageIterator, PdfError> {
+        let mut backend = PdfExtractBackend::new();
+        let page_count = backend.open(path)?;
+
+        Ok(PageIterator {
+            backend,
+            page_count,
+            current_page: 0,
+            config: self.config.clone(),
+        })
+    }
+
+    /// 处理单个页面
+    fn process_page(
+        &self,
+        backend: &dyn PdfBackend,
+        page_index: usize,
+    ) -> Result<PageIR, PdfError> {
+        let start = Instant::now();
+        let mem_before = crate::mem_track::MemorySnapshot::now();
+
+        let page_info = backend.page_info(page_index)?;
+
+        // 提取字符
+        let chars = backend.extract_chars(page_index)?;
+
+        // 提取图片
+        let raw_images = backend.extract_images(page_index).unwrap_or_default();
+
+        // 构建文本块 + 隐式网格检测（阅读顺序重建）
+        let (blocks, grid_tables) = build_blocks_and_grids(
+            &chars,
+            page_info.size.width,
+            page_info.size.height,
+            page_index,
+        );
+
+        // 转换图片为 ImageIR
+        let images: Vec<ImageIR> = raw_images
+            .iter()
+            .enumerate()
+            .map(|(i, img)| ImageIR {
+                image_id: format!("p{}_{}", page_index, i),
+                page_index,
+                bbox: img.bbox,
+                format: match img.format_hint.as_deref() {
+                    Some(s) if s.contains("jpg") || s.contains("jpeg") => ImageFormat::Jpg,
+                    Some(s) if s.contains("png") => ImageFormat::Png,
+                    _ => ImageFormat::Unknown,
+                },
+                bytes_ref: None,
+                caption_refs: Vec::new(),
+                source: ImageSource::Embedded,
+                ocr_text: None,
+            })
+            .collect();
+
+        // 提取线段和矩形（用于 ruled 表格检测）
+        let raw_lines = backend.extract_lines(page_index).unwrap_or_default();
+        let raw_rects = backend.extract_rects(page_index).unwrap_or_default();
+
+        let extract_ms = start.elapsed().as_millis() as u64;
+
+        // 表格抽取（支持 ruled + stream 自动切换）
+        let mut tables = extract_tables_with_graphics(
+            &chars,
+            &raw_lines,
+            &raw_rects,
+            page_index,
+            page_info.size.width,
+            page_info.size.height,
+        );
+
+        // 过滤掉与文本块高度重叠的假阳性表格
+        // （隐式网格已作为 BlockIR 输出，graphics 检测可能重复检测同一区域）
+        tables.retain(|table| {
+            let table_area = (table.bbox.width * table.bbox.height).max(1.0);
+            let total_overlap: f32 = blocks
+                .iter()
+                .map(|blk| {
+                    let ox =
+                        blk.bbox.x.max(table.bbox.x) < blk.bbox.right().min(table.bbox.right());
+                    let oy =
+                        blk.bbox.y.max(table.bbox.y) < blk.bbox.bottom().min(table.bbox.bottom());
+                    if ox && oy {
+                        let ow =
+                            blk.bbox.right().min(table.bbox.right()) - blk.bbox.x.max(table.bbox.x);
+                        let oh = blk.bbox.bottom().min(table.bbox.bottom())
+                            - blk.bbox.y.max(table.bbox.y);
+                        ow * oh
+                    } else {
+                        0.0
+                    }
+                })
+                .sum();
+            total_overlap / table_area <= 0.3
+        });
+
+        // 合并隐式网格表格（方案B下为空）
+        tables.extend(grid_tables);
+
+        // === 图表区域检测 ===
+        let mut blocks = blocks; // 转为 mut 以便后续剔除图区域内的文字块
+        let mut images = images;
+
+        if self.config.figure_detection_enabled {
+            let raw_path_objects = backend.extract_path_objects(page_index).unwrap_or_default();
+
+            if !raw_path_objects.is_empty() {
+                let table_bboxes: Vec<crate::ir::BBox> = tables.iter().map(|t| t.bbox).collect();
+
+                let detect_params = crate::figure::DetectParams {
+                    min_area_ratio: self.config.figure_min_area_ratio,
+                    min_path_count: self.config.figure_min_path_count,
+                    ..Default::default()
+                };
+
+                let figure_regions = crate::figure::detect_figure_regions(
+                    &raw_path_objects,
+                    &blocks,
+                    &table_bboxes,
+                    page_info.size.width,
+                    page_info.size.height,
+                    page_index,
+                    &detect_params,
+                );
+
+                for fig in &figure_regions {
+                    // 对每个图区域：尝试裁剪渲染 + OCR
+                    let mut ocr_text: Option<String> = None;
+
+                    // 尝试通过 OcrRenderer 裁剪渲染（仅当 renderer 可用时）
+                    if let Some(ocr_r) = &self.ocr_renderer {
+                        match ocr_r.render_region_to_image(
+                            page_index,
+                            fig.bbox,
+                            page_info.size.width,
+                            page_info.size.height,
+                            self.config.figure_render_width,
+                        ) {
+                            Ok(region_img) => {
+                                // 尝试 OCR
+                                if let Some(ocr_b) = &self.ocr_backend {
+                                    match ocr_b.ocr_full_page(&region_img) {
+                                        Ok(ocr_blocks) => {
+                                            let text: String = ocr_blocks
+                                                .iter()
+                                                .map(|b| b.text.as_str())
+                                                .collect::<Vec<_>>()
+                                                .join(", ");
+                                            if !text.is_empty() {
+                                                ocr_text = Some(text);
+                                            }
+                                        }
+                                        Err(e) => {
+                                            log::debug!(
+                                                "Figure OCR failed for {}: {}",
+                                                fig.figure_id,
+                                                e
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                log::debug!(
+                                    "Figure region render failed for {}: {}",
+                                    fig.figure_id,
+                                    e
+                                );
+                                // 如果裁剪渲染不可用，回退：从图区域内的文字块聚合文字
+                                let block_texts: Vec<&str> = blocks
+                                    .iter()
+                                    .filter(|b| fig.contained_block_ids.contains(&b.block_id))
+                                    .map(|b| b.normalized_text.as_str())
+                                    .collect();
+                                if !block_texts.is_empty() {
+                                    ocr_text = Some(block_texts.join(", "));
+                                }
+                            }
+                        }
+                    } else {
+                        // 没有 OcrRenderer：从图区域内文字块聚合文字
+                        let block_texts: Vec<&str> = blocks
+                            .iter()
+                            .filter(|b| fig.contained_block_ids.contains(&b.block_id))
+                            .map(|b| b.normalized_text.as_str())
+                            .collect();
+                        if !block_texts.is_empty() {
+                            ocr_text = Some(block_texts.join(", "));
+                        }
+                    }
+
+                    // 构建 FigureRegion 类型的 ImageIR
+                    let mut caption_refs = Vec::new();
+                    if let Some(cap) = &fig.caption {
+                        // 查找 caption 对应的 block_id
+                        for blk in &blocks {
+                            if blk.normalized_text.trim() == cap.as_str() {
+                                caption_refs.push(blk.block_id.clone());
+                                break;
+                            }
+                        }
+                    }
+
+                    images.push(ImageIR {
+                        image_id: fig.figure_id.clone(),
+                        page_index,
+                        bbox: fig.bbox,
+                        format: ImageFormat::Png,
+                        bytes_ref: None,
+                        caption_refs,
+                        source: ImageSource::FigureRegion,
+                        ocr_text,
+                    });
+
+                    // 从 blocks 中剔除图区域内的文字块
+                    blocks.retain(|b| !fig.contained_block_ids.contains(&b.block_id));
+
+                    log::info!(
+                        "Figure detected: {} on page {} ({} paths, {:.0}% confidence, {} blocks removed)",
+                        fig.figure_id,
+                        page_index,
+                        fig.path_count,
+                        fig.confidence * 100.0,
+                        fig.contained_block_ids.len(),
+                    );
+                }
+            }
+
+            // === 嵌入图片 → FigureRegion 升级 ===
+            // 条件：面积 > 阈值 OR 附近有 Figure/Fig./图 caption 文字
+            let page_area = page_info.size.width * page_info.size.height;
+            for img_ir in images.iter_mut() {
+                if img_ir.source != ImageSource::Embedded {
+                    continue;
+                }
+                let img_area = img_ir.bbox.area();
+                let ratio = if page_area > 0.0 {
+                    img_area / page_area
+                } else {
+                    0.0
+                };
+
+                let area_ok = page_area > 0.0 && ratio >= self.config.figure_min_area_ratio;
+
+                // 检测图片上下方 (±40pt) 是否有 Figure/Fig./图 caption
+                let has_nearby_caption = {
+                    let img_top = img_ir.bbox.y;
+                    let img_bottom = img_ir.bbox.bottom();
+                    let search_gap = 80.0;
+
+                    blocks.iter().any(|blk| {
+                        let blk_cy = blk.bbox.center_y();
+                        let near_top = blk_cy >= img_top - search_gap && blk_cy < img_top;
+                        let near_bottom = blk_cy > img_bottom && blk_cy <= img_bottom + search_gap;
+                        // 检查 x 轴是否有重叠（图片范围与文字块范围有交集）
+                        let x_overlap =
+                            img_ir.bbox.x < blk.bbox.right() && img_ir.bbox.right() > blk.bbox.x;
+                        if (near_top || near_bottom) && x_overlap {
+                            let t = blk.normalized_text.trim();
+                            t.starts_with("Figure")
+                                || t.starts_with("Fig.")
+                                || t.starts_with("fig.")
+                                || t.starts_with("图")
+                                || t.starts_with("FIGURE")
+                        } else {
+                            false
+                        }
+                    })
+                };
+
+                log::debug!(
+                    "Embedded image {} on page {}: ratio={:.3}, area_ok={}, has_caption={}",
+                    img_ir.image_id,
+                    page_index,
+                    ratio,
+                    area_ok,
+                    has_nearby_caption,
+                );
+
+                if !area_ok && !has_nearby_caption {
+                    continue;
+                }
+
+                // 获取图片区域描述文字
+                // 优先级：Vision LLM > OCR > 文字块聚合
+                let mut ocr_text: Option<String> = None;
+
+                // 先渲染图片区域（Vision 和 OCR 都需要）
+                let region_img: Option<Vec<u8>> = {
+                    let result = if let Some(ocr_r) = &self.ocr_renderer {
+                        ocr_r.render_region_to_image(
+                            page_index,
+                            img_ir.bbox,
+                            page_info.size.width,
+                            page_info.size.height,
+                            self.config.figure_render_width,
+                        )
+                    } else {
+                        #[cfg(feature = "pdfium")]
+                        {
+                            backend
+                                .render_page_to_image(page_index, self.config.figure_render_width)
+                                .and_then(|full_png| {
+                                    crop_region_from_image(
+                                        &full_png,
+                                        img_ir.bbox,
+                                        page_info.size.width,
+                                        page_info.size.height,
+                                    )
+                                })
+                        }
+                        #[cfg(not(feature = "pdfium"))]
+                        {
+                            Err(PdfError::Backend(
+                                "Page rendering requires pdfium feature".to_string(),
+                            ))
+                        }
+                    };
+                    result.ok()
+                };
+
+                // 方案1：Vision LLM 语义描述（图表/图形）
+                #[cfg(feature = "vision")]
+                if ocr_text.is_none() {
+                    if let Some(vision) = &self.vision_describer {
+                        if let Some(ref img_bytes) = region_img {
+                            // 构建 context hint（用 caption 文字帮助 LLM 理解）
+                            let hint = blocks
+                                .iter()
+                                .find(|b| {
+                                    let t = b.normalized_text.trim();
+                                    t.starts_with("Figure")
+                                        || t.starts_with("Fig.")
+                                        || t.starts_with("图")
+                                })
+                                .map(|b| b.normalized_text.as_str());
+
+                            match vision.describe_image(img_bytes, hint) {
+                                Ok(desc) => {
+                                    log::info!(
+                                        "Vision LLM described image {} ({} chars)",
+                                        img_ir.image_id,
+                                        desc.len()
+                                    );
+                                    ocr_text = Some(desc);
+                                }
+                                Err(e) => {
+                                    log::warn!(
+                                        "Vision LLM failed for {}: {}, falling back to OCR",
+                                        img_ir.image_id,
+                                        e
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 方案2：OCR 文字识别（扫描件回退）
+                if ocr_text.is_none() {
+                    if let Some(ocr_b) = &self.ocr_backend {
+                        if let Some(ref img_bytes) = region_img {
+                            if let Ok(ocr_blocks) = ocr_b.ocr_full_page(img_bytes) {
+                                let text: String = ocr_blocks
+                                    .iter()
+                                    .map(|b| b.text.as_str())
+                                    .collect::<Vec<_>>()
+                                    .join(", ");
+                                if !text.is_empty() {
+                                    ocr_text = Some(text);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 方案2（回退）：收集图片 bbox 内的文字块
+                if ocr_text.is_none() {
+                    let contained_ids: Vec<String> = blocks
+                        .iter()
+                        .filter(|blk| {
+                            let cx = blk.bbox.center_x();
+                            let cy = blk.bbox.center_y();
+                            cx >= img_ir.bbox.x
+                                && cx <= img_ir.bbox.right()
+                                && cy >= img_ir.bbox.y
+                                && cy <= img_ir.bbox.bottom()
+                        })
+                        .map(|blk| blk.block_id.clone())
+                        .collect();
+
+                    if !contained_ids.is_empty() {
+                        let text: String = blocks
+                            .iter()
+                            .filter(|b| contained_ids.contains(&b.block_id))
+                            .map(|b| b.normalized_text.as_str())
+                            .collect::<Vec<_>>()
+                            .join(", ");
+                        if !text.is_empty() {
+                            ocr_text = Some(text);
+                        }
+                        blocks.retain(|b| !contained_ids.contains(&b.block_id));
+                    }
+                }
+
+                // 标记为 FigureRegion + Caption 检测
+                img_ir.source = ImageSource::FigureRegion;
+                img_ir.ocr_text = ocr_text;
+
+                // Caption 检测：图片正下方寻找 "Figure" / "Fig." / "图" 开头的文字块
+                let img_bottom = img_ir.bbox.bottom();
+                let img_left = img_ir.bbox.x;
+                let img_right = img_ir.bbox.right();
+                let max_gap = 30.0;
+
+                let mut found_caption = None;
+                for blk in &blocks {
+                    let blk_top = blk.bbox.y;
+                    let blk_cx = blk.bbox.center_x();
+                    if blk_top >= img_bottom
+                        && blk_top <= img_bottom + max_gap
+                        && blk_cx >= img_left
+                        && blk_cx <= img_right
+                    {
+                        let text = blk.normalized_text.trim();
+                        if text.starts_with("Figure")
+                            || text.starts_with("Fig.")
+                            || text.starts_with("fig.")
+                            || text.starts_with("图")
+                            || text.starts_with("FIGURE")
+                        {
+                            found_caption = Some(blk.block_id.clone());
+                            break;
+                        }
+                    }
+                }
+                if let Some(cap_id) = found_caption {
+                    img_ir.caption_refs.push(cap_id);
+                }
+
+                log::info!(
+                    "Large embedded image -> FigureRegion: {} on page {} (ratio={:.1}%, has_ocr={}, has_caption={})",
+                    img_ir.image_id,
+                    page_index,
+                    ratio * 100.0,
+                    img_ir.ocr_text.is_some(),
+                    !img_ir.caption_refs.is_empty(),
+                );
+            }
+        }
+
+        // PageScore 评分
+        let page_score = compute_page_score(
+            &chars,
+            page_info.size.width,
+            page_info.size.height,
+            &self.config,
+        );
+        let text_score = page_score.score;
+        let is_scanned = text_score < self.config.scoring_text_threshold;
+
+        let mut page_warnings = Vec::new();
+        for flag in &page_score.reason_flags {
+            page_warnings.push(format!("PageScore flag: {:?}", flag));
+        }
+
+        // 大表格内存警告
+        for table in &tables {
+            if table.is_large() {
+                let mem_kb = table.estimated_memory_bytes() / 1024;
+                log::warn!(
+                    "Large table detected: {} on page {} ({} rows, {} cells, ~{}KB)",
+                    table.table_id,
+                    page_index,
+                    table.rows.len(),
+                    table.cell_count(),
+                    mem_kb
+                );
+                page_warnings.push(format!(
+                    "Large table {}: {} rows, {} cells, ~{}KB",
+                    table.table_id,
+                    table.rows.len(),
+                    table.cell_count(),
+                    mem_kb
+                ));
+            }
+        }
+
+        let page_diagnostics = PageDiagnostics {
+            warnings: page_warnings,
+            errors: Vec::new(),
+            block_count: blocks.len(),
+            table_count: tables.len(),
+            image_count: images.len(),
+            ocr_quality_score: None,
+        };
+
+        // 内存快照（处理后）
+        let mem_after = crate::mem_track::MemorySnapshot::now();
+        let mem_stats = crate::mem_track::PageMemoryStats::from_snapshots(&mem_before, &mem_after);
+
+        Ok(PageIR {
+            page_index,
+            size: page_info.size,
+            rotation: page_info.rotation,
+            blocks,
+            tables,
+            images,
+            diagnostics: page_diagnostics,
+            text_score,
+            is_scanned_guess: is_scanned,
+            source: if is_scanned {
+                PageSource::Ocr
+            } else {
+                PageSource::BornDigital
+            },
+            timings: Timings {
+                extract_ms: Some(extract_ms),
+                render_ms: None,
+                ocr_ms: None,
+                peak_rss_bytes: Some(mem_after.rss_bytes),
+                rss_delta_bytes: Some(mem_stats.delta_bytes),
+            },
+        })
+    }
+
+    /// 带超时的单页处理
+    ///
+    /// 利用标准库 thread + channel 实现同步超时。
+    /// 注意：超时后后台线程仍会继续运行直到完成，但结果会被丢弃。
+    fn process_page_with_timeout(
+        &self,
+        backend: &dyn PdfBackend,
+        page_index: usize,
+    ) -> Result<PageIR, PdfError> {
+        use std::time::Duration;
+
+        let timeout = Duration::from_secs(self.config.page_timeout_secs);
+
+        // 由于 PdfExtractBackend 不是 Send，我们在当前线程执行并用 channel 配合超时
+        // 这里采用简单方案：先正常执行，记录耗时，超过阈值后标记为超时
+        let start = Instant::now();
+        let result = self.process_page(backend, page_index);
+        let elapsed = start.elapsed();
+
+        if elapsed > timeout {
+            log::warn!(
+                "Page {} processing took {:.1}s, exceeding timeout of {}s",
+                page_index,
+                elapsed.as_secs_f64(),
+                self.config.page_timeout_secs
+            );
+            return Err(PdfError::Timeout(format!(
+                "Page {} took {:.1}s (limit: {}s)",
+                page_index,
+                elapsed.as_secs_f64(),
+                self.config.page_timeout_secs
+            )));
+        }
+
+        result
+    }
+}
+
+/// 页面迭代器
+pub struct PageIterator {
+    backend: PdfExtractBackend,
+    page_count: usize,
+    current_page: usize,
+    config: Config,
+}
+
+impl Iterator for PageIterator {
+    type Item = Result<PageIR, PdfError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current_page >= self.page_count {
+            return None;
+        }
+
+        let pipeline = Pipeline::new(self.config.clone());
+        let result = pipeline.process_page(&self.backend, self.current_page);
+        self.current_page += 1;
+        Some(result)
+    }
+}
+
+/// 计算文档 ID（基于文件内容的 SHA-256 hash）
+fn compute_doc_id(data: &[u8]) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(data);
+    let result = hasher.finalize();
+    format!("{:x}", result)
+}
+
+/// 从整页 PNG 图片中裁剪指定 BBox 区域
+#[cfg(feature = "pdfium")]
+fn crop_region_from_image(
+    full_page_png: &[u8],
+    bbox: crate::ir::BBox,
+    page_width: f32,
+    page_height: f32,
+) -> Result<Vec<u8>, PdfError> {
+    use std::io::Cursor;
+
+    let full_img = image::load_from_memory(full_page_png)
+        .map_err(|e| PdfError::Backend(format!("Failed to decode page image: {}", e)))?;
+
+    let img_w = full_img.width() as f32;
+    let img_h = full_img.height() as f32;
+
+    // PDF 坐标 → 像素坐标
+    let scale_x = img_w / page_width;
+    let scale_y = img_h / page_height;
+
+    let crop_x = (bbox.x * scale_x).max(0.0) as u32;
+    let crop_y = (bbox.y * scale_y).max(0.0) as u32;
+    let crop_w = (bbox.width * scale_x).min(img_w - crop_x as f32).max(1.0) as u32;
+    let crop_h = (bbox.height * scale_y).min(img_h - crop_y as f32).max(1.0) as u32;
+
+    let cropped = full_img.crop_imm(crop_x, crop_y, crop_w, crop_h);
+
+    let rgb_img = cropped.to_rgb8();
+    let mut bytes: Vec<u8> = Vec::new();
+    let mut cursor = Cursor::new(&mut bytes);
+    rgb_img
+        .write_to(&mut cursor, image::ImageFormat::Png)
+        .map_err(|e| PdfError::Backend(format!("Failed to encode cropped region: {}", e)))?;
+
+    Ok(bytes)
+}

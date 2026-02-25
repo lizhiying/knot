@@ -1,0 +1,45 @@
+页=1 bbox=(471,33,93,41) INVOICE Invoice #: INV-29747
+页=1 bbox=(486,81,78,10) Date: 2024-06-15
+页=1 bbox=(131,129,21,10) Item
+页=1 bbox=(275,129,17,10) Qty
+页=1 bbox=(338,129,47,10) Unit Price
+页=1 bbox=(449,129,26,10) Total
+页=1 bbox=(31,150,77,10) Software License
+页=1 bbox=(378,150,31,10) $2,430
+页=1 bbox=(471,150,36,10) $19,440
+页=1 bbox=(31,170,58,10) Support Plan
+页=1 bbox=(378,170,31,10) $2,372
+页=1 bbox=(471,170,36,10) $14,232
+页=1 bbox=(31,190,77,10) Training (3 days)
+页=1 bbox=(378,190,31,10) $2,102
+页=1 bbox=(477,190,31,10) $4,204
+页=1 bbox=(31,210,84,10) Custom Integration
+页=1 bbox=(378,210,31,10) $2,460
+页=1 bbox=(471,210,36,10) $12,300
+页=1 bbox=(31,230,379,70) Subtotal: Tax (8%): TOTAL: Data Migration 8 $2,659
+页=1 bbox=(471,230,36,70) $71,448 $5,715 $77,163 $21,272
+表=t0_0 页=0 col_0=Software License col_1=8 col_2=$2,430 col_3=$19,440
+表=t0_0 页=0 col_0=Support Plan col_1=6 col_2=$2,372 col_3=$14,232
+表=t0_0 页=0 col_0=Training (3 days) col_1=2 col_2=$2,102 col_3=$4,204
+表=t0_0 页=0 col_0=Custom Integration col_1=5 col_2=$2,460 col_3=$12,300
+表=t0_0 页=0 col_0=Data Migration col_1=8 col_2=$2,659 col_3=$21,272
+表=t0_0 页=0 行=0 列=col_0 值=Software License 类型=Text
+表=t0_0 页=0 行=0 列=col_1 值=8 类型=Number
+表=t0_0 页=0 行=0 列=col_2 值=$2,430 类型=Currency
+表=t0_0 页=0 行=0 列=col_3 值=$19,440 类型=Currency
+表=t0_0 页=0 行=1 列=col_0 值=Support Plan 类型=Text
+表=t0_0 页=0 行=1 列=col_1 值=6 类型=Number
+表=t0_0 页=0 行=1 列=col_2 值=$2,372 类型=Currency
+表=t0_0 页=0 行=1 列=col_3 值=$14,232 类型=Currency
+表=t0_0 页=0 行=2 列=col_0 值=Training (3 days) 类型=Text
+表=t0_0 页=0 行=2 列=col_1 值=2 类型=Number
+表=t0_0 页=0 行=2 列=col_2 值=$2,102 类型=Currency
+表=t0_0 页=0 行=2 列=col_3 值=$4,204 类型=Currency
+表=t0_0 页=0 行=3 列=col_0 值=Custom Integration 类型=Text
+表=t0_0 页=0 行=3 列=col_1 值=5 类型=Number
+表=t0_0 页=0 行=3 列=col_2 值=$2,460 类型=Currency
+表=t0_0 页=0 行=3 列=col_3 值=$12,300 类型=Currency
+表=t0_0 页=0 行=4 列=col_0 值=Data Migration 类型=Text
+表=t0_0 页=0 行=4 列=col_1 值=8 类型=Number
+表=t0_0 页=0 行=4 列=col_2 值=$2,659 类型=Currency
+表=t0_0 页=0 行=4 列=col_3 值=$21,272 类型=Currency

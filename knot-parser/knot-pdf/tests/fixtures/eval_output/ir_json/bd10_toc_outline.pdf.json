@@ -1,0 +1,672 @@
+{
+  "doc_id": "547dfb0d5ae639ce583073dc0cb3da8b34afb268e8af956876b46430eb5e810c",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 211.42,
+            "y": 31.320007,
+            "width": 172.44798,
+            "height": 16.0
+          },
+          "role": "Title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TABLE OF CONTENTS",
+                  "font_size": 16.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 211.42,
+                "y": 31.320007,
+                "width": 172.44798,
+                "height": 16.0
+              }
+            }
+          ],
+          "normalized_text": "TABLE OF CONTENTS"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 81.59003,
+            "width": 106.68299,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "1 Introduction",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 81.59003,
+                "width": 106.68299,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "1 Introduction"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 31.18,
+            "y": 101.42999,
+            "width": 149.495,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "2 System Architecture",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 101.42999,
+                "width": 149.495,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "2 System Architecture"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 73.7,
+            "y": 121.28003,
+            "width": 161.37,
+            "height": 130.04999
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Text Extraction Pipeline",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 73.7,
+                "y": 121.28003,
+                "width": 124.707,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Table Detection and Extraction",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 73.7,
+                "y": 141.12,
+                "width": 161.37,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "OCR Integration",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 73.7,
+                "y": 160.96002,
+                "width": 84.33699,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Performance Evaluation",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 73.7,
+                "y": 180.79999,
+                "width": 125.92799,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "API Reference",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 73.7,
+                "y": 200.65002,
+                "width": 74.58,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Appendix: Sample Outputs",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 73.7,
+                "y": 220.48999,
+                "width": 130.845,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Appendix: Benchmark Data",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 73.7,
+                "y": 240.33002,
+                "width": 133.892,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "Text Extraction Pipeline Table Detection and Extraction OCR Integration Performance Evaluation API Reference Appendix: Sample Outputs Appendix: Benchmark Data"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 551.87,
+            "y": 121.28003,
+            "width": 12.232056,
+            "height": 130.04999
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "12",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 551.87,
+                "y": 121.28003,
+                "width": 12.232056,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "23",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 551.87,
+                "y": 141.12,
+                "width": 12.232056,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "38",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 551.87,
+                "y": 160.96002,
+                "width": 12.232056,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "45",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 551.87,
+                "y": 180.79999,
+                "width": 12.232056,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "52",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 551.87,
+                "y": 200.65002,
+                "width": 12.232056,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "60",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 551.87,
+                "y": 220.48999,
+                "width": 12.232056,
+                "height": 11.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "70",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 551.87,
+                "y": 240.33002,
+                "width": 12.232056,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "12 23 38 45 52 60 70"
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t0_0",
+          "page_index": 0,
+          "bbox": {
+            "x": 31.18,
+            "y": 81.59003,
+            "width": 532.92206,
+            "height": 169.73999
+          },
+          "extraction_mode": "Stream",
+          "headers": [
+            "col_0",
+            "col_1",
+            "col_2"
+          ],
+          "rows": [
+            {
+              "row_index": 0,
+              "cells": [
+                {
+                  "row": 0,
+                  "col": 0,
+                  "text": "1",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 1,
+                  "text": "Introduction",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 2,
+                  "text": "1",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 1,
+              "cells": [
+                {
+                  "row": 1,
+                  "col": 0,
+                  "text": "2",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "System Architecture",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "5",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 2,
+              "cells": [
+                {
+                  "row": 2,
+                  "col": 0,
+                  "text": "3",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "Text Extraction Pipeline",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "12",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 3,
+              "cells": [
+                {
+                  "row": 3,
+                  "col": 0,
+                  "text": "4",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "text": "Table Detection and Extraction",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "text": "23",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 4,
+              "cells": [
+                {
+                  "row": 4,
+                  "col": 0,
+                  "text": "5",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 1,
+                  "text": "OCR Integration",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 2,
+                  "text": "38",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 5,
+              "cells": [
+                {
+                  "row": 5,
+                  "col": 0,
+                  "text": "6",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 1,
+                  "text": "Performance Evaluation",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 2,
+                  "text": "45",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 6,
+              "cells": [
+                {
+                  "row": 6,
+                  "col": 0,
+                  "text": "7",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 1,
+                  "text": "API Reference",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 2,
+                  "text": "52",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 7,
+              "cells": [
+                {
+                  "row": 7,
+                  "col": 0,
+                  "text": "A",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 1,
+                  "text": "Appendix: Sample Outputs",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 2,
+                  "text": "60",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 8,
+              "cells": [
+                {
+                  "row": 8,
+                  "col": 0,
+                  "text": "B",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 1,
+                  "text": "Appendix: Benchmark Data",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 2,
+                  "text": "70",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            }
+          ],
+          "column_types": [
+            "Number",
+            "Text",
+            "Number"
+          ],
+          "fallback_text": "[表t0_0 页0]\n行1: col_0=1 col_1=Introduction col_2=1\n行2: col_0=2 col_1=System Architecture col_2=5\n行3: col_0=3 col_1=Text Extraction Pipeline col_2=12\n行4: col_0=4 col_1=Table Detection and Extraction col_2=23\n行5: col_0=5 col_1=OCR Integration col_2=38\n行6: col_0=6 col_1=Performance Evaluation col_2=45\n行7: col_0=7 col_1=API Reference col_2=52\n行8: col_0=A col_1=Appendix: Sample Outputs col_2=60\n行9: col_0=B col_1=Appendix: Benchmark Data col_2=70"
+        }
+      ],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 5,
+        "table_count": 1,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.95337355,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 14,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 23969792,
+        "rss_delta_bytes": -163840
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

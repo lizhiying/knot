@@ -1,0 +1,883 @@
+{
+  "doc_id": "a7b8ee8cd0edab5b7af5d0e1f3ce6240cc4ae33df081c444063fd24e2fbdee49",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 32.690002,
+            "width": 92.799995,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Mixed Border Table",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 32.690002,
+                "width": 92.799995,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Mixed Border Table"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 54.640015,
+            "width": 30.015003,
+            "height": 187.59003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Item 1",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 54.640015,
+                "width": 25.011002,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item 2",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 74.48999,
+                "width": 25.011002,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item 3",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 94.33002,
+                "width": 25.011002,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item 4",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 114.170044,
+                "width": 25.011002,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item 5",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 134.01001,
+                "width": 25.011002,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item 6",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 153.85999,
+                "width": 25.011002,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item 7",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 173.70001,
+                "width": 25.011002,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item 8",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 193.54004,
+                "width": 25.011002,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item 9",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 213.39001,
+                "width": 25.011002,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item 10",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 233.23004,
+                "width": 30.015003,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "Item 1 Item 2 Item 3 Item 4 Item 5 Item 6 Item 7 Item 8 Item 9 Item 10"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 253.11,
+            "y": 54.640015,
+            "width": 27.521988,
+            "height": 187.59003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$1,643",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 253.11,
+                "y": 54.640015,
+                "width": 27.521988,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$4,369",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 253.11,
+                "y": 74.48999,
+                "width": 27.521988,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$4,453",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 253.11,
+                "y": 94.33002,
+                "width": 27.521988,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$2,582",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 253.11,
+                "y": 114.170044,
+                "width": 27.521988,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$1,190",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 253.11,
+                "y": 134.01001,
+                "width": 27.521988,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$4,481",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 253.11,
+                "y": 153.85999,
+                "width": 27.521988,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$9,369",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 253.11,
+                "y": 173.70001,
+                "width": 27.521988,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$8,829",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 253.11,
+                "y": 193.54004,
+                "width": 27.521988,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$1,960",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 253.11,
+                "y": 213.39001,
+                "width": 27.521988,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$1,302",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 253.11,
+                "y": 233.23004,
+                "width": 27.521988,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "$1,643 $4,369 $4,453 $2,582 $1,190 $4,481 $9,369 $8,829 $1,960 $1,302"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 362.5,
+            "y": 54.640015,
+            "width": 31.518005,
+            "height": 187.59003
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "98 units",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 362.5,
+                "y": 54.640015,
+                "width": 31.518005,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "51 units",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 362.5,
+                "y": 74.48999,
+                "width": 31.518005,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "59 units",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 362.5,
+                "y": 94.33002,
+                "width": 31.518005,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "1 units",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 367.5,
+                "y": 114.170044,
+                "width": 26.514008,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "38 units",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 362.5,
+                "y": 134.01001,
+                "width": 31.518005,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "16 units",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 362.5,
+                "y": 153.85999,
+                "width": 31.518005,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "35 units",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 362.5,
+                "y": 173.70001,
+                "width": 31.518005,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "97 units",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 362.5,
+                "y": 193.54004,
+                "width": 31.518005,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "58 units",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 362.5,
+                "y": 213.39001,
+                "width": 31.518005,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "14 units",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 362.5,
+                "y": 233.23004,
+                "width": 31.518005,
+                "height": 9.0
+              }
+            }
+          ],
+          "normalized_text": "98 units 51 units 59 units 1 units 38 units 16 units 35 units 97 units 58 units 14 units"
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t0_0",
+          "page_index": 0,
+          "bbox": {
+            "x": 31.18,
+            "y": 54.640015,
+            "width": 362.838,
+            "height": 187.59003
+          },
+          "extraction_mode": "Stream",
+          "headers": [
+            "Item 1",
+            "$1,643",
+            "98 units"
+          ],
+          "rows": [
+            {
+              "row_index": 0,
+              "cells": [
+                {
+                  "row": 0,
+                  "col": 0,
+                  "text": "Item 2",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 1,
+                  "text": "$4,369",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 2,
+                  "text": "51 units",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 1,
+              "cells": [
+                {
+                  "row": 1,
+                  "col": 0,
+                  "text": "Item 3",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "$4,453",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "59 units",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 2,
+              "cells": [
+                {
+                  "row": 2,
+                  "col": 0,
+                  "text": "Item 4",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "$2,582",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "1 units",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 3,
+              "cells": [
+                {
+                  "row": 3,
+                  "col": 0,
+                  "text": "Item 5",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "text": "$1,190",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "text": "38 units",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 4,
+              "cells": [
+                {
+                  "row": 4,
+                  "col": 0,
+                  "text": "Item 6",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 1,
+                  "text": "$4,481",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 2,
+                  "text": "16 units",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 5,
+              "cells": [
+                {
+                  "row": 5,
+                  "col": 0,
+                  "text": "Item 7",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 1,
+                  "text": "$9,369",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 2,
+                  "text": "35 units",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 6,
+              "cells": [
+                {
+                  "row": 6,
+                  "col": 0,
+                  "text": "Item 8",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 1,
+                  "text": "$8,829",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 2,
+                  "text": "97 units",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 7,
+              "cells": [
+                {
+                  "row": 7,
+                  "col": 0,
+                  "text": "Item 9",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 1,
+                  "text": "$1,960",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 2,
+                  "text": "58 units",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 8,
+              "cells": [
+                {
+                  "row": 8,
+                  "col": 0,
+                  "text": "Item 10",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 1,
+                  "text": "$1,302",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 2,
+                  "text": "14 units",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            }
+          ],
+          "column_types": [
+            "Text",
+            "Currency",
+            "Text"
+          ],
+          "fallback_text": "[表t0_0 页0]\n行1: Item 1=Item 2 $1,643=$4,369 98 units=51 units\n行2: Item 1=Item 3 $1,643=$4,453 98 units=59 units\n行3: Item 1=Item 4 $1,643=$2,582 98 units=1 units\n行4: Item 1=Item 5 $1,643=$1,190 98 units=38 units\n行5: Item 1=Item 6 $1,643=$4,481 98 units=16 units\n行6: Item 1=Item 7 $1,643=$9,369 98 units=35 units\n行7: Item 1=Item 8 $1,643=$8,829 98 units=97 units\n行8: Item 1=Item 9 $1,643=$1,960 98 units=58 units\n行9: Item 1=Item 10 $1,643=$1,302 98 units=14 units"
+        }
+      ],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 4,
+        "table_count": 1,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.92845607,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 16,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24444928,
+        "rss_delta_bytes": 0
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

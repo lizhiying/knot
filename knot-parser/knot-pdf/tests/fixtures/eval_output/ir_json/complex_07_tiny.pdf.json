@@ -1,0 +1,168 @@
+{
+  "doc_id": "ba75e9a4967ff7198f0cb55e42d7b76831b39360ae982f0b06c66f29e51af958",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 32.690002,
+            "width": 68.92,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Tiny 2x2 Table",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 32.690002,
+                "width": 68.92,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Tiny 2x2 Table"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 69.54004,
+            "width": 43.910004,
+            "height": 32.669983
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Revenue",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 69.54004,
+                "width": 40.019997,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Expenses",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 92.21002,
+                "width": 43.910004,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Revenue Expenses"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 258.94,
+            "y": 69.54004,
+            "width": 50.04001,
+            "height": 32.669983
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$1,234,567",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 258.94,
+                "y": 69.54004,
+                "width": 50.04001,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$987,654",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 267.28,
+                "y": 92.21002,
+                "width": 41.700012,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$1,234,567 $987,654"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 3,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.9054787,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 13,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24444928,
+        "rss_delta_bytes": 0
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

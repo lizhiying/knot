@@ -1,0 +1,2 @@
+页=1 bbox=(31,28,45,6) [scan artifact p1]
+页=1 bbox=(173,398,122,8) [Scanned image content - page 1]

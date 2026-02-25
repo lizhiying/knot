@@ -1,0 +1,900 @@
+{
+  "doc_id": "3294f9c7e2c9c6f0cebb35fe3323dea817de9a844cc6a116853500e2aff12f51",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 31.18,
+            "y": 74.5,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 74.5,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 31.18,
+            "y": 100.02002,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   899797%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 100.02002,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   899797%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 31.18,
+            "y": 117.02002,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 117.02002,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 31.18,
+            "y": 142.54004,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   998669%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 142.54004,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   998669%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_6",
+          "bbox": {
+            "x": 31.18,
+            "y": 159.54004,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 159.54004,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 31.18,
+            "y": 185.06,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   999413%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 185.06,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   999413%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 31.18,
+            "y": 202.06,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 202.06,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 31.18,
+            "y": 227.58002,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   898978%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 227.58002,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   898978%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 31.18,
+            "y": 244.58002,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 244.58002,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [
+          "PageScore flag: LowEntropy"
+        ],
+        "errors": [],
+        "block_count": 11,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.93343914,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 40,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 19169280,
+        "rss_delta_bytes": 8749056
+      }
+    },
+    {
+      "page_index": 1,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 31.18,
+            "y": 74.5,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 74.5,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 31.18,
+            "y": 100.02002,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   899797%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 100.02002,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   899797%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 31.18,
+            "y": 117.02002,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 117.02002,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 31.18,
+            "y": 142.54004,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   998669%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 142.54004,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   998669%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_6",
+          "bbox": {
+            "x": 31.18,
+            "y": 159.54004,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 159.54004,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 31.18,
+            "y": 185.06,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   999413%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 185.06,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   999413%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 31.18,
+            "y": 202.06,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 202.06,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 31.18,
+            "y": 227.58002,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   898978%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 227.58002,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   898978%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 31.18,
+            "y": 244.58002,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 244.58002,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [
+          "PageScore flag: LowEntropy"
+        ],
+        "errors": [],
+        "block_count": 11,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.93343914,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 37,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 22364160,
+        "rss_delta_bytes": 3194880
+      }
+    },
+    {
+      "page_index": 2,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 31.18,
+            "y": 74.5,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 74.5,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 31.18,
+            "y": 100.02002,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   899797%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 100.02002,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   899797%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_4",
+          "bbox": {
+            "x": 31.18,
+            "y": 117.02002,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 117.02002,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_5",
+          "bbox": {
+            "x": 31.18,
+            "y": 142.54004,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   998669%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 142.54004,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   998669%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_6",
+          "bbox": {
+            "x": 31.18,
+            "y": 159.54004,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 159.54004,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_7",
+          "bbox": {
+            "x": 31.18,
+            "y": 185.06,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   999413%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 185.06,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   999413%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_8",
+          "bbox": {
+            "x": 31.18,
+            "y": 202.06,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 202.06,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        },
+        {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 31.18,
+            "y": 227.58002,
+            "width": 532.919,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   898978%%%   aaaccccccuuurrraaacccyyy   ooonnn",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 227.58002,
+                "width": 532.919,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "TTThhheee   fffiiieeelllddd   ooofff   dddooocccuuummmeeennnttt   ppprrroooccceeessssssiiinnnggg   hhhaaasss   ssseeeeeennn   rrreeemmmaaarrrkkkaaabbbllleee   aaadddvvvaaannnccceeesss...   CCCuuurrrrrreeennnttt   sssyyysssttteeemmmsss   aaaccchhhiiieeevvveee   898978%%%   aaaccccccuuurrraaacccyyy   ooonnn"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 31.18,
+            "y": 244.58002,
+            "width": 440.759,
+            "height": 11.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss...",
+                  "font_size": 11.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 244.58002,
+                "width": 440.759,
+                "height": 11.0
+              }
+            }
+          ],
+          "normalized_text": "ssstttaaannndddaaarrrddd   bbbeeennnccchhhmmmaaarrrkkksss...   TTThhhiiisss   pppaaarrraaagggrrraaappphhh   dddiiissscccuuusssssseeesss   ttthhheee   iiimmmpppllliiicccaaatttiiiooonnnsss   fffooorrr   eeennnttteeerrrppprrriiissseee   wwwooorrrkkkffflllooowwwsss..."
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [
+          "PageScore flag: LowEntropy"
+        ],
+        "errors": [],
+        "block_count": 11,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.93343914,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 73,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 23494656,
+        "rss_delta_bytes": 1130496
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [
+      "Header/footer detected: 2 header patterns, 0 footer patterns, 3 pages affected"
+    ],
+    "errors": []
+  }
+}

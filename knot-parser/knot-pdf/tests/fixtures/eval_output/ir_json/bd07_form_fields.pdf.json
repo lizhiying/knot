@@ -1,0 +1,357 @@
+{
+  "doc_id": "5029a22805de163f4cbf828b1c0b81665df7501fd13290e983ed1e1bf3c3c606",
+  "metadata": {
+    "title": null,
+    "author": null,
+    "subject": null,
+    "creator": null,
+    "producer": null,
+    "creation_date": "D:20260225070752Z",
+    "modification_date": null
+  },
+  "outline": [],
+  "pages": [
+    {
+      "page_index": 0,
+      "size": {
+        "width": 612.0,
+        "height": 792.0
+      },
+      "rotation": 0.0,
+      "blocks": [
+        {
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 227.64,
+            "y": 32.72003,
+            "width": 139.99998,
+            "height": 14.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "APPLICATION FORM",
+                  "font_size": 14.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 227.64,
+                "y": 32.72003,
+                "width": 139.99998,
+                "height": 14.0
+              }
+            }
+          ],
+          "normalized_text": "APPLICATION FORM"
+        },
+        {
+          "block_id": "blk_1",
+          "bbox": {
+            "x": 31.18,
+            "y": 75.20001,
+            "width": 83.9,
+            "height": 168.73999
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Full Name:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 75.20001,
+                "width": 52.79,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Date of Birth:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 97.880005,
+                "width": 65.0,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Email:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 120.56,
+                "width": 31.68,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Phone:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 143.23999,
+                "width": 35.560005,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Address:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 165.91003,
+                "width": 45.010002,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Position Applied:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 188.59003,
+                "width": 83.9,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Expected Salary:",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 233.94,
+                "width": 82.26,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Full Name: Date of Birth: Email: Phone: Address: Position Applied: Expected Salary:"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 172.91,
+            "y": 75.20001,
+            "width": 200.1,
+            "height": 168.73999
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "John Smith",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 75.20001,
+                "width": 50.020004,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "1990-05-15",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 97.880005,
+                "width": 51.14,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "john.smith@example.com",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 120.56,
+                "width": 115.17999,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "+1-555-0123",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 143.23999,
+                "width": 56.979996,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "123 Main St, Suite 400, New York, NY 10001",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 165.91003,
+                "width": 200.1,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Senior Software Engineer",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 188.59003,
+                "width": 115.609985,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$150,000",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 172.91,
+                "y": 233.94,
+                "width": 41.699997,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "John Smith 1990-05-15 john.smith@example.com +1-555-0123 123 Main St, Suite 400, New York, NY 10001 Senior Software Engineer $150,000"
+        },
+        {
+          "block_id": "blk_3",
+          "bbox": {
+            "x": 31.18,
+            "y": 211.27002,
+            "width": 93.93,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Experience (years):",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 211.27002,
+                "width": 93.93,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Experience (years):"
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "diagnostics": {
+        "warnings": [],
+        "errors": [],
+        "block_count": 4,
+        "table_count": 0,
+        "image_count": 0,
+        "ocr_quality_score": null
+      },
+      "text_score": 0.9311763,
+      "is_scanned_guess": false,
+      "source": "BornDigital",
+      "timings": {
+        "extract_ms": 20,
+        "render_ms": null,
+        "ocr_ms": null,
+        "peak_rss_bytes": 24313856,
+        "rss_delta_bytes": 32768
+      }
+    }
+  ],
+  "diagnostics": {
+    "warnings": [],
+    "errors": []
+  }
+}

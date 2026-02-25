@@ -1,0 +1,11 @@
+页=1 bbox=(31,33,107,10) Multi-line Cell Content
+页=1 bbox=(60,55,22,8) Name
+页=1 bbox=(219,55,44,8) Description
+页=1 bbox=(401,55,20,8) Price
+页=1 bbox=(31,72,35,8) Product A
+页=1 bbox=(116,72,103,8) High-performance computing
+页=1 bbox=(31,72,369,36) $12,500 solution for enterprise Product B
+页=1 bbox=(116,101,76,8) Cloud-native platform
+页=1 bbox=(31,101,365,51) $8,900 with auto-scaling and monitoring Product C
+页=1 bbox=(116,143,70,8) Desktop application
+页=1 bbox=(116,143,280,22) $3,200 for data analysis
