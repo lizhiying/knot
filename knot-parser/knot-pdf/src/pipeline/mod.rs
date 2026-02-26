@@ -787,6 +787,117 @@ impl Pipeline {
                 }
             }
 
+            // === 基于文本聚类的图表区域检测 ===
+            // 当矢量 path 检测失效时（PPT 导出 PDF 常见），
+            // 通过数据标签（数字/百分比/年份）的空间聚集来识别图表区域
+            {
+                let chart_regions = detect_chart_regions_from_text(
+                    &blocks,
+                    page_info.size.width,
+                    page_info.size.height,
+                );
+
+                for (region_idx, chart_bbox) in chart_regions.iter().enumerate() {
+                    // 收集区域内的文字块 ID
+                    let contained_ids: Vec<String> = blocks
+                        .iter()
+                        .filter(|blk| {
+                            let cx = blk.bbox.center_x();
+                            let cy = blk.bbox.center_y();
+                            cx >= chart_bbox.x
+                                && cx <= chart_bbox.right()
+                                && cy >= chart_bbox.y
+                                && cy <= chart_bbox.bottom()
+                        })
+                        .map(|blk| blk.block_id.clone())
+                        .collect();
+
+                    if contained_ids.is_empty() {
+                        continue;
+                    }
+
+                    let chart_id = format!("chart_p{}_{}", page_index, region_idx);
+
+                    // 尝试渲染图表区域 + Vision LLM 描述
+                    let mut ocr_text: Option<String> = None;
+
+                    #[cfg(feature = "pdfium")]
+                    {
+                        // 渲染整页然后裁剪图表区域
+                        if let Ok(full_png) = backend
+                            .render_page_to_image(page_index, self.config.figure_render_width)
+                        {
+                            if let Ok(region_img) = crop_region_from_image(
+                                &full_png,
+                                *chart_bbox,
+                                page_info.size.width,
+                                page_info.size.height,
+                            ) {
+                                // Vision LLM 描述
+                                if let Some(vision) = &self.vision_describer {
+                                    match vision.describe_image(
+                                        &region_img,
+                                        Some("这是一个数据图表，请描述图表的主要内容和数据趋势"),
+                                    ) {
+                                        Ok(desc) => {
+                                            ocr_text = Some(desc.clone());
+                                            log::info!(
+                                                "Vision LLM described chart {} ({} chars)",
+                                                chart_id,
+                                                desc.len()
+                                            );
+                                        }
+                                        Err(e) => {
+                                            log::debug!(
+                                                "Vision LLM failed for chart {}: {}",
+                                                chart_id,
+                                                e
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 如果没有 Vision 描述，聚合区域内文字作为 fallback
+                    if ocr_text.is_none() {
+                        let text: String = blocks
+                            .iter()
+                            .filter(|b| contained_ids.contains(&b.block_id))
+                            .map(|b| b.normalized_text.as_str())
+                            .collect::<Vec<_>>()
+                            .join(", ");
+                        if !text.is_empty() {
+                            ocr_text = Some(text);
+                        }
+                    }
+
+                    // 创建 ImageIR
+                    images.push(ImageIR {
+                        image_id: chart_id.clone(),
+                        page_index,
+                        bbox: *chart_bbox,
+                        format: ImageFormat::Png,
+                        bytes_ref: None,
+                        caption_refs: vec![],
+                        source: ImageSource::FigureRegion,
+                        ocr_text,
+                    });
+
+                    // 移除区域内所有文字块
+                    let removed_count = contained_ids.len();
+                    blocks.retain(|b| !contained_ids.contains(&b.block_id));
+
+                    log::info!(
+                        "Chart detected from text clustering: {} on page {} ({} blocks removed)",
+                        chart_id,
+                        page_index,
+                        removed_count,
+                    );
+                }
+            }
+
             // === 嵌入图片 → FigureRegion 升级 ===
             // 条件：面积 > 阈值 OR 附近有 Figure/Fig./图 caption 文字
             let page_area = page_info.size.width * page_info.size.height;
@@ -1289,4 +1400,113 @@ fn crop_region_from_image(
         .map_err(|e| PdfError::Backend(format!("Failed to encode cropped region: {}", e)))?;
 
     Ok(bytes)
+}
+
+/// 基于文本数据标签聚类检测图表区域
+///
+/// PPT 导出的 PDF 中，图表（柱状图/折线图等）的数据标签（数字、百分比、年份）
+/// 是作为独立文本对象嵌入的。当这些标签在空间上聚集时，可以推断出图表区域。
+fn detect_chart_regions_from_text(
+    blocks: &[crate::ir::BlockIR],
+    page_width: f32,
+    page_height: f32,
+) -> Vec<crate::ir::BBox> {
+    use crate::ir::BBox;
+
+    // 识别数据标签块
+    let data_labels: Vec<&crate::ir::BlockIR> = blocks
+        .iter()
+        .filter(|b| {
+            let text = b.full_text();
+            is_chart_data_label_text(&text)
+        })
+        .collect();
+
+    if data_labels.len() < 5 {
+        return vec![];
+    }
+
+    // 计算所有数据标签的外接矩形
+    let mut min_x = f32::MAX;
+    let mut min_y = f32::MAX;
+    let mut max_x = f32::MIN;
+    let mut max_y = f32::MIN;
+
+    for blk in &data_labels {
+        min_x = min_x.min(blk.bbox.x);
+        min_y = min_y.min(blk.bbox.y);
+        max_x = max_x.max(blk.bbox.right());
+        max_y = max_y.max(blk.bbox.bottom());
+    }
+
+    let region_w = max_x - min_x;
+    let region_h = max_y - min_y;
+
+    // 区域不应太大（不应覆盖整个页面）
+    if region_w > page_width * 0.85 && region_h > page_height * 0.85 {
+        return vec![];
+    }
+
+    // 区域面积要合理
+    if region_w <= 0.0 || region_h <= 0.0 {
+        return vec![];
+    }
+
+    // 加 padding
+    let padding = 30.0;
+    let chart_bbox = BBox::new(
+        (min_x - padding).max(0.0),
+        (min_y - padding).max(0.0),
+        (region_w + padding * 2.0).min(page_width - (min_x - padding).max(0.0)),
+        (region_h + padding * 2.0).min(page_height - (min_y - padding).max(0.0)),
+    );
+
+    log::debug!(
+        "Chart text clustering: {} data labels -> region ({:.0}, {:.0}, {:.0}x{:.0})",
+        data_labels.len(),
+        chart_bbox.x,
+        chart_bbox.y,
+        chart_bbox.width,
+        chart_bbox.height,
+    );
+
+    vec![chart_bbox]
+}
+
+/// 判断文本是否为图表数据标签
+fn is_chart_data_label_text(text: &str) -> bool {
+    let trimmed = text.trim();
+    if trimmed.is_empty() || trimmed.len() > 30 {
+        return false;
+    }
+
+    // 纯数字（含逗号分隔）：150, 248, 1,747
+    let no_comma = trimmed.replace(',', "");
+    if no_comma.chars().all(|c| c.is_ascii_digit()) && !no_comma.is_empty() && no_comma.len() <= 6 {
+        return true;
+    }
+
+    // 百分比：97.0%, 65.7%, 28.0%, 120%
+    if trimmed.ends_with('%') {
+        let num_part = &trimmed[..trimmed.len() - 1];
+        if num_part.parse::<f32>().is_ok() {
+            return true;
+        }
+    }
+
+    // 年份标签：2022年, 2030年
+    if trimmed.ends_with('年') && trimmed.chars().count() <= 6 {
+        let chars: Vec<char> = trimmed.chars().collect();
+        let num_str: String = chars[..chars.len() - 1].iter().collect();
+        if num_str.parse::<u32>().is_ok() {
+            return true;
+        }
+    }
+
+    // 小数：35.0, 30.0
+    if trimmed.parse::<f32>().is_ok() && trimmed.len() <= 8 && trimmed.contains('.') {
+        return true;
+    }
+
+    false
 }

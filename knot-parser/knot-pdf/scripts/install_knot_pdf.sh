@@ -25,8 +25,9 @@ echo ""
 #   ocr_paddle   — PaddleOCR 引擎（扫描件支持）
 #   vision       — Vision LLM 图片描述
 #   formula_model — 公式 OCR（纯 Rust ONNX 推理）
+#   layout_model — ONNX 版面检测模型（改善分栏识别）
 
-FEATURES="cli,pdfium,ocr_paddle,vision,formula_model"
+FEATURES="cli,pdfium,ocr_paddle,vision,formula_model,layout_model"
 
 echo "📦 编译 features: $FEATURES"
 echo "📂 项目目录: $PROJECT_DIR"
