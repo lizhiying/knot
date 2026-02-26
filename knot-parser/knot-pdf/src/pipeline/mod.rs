@@ -37,6 +37,8 @@ pub struct Pipeline {
     vision_describer: Option<Box<dyn crate::vision::VisionDescriber>>,
     /// 公式 OCR 识别器（M12 Phase B）
     formula_recognizer: Option<Box<dyn crate::formula::FormulaRecognizer>>,
+    /// 后处理管线（M13）
+    postprocess_pipeline: crate::postprocess::PostProcessPipeline,
     /// OCR 最大并发数（同步模式下天然为 1，为 async 预留）
     max_ocr_workers: usize,
 }
@@ -305,6 +307,12 @@ impl Pipeline {
             None
         };
 
+        let postprocess_pipeline = if config.postprocess_enabled {
+            crate::postprocess::PostProcessPipeline::default_pipeline()
+        } else {
+            crate::postprocess::PostProcessPipeline::new()
+        };
+
         Self {
             config,
             store,
@@ -314,6 +322,7 @@ impl Pipeline {
             #[cfg(feature = "vision")]
             vision_describer,
             formula_recognizer,
+            postprocess_pipeline,
             max_ocr_workers,
         }
     }
@@ -1134,7 +1143,7 @@ impl Pipeline {
             Vec::new()
         };
 
-        Ok(PageIR {
+        let mut page_ir = PageIR {
             page_index,
             size: page_info.size,
             rotation: page_info.rotation,
@@ -1157,7 +1166,13 @@ impl Pipeline {
                 peak_rss_bytes: Some(mem_after.rss_bytes),
                 rss_delta_bytes: Some(mem_stats.delta_bytes),
             },
-        })
+        };
+
+        // M13: 后处理管线
+        self.postprocess_pipeline
+            .process_page(&mut page_ir, &self.config);
+
+        Ok(page_ir)
     }
 
     /// 带超时的单页处理

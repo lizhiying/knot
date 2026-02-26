@@ -101,6 +101,10 @@ pub enum BlockRole {
     PageNumber,
     /// 侧边栏/旁注
     Sidebar,
+    /// 水印（M13 新增）
+    Watermark,
+    /// 脚注（M13 新增）
+    Footnote,
     Unknown,
 }
 

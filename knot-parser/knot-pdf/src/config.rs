@@ -176,6 +176,23 @@ pub struct Config {
     #[serde(default = "default_formula_render_width")]
     pub formula_render_width: u32,
 
+    // === 后处理 (M13) ===
+    /// 是否启用后处理 Pipeline（默认 true）
+    #[serde(default = "default_true")]
+    pub postprocess_enabled: bool,
+
+    /// 是否检测并移除水印（默认 true）
+    #[serde(default = "default_true")]
+    pub remove_watermark: bool,
+
+    /// 是否分离脚注（默认 false，标记但不移除）
+    #[serde(default)]
+    pub separate_footnotes: bool,
+
+    /// 是否合并跨页段落（默认 true）
+    #[serde(default = "default_true")]
+    pub merge_cross_page_paragraphs: bool,
+
     /// 页码过滤（仅解析指定页面，0-indexed）
     /// 由 CLI --pages 参数设置，不通过配置文件设置
     #[serde(skip)]
@@ -348,6 +365,10 @@ impl Default for Config {
             formula_confidence_threshold: default_formula_confidence(),
             formula_input_size: default_formula_input_size(),
             formula_render_width: default_formula_render_width(),
+            postprocess_enabled: true,
+            remove_watermark: true,
+            separate_footnotes: false,
+            merge_cross_page_paragraphs: true,
             page_indices: None,
         }
     }

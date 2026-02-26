@@ -22,6 +22,7 @@ pub mod layout;
 pub mod mem_track;
 pub mod ocr;
 pub mod pipeline;
+pub mod postprocess;
 pub mod render;
 pub mod scoring;
 pub mod store;
