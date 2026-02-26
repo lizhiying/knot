@@ -55,8 +55,8 @@ impl PostProcessor for NoiseBlockFilter {
     fn process_page(&self, page: &mut PageIR, _config: &Config) {
         let before = page.blocks.len();
         page.blocks.retain(|b| {
-            // 保留有角色标注的块（Header/Footer/Title 等不过滤）
-            if !matches!(b.role, BlockRole::Body | BlockRole::Unknown) {
+            // PageNumber 不过滤（可能只有数字但有意义）
+            if matches!(b.role, BlockRole::PageNumber) {
                 return true;
             }
             let text = b.full_text();
@@ -185,10 +185,8 @@ mod tests {
         let filter = NoiseBlockFilter::new();
         filter.process_page(&mut page, &Config::default());
 
-        // 正常文本保留
-        assert_eq!(page.blocks.len(), 2);
+        // 正常文本保留，噪声块和空 Title 块被过滤
+        assert_eq!(page.blocks.len(), 1);
         assert_eq!(page.blocks[0].normalized_text, "normal");
-        // Title 角色即使为空也保留
-        assert_eq!(page.blocks[1].role, BlockRole::Title);
     }
 }
