@@ -17,6 +17,7 @@ pub mod error;
 pub mod figure;
 pub mod formula;
 pub mod hf_detect;
+pub mod hybrid;
 pub mod ir;
 pub mod layout;
 pub mod mem_track;

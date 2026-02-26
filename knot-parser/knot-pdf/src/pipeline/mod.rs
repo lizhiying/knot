@@ -1033,6 +1033,15 @@ impl Pipeline {
         let text_score = page_score.score;
         let is_scanned = text_score < self.config.scoring_text_threshold;
 
+        // M14: 解析策略选择
+        let parse_strategy = crate::hybrid::select_parse_strategy(text_score, &self.config);
+        log::debug!(
+            "Page {} strategy: {} (text_score={:.2})",
+            page_index,
+            parse_strategy.display_name(),
+            text_score
+        );
+
         let mut page_warnings = Vec::new();
         for flag in &page_score.reason_flags {
             page_warnings.push(format!("PageScore flag: {:?}", flag));
@@ -1067,6 +1076,7 @@ impl Pipeline {
             table_count: tables.len(),
             image_count: images.len(),
             ocr_quality_score: None,
+            parse_strategy: Some(parse_strategy.display_name().to_string()),
         };
 
         // 内存快照（处理后）

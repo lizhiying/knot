@@ -204,4 +204,7 @@ pub struct PageDiagnostics {
     pub table_count: usize,
     pub image_count: usize,
     pub ocr_quality_score: Option<f32>,
+    /// 使用的解析策略（M14: FastTrack / Enhanced / Full+VLM）
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parse_strategy: Option<String>,
 }

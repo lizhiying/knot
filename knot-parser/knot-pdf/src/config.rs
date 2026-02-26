@@ -193,10 +193,63 @@ pub struct Config {
     #[serde(default = "default_true")]
     pub merge_cross_page_paragraphs: bool,
 
+    // === 混合解析模式 (M14) ===
+    /// 解析模式（默认 Auto）
+    #[serde(default)]
+    pub parse_mode: ParseMode,
+
+    /// 是否启用 VLM 外部调用（默认 false）
+    #[serde(default)]
+    pub vlm_enabled: bool,
+
+    /// VLM API 地址
+    #[serde(default)]
+    pub vlm_api_url: Option<String>,
+
+    /// VLM API Key
+    #[serde(default)]
+    pub vlm_api_key: Option<String>,
+
+    /// VLM 模型名称
+    #[serde(default)]
+    pub vlm_model: Option<String>,
+
+    /// VLM 超时秒数（默认 30）
+    #[serde(default = "default_vlm_timeout")]
+    pub vlm_timeout_secs: u32,
+
+    /// VLM 最大重试次数（默认 2）
+    #[serde(default = "default_vlm_retries")]
+    pub vlm_max_retries: u32,
+
+    /// PageScore 低于此值时触发 VLM（默认 0.3）
+    #[serde(default = "default_vlm_score_threshold")]
+    pub vlm_score_threshold: f32,
+
     /// 页码过滤（仅解析指定页面，0-indexed）
     /// 由 CLI --pages 参数设置，不通过配置文件设置
     #[serde(skip)]
     pub page_indices: Option<Vec<usize>>,
+}
+
+/// 解析模式（M14）
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ParseMode {
+    /// 仅使用 Fast Track（纯文本提取 + 规则），最快
+    FastTrack,
+    /// Fast Track + 可选模型增强（版面/表格/公式模型），平衡
+    Enhanced,
+    /// 完整模式：Fast Track + 模型 + VLM 外部调用，最高质量
+    Full,
+    /// 自动选择：按页面特征决定（默认）
+    Auto,
+}
+
+impl Default for ParseMode {
+    fn default() -> Self {
+        Self::Auto
+    }
 }
 
 /// OCR 模式
@@ -320,6 +373,18 @@ fn default_formula_render_width() -> u32 {
     512
 }
 
+fn default_vlm_timeout() -> u32 {
+    30
+}
+
+fn default_vlm_retries() -> u32 {
+    2
+}
+
+fn default_vlm_score_threshold() -> f32 {
+    0.3
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -369,6 +434,14 @@ impl Default for Config {
             remove_watermark: true,
             separate_footnotes: false,
             merge_cross_page_paragraphs: true,
+            parse_mode: ParseMode::Auto,
+            vlm_enabled: false,
+            vlm_api_url: None,
+            vlm_api_key: None,
+            vlm_model: None,
+            vlm_timeout_secs: default_vlm_timeout(),
+            vlm_max_retries: default_vlm_retries(),
+            vlm_score_threshold: default_vlm_score_threshold(),
             page_indices: None,
         }
     }
