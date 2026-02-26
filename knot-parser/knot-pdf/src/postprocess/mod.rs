@@ -7,6 +7,7 @@ pub mod chart_text;
 pub mod footnote;
 pub mod list;
 pub mod noise;
+pub mod orphan;
 pub mod paragraph;
 pub mod url;
 pub mod watermark;
@@ -43,13 +44,15 @@ impl PostProcessPipeline {
         pipeline.add(Box::new(noise::NoiseBlockFilter::new()));
         // 2. 水印检测与过滤
         pipeline.add(Box::new(watermark::WatermarkFilter::new()));
-        // 3. 图表数据标签过滤（在脚注之前，避免数字标签干扰）
+        // 3. 孤儿块合并（将断裂的续写短块合回前一块）
+        pipeline.add(Box::new(orphan::OrphanBlockMerger::new()));
+        // 4. 图表数据标签过滤
         pipeline.add(Box::new(chart_text::ChartTextFilter::new()));
-        // 4. 脚注检测与分离
+        // 5. 脚注检测与分离
         pipeline.add(Box::new(footnote::FootnoteDetector::new()));
-        // 5. 列表识别增强
+        // 6. 列表识别增强
         pipeline.add(Box::new(list::ListDetector::new()));
-        // 6. URL 碎片修复
+        // 7. URL 碎片修复
         pipeline.add(Box::new(url::UrlFixer::new()));
         pipeline
     }
