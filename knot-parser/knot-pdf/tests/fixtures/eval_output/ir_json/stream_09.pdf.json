@@ -707,10 +707,10 @@
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 16,
+        "extract_ms": 28,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24412160,
+        "peak_rss_bytes": 21315584,
         "rss_delta_bytes": 0
       }
     }

@@ -1946,11 +1946,11 @@
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 50,
+        "extract_ms": 48,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 19447808,
-        "rss_delta_bytes": 9142272
+        "peak_rss_bytes": 17432576,
+        "rss_delta_bytes": 7553024
       }
     }
   ],

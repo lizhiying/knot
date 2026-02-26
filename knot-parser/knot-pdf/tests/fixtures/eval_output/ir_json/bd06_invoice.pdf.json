@@ -22,80 +22,6 @@
         {
           "block_id": "blk_0",
           "bbox": {
-            "x": 470.72,
-            "y": 32.75,
-            "width": 93.379974,
-            "height": 41.119995
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "INVOICE",
-                  "font_size": 18.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 490.08,
-                "y": 32.75,
-                "width": 74.01596,
-                "height": 18.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Invoice #: INV-29747",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 470.72,
-                "y": 63.869995,
-                "width": 93.379974,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "INVOICE Invoice #: INV-29747"
-        },
-        {
-          "block_id": "blk_1",
-          "bbox": {
-            "x": 486.28,
-            "y": 80.869995,
-            "width": 77.81998,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Date: 2024-06-15",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 486.28,
-                "y": 80.869995,
-                "width": 77.81998,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Date: 2024-06-15"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
             "x": 131.45,
             "y": 129.06,
             "width": 20.559998,
@@ -123,7 +49,7 @@
           "normalized_text": "Item"
         },
         {
-          "block_id": "blk_3",
+          "block_id": "blk_1",
           "bbox": {
             "x": 275.13,
             "y": 129.06,
@@ -152,7 +78,7 @@
           "normalized_text": "Qty"
         },
         {
-          "block_id": "blk_4",
+          "block_id": "blk_2",
           "bbox": {
             "x": 338.08,
             "y": 129.06,
@@ -181,36 +107,7 @@
           "normalized_text": "Unit Price"
         },
         {
-          "block_id": "blk_5",
-          "bbox": {
-            "x": 448.68,
-            "y": 129.06,
-            "width": 26.109985,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Total",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 448.68,
-                "y": 129.06,
-                "width": 26.109985,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Total"
-        },
-        {
-          "block_id": "blk_6",
+          "block_id": "blk_3",
           "bbox": {
             "x": 31.18,
             "y": 150.32,
@@ -239,7 +136,7 @@
           "normalized_text": "Software License"
         },
         {
-          "block_id": "blk_7",
+          "block_id": "blk_4",
           "bbox": {
             "x": 377.61,
             "y": 150.32,
@@ -268,36 +165,7 @@
           "normalized_text": "$2,430"
         },
         {
-          "block_id": "blk_8",
-          "bbox": {
-            "x": 471.26,
-            "y": 150.32,
-            "width": 36.139984,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$19,440",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 471.26,
-                "y": 150.32,
-                "width": 36.139984,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$19,440"
-        },
-        {
-          "block_id": "blk_9",
+          "block_id": "blk_5",
           "bbox": {
             "x": 31.18,
             "y": 170.17004,
@@ -326,7 +194,7 @@
           "normalized_text": "Support Plan"
         },
         {
-          "block_id": "blk_10",
+          "block_id": "blk_6",
           "bbox": {
             "x": 377.61,
             "y": 170.17004,
@@ -355,36 +223,7 @@
           "normalized_text": "$2,372"
         },
         {
-          "block_id": "blk_11",
-          "bbox": {
-            "x": 471.26,
-            "y": 170.17004,
-            "width": 36.139984,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$14,232",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 471.26,
-                "y": 170.17004,
-                "width": 36.139984,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$14,232"
-        },
-        {
-          "block_id": "blk_12",
+          "block_id": "blk_7",
           "bbox": {
             "x": 31.18,
             "y": 190.01001,
@@ -413,7 +252,7 @@
           "normalized_text": "Training (3 days)"
         },
         {
-          "block_id": "blk_13",
+          "block_id": "blk_8",
           "bbox": {
             "x": 377.61,
             "y": 190.01001,
@@ -442,36 +281,7 @@
           "normalized_text": "$2,102"
         },
         {
-          "block_id": "blk_14",
-          "bbox": {
-            "x": 476.82,
-            "y": 190.01001,
-            "width": 30.579987,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$4,204",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 476.82,
-                "y": 190.01001,
-                "width": 30.579987,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$4,204"
-        },
-        {
-          "block_id": "blk_15",
+          "block_id": "blk_9",
           "bbox": {
             "x": 31.18,
             "y": 209.85004,
@@ -500,7 +310,7 @@
           "normalized_text": "Custom Integration"
         },
         {
-          "block_id": "blk_16",
+          "block_id": "blk_10",
           "bbox": {
             "x": 377.61,
             "y": 209.85004,
@@ -529,36 +339,7 @@
           "normalized_text": "$2,460"
         },
         {
-          "block_id": "blk_17",
-          "bbox": {
-            "x": 471.26,
-            "y": 209.85004,
-            "width": 36.139984,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$12,300",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 471.26,
-                "y": 209.85004,
-                "width": 36.139984,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$12,300"
-        },
-        {
-          "block_id": "blk_18",
+          "block_id": "blk_11",
           "bbox": {
             "x": 31.18,
             "y": 229.69,
@@ -633,6 +414,225 @@
             }
           ],
           "normalized_text": "Subtotal: Tax (8%): TOTAL: Data Migration 8 $2,659"
+        },
+        {
+          "block_id": "blk_12",
+          "bbox": {
+            "x": 470.72,
+            "y": 32.75,
+            "width": 93.379974,
+            "height": 41.119995
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "INVOICE",
+                  "font_size": 18.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 490.08,
+                "y": 32.75,
+                "width": 74.01596,
+                "height": 18.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Invoice #: INV-29747",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 470.72,
+                "y": 63.869995,
+                "width": 93.379974,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "INVOICE Invoice #: INV-29747"
+        },
+        {
+          "block_id": "blk_13",
+          "bbox": {
+            "x": 486.28,
+            "y": 80.869995,
+            "width": 77.81998,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Date: 2024-06-15",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 486.28,
+                "y": 80.869995,
+                "width": 77.81998,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Date: 2024-06-15"
+        },
+        {
+          "block_id": "blk_14",
+          "bbox": {
+            "x": 448.68,
+            "y": 129.06,
+            "width": 26.109985,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Total",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 448.68,
+                "y": 129.06,
+                "width": 26.109985,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "Total"
+        },
+        {
+          "block_id": "blk_15",
+          "bbox": {
+            "x": 471.26,
+            "y": 150.32,
+            "width": 36.139984,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$19,440",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 471.26,
+                "y": 150.32,
+                "width": 36.139984,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$19,440"
+        },
+        {
+          "block_id": "blk_16",
+          "bbox": {
+            "x": 471.26,
+            "y": 170.17004,
+            "width": 36.139984,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$14,232",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 471.26,
+                "y": 170.17004,
+                "width": 36.139984,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$14,232"
+        },
+        {
+          "block_id": "blk_17",
+          "bbox": {
+            "x": 476.82,
+            "y": 190.01001,
+            "width": 30.579987,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$4,204",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 476.82,
+                "y": 190.01001,
+                "width": 30.579987,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$4,204"
+        },
+        {
+          "block_id": "blk_18",
+          "bbox": {
+            "x": 471.26,
+            "y": 209.85004,
+            "width": 36.139984,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "$12,300",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 471.26,
+                "y": 209.85004,
+                "width": 36.139984,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "$12,300"
         },
         {
           "block_id": "blk_19",
@@ -938,10 +938,10 @@
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 20,
+        "extract_ms": 19,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24281088,
+        "peak_rss_bytes": 21315584,
         "rss_delta_bytes": 0
       }
     }

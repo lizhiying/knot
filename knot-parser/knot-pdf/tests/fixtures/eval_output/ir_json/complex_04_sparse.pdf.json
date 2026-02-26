@@ -109,9 +109,9 @@
         {
           "block_id": "blk_3",
           "bbox": {
-            "x": 256.62,
-            "y": 55.340027,
-            "width": 25.343994,
+            "x": 112.99,
+            "y": 175.82,
+            "width": 8.895996,
             "height": 8.0
           },
           "role": "Body",
@@ -119,28 +119,28 @@
             {
               "spans": [
                 {
-                  "text": "Field 3",
+                  "text": "43",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 256.62,
-                "y": 55.340027,
-                "width": 25.343994,
+                "x": 112.99,
+                "y": 175.82,
+                "width": 8.895996,
                 "height": 8.0
               }
             }
           ],
-          "normalized_text": "Field 3"
+          "normalized_text": "43"
         },
         {
           "block_id": "blk_4",
           "bbox": {
-            "x": 353.0,
-            "y": 55.340027,
-            "width": 25.343994,
+            "x": 108.55,
+            "y": 192.83002,
+            "width": 13.344002,
             "height": 8.0
           },
           "role": "Body",
@@ -148,28 +148,28 @@
             {
               "spans": [
                 {
-                  "text": "Field 4",
+                  "text": "704",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 353.0,
-                "y": 55.340027,
-                "width": 25.343994,
+                "x": 108.55,
+                "y": 192.83002,
+                "width": 13.344002,
                 "height": 8.0
               }
             }
           ],
-          "normalized_text": "Field 4"
+          "normalized_text": "704"
         },
         {
           "block_id": "blk_5",
           "bbox": {
-            "x": 449.38,
-            "y": 55.340027,
-            "width": 25.343994,
+            "x": 108.55,
+            "y": 209.83002,
+            "width": 13.344002,
             "height": 8.0
           },
           "role": "Body",
@@ -177,21 +177,21 @@
             {
               "spans": [
                 {
-                  "text": "Field 5",
+                  "text": "951",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 449.38,
-                "y": 55.340027,
-                "width": 25.343994,
+                "x": 108.55,
+                "y": 209.83002,
+                "width": 13.344002,
                 "height": 8.0
               }
             }
           ],
-          "normalized_text": "Field 5"
+          "normalized_text": "951"
         },
         {
           "block_id": "blk_6",
@@ -225,35 +225,6 @@
         {
           "block_id": "blk_7",
           "bbox": {
-            "x": 397.68,
-            "y": 73.77002,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "748",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 397.68,
-                "y": 73.77002,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "748"
-        },
-        {
-          "block_id": "blk_8",
-          "bbox": {
             "x": 204.92,
             "y": 90.78003,
             "width": 13.343994,
@@ -281,65 +252,7 @@
           "normalized_text": "836"
         },
         {
-          "block_id": "blk_9",
-          "bbox": {
-            "x": 397.68,
-            "y": 107.79004,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "603",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 397.68,
-                "y": 107.79004,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "603"
-        },
-        {
-          "block_id": "blk_10",
-          "bbox": {
-            "x": 494.06,
-            "y": 107.79004,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "174",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 494.06,
-                "y": 107.79004,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "174"
-        },
-        {
-          "block_id": "blk_11",
+          "block_id": "blk_8",
           "bbox": {
             "x": 204.92,
             "y": 124.79004,
@@ -400,7 +313,181 @@
           "normalized_text": "706 987 890"
         },
         {
+          "block_id": "blk_9",
+          "bbox": {
+            "x": 256.62,
+            "y": 55.340027,
+            "width": 25.343994,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Field 3",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 256.62,
+                "y": 55.340027,
+                "width": 25.343994,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Field 3"
+        },
+        {
+          "block_id": "blk_10",
+          "bbox": {
+            "x": 353.0,
+            "y": 55.340027,
+            "width": 25.343994,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Field 4",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 353.0,
+                "y": 55.340027,
+                "width": 25.343994,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Field 4"
+        },
+        {
+          "block_id": "blk_11",
+          "bbox": {
+            "x": 397.68,
+            "y": 73.77002,
+            "width": 13.343994,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "748",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 397.68,
+                "y": 73.77002,
+                "width": 13.343994,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "748"
+        },
+        {
           "block_id": "blk_12",
+          "bbox": {
+            "x": 449.38,
+            "y": 55.340027,
+            "width": 25.343994,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Field 5",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 449.38,
+                "y": 55.340027,
+                "width": 25.343994,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Field 5"
+        },
+        {
+          "block_id": "blk_13",
+          "bbox": {
+            "x": 397.68,
+            "y": 107.79004,
+            "width": 13.343994,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "603",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 397.68,
+                "y": 107.79004,
+                "width": 13.343994,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "603"
+        },
+        {
+          "block_id": "blk_14",
+          "bbox": {
+            "x": 494.06,
+            "y": 107.79004,
+            "width": 13.343994,
+            "height": 8.0
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "174",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 494.06,
+                "y": 107.79004,
+                "width": 13.343994,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "174"
+        },
+        {
+          "block_id": "blk_15",
           "bbox": {
             "x": 301.3,
             "y": 124.79004,
@@ -459,93 +546,6 @@
             }
           ],
           "normalized_text": "457 172 576 674"
-        },
-        {
-          "block_id": "blk_13",
-          "bbox": {
-            "x": 112.99,
-            "y": 175.82,
-            "width": 8.895996,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "43",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 112.99,
-                "y": 175.82,
-                "width": 8.895996,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "43"
-        },
-        {
-          "block_id": "blk_14",
-          "bbox": {
-            "x": 108.55,
-            "y": 192.83002,
-            "width": 13.344002,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "704",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 108.55,
-                "y": 192.83002,
-                "width": 13.344002,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "704"
-        },
-        {
-          "block_id": "blk_15",
-          "bbox": {
-            "x": 108.55,
-            "y": 209.83002,
-            "width": 13.344002,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "951",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 108.55,
-                "y": 209.83002,
-                "width": 13.344002,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "951"
         },
         {
           "block_id": "blk_16",
@@ -714,11 +714,11 @@
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 19,
+        "extract_ms": 28,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24412160,
-        "rss_delta_bytes": 0
+        "peak_rss_bytes": 21315584,
+        "rss_delta_bytes": 49152
       }
     }
   ],

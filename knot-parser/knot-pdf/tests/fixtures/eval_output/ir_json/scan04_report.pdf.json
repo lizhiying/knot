@@ -32,7 +32,7 @@
             {
               "spans": [
                 {
-                  "text": "[[[[[SSSSScccccaaaaannnnnnnnnneeeeeddddd     iiiiimmmmmaaaaagggggeeeee     cccccooooonnnnnttttteeeeennnnnttttt     -----     pppppaaaaagggggeeeee     12345]]]]]",
+                  "text": "[Scanned image content - page 1]",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -46,7 +46,7 @@
               }
             }
           ],
-          "normalized_text": "[[[[[SSSSScccccaaaaannnnnnnnnneeeeeddddd     iiiiimmmmmaaaaagggggeeeee     cccccooooonnnnnttttteeeeennnnnttttt     -----     pppppaaaaagggggeeeee     12345]]]]]"
+          "normalized_text": "[Scanned image content - page 1]"
         }
       ],
       "tables": [],
@@ -59,15 +59,15 @@
         "image_count": 0,
         "ocr_quality_score": null
       },
-      "text_score": 0.93068933,
+      "text_score": 0.9146251,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 42,
+        "extract_ms": 40,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24068096,
-        "rss_delta_bytes": 327680
+        "peak_rss_bytes": 20758528,
+        "rss_delta_bytes": 311296
       }
     },
     {
@@ -91,7 +91,7 @@
             {
               "spans": [
                 {
-                  "text": "[[[[[SSSSScccccaaaaannnnnnnnnneeeeeddddd     iiiiimmmmmaaaaagggggeeeee     cccccooooonnnnnttttteeeeennnnnttttt     -----     pppppaaaaagggggeeeee     12345]]]]]",
+                  "text": "[Scanned image content - page 2]",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -105,7 +105,7 @@
               }
             }
           ],
-          "normalized_text": "[[[[[SSSSScccccaaaaannnnnnnnnneeeeeddddd     iiiiimmmmmaaaaagggggeeeee     cccccooooonnnnnttttteeeeennnnnttttt     -----     pppppaaaaagggggeeeee     12345]]]]]"
+          "normalized_text": "[Scanned image content - page 2]"
         }
       ],
       "tables": [],
@@ -118,15 +118,15 @@
         "image_count": 0,
         "ocr_quality_score": null
       },
-      "text_score": 0.93068933,
+      "text_score": 0.9146251,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 38,
+        "extract_ms": 42,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24281088,
-        "rss_delta_bytes": 212992
+        "peak_rss_bytes": 20987904,
+        "rss_delta_bytes": 229376
       }
     },
     {
@@ -150,7 +150,7 @@
             {
               "spans": [
                 {
-                  "text": "[[[[[SSSSScccccaaaaannnnnnnnnneeeeeddddd     iiiiimmmmmaaaaagggggeeeee     cccccooooonnnnnttttteeeeennnnnttttt     -----     pppppaaaaagggggeeeee     12345]]]]]",
+                  "text": "[Scanned image content - page 3]",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -164,7 +164,7 @@
               }
             }
           ],
-          "normalized_text": "[[[[[SSSSScccccaaaaannnnnnnnnneeeeeddddd     iiiiimmmmmaaaaagggggeeeee     cccccooooonnnnnttttteeeeennnnnttttt     -----     pppppaaaaagggggeeeee     12345]]]]]"
+          "normalized_text": "[Scanned image content - page 3]"
         }
       ],
       "tables": [],
@@ -177,15 +177,15 @@
         "image_count": 0,
         "ocr_quality_score": null
       },
-      "text_score": 0.93068933,
+      "text_score": 0.9146251,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 38,
+        "extract_ms": 40,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24363008,
-        "rss_delta_bytes": 81920
+        "peak_rss_bytes": 21086208,
+        "rss_delta_bytes": 98304
       }
     },
     {
@@ -209,7 +209,7 @@
             {
               "spans": [
                 {
-                  "text": "[[[[[SSSSScccccaaaaannnnnnnnnneeeeeddddd     iiiiimmmmmaaaaagggggeeeee     cccccooooonnnnnttttteeeeennnnnttttt     -----     pppppaaaaagggggeeeee     12345]]]]]",
+                  "text": "[Scanned image content - page 4]",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -223,7 +223,7 @@
               }
             }
           ],
-          "normalized_text": "[[[[[SSSSScccccaaaaannnnnnnnnneeeeeddddd     iiiiimmmmmaaaaagggggeeeee     cccccooooonnnnnttttteeeeennnnnttttt     -----     pppppaaaaagggggeeeee     12345]]]]]"
+          "normalized_text": "[Scanned image content - page 4]"
         }
       ],
       "tables": [],
@@ -236,15 +236,15 @@
         "image_count": 0,
         "ocr_quality_score": null
       },
-      "text_score": 0.93068933,
+      "text_score": 0.9146251,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 41,
+        "extract_ms": 42,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24412160,
-        "rss_delta_bytes": 49152
+        "peak_rss_bytes": 21102592,
+        "rss_delta_bytes": 16384
       }
     },
     {
@@ -268,7 +268,7 @@
             {
               "spans": [
                 {
-                  "text": "[[[[[SSSSScccccaaaaannnnnnnnnneeeeeddddd     iiiiimmmmmaaaaagggggeeeee     cccccooooonnnnnttttteeeeennnnnttttt     -----     pppppaaaaagggggeeeee     12345]]]]]",
+                  "text": "[Scanned image content - page 5]",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -282,7 +282,7 @@
               }
             }
           ],
-          "normalized_text": "[[[[[SSSSScccccaaaaannnnnnnnnneeeeeddddd     iiiiimmmmmaaaaagggggeeeee     cccccooooonnnnnttttteeeeennnnnttttt     -----     pppppaaaaagggggeeeee     12345]]]]]"
+          "normalized_text": "[Scanned image content - page 5]"
         }
       ],
       "tables": [],
@@ -295,15 +295,15 @@
         "image_count": 0,
         "ocr_quality_score": null
       },
-      "text_score": 0.93068933,
+      "text_score": 0.9146251,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 34,
+        "extract_ms": 50,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24412160,
-        "rss_delta_bytes": 0
+        "peak_rss_bytes": 21168128,
+        "rss_delta_bytes": 65536
       }
     }
   ],

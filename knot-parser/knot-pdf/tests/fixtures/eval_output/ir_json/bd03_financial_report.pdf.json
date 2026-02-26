@@ -32,7 +32,7 @@
             {
               "spans": [
                 {
-                  "text": "IIIItttteeeemmmm",
+                  "text": "Item",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -48,7 +48,7 @@
             {
               "spans": [
                 {
-                  "text": "RRRReeeevvvveeeennnnuuuueeee",
+                  "text": "Revenue",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -64,7 +64,7 @@
             {
               "spans": [
                 {
-                  "text": "CCCCOOOOGGGGSSSS",
+                  "text": "COGS",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -80,7 +80,7 @@
             {
               "spans": [
                 {
-                  "text": "GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt",
+                  "text": "Gross Profit",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -96,7 +96,7 @@
             {
               "spans": [
                 {
-                  "text": "OOOOppppEEEExxxx",
+                  "text": "OpEx",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -112,7 +112,7 @@
             {
               "spans": [
                 {
-                  "text": "EEEEBBBBIIIITTTTDDDDAAAA",
+                  "text": "EBITDA",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -128,7 +128,7 @@
             {
               "spans": [
                 {
-                  "text": "NNNNeeeetttt    IIIInnnnccccoooommmmeeee",
+                  "text": "Net Income",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -142,7 +142,7 @@
               }
             }
           ],
-          "normalized_text": "IIIItttteeeemmmm RRRReeeevvvveeeennnnuuuueeee CCCCOOOOGGGGSSSS GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt OOOOppppEEEExxxx EEEEBBBBIIIITTTTDDDDAAAA NNNNeeeetttt    IIIInnnnccccoooommmmeeee"
+          "normalized_text": "Item Revenue COGS Gross Profit OpEx EBITDA Net Income"
         },
         {
           "block_id": "blk_2",
@@ -157,7 +157,7 @@
             {
               "spans": [
                 {
-                  "text": "AAAAccccttttuuuuaaaallll",
+                  "text": "Actual",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -173,23 +173,23 @@
             {
               "spans": [
                 {
-                  "text": "$$$$4947583,,,,733565905821",
+                  "text": "$7,765",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 262.28,
+                "x": 267.28,
                 "y": 101.420044,
-                "width": 32.526,
+                "width": 27.522003,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$84972299,,,,579606621161",
+                  "text": "$82,501",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -205,7 +205,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$65331441,,,,140061344413",
+                  "text": "$61,164",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -221,7 +221,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$97445418,,,,159060438814",
+                  "text": "$95,168",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -237,7 +237,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$15928326,,,,345714214369",
+                  "text": "$18,314",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -253,7 +253,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$52861604,,,,295750368373",
+                  "text": "$51,258",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -267,7 +267,7 @@
               }
             }
           ],
-          "normalized_text": "AAAAccccttttuuuuaaaallll $$$$4947583,,,,733565905821 $$$$84972299,,,,579606621161 $$$$65331441,,,,140061344413 $$$$97445418,,,,159060438814 $$$$15928326,,,,345714214369 $$$$52861604,,,,295750368373"
+          "normalized_text": "Actual $7,765 $82,501 $61,164 $95,168 $18,314 $51,258"
         },
         {
           "block_id": "blk_3",
@@ -282,7 +282,7 @@
             {
               "spans": [
                 {
-                  "text": "BBBBuuuuddddggggeeeetttt",
+                  "text": "Budget",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -298,7 +298,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$42285695,,,,946606152494",
+                  "text": "$45,902",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -314,7 +314,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$5532460,,,,670340425025",
+                  "text": "$54,700",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -330,7 +330,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$14666160,,,,353977756852",
+                  "text": "$16,376",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -346,7 +346,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$92717847,,,,518955332639",
+                  "text": "$97,552",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -362,7 +362,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$43542058,,,,912472835876",
+                  "text": "$42,975",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -378,7 +378,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$4175348,,,,447106856241",
+                  "text": "$43,462",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -392,7 +392,7 @@
               }
             }
           ],
-          "normalized_text": "BBBBuuuuddddggggeeeetttt $$$$42285695,,,,946606152494 $$$$5532460,,,,670340425025 $$$$14666160,,,,353977756852 $$$$92717847,,,,518955332639 $$$$43542058,,,,912472835876 $$$$4175348,,,,447106856241"
+          "normalized_text": "Budget $45,902 $54,700 $16,376 $97,552 $42,975 $43,462"
         },
         {
           "block_id": "blk_4",
@@ -407,7 +407,7 @@
             {
               "spans": [
                 {
-                  "text": "VVVVaaaarrrriiiiaaaannnncccceeee",
+                  "text": "Variance",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -423,7 +423,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$--16348882,,,,871197354373",
+                  "text": "$-38,137",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -439,55 +439,55 @@
             {
               "spans": [
                 {
-                  "text": "$$$$-29417793,,,,832202981161",
+                  "text": "$27,801",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 118.420044,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$--41324229,,,,783983408649",
+                  "text": "$44,788",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 135.43,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$-433-6022,,,,303859892542",
+                  "text": "$-2,384",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 462.71,
                 "y": 152.44,
-                "width": 35.52301,
+                "width": 30.519012,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$--23223741,,,,326713615917",
+                  "text": "$-24,661",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -503,21 +503,21 @@
             {
               "spans": [
                 {
-                  "text": "$$$-26$11573,,,,477395987368",
+                  "text": "$7,796",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 465.71,
                 "y": 186.46002,
-                "width": 35.52301,
+                "width": 27.522003,
                 "height": 9.0
               }
             }
           ],
-          "normalized_text": "VVVVaaaarrrriiiiaaaannnncccceeee $$$$--16348882,,,,871197354373 $$$$-29417793,,,,832202981161 $$$$--41324229,,,,783983408649 $$$$-433-6022,,,,303859892542 $$$$--23223741,,,,326713615917 $$$-26$11573,,,,477395987368"
+          "normalized_text": "Variance $-38,137 $27,801 $44,788 $-2,384 $-24,661 $7,796"
         }
       ],
       "tables": [],
@@ -530,14 +530,14 @@
         "image_count": 0,
         "ocr_quality_score": null
       },
-      "text_score": 0.94033957,
+      "text_score": 0.94023955,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 53,
+        "extract_ms": 55,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24068096,
+        "peak_rss_bytes": 20758528,
         "rss_delta_bytes": 327680
       }
     },
@@ -562,23 +562,7 @@
             {
               "spans": [
                 {
-                  "text": "IIIItttteeeemmmm",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 104.13,
-                "y": 82.98999,
-                "width": 18.503998,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "RRRReeeevvvveeeennnnuuuueeee",
+                  "text": "Revenue",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -594,7 +578,7 @@
             {
               "spans": [
                 {
-                  "text": "CCCCOOOOGGGGSSSS",
+                  "text": "COGS",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -610,7 +594,7 @@
             {
               "spans": [
                 {
-                  "text": "GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt",
+                  "text": "Gross Profit",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -626,7 +610,7 @@
             {
               "spans": [
                 {
-                  "text": "OOOOppppEEEExxxx",
+                  "text": "OpEx",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -642,7 +626,7 @@
             {
               "spans": [
                 {
-                  "text": "EEEEBBBBIIIITTTTDDDDAAAA",
+                  "text": "EBITDA",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -658,7 +642,7 @@
             {
               "spans": [
                 {
-                  "text": "NNNNeeeetttt    IIIInnnnccccoooommmmeeee",
+                  "text": "Net Income",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -670,9 +654,25 @@
                 "width": 46.017,
                 "height": 9.0
               }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 104.13,
+                "y": 82.98999,
+                "width": 18.503998,
+                "height": 9.0
+              }
             }
           ],
-          "normalized_text": "IIIItttteeeemmmm RRRReeeevvvveeeennnnuuuueeee CCCCOOOOGGGGSSSS GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt OOOOppppEEEExxxx EEEEBBBBIIIITTTTDDDDAAAA NNNNeeeetttt    IIIInnnnccccoooommmmeeee"
+          "normalized_text": "Revenue COGS Gross Profit OpEx EBITDA Net Income Item"
         },
         {
           "block_id": "blk_2",
@@ -687,23 +687,7 @@
             {
               "spans": [
                 {
-                  "text": "AAAAccccttttuuuuaaaallll",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 234.28,
-                "y": 82.98999,
-                "width": 29.502014,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$$$$4947583,,,,733565905821",
+                  "text": "$45,358",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -719,7 +703,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$84972299,,,,579606621161",
+                  "text": "$42,761",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -735,7 +719,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$65331441,,,,140061344413",
+                  "text": "$54,414",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -751,7 +735,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$97445418,,,,159060438814",
+                  "text": "$74,508",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -767,7 +751,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$15928326,,,,345714214369",
+                  "text": "$53,443",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -783,7 +767,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$52861604,,,,295750368373",
+                  "text": "$26,903",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -795,9 +779,25 @@
                 "width": 32.526,
                 "height": 9.0
               }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Actual",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 234.28,
+                "y": 82.98999,
+                "width": 29.502014,
+                "height": 9.0
+              }
             }
           ],
-          "normalized_text": "AAAAccccttttuuuuaaaallll $$$$4947583,,,,733565905821 $$$$84972299,,,,579606621161 $$$$65331441,,,,140061344413 $$$$97445418,,,,159060438814 $$$$15928326,,,,345714214369 $$$$52861604,,,,295750368373"
+          "normalized_text": "$45,358 $42,761 $54,414 $74,508 $53,443 $26,903 Actual"
         },
         {
           "block_id": "blk_3",
@@ -812,23 +812,7 @@
             {
               "spans": [
                 {
-                  "text": "BBBBuuuuddddggggeeeetttt",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 331.75,
-                "y": 82.98999,
-                "width": 32.498993,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$$$$42285695,,,,946606152494",
+                  "text": "$26,464",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -844,7 +828,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$5532460,,,,670340425025",
+                  "text": "$56,042",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -860,7 +844,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$14666160,,,,353977756852",
+                  "text": "$41,578",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -876,7 +860,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$92717847,,,,518955332639",
+                  "text": "$28,156",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -892,7 +876,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$43542058,,,,912472835876",
+                  "text": "$30,128",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -908,21 +892,37 @@
             {
               "spans": [
                 {
-                  "text": "$$$$4175348,,,,447106856241",
+                  "text": "$5,406",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 361.49,
+                "x": 366.49,
                 "y": 186.46002,
-                "width": 32.526,
+                "width": 27.522003,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Budget",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 331.75,
+                "y": 82.98999,
+                "width": 32.498993,
                 "height": 9.0
               }
             }
           ],
-          "normalized_text": "BBBBuuuuddddggggeeeetttt $$$$42285695,,,,946606152494 $$$$5532460,,,,670340425025 $$$$14666160,,,,353977756852 $$$$92717847,,,,518955332639 $$$$43542058,,,,912472835876 $$$$4175348,,,,447106856241"
+          "normalized_text": "$26,464 $56,042 $41,578 $28,156 $30,128 $5,406 Budget"
         },
         {
           "block_id": "blk_4",
@@ -937,39 +937,23 @@
             {
               "spans": [
                 {
-                  "text": "VVVVaaaarrrriiiiaaaannnncccceeee",
+                  "text": "$18,894",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 427.7,
-                "y": 82.98999,
-                "width": 37.520996,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$$$$--16348882,,,,871197354373",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 101.420044,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$-29417793,,,,832202981161",
+                  "text": "$-13,281",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -985,69 +969,85 @@
             {
               "spans": [
                 {
-                  "text": "$$$$--41324229,,,,783983408649",
+                  "text": "$12,836",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 135.43,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$-433-6022,,,,303859892542",
+                  "text": "$46,352",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 152.44,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$--23223741,,,,326713615917",
+                  "text": "$23,315",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 169.45001,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$-26$11573,,,,477395987368",
+                  "text": "$21,497",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 186.46002,
-                "width": 35.52301,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Variance",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 427.7,
+                "y": 82.98999,
+                "width": 37.520996,
                 "height": 9.0
               }
             }
           ],
-          "normalized_text": "VVVVaaaarrrriiiiaaaannnncccceeee $$$$--16348882,,,,871197354373 $$$$-29417793,,,,832202981161 $$$$--41324229,,,,783983408649 $$$$-433-6022,,,,303859892542 $$$$--23223741,,,,326713615917 $$$-26$11573,,,,477395987368"
+          "normalized_text": "$18,894 $-13,281 $12,836 $46,352 $23,315 $21,497 Variance"
         }
       ],
       "tables": [],
@@ -1060,15 +1060,15 @@
         "image_count": 0,
         "ocr_quality_score": null
       },
-      "text_score": 0.94033957,
+      "text_score": 0.9388195,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 60,
+        "extract_ms": 53,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24363008,
-        "rss_delta_bytes": 294912
+        "peak_rss_bytes": 21037056,
+        "rss_delta_bytes": 278528
       }
     },
     {
@@ -1092,23 +1092,7 @@
             {
               "spans": [
                 {
-                  "text": "IIIItttteeeemmmm",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 104.13,
-                "y": 82.98999,
-                "width": 18.503998,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "RRRReeeevvvveeeennnnuuuueeee",
+                  "text": "Revenue",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1124,7 +1108,7 @@
             {
               "spans": [
                 {
-                  "text": "CCCCOOOOGGGGSSSS",
+                  "text": "COGS",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1140,7 +1124,7 @@
             {
               "spans": [
                 {
-                  "text": "GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt",
+                  "text": "Gross Profit",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1156,7 +1140,7 @@
             {
               "spans": [
                 {
-                  "text": "OOOOppppEEEExxxx",
+                  "text": "OpEx",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1172,7 +1156,7 @@
             {
               "spans": [
                 {
-                  "text": "EEEEBBBBIIIITTTTDDDDAAAA",
+                  "text": "EBITDA",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1188,7 +1172,7 @@
             {
               "spans": [
                 {
-                  "text": "NNNNeeeetttt    IIIInnnnccccoooommmmeeee",
+                  "text": "Net Income",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1200,9 +1184,25 @@
                 "width": 46.017,
                 "height": 9.0
               }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Item",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 104.13,
+                "y": 82.98999,
+                "width": 18.503998,
+                "height": 9.0
+              }
             }
           ],
-          "normalized_text": "IIIItttteeeemmmm RRRReeeevvvveeeennnnuuuueeee CCCCOOOOGGGGSSSS GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt OOOOppppEEEExxxx EEEEBBBBIIIITTTTDDDDAAAA NNNNeeeetttt    IIIInnnnccccoooommmmeeee"
+          "normalized_text": "Revenue COGS Gross Profit OpEx EBITDA Net Income Item"
         },
         {
           "block_id": "blk_2",
@@ -1217,23 +1217,7 @@
             {
               "spans": [
                 {
-                  "text": "AAAAccccttttuuuuaaaallll",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 234.28,
-                "y": 82.98999,
-                "width": 29.502014,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$$$$4947583,,,,733565905821",
+                  "text": "$98,392",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1249,7 +1233,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$84972299,,,,579606621161",
+                  "text": "$99,966",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1265,7 +1249,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$65331441,,,,140061344413",
+                  "text": "$34,031",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1281,7 +1265,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$97445418,,,,159060438814",
+                  "text": "$41,941",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1297,7 +1281,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$15928326,,,,345714214369",
+                  "text": "$92,526",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1313,7 +1297,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$52861604,,,,295750368373",
+                  "text": "$80,537",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1325,9 +1309,25 @@
                 "width": 32.526,
                 "height": 9.0
               }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Actual",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 234.28,
+                "y": 82.98999,
+                "width": 29.502014,
+                "height": 9.0
+              }
             }
           ],
-          "normalized_text": "AAAAccccttttuuuuaaaallll $$$$4947583,,,,733565905821 $$$$84972299,,,,579606621161 $$$$65331441,,,,140061344413 $$$$97445418,,,,159060438814 $$$$15928326,,,,345714214369 $$$$52861604,,,,295750368373"
+          "normalized_text": "$98,392 $99,966 $34,031 $41,941 $92,526 $80,537 Actual"
         },
         {
           "block_id": "blk_3",
@@ -1342,23 +1342,7 @@
             {
               "spans": [
                 {
-                  "text": "BBBBuuuuddddggggeeeetttt",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 331.75,
-                "y": 82.98999,
-                "width": 32.498993,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$$$$42285695,,,,946606152494",
+                  "text": "$29,619",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1374,23 +1358,23 @@
             {
               "spans": [
                 {
-                  "text": "$$$$5532460,,,,670340425025",
+                  "text": "$2,645",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 361.49,
+                "x": 366.49,
                 "y": 118.420044,
-                "width": 32.526,
+                "width": 27.522003,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$14666160,,,,353977756852",
+                  "text": "$66,375",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1406,7 +1390,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$92717847,,,,518955332639",
+                  "text": "$74,833",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1422,7 +1406,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$43542058,,,,912472835876",
+                  "text": "$55,287",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1438,7 +1422,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$4175348,,,,447106856241",
+                  "text": "$14,784",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1450,9 +1434,25 @@
                 "width": 32.526,
                 "height": 9.0
               }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Budget",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 331.75,
+                "y": 82.98999,
+                "width": 32.498993,
+                "height": 9.0
+              }
             }
           ],
-          "normalized_text": "BBBBuuuuddddggggeeeetttt $$$$42285695,,,,946606152494 $$$$5532460,,,,670340425025 $$$$14666160,,,,353977756852 $$$$92717847,,,,518955332639 $$$$43542058,,,,912472835876 $$$$4175348,,,,447106856241"
+          "normalized_text": "$29,619 $2,645 $66,375 $74,833 $55,287 $14,784 Budget"
         },
         {
           "block_id": "blk_4",
@@ -1467,55 +1467,39 @@
             {
               "spans": [
                 {
-                  "text": "VVVVaaaarrrriiiiaaaannnncccceeee",
+                  "text": "$68,773",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 427.7,
-                "y": 82.98999,
-                "width": 37.520996,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$$$$--16348882,,,,871197354373",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 101.420044,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$-29417793,,,,832202981161",
+                  "text": "$97,321",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 118.420044,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$--41324229,,,,783983408649",
+                  "text": "$-32,344",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1531,7 +1515,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$-433-6022,,,,303859892542",
+                  "text": "$-32,892",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1547,37 +1531,53 @@
             {
               "spans": [
                 {
-                  "text": "$$$$--23223741,,,,326713615917",
+                  "text": "$37,239",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 169.45001,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$-26$11573,,,,477395987368",
+                  "text": "$65,753",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 186.46002,
-                "width": 35.52301,
+                "width": 32.526,
+                "height": 9.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Variance",
+                  "font_size": 9.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 427.7,
+                "y": 82.98999,
+                "width": 37.520996,
                 "height": 9.0
               }
             }
           ],
-          "normalized_text": "VVVVaaaarrrriiiiaaaannnncccceeee $$$$--16348882,,,,871197354373 $$$$-29417793,,,,832202981161 $$$$--41324229,,,,783983408649 $$$$-433-6022,,,,303859892542 $$$$--23223741,,,,326713615917 $$$-26$11573,,,,477395987368"
+          "normalized_text": "$68,773 $97,321 $-32,344 $-32,892 $37,239 $65,753 Variance"
         }
       ],
       "tables": [],
@@ -1590,15 +1590,15 @@
         "image_count": 0,
         "ocr_quality_score": null
       },
-      "text_score": 0.94033957,
+      "text_score": 0.9394698,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 82,
+        "extract_ms": 59,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24412160,
-        "rss_delta_bytes": 49152
+        "peak_rss_bytes": 21102592,
+        "rss_delta_bytes": 65536
       }
     },
     {
@@ -1622,7 +1622,7 @@
             {
               "spans": [
                 {
-                  "text": "IIIItttteeeemmmm",
+                  "text": "Item",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1638,7 +1638,7 @@
             {
               "spans": [
                 {
-                  "text": "RRRReeeevvvveeeennnnuuuueeee",
+                  "text": "Revenue",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1654,7 +1654,7 @@
             {
               "spans": [
                 {
-                  "text": "CCCCOOOOGGGGSSSS",
+                  "text": "COGS",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1670,7 +1670,7 @@
             {
               "spans": [
                 {
-                  "text": "GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt",
+                  "text": "Gross Profit",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1686,7 +1686,7 @@
             {
               "spans": [
                 {
-                  "text": "OOOOppppEEEExxxx",
+                  "text": "OpEx",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1702,7 +1702,7 @@
             {
               "spans": [
                 {
-                  "text": "EEEEBBBBIIIITTTTDDDDAAAA",
+                  "text": "EBITDA",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1718,7 +1718,7 @@
             {
               "spans": [
                 {
-                  "text": "NNNNeeeetttt    IIIInnnnccccoooommmmeeee",
+                  "text": "Net Income",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1732,7 +1732,7 @@
               }
             }
           ],
-          "normalized_text": "IIIItttteeeemmmm RRRReeeevvvveeeennnnuuuueeee CCCCOOOOGGGGSSSS GGGGrrrroooossssssss    PPPPrrrrooooffffiiiitttt OOOOppppEEEExxxx EEEEBBBBIIIITTTTDDDDAAAA NNNNeeeetttt    IIIInnnnccccoooommmmeeee"
+          "normalized_text": "Item Revenue COGS Gross Profit OpEx EBITDA Net Income"
         },
         {
           "block_id": "blk_2",
@@ -1747,7 +1747,7 @@
             {
               "spans": [
                 {
-                  "text": "AAAAccccttttuuuuaaaallll",
+                  "text": "Actual",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1763,7 +1763,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$4947583,,,,733565905821",
+                  "text": "$43,501",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1779,7 +1779,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$84972299,,,,579606621161",
+                  "text": "$79,621",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1795,7 +1795,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$65331441,,,,140061344413",
+                  "text": "$31,043",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1811,7 +1811,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$97445418,,,,159060438814",
+                  "text": "$48,034",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1827,7 +1827,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$15928326,,,,345714214369",
+                  "text": "$26,719",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1843,7 +1843,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$52861604,,,,295750368373",
+                  "text": "$64,763",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1857,7 +1857,7 @@
               }
             }
           ],
-          "normalized_text": "AAAAccccttttuuuuaaaallll $$$$4947583,,,,733565905821 $$$$84972299,,,,579606621161 $$$$65331441,,,,140061344413 $$$$97445418,,,,159060438814 $$$$15928326,,,,345714214369 $$$$52861604,,,,295750368373"
+          "normalized_text": "Actual $43,501 $79,621 $31,043 $48,034 $26,719 $64,763"
         },
         {
           "block_id": "blk_3",
@@ -1872,7 +1872,7 @@
             {
               "spans": [
                 {
-                  "text": "BBBBuuuuddddggggeeeetttt",
+                  "text": "Budget",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1888,7 +1888,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$42285695,,,,946606152494",
+                  "text": "$85,654",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1904,7 +1904,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$5532460,,,,670340425025",
+                  "text": "$30,325",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1920,7 +1920,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$14666160,,,,353977756852",
+                  "text": "$60,952",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1936,7 +1936,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$92717847,,,,518955332639",
+                  "text": "$17,939",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1952,7 +1952,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$43542058,,,,912472835876",
+                  "text": "$48,436",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1968,7 +1968,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$4175348,,,,447106856241",
+                  "text": "$78,151",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -1982,7 +1982,7 @@
               }
             }
           ],
-          "normalized_text": "BBBBuuuuddddggggeeeetttt $$$$42285695,,,,946606152494 $$$$5532460,,,,670340425025 $$$$14666160,,,,353977756852 $$$$92717847,,,,518955332639 $$$$43542058,,,,912472835876 $$$$4175348,,,,447106856241"
+          "normalized_text": "Budget $85,654 $30,325 $60,952 $17,939 $48,436 $78,151"
         },
         {
           "block_id": "blk_4",
@@ -1997,7 +1997,7 @@
             {
               "spans": [
                 {
-                  "text": "VVVVaaaarrrriiiiaaaannnncccceeee",
+                  "text": "Variance",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -2013,7 +2013,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$$--16348882,,,,871197354373",
+                  "text": "$-42,153",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -2029,23 +2029,23 @@
             {
               "spans": [
                 {
-                  "text": "$$$$-29417793,,,,832202981161",
+                  "text": "$49,296",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 118.420044,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$--41324229,,,,783983408649",
+                  "text": "$-29,909",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -2061,23 +2061,23 @@
             {
               "spans": [
                 {
-                  "text": "$$$$-433-6022,,,,303859892542",
+                  "text": "$30,095",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 457.71,
+                "x": 460.7,
                 "y": 152.44,
-                "width": 35.52301,
+                "width": 32.526,
                 "height": 9.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "$$$$--23223741,,,,326713615917",
+                  "text": "$-21,717",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -2093,7 +2093,7 @@
             {
               "spans": [
                 {
-                  "text": "$$$-26$11573,,,,477395987368",
+                  "text": "$-13,388",
                   "font_size": 9.0,
                   "is_bold": false,
                   "font_name": null
@@ -2107,7 +2107,7 @@
               }
             }
           ],
-          "normalized_text": "VVVVaaaarrrriiiiaaaannnncccceeee $$$$--16348882,,,,871197354373 $$$$-29417793,,,,832202981161 $$$$--41324229,,,,783983408649 $$$$-433-6022,,,,303859892542 $$$$--23223741,,,,326713615917 $$$-26$11573,,,,477395987368"
+          "normalized_text": "Variance $-42,153 $49,296 $-29,909 $30,095 $-21,717 $-13,388"
         }
       ],
       "tables": [],
@@ -2120,15 +2120,15 @@
         "image_count": 0,
         "ocr_quality_score": null
       },
-      "text_score": 0.94033957,
+      "text_score": 0.94048357,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 105,
+        "extract_ms": 72,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24444928,
-        "rss_delta_bytes": 32768
+        "peak_rss_bytes": 21184512,
+        "rss_delta_bytes": 81920
       }
     }
   ],

@@ -1386,11 +1386,11 @@
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 53,
+        "extract_ms": 34,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 24068096,
-        "rss_delta_bytes": 327680
+        "peak_rss_bytes": 20725760,
+        "rss_delta_bytes": 278528
       }
     }
   ],

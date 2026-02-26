@@ -732,8 +732,8 @@
         "extract_ms": 12,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 23658496,
-        "rss_delta_bytes": 49152
+        "peak_rss_bytes": 20955136,
+        "rss_delta_bytes": 0
       }
     }
   ],
