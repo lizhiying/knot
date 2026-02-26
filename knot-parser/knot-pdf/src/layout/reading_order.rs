@@ -1105,17 +1105,42 @@ fn detect_sparse_column_grid(
         return None;
     }
 
-    // 选择支持行数最多的簇作为主要列分界
-    // （允许多个簇存在——页脚等行可能产生额外间隙）
-    let best_cluster = gap_clusters.iter().max_by_key(|(_, count)| *count).unwrap();
+    // 选择最佳列分界线
+    // 策略：当多个簇的支持行数接近时，优先选更靠近页面中心的间隙
+    // （真正的列分界通常在页面中部，而序号/缩进间距通常在页面左侧）
+    let page_center_x = _page_width / 2.0;
+    let max_count = gap_clusters.iter().map(|(_, c)| *c).max().unwrap();
+
+    // 候选簇：支持行数 >= max_count/2 且 >= 2
+    let candidates: Vec<&(f32, usize)> = gap_clusters
+        .iter()
+        .filter(|(_, count)| *count >= max_count.max(2) / 2 && *count >= 1)
+        .collect();
+
+    let best_cluster = if candidates.len() > 1 {
+        // 多个候选时，选最靠近页面中心的（距离加权）
+        candidates
+            .iter()
+            .max_by(|(x1, c1), (x2, c2)| {
+                // 综合评分：count 权重 + 距离中心的接近度
+                let score1 = *c1 as f32 * 2.0 - (*x1 - page_center_x).abs() / page_center_x;
+                let score2 = *c2 as f32 * 2.0 - (*x2 - page_center_x).abs() / page_center_x;
+                score1
+                    .partial_cmp(&score2)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
+            .unwrap()
+    } else {
+        gap_clusters.iter().max_by_key(|(_, count)| *count).unwrap()
+    };
 
     let boundary_x = best_cluster.0; // 聚类中心
     let boundary_count = best_cluster.1; // 支持行数
 
-    // 需要至少 2 行支持这个分界位置
-    if boundary_count < 2 {
+    // 需要至少 1 行支持这个分界位置（放宽条件配合中心优先策略）
+    if boundary_count < 1 {
         log::debug!(
-            "sparse_column: boundary_count={} < 2, skipping",
+            "sparse_column: boundary_count={} < 1, skipping",
             boundary_count
         );
         return None;
