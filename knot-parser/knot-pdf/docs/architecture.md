@@ -297,14 +297,145 @@ text_score < 0.3  →  FullWithVlm        (VLM 外部调用)
 
 **组合示例：**
 ```bash
-# 最小构建（纯规则解析）
+# 最小构建（纯规则解析，零额外依赖）
 cargo build --lib
 
-# 推荐生产构建
+# 推荐生产构建（Pdfium + 公式 + CLI）
 cargo build --features "pdfium,formula_model,cli"
 
 # 全功能构建
 cargo build --features "pdfium,ocr_tesseract,layout_model,table_model,formula_model,vision,async,store_sled,cli"
+```
+
+---
+
+## 4.1 构建 & 全局安装
+
+### 一键安装
+
+```bash
+# 使用安装脚本（推荐）
+bash scripts/install_knot_pdf.sh
+```
+
+安装脚本会：
+1. 编译 `knot-pdf-cli` 并安装到 `~/.cargo/bin/`
+2. 安装后全局可用（确保 `~/.cargo/bin` 在 `$PATH` 中）
+3. 如果 `~/.config/knot-pdf/knot-pdf.toml` 不存在，自动创建默认配置
+
+### 手动安装
+
+```bash
+# 进入项目目录
+cd knot-parser/knot-pdf
+
+# 编译安装到 ~/.cargo/bin/
+# Features 按需选择，cli 是必须的
+cargo install --path . \
+    --features "cli,pdfium,ocr_paddle,vision,formula_model" \
+    --bin knot-pdf-cli \
+    --force
+
+# 验证安装
+knot-pdf-cli --version
+knot-pdf-cli --help
+```
+
+### 确保 PATH 包含 cargo bin
+
+如果安装后 `knot-pdf-cli` 命令找不到，在 `~/.zshrc` 中添加：
+
+```bash
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+### 卸载
+
+```bash
+cargo uninstall knot-pdf
+```
+
+---
+
+## 4.2 配置文件
+
+### 配置搜索顺序
+
+`knot-pdf-cli` 启动时按以下优先级自动搜索配置文件：
+
+| 优先级 | 路径                                   | 说明                       |
+| ------ | -------------------------------------- | -------------------------- |
+| 1      | `./knot-pdf.toml`                      | 当前工作目录（项目级配置） |
+| 2      | `<exe_dir>/knot-pdf.toml`              | 可执行文件同级目录         |
+| 3      | **`~/.config/knot-pdf/knot-pdf.toml`** | 用户全局配置（推荐）       |
+
+也可通过 `-c` 参数指定：
+
+```bash
+knot-pdf-cli -c /path/to/my-config.toml markdown input.pdf
+```
+
+### 配置文件位置
+
+```
+~/.config/knot-pdf/knot-pdf.toml
+```
+
+### 配置文件结构
+
+```toml
+# ── 文本抽取 ──────────────────────────────────────────
+scoring_text_threshold = 0.3   # 低于此值判定为扫描页
+garbled_threshold = 0.2        # 乱码检测阈值
+strip_headers_footers = true   # 去除页眉页脚
+max_columns = 3                # 多栏检测上限
+
+# ── 布局分析 ──────────────────────────────────────────
+reading_order_method = "xy_cut"  # 阅读顺序算法
+
+# ── OCR 配置（需 --features ocr_paddle 或 ocr_tesseract）──
+ocr_enabled = true
+ocr_mode = "auto"              # auto | force_all | disabled
+ocr_languages = ["eng"]
+ocr_render_width = 1024
+ocr_workers = 1
+
+# ── 图表检测 (M8) ────────────────────────────────────
+figure_detection_enabled = true
+
+# ── 公式检测 (M12) ───────────────────────────────────
+formula_detection_enabled = true   # 公式区域检测（纯规则）
+formula_model_enabled = false      # 公式 OCR（需 --features formula_model）
+
+# ── 后处理 (M13) ─────────────────────────────────────
+postprocess_enabled = true         # 后处理管线总开关
+remove_watermark = true            # 水印过滤
+separate_footnotes = false         # 脚注分离
+merge_cross_page_paragraphs = true # 跨页段落合并
+
+# ── 混合解析模式 (M14) ───────────────────────────────
+parse_mode = "auto"    # auto | fast_track | enhanced | full
+vlm_enabled = false    # VLM 外部调用
+
+# ── Vision LLM（图表语义理解，需 --features vision）───
+vision_api_url = "http://localhost:11434/v1/chat/completions"
+vision_model = "glm-ocr:latest"
+
+# ── 输出控制 ──────────────────────────────────────────
+emit_markdown = true
+emit_ir_json = false
+
+# ── 资源控制 ──────────────────────────────────────────
+max_memory_mb = 200
+page_timeout_secs = 0  # 0 = 不超时
+```
+
+> 完整配置模板见 `scripts/knot-pdf.default.toml`
+
+### 查看当前生效的配置
+
+```bash
+knot-pdf-cli config show
 ```
 
 ---
@@ -488,12 +619,16 @@ knot-pdf/
 │   ├── milestones/               #   15 个 Milestone 文档
 │   └── *.md                      #   技术指南
 ├── models/                       # ONNX 模型文件（gitignored）
-└── scripts/                      # 辅助脚本
+└── scripts/
+    ├── install_knot_pdf.sh       # 一键安装脚本
+    └── knot-pdf.default.toml     # 默认配置文件模板
 ```
 
 ---
 
 ## 9. 快速上手
+
+### Rust API
 
 ```rust
 use knot_pdf::{parse_pdf, Config};
@@ -519,17 +654,27 @@ fn main() {
 }
 ```
 
-**CLI 使用：**
+### CLI 使用
+
 ```bash
 # 输出 Markdown
-knot-pdf markdown input.pdf -o output.md
+knot-pdf-cli markdown input.pdf -o output.md
 
 # 输出 RAG 文本
-knot-pdf rag input.pdf -o output.txt
+knot-pdf-cli rag input.pdf -o output.txt
 
 # 输出 JSON IR
-knot-pdf parse input.pdf -o output.json
+knot-pdf-cli parse input.pdf -o output.json
 
 # 查看 PDF 信息
-knot-pdf info input.pdf
+knot-pdf-cli info input.pdf
+
+# 查看当前配置
+knot-pdf-cli config show
+
+# 指定配置文件
+knot-pdf-cli -c ~/.config/knot-pdf/knot-pdf.toml markdown input.pdf
+
+# 详细日志
+knot-pdf-cli -vv markdown input.pdf
 ```

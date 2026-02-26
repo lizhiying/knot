@@ -1,0 +1,168 @@
+# ================================================================
+# knot-pdf 全局配置文件
+# 路径: ~/.config/knot-pdf/knot-pdf.toml
+#
+# 所有选项均有合理默认值，只需配置你想修改的项。
+# 未指定的选项自动使用默认值。
+# ================================================================
+
+# ── 文本抽取 ──────────────────────────────────────────
+
+# 文本质量评分阈值（低于此值判定为扫描页，触发 OCR）
+scoring_text_threshold = 0.3
+
+# 乱码检测阈值
+garbled_threshold = 0.2
+
+# 是否去除页眉页脚
+strip_headers_footers = true
+
+# 最大列数（多栏检测上限）
+max_columns = 3
+
+# ── 文本合并参数 ──────────────────────────────────────
+
+# 行合并 y 容差（像素）
+# line_merge_tolerance = 5.0
+
+# 词间距检测系数（字号 × 此值 = 空格判定阈值）
+# word_spacing_ratio = 0.3
+
+# 紧凑间距系数（数字/标点等紧凑排列场景）
+# tight_spacing_ratio = 0.15
+
+# ── 布局分析 ──────────────────────────────────────────
+
+# 多栏间距阈值（像素）
+# multi_column_gap_threshold = 15.0
+
+# 阅读顺序算法: "xy_cut" 或 "geometric"
+reading_order_method = "xy_cut"
+
+# ── 表格提取 ──────────────────────────────────────────
+
+# 表格最小行/列数
+# table_min_rows = 2
+# table_min_cols = 2
+
+# ── OCR 配置 ──────────────────────────────────────────
+# 需编译时启用 --features ocr_paddle 或 ocr_tesseract
+
+# 启用 OCR（扫描件自动触发）
+ocr_enabled = true
+
+# OCR 模式: "auto" | "force_all" | "disabled"
+ocr_mode = "auto"
+
+# OCR 语言
+ocr_languages = ["eng"]
+
+# OCR 渲染分辨率（宽度像素）
+ocr_render_width = 1024
+
+# OCR 并发数
+ocr_workers = 1
+
+# OCR 模型目录（留空则自动探测 models/ppocrv5/）
+# ocr_model_dir = "models/ppocrv5"
+
+# ── 图表检测 (M8) ────────────────────────────────────
+
+# 启用图表检测
+figure_detection_enabled = true
+
+# ── 公式检测 (M12) ───────────────────────────────────
+
+# 启用公式区域检测（纯规则，零依赖）
+formula_detection_enabled = true
+
+# 启用公式 OCR 模型（需编译时 --features formula_model）
+# 开启后会将检测到的公式区域渲染为图片，用 TrOCR 模型识别为 LaTeX
+formula_model_enabled = false
+
+# 公式模型文件目录（包含 encoder_model.onnx + decoder_model.onnx + vocab.json）
+# 留空则自动搜索 models/formula/
+# formula_model_path = "models/formula"
+
+# 公式 OCR 置信度阈值（0.0~1.0）
+# formula_confidence_threshold = 0.3
+
+# 公式模型输入分辨率
+# formula_input_size = 256
+
+# 公式渲染分辨率（宽度像素）
+# formula_render_width = 512
+
+# ── 后处理 (M13) ─────────────────────────────────────
+
+# 启用后处理管线（水印过滤、脚注检测、列表识别、URL修复）
+postprocess_enabled = true
+
+# 检测并移除水印文本
+remove_watermark = true
+
+# 分离脚注（标记为 Footnote 角色）
+separate_footnotes = false
+
+# 合并跨页段落
+merge_cross_page_paragraphs = true
+
+# ── 混合解析模式 (M14) ───────────────────────────────
+
+# 解析模式: "auto" | "fast_track" | "enhanced" | "full"
+#   auto       — 按页面文本质量自动选择（推荐）
+#   fast_track — 仅规则提取，最快
+#   enhanced   — 规则 + 模型增强
+#   full       — 规则 + 模型 + VLM 外部调用
+parse_mode = "auto"
+
+# 是否启用 VLM 外部调用（Full 模式所需）
+vlm_enabled = false
+
+# VLM API 地址（OpenAI 兼容格式）
+# vlm_api_url = "https://api.openai.com/v1/chat/completions"
+
+# VLM API Key
+# vlm_api_key = "sk-..."
+
+# VLM 模型名称
+# vlm_model = "gpt-4o"
+
+# VLM 超时秒数
+# vlm_timeout_secs = 30
+
+# VLM 最大重试次数
+# vlm_max_retries = 2
+
+# PageScore 低于此值时触发 VLM（仅 full/auto 模式有效）
+# vlm_score_threshold = 0.3
+
+# ── Vision LLM（图表语义理解）────────────────────────
+# 需编译时启用 --features vision
+
+# Vision LLM API URL（OpenAI 兼容 Chat Completions 格式）
+vision_api_url = "http://localhost:11434/v1/chat/completions"
+
+# Vision LLM API Key
+# vision_api_key = "sk-..."
+
+# Vision LLM 模型名称
+vision_model = "glm-ocr:latest"
+
+# ── 输出控制 ──────────────────────────────────────────
+
+emit_markdown = true
+emit_ir_json = false
+
+# ── Store / 缓存 ─────────────────────────────────────
+# 需编译时启用 --features store_sled
+
+store_enabled = false
+# store_path = "/tmp/knot-pdf-store"
+
+# ── 资源控制 ──────────────────────────────────────────
+
+max_memory_mb = 200
+page_queue_size = 4
+render_workers = 2
+page_timeout_secs = 0      # 0 = 不超时
