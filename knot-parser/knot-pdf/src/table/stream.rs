@@ -92,6 +92,7 @@ pub fn extract_stream_table(
         rows: table_rows,
         column_types,
         fallback_text,
+        confidence: None,
     })
 }
 

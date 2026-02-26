@@ -9,9 +9,13 @@
 
 pub mod candidate;
 pub mod cell_type;
+pub mod enhance;
 pub mod fallback;
+#[cfg(feature = "table_model")]
+pub mod onnx_structure;
 pub mod ruled;
 pub mod stream;
+pub mod structure_detect;
 
 use crate::backend::{RawChar, RawLine, RawRect};
 use crate::ir::{BBox, TableIR};
@@ -92,6 +96,9 @@ pub fn extract_tables_with_graphics(
             tables.push(table);
         }
     }
+
+    // M11: 增强处理（置信度评估 + 合并单元格 + IoU 消歧 + 低置信度告警）
+    enhance::enhance_tables(&mut tables, chars, 0.5);
 
     tables
 }

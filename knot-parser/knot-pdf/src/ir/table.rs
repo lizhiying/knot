@@ -57,6 +57,9 @@ pub struct TableIR {
     pub column_types: Vec<CellType>,
     /// 回退文本（必须有）—— 即使结构化成功也要生成
     pub fallback_text: String,
+    /// 表格置信度评估（M11 新增）
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confidence: Option<crate::table::enhance::TableConfidence>,
 }
 
 impl TableIR {

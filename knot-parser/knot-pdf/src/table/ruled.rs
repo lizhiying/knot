@@ -163,6 +163,7 @@ pub fn extract_ruled_table(
         rows: table_rows,
         column_types,
         fallback_text,
+            confidence: None,
     })
 }
 
@@ -1451,6 +1452,7 @@ fn extract_booktabs_table(
         rows: table_rows,
         column_types,
         fallback_text,
+            confidence: None,
     })
 }
 

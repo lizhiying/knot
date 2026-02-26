@@ -93,8 +93,14 @@ pub enum BlockRole {
     Header,
     Footer,
     Title,
+    /// 标题（H2/H3 级别，区分于 Title 即 H1）
+    Heading,
     List,
     Caption,
+    /// 页码
+    PageNumber,
+    /// 侧边栏/旁注
+    Sidebar,
     Unknown,
 }
 
