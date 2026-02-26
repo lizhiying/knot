@@ -4,6 +4,7 @@
 
 mod block;
 mod document;
+mod formula;
 mod image;
 mod page;
 mod table;
@@ -11,6 +12,7 @@ mod types;
 
 pub use block::*;
 pub use document::*;
+pub use formula::*;
 pub use image::*;
 pub use page::*;
 pub use table::*;

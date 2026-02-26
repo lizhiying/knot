@@ -105,6 +105,77 @@ pub struct Config {
     #[serde(default = "default_vision_model")]
     pub vision_model: String,
 
+    /// 阅读顺序算法
+    #[serde(default)]
+    pub reading_order_method: ReadingOrderMethod,
+
+    /// XY-Cut 间隙比例（占页面宽度的比例，默认 0.02）
+    #[serde(default = "default_xy_cut_gap_ratio")]
+    pub xy_cut_gap_ratio: f32,
+
+    // === 版面检测 (M10) ===
+    /// 是否启用版面检测模型
+    #[serde(default)]
+    pub layout_model_enabled: bool,
+
+    /// 版面检测模型文件路径（None 则自动搜索）
+    #[serde(default)]
+    pub layout_model_path: Option<std::path::PathBuf>,
+
+    /// 版面检测置信度阈值（0.0~1.0，默认 0.5）
+    #[serde(default = "default_layout_confidence")]
+    pub layout_confidence_threshold: f32,
+
+    /// 版面检测模型输入分辨率（默认 640）
+    #[serde(default = "default_layout_input_size")]
+    pub layout_input_size: u32,
+
+    // === 表格结构模型 (M11) ===
+    /// 是否启用表格结构识别模型
+    #[serde(default)]
+    pub table_model_enabled: bool,
+
+    /// 表格结构模型文件路径（None 则自动搜索）
+    #[serde(default)]
+    pub table_model_path: Option<std::path::PathBuf>,
+
+    /// 表格结构模型置信度阈值（0.0~1.0，默认 0.5）
+    #[serde(default = "default_table_confidence")]
+    pub table_confidence_threshold: f32,
+
+    /// 表格结构模型输入分辨率（默认 640）
+    #[serde(default = "default_table_input_size")]
+    pub table_input_size: u32,
+
+    // === 公式检测 (M12) ===
+    /// 是否启用公式区域检测（默认 true）
+    #[serde(default = "default_true")]
+    pub formula_detection_enabled: bool,
+
+    /// 是否启用公式 OCR 模型（需 formula_model feature）
+    #[serde(default)]
+    pub formula_model_enabled: bool,
+
+    /// 公式 OCR 模型文件路径（None 则自动搜索）
+    #[serde(default)]
+    pub formula_model_path: Option<std::path::PathBuf>,
+
+    /// 公式 OCR 词表文件路径
+    #[serde(default)]
+    pub formula_vocab_path: Option<std::path::PathBuf>,
+
+    /// 公式 OCR 置信度阈值（0.0~1.0，默认 0.3）
+    #[serde(default = "default_formula_confidence")]
+    pub formula_confidence_threshold: f32,
+
+    /// 公式 OCR 模型输入分辨率（默认 256）
+    #[serde(default = "default_formula_input_size")]
+    pub formula_input_size: u32,
+
+    /// 公式渲染分辨率（宽度像素，默认 512）
+    #[serde(default = "default_formula_render_width")]
+    pub formula_render_width: u32,
+
     /// 页码过滤（仅解析指定页面，0-indexed）
     /// 由 CLI --pages 参数设置，不通过配置文件设置
     #[serde(skip)]
@@ -123,6 +194,24 @@ pub enum OcrMode {
 impl Default for OcrMode {
     fn default() -> Self {
         Self::Disabled
+    }
+}
+
+/// 阅读顺序算法
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ReadingOrderMethod {
+    /// 现有的启发式排序
+    Heuristic,
+    /// XY-Cut 递归分割（推荐用于多栏文档）
+    XyCut,
+    /// 自动选择（默认：对多栏使用 XyCut，单栏使用 Heuristic）
+    Auto,
+}
+
+impl Default for ReadingOrderMethod {
+    fn default() -> Self {
+        Self::Auto
     }
 }
 
@@ -178,8 +267,40 @@ fn default_figure_render_width() -> u32 {
     800
 }
 
+fn default_xy_cut_gap_ratio() -> f32 {
+    0.02
+}
+
+fn default_layout_confidence() -> f32 {
+    0.5
+}
+
+fn default_layout_input_size() -> u32 {
+    640
+}
+
+fn default_table_confidence() -> f32 {
+    0.5
+}
+
+fn default_table_input_size() -> u32 {
+    640
+}
+
 fn default_vision_model() -> String {
     "gpt-4o".to_string()
+}
+
+fn default_formula_confidence() -> f32 {
+    0.3
+}
+
+fn default_formula_input_size() -> u32 {
+    256
+}
+
+fn default_formula_render_width() -> u32 {
+    512
 }
 
 impl Default for Config {
@@ -210,6 +331,23 @@ impl Default for Config {
             vision_api_url: None,
             vision_api_key: None,
             vision_model: default_vision_model(),
+            reading_order_method: ReadingOrderMethod::default(),
+            xy_cut_gap_ratio: default_xy_cut_gap_ratio(),
+            layout_model_enabled: false,
+            layout_model_path: None,
+            layout_confidence_threshold: default_layout_confidence(),
+            layout_input_size: default_layout_input_size(),
+            table_model_enabled: false,
+            table_model_path: None,
+            table_confidence_threshold: default_table_confidence(),
+            table_input_size: default_table_input_size(),
+            formula_detection_enabled: true,
+            formula_model_enabled: false,
+            formula_model_path: None,
+            formula_vocab_path: None,
+            formula_confidence_threshold: default_formula_confidence(),
+            formula_input_size: default_formula_input_size(),
+            formula_render_width: default_formula_render_width(),
             page_indices: None,
         }
     }

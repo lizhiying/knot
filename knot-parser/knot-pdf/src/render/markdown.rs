@@ -77,6 +77,23 @@ impl MarkdownRenderer {
             }
         }
 
+        // 渲染公式（M12）
+        if !page.formulas.is_empty() {
+            // 按 y 坐标排序
+            let mut formulas: Vec<&crate::ir::FormulaIR> = page.formulas.iter().collect();
+            formulas.sort_by(|a, b| {
+                a.bbox
+                    .y
+                    .partial_cmp(&b.bbox.y)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            });
+
+            for formula in formulas {
+                output.push_str(&formula.to_markdown());
+                output.push_str("\n\n");
+            }
+        }
+
         // 渲染表格
         if self.include_tables {
             for table in &page.tables {

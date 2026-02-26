@@ -325,7 +325,7 @@ fn make_sample_table(rows: usize, cols: usize) -> knot_pdf::ir::TableIR {
         rows: table_rows,
         column_types: vec![CellType::Text; cols],
         fallback_text: "test fallback".to_string(),
-    }
+            confidence: None,    }
 }
 
 // === §7 TOML 配置文件 ===

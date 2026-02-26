@@ -15,6 +15,7 @@ pub mod backend;
 pub mod config;
 pub mod error;
 pub mod figure;
+pub mod formula;
 pub mod hf_detect;
 pub mod ir;
 pub mod layout;

@@ -530,6 +530,7 @@ fn make_test_table_ir() -> TableIR {
         fallback_text:
             "[表t0_0 页0]\n行1: Name=Alice Age=25 Score=95.5\n行2: Name=Bob Age=30 Score=88.0"
                 .to_string(),
+        confidence: None,
     }
 }
 

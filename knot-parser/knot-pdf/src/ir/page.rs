@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use super::{BlockIR, ImageIR, PageDiagnostics, PageSize, PageSource, TableIR, Timings};
+use super::{BlockIR, FormulaIR, ImageIR, PageDiagnostics, PageSize, PageSource, TableIR, Timings};
 
 /// 页面 IR
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -22,6 +22,9 @@ pub struct PageIR {
     /// 图片列表
     #[serde(default)]
     pub images: Vec<ImageIR>,
+    /// 公式列表（M12 新增）
+    #[serde(default)]
+    pub formulas: Vec<FormulaIR>,
     /// 页面诊断信息
     #[serde(default)]
     pub diagnostics: PageDiagnostics,

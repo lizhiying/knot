@@ -16,7 +16,7 @@ use crate::ir::{
     Diagnostics, DocumentIR, ImageFormat, ImageIR, ImageSource, PageDiagnostics, PageIR,
     PageSource, Timings,
 };
-use crate::layout::build_blocks_and_grids;
+use crate::layout::build_blocks_with_config;
 use crate::scoring::compute_page_score;
 use crate::table::extract_tables_with_graphics;
 
@@ -30,9 +30,13 @@ pub struct Pipeline {
     store: Option<Box<dyn Store>>,
     ocr_backend: Option<Box<dyn OcrBackend>>,
     ocr_renderer: Option<Box<dyn OcrRenderer>>,
+    /// 版面检测器（用于增强 BlockIR.role 分类）
+    layout_detector: Option<Box<dyn crate::layout::LayoutDetector>>,
     /// Vision LLM 描述器（用于图表语义理解）
     #[cfg(feature = "vision")]
     vision_describer: Option<Box<dyn crate::vision::VisionDescriber>>,
+    /// 公式 OCR 识别器（M12 Phase B）
+    formula_recognizer: Option<Box<dyn crate::formula::FormulaRecognizer>>,
     /// OCR 最大并发数（同步模式下天然为 1，为 async 预留）
     max_ocr_workers: usize,
 }
@@ -160,13 +164,156 @@ impl Pipeline {
             }
         };
 
+        // 版面检测器初始化
+        let layout_detector: Option<Box<dyn crate::layout::LayoutDetector>> =
+            if config.layout_model_enabled {
+                #[cfg(feature = "layout_model")]
+                {
+                    if let Some(ref model_path) = config.layout_model_path {
+                        match crate::layout::OnnxLayoutDetector::from_file(
+                            model_path,
+                            config.layout_input_size,
+                            crate::layout::ClassSchema::default(),
+                            config.layout_confidence_threshold,
+                        ) {
+                            Ok(det) => {
+                                log::info!("Loaded ONNX layout model from {:?}", model_path);
+                                Some(Box::new(det) as Box<dyn crate::layout::LayoutDetector>)
+                            }
+                            Err(e) => {
+                                log::warn!("Failed to load layout model: {}, using mock", e);
+                                Some(Box::new(crate::layout::MockLayoutDetector))
+                            }
+                        }
+                    } else {
+                        // 尝试自动搜索模型文件
+                        let auto_paths = ["doclayout_yolo.onnx", "layout_model.onnx"];
+                        let mut found = None;
+                        for p in &auto_paths {
+                            let path = std::path::Path::new(p);
+                            if path.exists() {
+                                found = Some(path.to_path_buf());
+                                break;
+                            }
+                        }
+                        if let Some(path) = found {
+                            match crate::layout::OnnxLayoutDetector::from_file(
+                                &path,
+                                config.layout_input_size,
+                                crate::layout::ClassSchema::default(),
+                                config.layout_confidence_threshold,
+                            ) {
+                                Ok(det) => {
+                                    log::info!("Auto-loaded ONNX layout model from {:?}", path);
+                                    Some(Box::new(det) as Box<dyn crate::layout::LayoutDetector>)
+                                }
+                                Err(e) => {
+                                    log::warn!("Failed to load auto-found model: {}", e);
+                                    Some(Box::new(crate::layout::MockLayoutDetector))
+                                }
+                            }
+                        } else {
+                            log::info!("No layout model found, using mock detector");
+                            Some(Box::new(crate::layout::MockLayoutDetector))
+                        }
+                    }
+                }
+                #[cfg(not(feature = "layout_model"))]
+                {
+                    log::warn!(
+                        "layout_model_enabled=true but 'layout_model' feature not compiled. \
+                         Rebuild with --features layout_model to enable ONNX inference."
+                    );
+                    Some(Box::new(crate::layout::MockLayoutDetector))
+                }
+            } else {
+                None
+            };
+
+        // === M12 Phase B: 公式 OCR 识别器 ===
+        let formula_recognizer: Option<Box<dyn crate::formula::FormulaRecognizer>> = if config
+            .formula_model_enabled
+        {
+            #[cfg(feature = "formula_model")]
+            {
+                if let Some(model_dir) = &config.formula_model_path {
+                    match crate::formula::OnnxFormulaRecognizer::from_dir(
+                        model_dir,
+                        config.formula_confidence_threshold,
+                    ) {
+                        Ok(recognizer) => {
+                            log::info!("Formula ONNX recognizer loaded successfully");
+                            Some(Box::new(recognizer) as Box<dyn crate::formula::FormulaRecognizer>)
+                        }
+                        Err(e) => {
+                            log::warn!("Failed to load formula model: {}", e);
+                            None
+                        }
+                    }
+                } else {
+                    // 自动搜索 models/formula 目录
+                    let auto_dirs = [
+                        std::path::PathBuf::from("models/formula"),
+                        std::env::current_exe()
+                            .unwrap_or_default()
+                            .parent()
+                            .unwrap_or(std::path::Path::new("."))
+                            .join("models/formula"),
+                    ];
+                    let mut loaded = false;
+                    let mut result: Option<Box<dyn crate::formula::FormulaRecognizer>> = None;
+                    for dir in &auto_dirs {
+                        if dir.join("encoder_model.onnx").exists() {
+                            match crate::formula::OnnxFormulaRecognizer::from_dir(
+                                dir,
+                                config.formula_confidence_threshold,
+                            ) {
+                                Ok(recognizer) => {
+                                    log::info!("Formula model auto-loaded from {:?}", dir);
+                                    result = Some(Box::new(recognizer));
+                                    loaded = true;
+                                    break;
+                                }
+                                Err(e) => {
+                                    log::warn!(
+                                        "Failed to load formula model from {:?}: {}",
+                                        dir,
+                                        e
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    if !loaded {
+                        log::warn!(
+                            "formula_model_enabled=true but no model directory found. \
+                             Set formula_model_path or place models in models/formula/"
+                        );
+                    }
+                    result
+                }
+            }
+            #[cfg(not(feature = "formula_model"))]
+            {
+                log::warn!(
+                    "formula_model_enabled=true but 'formula_model' feature not compiled. \
+                         Rebuild with --features formula_model to enable formula OCR."
+                );
+                None
+            }
+        } else {
+            None
+        };
+
         Self {
             config,
             store,
             ocr_backend,
             ocr_renderer,
+            layout_detector,
             #[cfg(feature = "vision")]
             vision_describer,
+            formula_recognizer,
             max_ocr_workers,
         }
     }
@@ -369,13 +516,55 @@ impl Pipeline {
         // 提取图片
         let raw_images = backend.extract_images(page_index).unwrap_or_default();
 
-        // 构建文本块 + 隐式网格检测（阅读顺序重建）
-        let (blocks, grid_tables) = build_blocks_and_grids(
+        // 构建文本块 + 隐式网格检测 + 阅读顺序重建（支持 XY-Cut）
+        let (blocks, grid_tables) = build_blocks_with_config(
             &chars,
             page_info.size.width,
             page_info.size.height,
             page_index,
+            self.config.reading_order_method,
+            self.config.xy_cut_gap_ratio,
         );
+
+        // === 版面检测融合 (M10) ===
+        // 当 layout_detector 可用时，渲染页面图片并调用模型检测
+        let mut blocks = blocks;
+        if let Some(layout_det) = &self.layout_detector {
+            // 渲染页面为图片
+            match backend.render_page_to_image(page_index, self.config.layout_input_size) {
+                Ok(img_data) => {
+                    match layout_det.detect(&img_data, page_info.size.width, page_info.size.height)
+                    {
+                        Ok(mut regions) => {
+                            crate::layout::nms(&mut regions, 0.5);
+
+                            log::debug!(
+                                "Layout detection page {}: {} regions",
+                                page_index,
+                                regions.len()
+                            );
+
+                            crate::layout::merge_layout_with_blocks(
+                                &mut blocks,
+                                &regions,
+                                self.config.layout_confidence_threshold,
+                                0.3,
+                            );
+                        }
+                        Err(e) => {
+                            log::warn!("Layout detection failed for page {}: {}", page_index, e);
+                        }
+                    }
+                }
+                Err(_) => {
+                    // 渲染不可用（例如 pdf-extract 后端不支持渲染），跳过版面检测
+                    log::debug!(
+                        "Page rendering not available for layout detection on page {}",
+                        page_index
+                    );
+                }
+            }
+        }
 
         // 转换图片为 ImageIR
         let images: Vec<ImageIR> = raw_images
@@ -596,6 +785,19 @@ impl Pipeline {
                 if img_ir.source != ImageSource::Embedded {
                     continue;
                 }
+
+                // 跳过位置无效的图片（bbox 在原点附近，常见于 PPT 导出 PDF 的装饰图层）
+                // 这些图片的坐标不代表实际页面位置，不应参与 FigureRegion 升级
+                if img_ir.bbox.x.abs() < 1.0 && img_ir.bbox.y.abs() < 1.0 {
+                    log::debug!(
+                        "Skipping image {} with invalid position ({:.1}, {:.1})",
+                        img_ir.image_id,
+                        img_ir.bbox.x,
+                        img_ir.bbox.y,
+                    );
+                    continue;
+                }
+
                 let img_area = img_ir.bbox.area();
                 let ratio = if page_area > 0.0 {
                     img_area / page_area
@@ -862,6 +1064,76 @@ impl Pipeline {
         let mem_after = crate::mem_track::MemorySnapshot::now();
         let mem_stats = crate::mem_track::PageMemoryStats::from_snapshots(&mem_before, &mem_after);
 
+        // === M12: 公式区域检测 ===
+        let formulas = if self.config.formula_detection_enabled {
+            let mut detected = crate::formula::detect_formulas(&chars, &blocks, page_index);
+            // 从 blocks 中剔除被公式覆盖的文本块
+            if !detected.is_empty() {
+                let formula_block_ids: Vec<&str> = detected
+                    .iter()
+                    .flat_map(|f| f.contained_block_ids.iter().map(|s| s.as_str()))
+                    .collect();
+                blocks.retain(|b| !formula_block_ids.contains(&b.block_id.as_str()));
+                log::debug!(
+                    "Page {}: detected {} formulas, removed {} blocks",
+                    page_index,
+                    detected.len(),
+                    formula_block_ids.len(),
+                );
+            }
+
+            // === M12 Phase B: 公式 OCR → LaTeX ===
+            if let Some(ref recognizer) = self.formula_recognizer {
+                if let Some(ocr_r) = &self.ocr_renderer {
+                    for formula in detected.iter_mut() {
+                        // 渲染公式区域为图片
+                        match ocr_r.render_region_to_image(
+                            page_index,
+                            formula.bbox,
+                            page_info.size.width,
+                            page_info.size.height,
+                            self.config.formula_render_width,
+                        ) {
+                            Ok(img_bytes) => {
+                                // OCR 识别
+                                match recognizer.recognize(&img_bytes) {
+                                    Ok(result) => {
+                                        if !result.latex.is_empty() {
+                                            log::debug!(
+                                                "Formula {} OCR: '{}' (conf={:.3})",
+                                                formula.formula_id,
+                                                result.latex,
+                                                result.confidence,
+                                            );
+                                            formula.latex = Some(result.latex);
+                                        }
+                                    }
+                                    Err(e) => {
+                                        log::debug!(
+                                            "Formula OCR failed for {}: {}",
+                                            formula.formula_id,
+                                            e
+                                        );
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                log::debug!(
+                                    "Formula region render failed for {}: {}",
+                                    formula.formula_id,
+                                    e
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            detected
+        } else {
+            Vec::new()
+        };
+
         Ok(PageIR {
             page_index,
             size: page_info.size,
@@ -869,6 +1141,7 @@ impl Pipeline {
             blocks,
             tables,
             images,
+            formulas,
             diagnostics: page_diagnostics,
             text_score,
             is_scanned_guess: is_scanned,

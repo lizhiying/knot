@@ -109,6 +109,7 @@ fn make_test_page(index: usize) -> PageIR {
             }],
             column_types: vec![CellType::Text, CellType::Number, CellType::Percent],
             fallback_text: "名称 数值 百分比\n项目A 100 50%".to_string(),
+            confidence: None,
         }],
         images: vec![ImageIR {
             image_id: format!("img_p{}_0", index),
@@ -120,6 +121,7 @@ fn make_test_page(index: usize) -> PageIR {
             source: ImageSource::Embedded,
             ocr_text: None,
         }],
+        formulas: vec![],
         diagnostics: PageDiagnostics {
             warnings: vec![],
             errors: vec![],
@@ -255,6 +257,7 @@ fn test_table_ir_serde_roundtrip() {
         }],
         column_types: vec![CellType::Text, CellType::Number],
         fallback_text: "A B\na1 99.5".to_string(),
+        confidence: None,
     };
     let json = serde_json::to_string(&table).expect("序列化失败");
     let table2: TableIR = serde_json::from_str(&json).expect("反序列化失败");
@@ -380,6 +383,7 @@ fn test_table_to_csv() {
         }],
         column_types: vec![CellType::Text, CellType::Number],
         fallback_text: "Name Value\nX 42".to_string(),
+        confidence: None,
     };
     let csv = table.to_csv();
     assert!(csv.contains("Name,Value"));
@@ -417,6 +421,7 @@ fn test_table_to_markdown() {
         }],
         column_types: vec![CellType::Text, CellType::Text],
         fallback_text: "".to_string(),
+        confidence: None,
     };
     let md = table.to_markdown();
     assert!(md.contains("| A | B |"));
