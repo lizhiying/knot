@@ -785,10 +785,252 @@ fn compute_table_bbox(grid: &Grid) -> BBox {
 
 // ─── 三线表 (Booktabs) 抽取 ───
 
+/// 词间距比例阈值（用于单元格内文本空格判定）
+const BOOKTABS_WORD_SPACING_RATIO: f32 = 0.15;
+
+/// 将一组按 x 排序的字符拼接为文本，根据字符间距自动插入空格
+fn chars_to_text_with_spacing(chars: &[&RawChar]) -> String {
+    if chars.is_empty() {
+        return String::new();
+    }
+    let mut text = String::new();
+    text.push(chars[0].unicode);
+
+    for i in 1..chars.len() {
+        let prev = &chars[i - 1];
+        let curr = &chars[i];
+        let gap = curr.bbox.x - (prev.bbox.x + prev.bbox.width);
+        let font_size = prev.font_size.max(curr.font_size).max(1.0);
+        if gap > font_size * BOOKTABS_WORD_SPACING_RATIO {
+            text.push(' ');
+        }
+        text.push(curr.unicode);
+    }
+    text
+}
+
+/// 检测双栏布局中的栏沟（column gutter）
+///
+/// 通过分析表格区域之外的短行起始 x 坐标分布，找到双栏之间的间隙。
+fn detect_column_gutter(
+    all_chars: &[RawChar],
+    table_y_top: f32,
+    table_y_bottom: f32,
+    _content_x_min: f32,
+    _content_x_max: f32,
+) -> Option<(f32, f32)> {
+    // 只使用表格区域之外的字符
+    let outside_chars: Vec<&RawChar> = all_chars
+        .iter()
+        .filter(|c| {
+            let cy = c.bbox.y + c.bbox.height / 2.0;
+            cy < table_y_top - 5.0 || cy > table_y_bottom + 5.0
+        })
+        .collect();
+
+    if outside_chars.len() < 30 {
+        return None;
+    }
+
+    // 按 y 聚类成行（3pt 容差），收集 (line_x_min, line_x_max)
+    let mut sorted_by_y: Vec<&RawChar> = outside_chars.clone();
+    sorted_by_y.sort_by(|a, b| {
+        a.bbox
+            .y
+            .partial_cmp(&b.bbox.y)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    let mut text_lines: Vec<(f32, f32)> = Vec::new();
+    let mut cur_xmin = sorted_by_y[0].bbox.x;
+    let mut cur_xmax = sorted_by_y[0].bbox.x + sorted_by_y[0].bbox.width;
+    let mut cur_y = sorted_by_y[0].bbox.y;
+    let mut cur_count = 1;
+
+    for &ch in sorted_by_y.iter().skip(1) {
+        if (ch.bbox.y - cur_y).abs() < 3.0 {
+            cur_xmin = cur_xmin.min(ch.bbox.x);
+            cur_xmax = cur_xmax.max(ch.bbox.x + ch.bbox.width);
+            cur_count += 1;
+        } else {
+            if cur_count >= 3 {
+                text_lines.push((cur_xmin, cur_xmax));
+            }
+            cur_xmin = ch.bbox.x;
+            cur_xmax = ch.bbox.x + ch.bbox.width;
+            cur_y = ch.bbox.y;
+            cur_count = 1;
+        }
+    }
+    if cur_count >= 3 {
+        text_lines.push((cur_xmin, cur_xmax));
+    }
+
+    if text_lines.len() < 4 {
+        return None;
+    }
+
+    // 页面 x 范围
+    let page_x_min = text_lines.iter().map(|t| t.0).fold(f32::MAX, f32::min);
+    let page_x_max = text_lines.iter().map(|t| t.1).fold(f32::MIN, f32::max);
+    let x_range = page_x_max - page_x_min;
+
+    if x_range < 100.0 {
+        return None;
+    }
+
+    // 只保留短行（x_span < 60% 页面宽度），收集起始 x
+    let max_col_span = x_range * 0.60;
+    let mut line_starts: Vec<f32> = text_lines
+        .iter()
+        .filter(|(xmin, xmax)| (xmax - xmin) < max_col_span)
+        .map(|(xmin, _)| *xmin)
+        .collect();
+
+    if line_starts.len() < 4 {
+        return None;
+    }
+
+    // 排序后找最大间隙
+    line_starts.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+
+    let mut max_gap = 0.0_f32;
+    let mut gap_pos = 0;
+    for i in 1..line_starts.len() {
+        let gap = line_starts[i] - line_starts[i - 1];
+        if gap > max_gap {
+            max_gap = gap;
+            gap_pos = i;
+        }
+    }
+
+    if max_gap < 20.0 || gap_pos == 0 {
+        return None;
+    }
+
+    let split_x = (line_starts[gap_pos - 1] + line_starts[gap_pos]) / 2.0;
+
+    // gutter 边界可以直接用 gap 的两端点
+    // gap_left_start = 最后一个左栏行的起始 x
+    // gap_right_start = 第一个右栏行的起始 x
+    // 但我们需要左栏行的结束 x 来确定 gutter_left
+    // 收集左栏行的 x_max
+    let max_col_span = x_range * 0.60;
+    let mut left_col_ends: Vec<f32> = Vec::new();
+
+    for &(xmin, xmax) in &text_lines {
+        let span = xmax - xmin;
+        if span < max_col_span && xmin < split_x {
+            left_col_ends.push(xmax);
+        }
+    }
+
+    if left_col_ends.is_empty() {
+        return None;
+    }
+
+    left_col_ends.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+
+    // gutter_left = 左栏行结束 x 的 75 百分位
+    let gutter_left = left_col_ends[left_col_ends.len() * 3 / 4];
+    // gutter_right = 第一个右栏行的起始 x
+    let gutter_right = line_starts[gap_pos];
+
+    let gutter_width = gutter_right - gutter_left;
+    if gutter_width < 3.0 || gutter_width > 80.0 {
+        return None;
+    }
+
+    Some((gutter_left, gutter_right))
+}
+
+/// 过滤双栏布局中混入表格区域的正文段落字符
+///
+/// 策略：对字符按 y 再按 x 排序后，按 x 间隙 > 8pt 分段。
+/// 每段如果完全在某一栏内（不跨越 gutter）且字符数 > 25，
+/// 则判定为正文段落文字，移除。否则保留。
+fn filter_multicolumn_body_text<'a>(
+    chars: &[&'a RawChar],
+    gutter_left: f32,
+    gutter_right: f32,
+    _table_x_min: f32,
+    _table_x_max: f32,
+) -> Vec<&'a RawChar> {
+    if chars.is_empty() {
+        return Vec::new();
+    }
+
+    // 按 y 再按 x 排序
+    let mut sorted: Vec<&'a RawChar> = chars.to_vec();
+    sorted.sort_by(|a, b| {
+        let ya = a.bbox.y;
+        let yb = b.bbox.y;
+        ya.partial_cmp(&yb)
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then_with(|| {
+                a.bbox
+                    .x
+                    .partial_cmp(&b.bbox.x)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
+    });
+
+    // 按 x 间隙 > 8pt 分段（同时在 y 跳变 > 4pt 时也分段）
+    const RUN_GAP: f32 = 8.0;
+    const Y_BREAK: f32 = 4.0;
+    const BODY_TEXT_MIN_CHARS: usize = 25;
+
+    let mut result: Vec<&'a RawChar> = Vec::new();
+    let mut run_start = 0;
+
+    for i in 1..=sorted.len() {
+        let should_break = if i == sorted.len() {
+            true
+        } else {
+            let prev = &sorted[i - 1];
+            let curr = &sorted[i];
+            let x_gap = curr.bbox.x - (prev.bbox.x + prev.bbox.width);
+            let y_gap = (curr.bbox.y - prev.bbox.y).abs();
+            x_gap > RUN_GAP || y_gap > Y_BREAK
+        };
+
+        if should_break {
+            let run = &sorted[run_start..i];
+
+            // 检查这个段是否完全在一栏内
+            let run_x_min = run.iter().map(|c| c.bbox.x).fold(f32::MAX, f32::min);
+            let run_x_max = run
+                .iter()
+                .map(|c| c.bbox.x + c.bbox.width)
+                .fold(f32::MIN, f32::max);
+
+            let in_left_only = run_x_max < gutter_left + 5.0;
+            let in_right_only = run_x_min > gutter_right - 5.0;
+            let is_long = run.len() > BODY_TEXT_MIN_CHARS;
+
+            if (in_left_only || in_right_only) && is_long {
+                // 正文段落段 → 跳过
+            } else {
+                // 表格内容或短段 → 保留
+                result.extend(run);
+            }
+
+            run_start = i;
+        }
+    }
+
+    result
+}
+
 /// 从只有水平线的三线表中抽取表格
 ///
 /// 学术论文中最常见的表格样式：只有 top/header-sep/bottom 三条水平线，
 /// 无垂直线。列边界通过文本对齐推断。
+///
+/// 改进策略：
+/// 1. 列边界仅通过数据行（第2条水平线之后的区域）推断，避免表头跨列文字干扰
+/// 2. 表头区域（第1~2条水平线之间）的多个子行纵向合并为单个表头行
+/// 3. 单元格内文本根据词间距自动插入空格
 fn extract_booktabs_table(
     h_lines: &[NormalizedLine],
     chars: &[RawChar],
@@ -799,6 +1041,7 @@ fn extract_booktabs_table(
     merge_collinear(&mut h_sorted, true);
     snap_lines(&mut h_sorted, true);
     h_sorted.sort_by(|a, b| a.y.partial_cmp(&b.y).unwrap_or(std::cmp::Ordering::Equal));
+
 
     if h_sorted.len() < 3 {
         return None;
@@ -816,11 +1059,20 @@ fn extract_booktabs_table(
     }
     row_bounds.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
 
+    log::debug!(
+        "Booktabs page {}: {} h_lines after merge, row_bounds={:?}",
+        page_index,
+        h_sorted.len(),
+        row_bounds
+    );
+    for (i, line) in h_sorted.iter().enumerate() {
+    }
+
     if row_bounds.len() < 3 {
         return None;
     }
 
-    let row_count = row_bounds.len() - 1;
+    let region_count = row_bounds.len() - 1;
 
     // 确定表格的 x 范围（取最长水平线的 start/end）
     let table_x_min = h_sorted.iter().map(|l| l.start).fold(f32::MAX, f32::min);
@@ -842,11 +1094,34 @@ fn extract_booktabs_table(
         return None;
     }
 
-    // 先按水平线间区域分组，再在每个区域内按 y 坐标聚类出细分行
-    let mut region_chars: Vec<Vec<&RawChar>> = vec![Vec::new(); row_count];
+    // ── 双栏布局检测与过滤 ──
+    // 分析表格区域外的字符 x 分布，检测栏沟（column gutter）
+    let table_chars = {
+        let gutter = detect_column_gutter(chars, y_top, y_bottom, table_x_min, table_x_max);
+        if let Some((gutter_left, gutter_right)) = gutter {
+            let before_count = table_chars.len();
+            let filtered = filter_multicolumn_body_text(
+                &table_chars,
+                gutter_left,
+                gutter_right,
+                table_x_min,
+                table_x_max,
+            );
+            filtered
+        } else {
+            table_chars
+        }
+    };
+
+    if table_chars.is_empty() {
+        return None;
+    }
+
+    // 按水平线间区域分组
+    let mut region_chars: Vec<Vec<&RawChar>> = vec![Vec::new(); region_count];
     for ch in &table_chars {
         let cy = ch.bbox.y + ch.bbox.height / 2.0;
-        for r in 0..row_count {
+        for r in 0..region_count {
             if cy >= row_bounds[r] - 2.0 && cy < row_bounds[r + 1] + 2.0 {
                 region_chars[r].push(ch);
                 break;
@@ -854,13 +1129,18 @@ fn extract_booktabs_table(
         }
     }
 
-    // 在每个区域内按 y 坐标递增扫描聚类成子行
-    let mut row_chars: Vec<Vec<&RawChar>> = Vec::new();
-    for region in &region_chars {
+    // ── 步骤1：在每个区域内按 y 坐标递增扫描聚类成子行 ──
+    // 记录每个子行属于哪个 region (用于区分表头和数据区域)
+    struct SubRow<'a> {
+        chars: Vec<&'a RawChar>,
+        region_idx: usize,
+    }
+
+    let mut sub_rows: Vec<SubRow> = Vec::new();
+    for (region_idx, region) in region_chars.iter().enumerate() {
         if region.is_empty() {
             continue;
         }
-        // 按 y 坐标排序
         let mut sorted: Vec<&RawChar> = region.clone();
         sorted.sort_by(|a, b| {
             a.bbox
@@ -869,50 +1149,137 @@ fn extract_booktabs_table(
                 .unwrap_or(std::cmp::Ordering::Equal)
         });
 
-        // 递增扫描：当前行的基线 y 和容差
         let mut current_row: Vec<&RawChar> = vec![sorted[0]];
         let mut row_y = sorted[0].bbox.y;
 
         for &ch in sorted.iter().skip(1) {
             let delta = ch.bbox.y - row_y;
-            // 如果 y 跳变较大（超过典型上标偏移 ~6pt），开始新行
             if delta > 6.0 {
-                row_chars.push(std::mem::take(&mut current_row));
+                sub_rows.push(SubRow {
+                    chars: std::mem::take(&mut current_row),
+                    region_idx,
+                });
                 row_y = ch.bbox.y;
             }
             current_row.push(ch);
         }
         if !current_row.is_empty() {
-            row_chars.push(current_row);
+            sub_rows.push(SubRow {
+                chars: current_row,
+                region_idx,
+            });
         }
     }
 
-    let row_count = row_chars.len();
-
-    // 对每行按 x 排序，检测列间隙（大于 MIN_COL_GAP 的间隔）
-    const MIN_COL_GAP: f32 = 20.0;
-
-    // 收集所有行的间隙 x 坐标
-    let mut all_gap_positions: Vec<f32> = Vec::new();
-
-    for row in &mut row_chars {
-        row.sort_by(|a, b| {
+    // 对每个子行内的字符按 x 排序
+    for sub_row in sub_rows.iter_mut() {
+        sub_row.chars.sort_by(|a, b| {
             a.bbox
                 .x
                 .partial_cmp(&b.bbox.x)
                 .unwrap_or(std::cmp::Ordering::Equal)
         });
+    }
 
-        // 检测间隙
+    // ── 步骤2：仅用数据行（region_idx >= 1）检测列间隙 ──
+    const MIN_COL_GAP: f32 = 20.0;
+    let mut all_gap_positions: Vec<f32> = Vec::new();
+
+    // 统计每个数据行的间隙数量，用于一致性验证
+    // 判定逻辑：按 MIN_COL_GAP 拆段，表格行应有 ≥3 个短段，段落行通常是 1-2 个长段
+    let mut per_row_gap_counts: Vec<usize> = Vec::new();
+
+    for sub_row in &sub_rows {
+        if sub_row.region_idx < 1 {
+            continue; // 跳过表头区域
+        }
+
+        let row = &sub_row.chars;
+        // 按 MIN_COL_GAP 拆段，统计段数和各段字符数
+        let mut segments: Vec<usize> = Vec::new(); // 每段的字符数
+        let mut current_seg_len: usize = 1;
+
         for i in 1..row.len() {
             let prev_right = row[i - 1].bbox.x + row[i - 1].bbox.width;
             let curr_left = row[i].bbox.x;
             let gap = curr_left - prev_right;
             if gap >= MIN_COL_GAP {
-                let gap_center = (prev_right + curr_left) / 2.0;
-                all_gap_positions.push(gap_center);
+                segments.push(current_seg_len);
+                current_seg_len = 1;
+            } else {
+                current_seg_len += 1;
             }
         }
+        if !row.is_empty() {
+            segments.push(current_seg_len);
+        }
+
+        let gap_count = if segments.len() >= 1 {
+            segments.len() - 1
+        } else {
+            0
+        };
+
+        // 表格行判定：≥3 段（≥2 个间隙），且各段平均长度 ≤ 30 字符
+        let avg_seg_len = if !segments.is_empty() {
+            segments.iter().sum::<usize>() as f32 / segments.len() as f32
+        } else {
+            0.0
+        };
+
+        if gap_count >= 2 && avg_seg_len <= 30.0 {
+            per_row_gap_counts.push(gap_count);
+        } else {
+            per_row_gap_counts.push(usize::MAX); // 标记为无效（段落行）
+        }
+    }
+
+    // 找出有效行（非 usize::MAX）中最常见的间隙数量（众数）
+    let mut gap_count_freq: std::collections::HashMap<usize, usize> =
+        std::collections::HashMap::new();
+    for &gc in &per_row_gap_counts {
+        if gc != usize::MAX && gc >= 2 {
+            // 只统计合理的间隙数量（≥2 意味着 ≥3 列）
+            *gap_count_freq.entry(gc).or_insert(0) += 1;
+        }
+    }
+
+    let (mode_gap_count, mode_freq) = gap_count_freq
+        .iter()
+        .max_by_key(|(_, &freq)| freq)
+        .map(|(&gc, &freq)| (gc, freq))
+        .unwrap_or((0, 0));
+
+    // 至少需要 2 行具有一致的间隙模式
+    if mode_freq < 2 || mode_gap_count < 2 {
+        return None;
+    }
+
+    // 只使用间隙数量等于众数的数据行来推断列边界
+    // 同时过滤 sub_rows：只保留有效的表格行
+    let mut valid_data_indices: Vec<usize> = Vec::new();
+    let mut data_row_idx = 0;
+    for (i, sub_row) in sub_rows.iter().enumerate() {
+        if sub_row.region_idx < 1 {
+            continue;
+        }
+        if data_row_idx < per_row_gap_counts.len()
+            && per_row_gap_counts[data_row_idx] == mode_gap_count
+        {
+            valid_data_indices.push(i);
+
+            let row = &sub_row.chars;
+            for j in 1..row.len() {
+                let prev_right = row[j - 1].bbox.x + row[j - 1].bbox.width;
+                let curr_left = row[j].bbox.x;
+                let gap = curr_left - prev_right;
+                if gap >= MIN_COL_GAP {
+                    let gap_center = (prev_right + curr_left) / 2.0;
+                    all_gap_positions.push(gap_center);
+                }
+            }
+        }
+        data_row_idx += 1;
     }
 
     if all_gap_positions.is_empty() {
@@ -926,7 +1293,6 @@ fn extract_booktabs_table(
     for &pos in &all_gap_positions {
         if let Some(last) = col_separators.last() {
             if (pos - last).abs() < MIN_COL_GAP {
-                // 更新为平均值
                 let n = col_separators.len();
                 col_separators[n - 1] = (col_separators[n - 1] + pos) / 2.0;
                 continue;
@@ -935,62 +1301,120 @@ fn extract_booktabs_table(
         col_separators.push(pos);
     }
 
-    // 构建列边界（表格左边 + 各列分隔 + 表格右边）
+    // 构建列边界
     let mut col_bounds = vec![table_x_min];
     col_bounds.extend(&col_separators);
     col_bounds.push(table_x_max);
 
     let col_count = col_bounds.len() - 1;
-
     if col_count < 2 {
         return None;
     }
 
+    // ── 步骤3：处理表头区域 ──
+    // 表头区域 = region_idx == 0 的所有子行（过滤掉明显非表格的行）
+    // 用有效数据行的最大字符数 ×3 作为表头行的字符数上限
+    let max_data_row_chars = valid_data_indices
+        .iter()
+        .map(|&i| sub_rows[i].chars.len())
+        .max()
+        .unwrap_or(50);
+    let header_char_limit = (max_data_row_chars * 3).max(60);
+
+    // 如果有多个子行（如 "Sequential" + "Operations"），纵向合并
+    let header_sub_rows: Vec<&SubRow> = sub_rows
+        .iter()
+        .filter(|r| r.region_idx == 0 && r.chars.len() <= header_char_limit)
+        .collect();
+    // 有效数据行 = 通过一致性验证的行
+    let valid_data_sub_rows: Vec<&SubRow> =
+        valid_data_indices.iter().map(|&i| &sub_rows[i]).collect();
+
+    // 将表头子行的字符投影到列，然后纵向合并
+    let mut header_texts: Vec<String> = vec![String::new(); col_count];
+    if header_sub_rows.len() <= 1 {
+        // 单行表头：直接投影
+        if let Some(hr) = header_sub_rows.first() {
+            let mut col_chars: Vec<Vec<&RawChar>> = vec![Vec::new(); col_count];
+            for ch in &hr.chars {
+                let cx = ch.bbox.x + ch.bbox.width / 2.0;
+                for c in 0..col_count {
+                    if cx >= col_bounds[c] - 2.0 && cx < col_bounds[c + 1] + 2.0 {
+                        col_chars[c].push(ch);
+                        break;
+                    }
+                }
+            }
+            for (c, cchars) in col_chars.iter().enumerate() {
+                header_texts[c] = chars_to_text_with_spacing(cchars).trim().to_string();
+            }
+        }
+    } else {
+        // 多行表头：每个子行投影到列后，纵向用 " " (空格) 拼接
+        let mut col_lines: Vec<Vec<String>> = vec![Vec::new(); col_count];
+        for hr in &header_sub_rows {
+            let mut col_chars: Vec<Vec<&RawChar>> = vec![Vec::new(); col_count];
+            for ch in &hr.chars {
+                let cx = ch.bbox.x + ch.bbox.width / 2.0;
+                for c in 0..col_count {
+                    if cx >= col_bounds[c] - 2.0 && cx < col_bounds[c + 1] + 2.0 {
+                        col_chars[c].push(ch);
+                        break;
+                    }
+                }
+            }
+            for (c, cchars) in col_chars.iter().enumerate() {
+                let line_text = chars_to_text_with_spacing(cchars).trim().to_string();
+                if !line_text.is_empty() {
+                    col_lines[c].push(line_text);
+                }
+            }
+        }
+        for (c, lines) in col_lines.iter().enumerate() {
+            header_texts[c] = lines.join(" ");
+        }
+    }
+
     log::info!(
-        "Booktabs table detected on page {}: {} rows x {} cols, {} h-lines",
+        "Booktabs table detected on page {}: {} data rows x {} cols, {} h-lines, headers: {:?}",
         page_index,
-        row_count,
+        valid_data_sub_rows.len(),
         col_count,
         h_sorted.len(),
+        header_texts,
     );
 
-    // 将字符投影到 row×col 网格
-    let mut cell_texts: Vec<Vec<String>> = vec![vec![String::new(); col_count]; row_count];
+    // ── 步骤4：将有效数据行字符投影到网格（带空格检测）──
+    let data_row_count = valid_data_sub_rows.len();
+    let mut cell_texts: Vec<Vec<String>> = vec![vec![String::new(); col_count]; data_row_count];
 
-    for (r, row) in row_chars.iter().enumerate() {
-        for ch in row {
+    for (r, sub_row) in valid_data_sub_rows.iter().enumerate() {
+        // 先按列分组字符
+        let mut col_chars: Vec<Vec<&RawChar>> = vec![Vec::new(); col_count];
+        for ch in &sub_row.chars {
             let cx = ch.bbox.x + ch.bbox.width / 2.0;
-            // 找到字符所属的列
             for c in 0..col_count {
                 if cx >= col_bounds[c] - 2.0 && cx < col_bounds[c + 1] + 2.0 {
-                    cell_texts[r][c].push(ch.unicode);
+                    col_chars[c].push(ch);
                     break;
                 }
             }
         }
-    }
-
-    // Trim cell texts
-    for row in cell_texts.iter_mut() {
-        for cell in row.iter_mut() {
-            *cell = cell.trim().to_string();
+        for (c, cchars) in col_chars.iter().enumerate() {
+            cell_texts[r][c] = chars_to_text_with_spacing(cchars).trim().to_string();
         }
     }
 
-    // 表头推断：首行通常是表头
-    let headers: Vec<String> = cell_texts[0].iter().map(|s| s.trim().to_string()).collect();
-    let data_start = 1;
-
     // CellType 推断
-    let column_types = infer_column_types(&cell_texts, data_start, col_count);
+    let column_types = infer_column_types(&cell_texts, 0, col_count);
 
     // 构建 TableRow/TableCell
     let mut table_rows = Vec::new();
-    for row_idx in data_start..row_count {
+    for row_idx in 0..data_row_count {
         let mut cells = Vec::new();
         for col in 0..col_count {
             cells.push(TableCell {
-                row: row_idx - data_start,
+                row: row_idx,
                 col,
                 text: cell_texts[row_idx][col].clone(),
                 cell_type: if col < column_types.len() {
@@ -1003,12 +1427,12 @@ fn extract_booktabs_table(
             });
         }
         table_rows.push(TableRow {
-            row_index: row_idx - data_start,
+            row_index: row_idx,
             cells,
         });
     }
 
-    let fallback_text = generate_fallback_text(&headers, &table_rows, table_id, page_index);
+    let fallback_text = generate_fallback_text(&header_texts, &table_rows, table_id, page_index);
 
     let table_bbox = BBox::new(
         table_x_min,
@@ -1017,12 +1441,13 @@ fn extract_booktabs_table(
         row_bounds.last().unwrap() - row_bounds[0],
     );
 
+
     Some(TableIR {
         table_id: table_id.to_string(),
         page_index,
         bbox: table_bbox,
         extraction_mode: ExtractionMode::Ruled,
-        headers,
+        headers: header_texts,
         rows: table_rows,
         column_types,
         fallback_text,

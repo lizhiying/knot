@@ -422,7 +422,7 @@ impl PdfBackend for PdfExtractBackend {
             .ok_or_else(|| PdfError::Backend("PDF not opened".into()))?;
 
         let page_info = self.page_info(page_index)?;
-        let mut collector = CharCollector::new(page_info.size);
+        let mut collector = CharCollector::new(page_info.size, page_index);
 
         // 使用 pdf_extract::output_doc 来获取字符信息
         let doc = lopdf::Document::load_mem(data)
@@ -558,16 +558,22 @@ struct CharCollector {
     chars: Vec<RawChar>,
     page_size: PageSize,
     current_page: Option<u32>,
+    target_page_index: usize,
+    current_page_index: usize,
     target_found: bool,
+    target_done: bool,
 }
 
 impl CharCollector {
-    fn new(page_size: PageSize) -> Self {
+    fn new(page_size: PageSize, target_page_index: usize) -> Self {
         Self {
             chars: Vec::new(),
             page_size,
             current_page: None,
+            target_page_index,
+            current_page_index: 0,
             target_found: false,
+            target_done: false,
         }
     }
 }
@@ -580,16 +586,22 @@ impl pdf_extract::OutputDev for CharCollector {
         _art_box: Option<(f64, f64, f64, f64)>,
     ) -> Result<(), pdf_extract::OutputError> {
         self.current_page = Some(page_num);
-        // 更新页面尺寸
-        self.page_size = PageSize {
-            width: (media_box.urx - media_box.llx) as f32,
-            height: (media_box.ury - media_box.lly) as f32,
-        };
-        self.target_found = true;
+        if self.current_page_index == self.target_page_index {
+            // 更新页面尺寸
+            self.page_size = PageSize {
+                width: (media_box.urx - media_box.llx) as f32,
+                height: (media_box.ury - media_box.lly) as f32,
+            };
+            self.target_found = true;
+        }
         Ok(())
     }
 
     fn end_page(&mut self) -> Result<(), pdf_extract::OutputError> {
+        if self.current_page_index == self.target_page_index && self.target_found {
+            self.target_done = true;
+        }
+        self.current_page_index += 1;
         self.current_page = None;
         Ok(())
     }
@@ -602,7 +614,7 @@ impl pdf_extract::OutputDev for CharCollector {
         font_size: f64,
         char: &str,
     ) -> Result<(), pdf_extract::OutputError> {
-        if !self.target_found {
+        if !self.target_found || self.target_done {
             return Ok(());
         }
 
@@ -642,21 +654,16 @@ impl pdf_extract::OutputDev for CharCollector {
 }
 
 /// 对单个页面执行 pdf_extract 输出
+///
+/// 注意：pdf_extract::output_doc 会遍历所有页面，
+/// 但 CharCollector 内部只收集 target_page_index 对应页面的字符。
 fn output_single_page(
     doc: &lopdf::Document,
-    page_index: usize,
+    _page_index: usize,
     collector: &mut CharCollector,
 ) -> Result<(), PdfError> {
-    // pdf_extract::output_doc 会处理所有页面，
-    // 我们使用 extract_text_from_mem_by_pages 简化实现，
-    // 但为了获取字符位置信息，需要使用 OutputDev
     pdf_extract::output_doc(doc, collector)
         .map_err(|e| PdfError::Backend(format!("pdf_extract error: {:?}", e)))?;
-
-    // 过滤：CharCollector 收集了所有页面的字符，
-    // 但由于 output_doc 的特性，我们无法只处理一页
-    // 后续可以优化为真正的单页处理
-    let _ = page_index;
 
     Ok(())
 }
