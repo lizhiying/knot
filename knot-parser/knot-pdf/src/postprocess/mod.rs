@@ -6,6 +6,7 @@
 pub mod chart_text;
 pub mod footnote;
 pub mod list;
+pub mod noise;
 pub mod paragraph;
 pub mod url;
 pub mod watermark;
@@ -38,15 +39,17 @@ impl PostProcessPipeline {
     /// 创建默认管线（包含所有内置处理器，按推荐顺序）
     pub fn default_pipeline() -> Self {
         let mut pipeline = Self::new();
-        // 1. 水印检测与过滤（最先执行，避免影响其他检测）
+        // 1. 噪声块过滤（纯标点/引号/空白块，最先执行）
+        pipeline.add(Box::new(noise::NoiseBlockFilter::new()));
+        // 2. 水印检测与过滤
         pipeline.add(Box::new(watermark::WatermarkFilter::new()));
-        // 2. 图表数据标签过滤（在脚注之前，避免数字标签干扰）
+        // 3. 图表数据标签过滤（在脚注之前，避免数字标签干扰）
         pipeline.add(Box::new(chart_text::ChartTextFilter::new()));
-        // 3. 脚注检测与分离
+        // 4. 脚注检测与分离
         pipeline.add(Box::new(footnote::FootnoteDetector::new()));
-        // 4. 列表识别增强
+        // 5. 列表识别增强
         pipeline.add(Box::new(list::ListDetector::new()));
-        // 5. URL 碎片修复
+        // 6. URL 碎片修复
         pipeline.add(Box::new(url::UrlFixer::new()));
         pipeline
     }
