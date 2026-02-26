@@ -1,9 +1,14 @@
 //! 阅读顺序重建：行聚类、列检测、段落合并、隐式网格检测
 //!
-//! 将从 PDF 提取的原始字符转换为按阅读顺序排列的文本块
+//! 将从 PDF 提取的原始字符转换为按阅读顺序排列的文本块。
+//! 支持两种排序算法：
+//! - Heuristic: 现有的启发式排序（基于 y 位置 + 列检测）
+//! - XyCut: 递归分割算法，天然支持多栏布局
 
 use crate::backend::RawChar;
+use crate::config::ReadingOrderMethod;
 use crate::ir::{BBox, BlockIR, BlockRole, TableIR, TextLine, TextSpan};
+use crate::layout::xy_cut::{xy_cut_order, XyCutConfig};
 
 /// 行聚类容差（y 坐标差异在此范围内视为同一行）
 const LINE_Y_TOLERANCE: f32 = 3.0;
@@ -44,6 +49,90 @@ const BULLET_CHARS: &[char] = &['•', '·', '▪', '▸', '►', '◦', '‣', 
 pub fn build_blocks(chars: &[RawChar], page_width: f32, page_height: f32) -> Vec<BlockIR> {
     let (blocks, _) = build_blocks_and_grids(chars, page_width, page_height, 0);
     blocks
+}
+
+/// 从原始字符构建文本块 + 支持配置阅读顺序算法
+///
+/// 根据 `reading_order_method` 配置选择使用 Heuristic 或 XY-Cut 算法排序。
+pub fn build_blocks_with_config(
+    chars: &[RawChar],
+    page_width: f32,
+    page_height: f32,
+    page_index: usize,
+    reading_order: ReadingOrderMethod,
+    xy_cut_gap_ratio: f32,
+) -> (Vec<BlockIR>, Vec<TableIR>) {
+    // 先用现有方法构建块
+    let (mut blocks, tables) = build_blocks_and_grids(chars, page_width, page_height, page_index);
+
+    // 根据配置重新排序
+    let use_xycut = match reading_order {
+        ReadingOrderMethod::XyCut => true,
+        ReadingOrderMethod::Heuristic => false,
+        ReadingOrderMethod::Auto => {
+            // Auto: 当检测到多个 block 的 x 范围有明显分离时，使用 XyCut
+            has_multi_column_layout(&blocks, page_width)
+        }
+    };
+
+    if use_xycut && blocks.len() > 1 {
+        let bboxes: Vec<BBox> = blocks.iter().map(|b| b.bbox).collect();
+        let config = XyCutConfig {
+            gap_ratio: xy_cut_gap_ratio,
+            ..XyCutConfig::default()
+        };
+        let order = xy_cut_order(&bboxes, page_width, page_height, &config);
+
+        // 按 XY-Cut 顺序重新排列 blocks
+        let old_blocks = blocks;
+        blocks = order.into_iter().map(|i| old_blocks[i].clone()).collect();
+
+        // 重新编号
+        for (idx, blk) in blocks.iter_mut().enumerate() {
+            blk.block_id = format!("blk_{}", idx);
+        }
+    }
+
+    (blocks, tables)
+}
+
+/// 检测是否存在多栏布局
+///
+/// 通过分析 block 的 x 分布推断是否多栏：
+/// - 如果有显著的 x 方向间隙将 blocks 分成了多组，则认为是多栏
+fn has_multi_column_layout(blocks: &[BlockIR], page_width: f32) -> bool {
+    if blocks.len() < 4 {
+        return false;
+    }
+
+    // 过滤掉横幅块（宽度 > 70% 页宽，通常是标题/页眉）
+    let narrow_blocks: Vec<&BlockIR> = blocks
+        .iter()
+        .filter(|b| b.bbox.width < page_width * 0.7)
+        .collect();
+
+    if narrow_blocks.len() < 4 {
+        return false;
+    }
+
+    // 统计窄块的 x 中心分布
+    let mut x_centers: Vec<f32> = narrow_blocks.iter().map(|b| b.bbox.center_x()).collect();
+    x_centers.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+
+    // 检查 x 中心是否有明显的双峰分布（双栏特征）
+    let mid_x = page_width / 2.0;
+    let gap_threshold = page_width * 0.1; // 10% 页宽的间隙
+    let left_count = x_centers
+        .iter()
+        .filter(|&&x| x < mid_x - gap_threshold)
+        .count();
+    let right_count = x_centers
+        .iter()
+        .filter(|&&x| x > mid_x + gap_threshold)
+        .count();
+
+    // 左右两侧都有足够的块 → 多栏
+    left_count >= 2 && right_count >= 2
 }
 
 /// 从原始字符构建文本块 + 隐式网格检测
@@ -162,7 +251,7 @@ pub fn build_blocks_and_grids(
         }
     }
 
-    // 按 y 位置排序（保持阅读顺序）
+    // 按 y 位置排序（保持阅读顺序，更精确的排序由 build_blocks_with_config 层面的 XY-Cut 负责）
     positioned_blocks.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
 
     // 重新编号
@@ -776,6 +865,7 @@ struct LineGapProfile {
 ///
 /// 对每行分析内部显著间隙位置。当连续行有相同数量的间隙且位置对齐时，
 /// 识别为网格区域，按列优先顺序生成 BlockIR。
+/// 附加：稀疏列检测 —— 当只有部分行在固定 x 位置有间隙时，也能识别为列布局。
 fn detect_implicit_grids(
     lines: &[CharLine],
     _page_index: usize,
@@ -801,6 +891,33 @@ fn detect_implicit_grids(
                     .all(|seg| seg.len() >= MIN_LINE_CHAR_COUNT)
         })
         .collect();
+
+    // 调试：输出 profiles 统计
+    log::debug!(
+        "detect_implicit_grids: {} lines → {} valid profiles",
+        lines.len(),
+        profiles.len()
+    );
+    for p in &profiles {
+        let seg_lens: Vec<usize> = p.segments.iter().map(|s| s.len()).collect();
+        let seg_texts: Vec<String> = p
+            .segments
+            .iter()
+            .map(|s| s.iter().map(|c| c.unicode).collect::<String>())
+            .collect();
+        log::debug!(
+            "  profile[{}]: y={:.1}, gaps={}, gap_centers={:?}, seg_lens={:?}, texts={:?}",
+            p.line_idx,
+            p.y_center,
+            p.gap_centers.len(),
+            p.gap_centers,
+            seg_lens,
+            seg_texts
+                .iter()
+                .map(|t| t.chars().take(15).collect::<String>())
+                .collect::<Vec<_>>()
+        );
+    }
 
     // 对齐容差（基于页宽的百分比）
     let x_tolerance = page_width * GRID_X_ALIGN_RATIO;
@@ -920,6 +1037,24 @@ fn detect_implicit_grids(
         }
     }
 
+    // Step 2b: 稀疏列检测
+    // 当 Step 2 没有消费任何行时，尝试通过间隙位置聚类找到稳定的列分界
+    // 典型场景：左窄标签+右宽内容布局（PPT 导出 PDF 的十大趋势页面等）
+    let any_consumed = consumed_indices.iter().any(|&c| c);
+    log::debug!(
+        "Step 2b check: any_consumed={}, profiles_empty={}",
+        any_consumed,
+        profiles.is_empty()
+    );
+    if !any_consumed && !profiles.is_empty() {
+        let sparse_result =
+            detect_sparse_column_grid(lines, &profiles, page_width, x_tolerance, min_gap);
+        log::debug!("Step 2b sparse_result: {:?}", sparse_result.is_some());
+        if let Some((blocks, consumed)) = sparse_result {
+            return (blocks, consumed);
+        }
+    }
+
     // Step 3: 返回未消耗的行
     let remaining: Vec<CharLine> = lines
         .iter()
@@ -929,6 +1064,316 @@ fn detect_implicit_grids(
         .collect();
 
     (grid_blocks, remaining)
+}
+
+/// 稀疏列检测：当只有部分行在固定位置有间隙时，识别列布局
+///
+/// 典型场景：左窄标签+右宽内容的分组列表布局
+/// - 有些行同时有标签（左列）和内容（右列）→ 有间隙
+/// - 有些行只有内容（右列）→ 无间隙，但左边界对齐
+///
+/// 检测逻辑：
+/// 1. 聚类所有间隙位置，找到稳定的列分界 x 坐标
+/// 2. 验证大多数无间隙行的左边界都在分界位置右侧附近（即它们是纯右列行）
+/// 3. 用分界位置拆分所有行，左列允许为空
+fn detect_sparse_column_grid(
+    lines: &[CharLine],
+    profiles: &[LineGapProfile],
+    _page_width: f32,
+    x_tolerance: f32,
+    _min_gap: f32,
+) -> Option<(Vec<BlockIR>, Vec<CharLine>)> {
+    // 收集所有有间隙的 profiles 的 gap_centers
+    let all_gaps: Vec<f32> = profiles
+        .iter()
+        .flat_map(|p| p.gap_centers.iter().cloned())
+        .collect();
+
+    log::debug!("sparse_column: all_gaps={:?}", all_gaps);
+
+    if all_gaps.is_empty() {
+        log::debug!("sparse_column: no gaps found, skipping");
+        return None;
+    }
+
+    // 对间隙位置聚类
+    let gap_clusters = cluster_gap_positions(&all_gaps, x_tolerance);
+
+    log::debug!("sparse_column: gap_clusters={:?}", gap_clusters);
+
+    if gap_clusters.is_empty() {
+        return None;
+    }
+
+    // 选择支持行数最多的簇作为主要列分界
+    // （允许多个簇存在——页脚等行可能产生额外间隙）
+    let best_cluster = gap_clusters.iter().max_by_key(|(_, count)| *count).unwrap();
+
+    let boundary_x = best_cluster.0; // 聚类中心
+    let boundary_count = best_cluster.1; // 支持行数
+
+    // 需要至少 2 行支持这个分界位置
+    if boundary_count < 2 {
+        log::debug!(
+            "sparse_column: boundary_count={} < 2, skipping",
+            boundary_count
+        );
+        return None;
+    }
+
+    // 确定网格 y 范围：从第一个有间隙行到最后一个有间隙行
+    // 只有这个范围内的行参与网格拆分
+    let gap_profile_y_values: Vec<f32> = profiles
+        .iter()
+        .filter(|p| {
+            p.gap_centers
+                .iter()
+                .any(|gc| (gc - boundary_x).abs() < x_tolerance)
+        })
+        .map(|p| p.y_center)
+        .collect();
+
+    if gap_profile_y_values.is_empty() {
+        return None;
+    }
+
+    let grid_y_min = gap_profile_y_values
+        .iter()
+        .cloned()
+        .fold(f32::MAX, f32::min);
+    let grid_y_max = gap_profile_y_values
+        .iter()
+        .cloned()
+        .fold(f32::MIN, f32::max);
+
+    // 扩展 y 范围：向上下各扩展一些（允许网格边缘的纯右列行）
+    let avg_line_gap = if lines.len() >= 2 {
+        let mut gaps: Vec<f32> = Vec::new();
+        for i in 1..lines.len() {
+            let g = lines[i].y_center - lines[i - 1].y_center;
+            if g > 0.0 {
+                gaps.push(g);
+            }
+        }
+        gaps.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+        if gaps.is_empty() {
+            30.0
+        } else {
+            gaps[gaps.len() / 2]
+        }
+    } else {
+        30.0
+    };
+
+    // 大间隙（区域分隔线）的阈值：中位行距的 2 倍
+    let section_gap_threshold = avg_line_gap * 2.0;
+
+    // 向上扩展到第一个间隙行之前的连续行（不超过大间隙）
+    let mut y_start = grid_y_min;
+    for line in lines.iter().rev() {
+        if line.y_center >= grid_y_min {
+            continue;
+        }
+        if grid_y_min - line.y_center > section_gap_threshold {
+            break;
+        }
+        y_start = line.y_center;
+    }
+
+    // 向下扩展到最后一个间隙行之后的连续行（不超过大间隙）
+    let mut y_end = grid_y_max;
+    for line in lines.iter() {
+        if line.y_center <= grid_y_max {
+            continue;
+        }
+        if line.y_center - grid_y_max > section_gap_threshold {
+            break;
+        }
+        y_end = line.y_center;
+    }
+
+    // 收集 y 范围内的行
+    let grid_lines: Vec<(usize, &CharLine)> = lines
+        .iter()
+        .enumerate()
+        .filter(|(_, line)| line.y_center >= y_start - 5.0 && line.y_center <= y_end + 5.0)
+        .collect();
+
+    if grid_lines.len() < 3 {
+        return None;
+    }
+
+    // 验证：y 范围内的无间隙行中，大部分从 boundary_x 右侧开始
+    let no_gap_in_range: Vec<&CharLine> = grid_lines
+        .iter()
+        .filter(|(_, line)| {
+            !profiles.iter().any(|p| {
+                p.line_idx < lines.len()
+                    && (lines[p.line_idx].y_center - line.y_center).abs() < 0.5
+                    && p.gap_centers
+                        .iter()
+                        .any(|gc| (gc - boundary_x).abs() < x_tolerance)
+            })
+        })
+        .map(|(_, line)| *line)
+        .collect();
+
+    if no_gap_in_range.is_empty() {
+        return None;
+    }
+
+    let aligned_count = no_gap_in_range
+        .iter()
+        .filter(|line| line.bbox.x > boundary_x - x_tolerance * 2.0)
+        .count();
+
+    let alignment_ratio = aligned_count as f32 / no_gap_in_range.len() as f32;
+
+    if alignment_ratio < 0.4 {
+        log::debug!(
+            "sparse_column: alignment_ratio={:.1}% < 40%, skipping",
+            alignment_ratio * 100.0
+        );
+        return None;
+    }
+
+    log::debug!(
+        "Sparse column grid detected: boundary_x={:.1}, y_range=[{:.1}, {:.1}], {} lines, alignment={:.1}%",
+        boundary_x,
+        y_start,
+        y_end,
+        grid_lines.len(),
+        alignment_ratio * 100.0
+    );
+
+    // 用 boundary_x 拆分网格范围内的行
+    let gap_centers = vec![boundary_x];
+    let mut left_col_profiles: Vec<LineGapProfile> = Vec::new();
+    let mut right_col_lines: Vec<CharLine> = Vec::new();
+    let mut consumed: Vec<bool> = vec![false; lines.len()];
+
+    for &(li, line) in &grid_lines {
+        // 尝试强制拆分
+        let forced = force_split_by_gaps(line, &gap_centers, 1); // min_chars=1 允许短标签
+
+        if let Some(fp) = forced {
+            if fp.segments.len() == 2 {
+                // 左列有内容
+                consumed[li] = true;
+                left_col_profiles.push(fp);
+                continue;
+            }
+        }
+
+        // 无间隙行：检查是否是纯右列行
+        if line.bbox.x > boundary_x - x_tolerance * 2.0 {
+            // 纯右列行 → 将整行作为右列内容
+            consumed[li] = true;
+            right_col_lines.push(line.clone());
+        }
+        // 否则这行不属于网格，交给后续处理
+    }
+
+    // 生成拆分后的行
+    // 不生成 BlockIR，而是将拆分后的行加入 remaining，让下游段落合并逻辑处理
+    let mut split_lines: Vec<CharLine> = Vec::new();
+
+    // 左列行：从拆分后的第一个 segment 提取
+    for profile in &left_col_profiles {
+        if profile.segments.is_empty() {
+            continue;
+        }
+        let seg = &profile.segments[0];
+        if seg.is_empty() {
+            continue;
+        }
+        split_lines.push(CharLine {
+            chars: seg.clone(),
+            y_center: profile.y_center,
+            bbox: compute_chars_bbox(seg),
+        });
+
+        // 右列部分
+        if profile.segments.len() >= 2 {
+            let rseg = &profile.segments[1];
+            if !rseg.is_empty() {
+                split_lines.push(CharLine {
+                    chars: rseg.clone(),
+                    y_center: profile.y_center,
+                    bbox: compute_chars_bbox(rseg),
+                });
+            }
+        }
+    }
+
+    // 纯右列行直接添加
+    for line in &right_col_lines {
+        split_lines.push(line.clone());
+    }
+
+    if split_lines.is_empty() {
+        return None;
+    }
+
+    // 按 y 排序
+    split_lines.sort_by(|a, b| {
+        a.y_center
+            .partial_cmp(&b.y_center)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    // 返回空 blocks + 拆分后的行合并到 remaining 中
+    // 未消耗的行 + 拆分后的新行，一起交给下游处理
+    let mut remaining: Vec<CharLine> = lines
+        .iter()
+        .enumerate()
+        .filter(|(idx, _)| !consumed[*idx])
+        .map(|(_, line)| line.clone())
+        .collect();
+
+    remaining.extend(split_lines);
+
+    // 按 y 排序
+    remaining.sort_by(|a, b| {
+        a.y_center
+            .partial_cmp(&b.y_center)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    Some((Vec::new(), remaining))
+}
+
+/// 对间隙位置聚类
+///
+/// 将接近的间隙位置归为同一簇，返回 (簇中心, 簇大小) 列表
+fn cluster_gap_positions(gaps: &[f32], tolerance: f32) -> Vec<(f32, usize)> {
+    if gaps.is_empty() {
+        return Vec::new();
+    }
+
+    let mut sorted: Vec<f32> = gaps.to_vec();
+    sorted.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+
+    let mut clusters: Vec<(f32, usize)> = Vec::new(); // (sum, count)
+    let mut cur_sum = sorted[0];
+    let mut cur_count: usize = 1;
+    let mut cur_center = sorted[0];
+
+    for &g in &sorted[1..] {
+        if (g - cur_center).abs() < tolerance {
+            cur_sum += g;
+            cur_count += 1;
+            cur_center = cur_sum / cur_count as f32;
+        } else {
+            clusters.push((cur_center, cur_count));
+            cur_sum = g;
+            cur_count = 1;
+            cur_center = g;
+        }
+    }
+    clusters.push((cur_center, cur_count));
+
+    clusters
 }
 
 /// 用已知的间隙位置强制拆分一行
