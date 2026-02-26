@@ -3,6 +3,7 @@
 //! 可插拔的后处理管线，用于对已解析的 PageIR 进行噪声过滤和质量提升。
 //! 处理器按注册顺序依次执行。
 
+pub mod chart_text;
 pub mod footnote;
 pub mod list;
 pub mod paragraph;
@@ -39,11 +40,13 @@ impl PostProcessPipeline {
         let mut pipeline = Self::new();
         // 1. 水印检测与过滤（最先执行，避免影响其他检测）
         pipeline.add(Box::new(watermark::WatermarkFilter::new()));
-        // 2. 脚注检测与分离
+        // 2. 图表数据标签过滤（在脚注之前，避免数字标签干扰）
+        pipeline.add(Box::new(chart_text::ChartTextFilter::new()));
+        // 3. 脚注检测与分离
         pipeline.add(Box::new(footnote::FootnoteDetector::new()));
-        // 3. 列表识别增强
+        // 4. 列表识别增强
         pipeline.add(Box::new(list::ListDetector::new()));
-        // 4. URL 碎片修复
+        // 5. URL 碎片修复
         pipeline.add(Box::new(url::UrlFixer::new()));
         pipeline
     }
@@ -81,6 +84,7 @@ mod tests {
         let pipeline = PostProcessPipeline::default_pipeline();
         let names = pipeline.processor_names();
         assert!(names.contains(&"watermark_filter"));
+        assert!(names.contains(&"chart_text_filter"));
         assert!(names.contains(&"footnote_detector"));
         assert!(names.contains(&"list_detector"));
         assert!(names.contains(&"url_fixer"));
