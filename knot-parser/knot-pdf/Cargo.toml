@@ -13,6 +13,9 @@ pdfium = ["dep:pdfium-render", "dep:image"]
 ocr_tesseract = ["dep:leptess"]
 ocr_paddle = ["dep:pure-onnx-ocr", "dep:image"]
 vision = ["dep:ureq", "dep:base64"]
+layout_model = ["dep:tract-onnx", "dep:image"]
+table_model = ["dep:tract-onnx", "dep:image"]
+formula_model = ["dep:ort", "dep:image"]
 cli = ["dep:clap", "dep:env_logger"]
 
 [dependencies]
@@ -36,6 +39,8 @@ image = { version = "0.25", optional = true }
 pdfium-render = { version = "0.8", optional = true }
 ureq = { version = "2", features = ["json"], optional = true }
 base64 = { version = "0.22", optional = true }
+tract-onnx = { version = "0.21", optional = true }
+ort = { version = "2.0.0-rc.9", optional = true }
 
 # cli
 clap = { version = "4", features = ["derive"], optional = true }
