@@ -217,12 +217,31 @@ impl PdfBackend for PdfiumBackend {
             let mut images = Vec::new();
 
             for obj in page.objects().iter() {
-                if obj.as_image_object().is_some() {
+                if let Some(img_obj) = obj.as_image_object() {
                     if let Ok(rect) = obj.bounds() {
                         let left = rect.left().value;
                         let bottom = rect.bottom().value;
                         let right = rect.right().value;
                         let top = rect.top().value;
+
+                        // 尝试获取图片原始字节（用于 QR 检测等）
+                        let data = match img_obj.get_raw_image() {
+                            Ok(img) => {
+                                let mut buf = Vec::new();
+                                let mut cursor = std::io::Cursor::new(&mut buf);
+                                if img.write_to(&mut cursor, image::ImageFormat::Png).is_ok() {
+                                    Some(buf)
+                                } else {
+                                    None
+                                }
+                            }
+                            Err(_) => None,
+                        };
+                        let format_hint = if data.is_some() {
+                            Some("png".to_string())
+                        } else {
+                            None
+                        };
 
                         images.push(RawImage {
                             bbox: BBox {
@@ -231,8 +250,8 @@ impl PdfBackend for PdfiumBackend {
                                 width: (right - left).abs(),
                                 height: (top - bottom).abs(),
                             },
-                            data: None,
-                            format_hint: None,
+                            data,
+                            format_hint,
                         });
                     }
                 }

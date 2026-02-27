@@ -130,12 +130,17 @@ impl MarkdownRenderer {
                         }
                     }
                     ImageSource::Embedded => {
-                        output.push_str(&format!(
-                            "![image_{}](page_{}_img_{})\n\n",
-                            image.image_id,
-                            page.page_index + 1,
-                            image.image_id
-                        ));
+                        if image.is_qrcode {
+                            // 二维码输出为标签，方便检索
+                            output.push_str(&format!("[二维码/QR Code: {}]\n\n", image.image_id));
+                        } else {
+                            output.push_str(&format!(
+                                "![image_{}](page_{}_img_{})\n\n",
+                                image.image_id,
+                                page.page_index + 1,
+                                image.image_id
+                            ));
+                        }
                     }
                 }
             }

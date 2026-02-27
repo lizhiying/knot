@@ -27,4 +27,7 @@ pub struct ImageIR {
     /// OCR 提取的文字描述（图表区域渲染后 OCR 得到的文字）
     #[serde(default)]
     pub ocr_text: Option<String>,
+    /// 是否为二维码图片
+    #[serde(default)]
+    pub is_qrcode: bool,
 }

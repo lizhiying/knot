@@ -575,23 +575,35 @@ impl Pipeline {
             }
         }
 
-        // 转换图片为 ImageIR
+        // 转换图片为 ImageIR（并检测二维码）
         let images: Vec<ImageIR> = raw_images
             .iter()
             .enumerate()
-            .map(|(i, img)| ImageIR {
-                image_id: format!("p{}_{}", page_index, i),
-                page_index,
-                bbox: img.bbox,
-                format: match img.format_hint.as_deref() {
-                    Some(s) if s.contains("jpg") || s.contains("jpeg") => ImageFormat::Jpg,
-                    Some(s) if s.contains("png") => ImageFormat::Png,
-                    _ => ImageFormat::Unknown,
-                },
-                bytes_ref: None,
-                caption_refs: Vec::new(),
-                source: ImageSource::Embedded,
-                ocr_text: None,
+            .map(|(i, img)| {
+                // QR code 检测：通过 bbox 宽高比和像素特征判断
+                let is_qrcode = Self::detect_qrcode(&img.bbox, img.data.as_deref());
+                if is_qrcode {
+                    log::debug!("QR code detected: p{}_{}", page_index, i);
+                }
+                ImageIR {
+                    image_id: format!("p{}_{}", page_index, i),
+                    page_index,
+                    bbox: img.bbox,
+                    format: match img.format_hint.as_deref() {
+                        Some(s) if s.contains("jpg") || s.contains("jpeg") => ImageFormat::Jpg,
+                        Some(s) if s.contains("png") => ImageFormat::Png,
+                        _ => ImageFormat::Unknown,
+                    },
+                    bytes_ref: None,
+                    caption_refs: Vec::new(),
+                    source: ImageSource::Embedded,
+                    ocr_text: if is_qrcode {
+                        Some("二维码/QR Code".to_string())
+                    } else {
+                        None
+                    },
+                    is_qrcode,
+                }
             })
             .collect();
 
@@ -771,6 +783,7 @@ impl Pipeline {
                         caption_refs,
                         source: ImageSource::FigureRegion,
                         ocr_text,
+                        is_qrcode: false,
                     });
 
                     // 从 blocks 中剔除图区域内的文字块
@@ -890,6 +903,7 @@ impl Pipeline {
                         caption_refs: vec![],
                         source: ImageSource::FigureRegion,
                         ocr_text,
+                        is_qrcode: false,
                     });
 
                     // 移除区域内所有文字块
@@ -1574,6 +1588,76 @@ impl Pipeline {
         }
 
         result
+    }
+
+    /// 检测图片是否为二维码
+    /// 通过 bbox 宽高比（近正方形）和像素特征（高黑白对比度）判断
+    fn detect_qrcode(bbox: &crate::ir::BBox, image_data: Option<&[u8]>) -> bool {
+        let w = bbox.width;
+        let h = bbox.height;
+
+        // 检查 1: 近正方形（宽高比 0.8-1.2）
+        if w < 1.0 || h < 1.0 {
+            return false;
+        }
+        let ratio = w / h;
+        if !(0.8..=1.25).contains(&ratio) {
+            return false;
+        }
+
+        // 检查 2: 尺寸合理（QR 码通常不会很大，也不会太小）
+        // 在 PDF 坐标系中，QR 码通常 50-300 pt
+        if w < 30.0 || w > 350.0 {
+            return false;
+        }
+
+        // 检查 3: 如果有图片数据，分析像素黑白比
+        #[cfg(feature = "pdfium")]
+        if let Some(data) = image_data {
+            if let Ok(img) = image::load_from_memory(data) {
+                let gray = img.to_luma8();
+                let total = gray.len();
+                if total == 0 {
+                    return false;
+                }
+
+                // 统计近黑（<50）和近白（>200）的像素比例
+                let mut bw_count = 0usize;
+                // 采样以提高效率（每隔几个像素取一个）
+                let step = (total / 1000).max(1);
+                let mut sampled = 0usize;
+                for (i, &px) in gray.as_raw().iter().enumerate() {
+                    if i % step != 0 {
+                        continue;
+                    }
+                    sampled += 1;
+                    if px < 80 || px > 180 {
+                        bw_count += 1;
+                    }
+                }
+
+                if sampled > 0 {
+                    let bw_ratio = bw_count as f32 / sampled as f32;
+                    // QR 码至少 70% 像素是黑或白
+                    if bw_ratio < 0.70 {
+                        return false;
+                    }
+                    log::trace!(
+                        "QR candidate: {:.0}x{:.0}, bw_ratio={:.1}%",
+                        w,
+                        h,
+                        bw_ratio * 100.0
+                    );
+                    return true;
+                }
+            }
+        }
+
+        // 如果没有像素数据，仅通过形状判断（不够可靠，不标记）
+        #[cfg(not(feature = "pdfium"))]
+        let _ = image_data;
+
+        false
     }
 }
 
