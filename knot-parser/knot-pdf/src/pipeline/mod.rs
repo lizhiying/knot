@@ -697,7 +697,7 @@ impl Pipeline {
                 );
 
                 for fig in &figure_regions {
-                    // 对每个图区域：尝试裁剪渲染 + OCR
+                    // 对每个图区域：尝试 VLM/OCR 获取描述
                     let mut ocr_text: Option<String> = None;
 
                     // 尝试通过 OcrRenderer 裁剪渲染（仅当 renderer 可用时）
@@ -710,25 +710,53 @@ impl Pipeline {
                             self.config.figure_render_width,
                         ) {
                             Ok(region_img) => {
-                                // 尝试 OCR
-                                if let Some(ocr_b) = &self.ocr_backend {
-                                    match ocr_b.ocr_full_page(&region_img) {
-                                        Ok(ocr_blocks) => {
-                                            let text: String = ocr_blocks
-                                                .iter()
-                                                .map(|b| b.text.as_str())
-                                                .collect::<Vec<_>>()
-                                                .join(", ");
-                                            if !text.is_empty() {
-                                                ocr_text = Some(text);
+                                // 优先用 VLM 描述图表（比 OCR 效果好）
+                                #[cfg(feature = "vision")]
+                                if ocr_text.is_none() {
+                                    if let Some(vision) = &self.vision_describer {
+                                        match vision.describe_image(
+                                            &region_img,
+                                            Some("这是一个数据图表或矢量图。请详细提取其中所有文字内容，包括标题、标签、数据和注释。输出纯文本。"),
+                                        ) {
+                                            Ok(desc) if !desc.is_empty() => {
+                                                log::info!(
+                                                    "Vision LLM described figure {} ({} chars)",
+                                                    fig.figure_id, desc.len()
+                                                );
+                                                ocr_text = Some(desc);
+                                            }
+                                            Ok(_) => {}
+                                            Err(e) => {
+                                                log::debug!(
+                                                    "Vision LLM failed for figure {}: {}",
+                                                    fig.figure_id, e
+                                                );
                                             }
                                         }
-                                        Err(e) => {
-                                            log::debug!(
-                                                "Figure OCR failed for {}: {}",
-                                                fig.figure_id,
-                                                e
-                                            );
+                                    }
+                                }
+
+                                // VLM 不可用或失败时，尝试 OCR
+                                if ocr_text.is_none() {
+                                    if let Some(ocr_b) = &self.ocr_backend {
+                                        match ocr_b.ocr_full_page(&region_img) {
+                                            Ok(ocr_blocks) => {
+                                                let text: String = ocr_blocks
+                                                    .iter()
+                                                    .map(|b| b.text.as_str())
+                                                    .collect::<Vec<_>>()
+                                                    .join(", ");
+                                                if !text.is_empty() {
+                                                    ocr_text = Some(text);
+                                                }
+                                            }
+                                            Err(e) => {
+                                                log::debug!(
+                                                    "Figure OCR failed for {}: {}",
+                                                    fig.figure_id,
+                                                    e
+                                                );
+                                            }
                                         }
                                     }
                                 }
@@ -739,19 +767,12 @@ impl Pipeline {
                                     fig.figure_id,
                                     e
                                 );
-                                // 如果裁剪渲染不可用，回退：从图区域内的文字块聚合文字
-                                let block_texts: Vec<&str> = blocks
-                                    .iter()
-                                    .filter(|b| fig.contained_block_ids.contains(&b.block_id))
-                                    .map(|b| b.normalized_text.as_str())
-                                    .collect();
-                                if !block_texts.is_empty() {
-                                    ocr_text = Some(block_texts.join(", "));
-                                }
                             }
                         }
-                    } else {
-                        // 没有 OcrRenderer：从图区域内文字块聚合文字
+                    }
+
+                    // 最终回退：从图区域内的文字块聚合文字
+                    if ocr_text.is_none() {
                         let block_texts: Vec<&str> = blocks
                             .iter()
                             .filter(|b| fig.contained_block_ids.contains(&b.block_id))
@@ -1502,16 +1523,13 @@ impl Pipeline {
                                 // （标题信息已注入 prompt，VLM 会自行输出完整标题）
                                 page_ir.blocks.clear();
 
-                                // 清除嵌入式装饰小图片（VLM 已覆盖全页视觉内容）
-                                // 保留 FigureRegion（可能有独立图表描述）
+                                // 清除所有图片（VLM 已覆盖全页视觉内容，包括图表和装饰图片）
                                 let before_img_count = page_ir.images.len();
-                                page_ir
-                                    .images
-                                    .retain(|img| img.source != ImageSource::Embedded);
-                                if before_img_count != page_ir.images.len() {
+                                page_ir.images.clear();
+                                if before_img_count > 0 {
                                     log::debug!(
-                                        "VLM fallback: cleared {} embedded images",
-                                        before_img_count - page_ir.images.len()
+                                        "VLM fallback: cleared {} images (embedded + figures)",
+                                        before_img_count
                                     );
                                 }
                                 page_ir.blocks.push(crate::ir::BlockIR {
