@@ -989,6 +989,15 @@ fn detect_implicit_grids(
                 if gap_to_grid <= 0.0 || gap_to_grid > avg_line_height * 2.0 {
                     continue;
                 }
+                // 检查原始行是否有自然间隙，如果没有（连续文本如标题），不强制拆分
+                let orig_profile = analyze_line_gaps(line, 0, min_gap);
+                if orig_profile.gap_centers.is_empty() {
+                    log::debug!(
+                        "Grid extend-up skip: y={:.1} has no natural gaps (title?)",
+                        line.y_center
+                    );
+                    continue;
+                }
                 let forced_profile =
                     force_split_by_gaps(line, &avg_gap_centers, MIN_LINE_CHAR_COUNT);
                 if let Some(fp) = forced_profile {
@@ -1008,6 +1017,15 @@ fn detect_implicit_grids(
             for line in lines.iter() {
                 let gap_to_grid = line.y_center - grid_y_max;
                 if gap_to_grid <= 0.0 || gap_to_grid > avg_line_height * 2.0 {
+                    continue;
+                }
+                // 检查原始行是否有自然间隙，如果没有（连续文本如标题），不强制拆分
+                let orig_profile = analyze_line_gaps(line, 0, min_gap);
+                if orig_profile.gap_centers.is_empty() {
+                    log::debug!(
+                        "Grid extend-down skip: y={:.1} has no natural gaps (title?)",
+                        line.y_center
+                    );
                     continue;
                 }
                 let forced_profile =
