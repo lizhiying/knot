@@ -63,10 +63,27 @@ impl WatermarkFilter {
         }
 
         // 规则 4：面积极大（占页面 >20%）且文字很少的块 → 可能是水印
+        // 但要排除包含联系方式、品牌信息的块（常见于 PPT 尾页）
         let block_area = block.bbox.area();
         let char_count = text.chars().count();
         if block_area > page_area * 0.2 && char_count < 50 {
-            return true;
+            // 检查是否包含联系方式或品牌信息（PPT 尾页常见）
+            let has_contact_info = lower.contains("http")
+                || lower.contains("www")
+                || lower.contains("微博")
+                || lower.contains("微信")
+                || lower.contains("邮箱")
+                || lower.contains("电话")
+                || lower.contains("热线")
+                || lower.contains("@")
+                || lower.contains("qr")
+                || lower.contains("二维码")
+                || lower.contains(".com")
+                || lower.contains(".cn")
+                || lower.contains(".org");
+            if !has_contact_info {
+                return true;
+            }
         }
 
         // 规则 5：对角线方向的文本（通过 bbox 形状判断）
