@@ -800,6 +800,29 @@ impl Pipeline {
                 }
             }
 
+            // === 提前检测 PPT 复杂布局 ===
+            // 如果页面可能是 PPT 复杂布局（后面会触发全页 VLM 回退），
+            // 可以跳过逐个图表/图片的 VLM 调用以提高性能
+            let likely_complex_ppt = {
+                let is_ppt = page_info.size.width > page_info.size.height;
+                let short_count = blocks
+                    .iter()
+                    .filter(|b| b.normalized_text.chars().count() < 25)
+                    .count();
+                let short_ratio = if blocks.is_empty() {
+                    0.0
+                } else {
+                    short_count as f64 / blocks.len() as f64
+                };
+                is_ppt && blocks.len() > 8 && short_ratio > 0.40
+            };
+            if likely_complex_ppt {
+                log::debug!(
+                    "Likely complex PPT on page {}, skipping per-image VLM (will use full-page VLM instead)",
+                    page_index
+                );
+            }
+
             // === 基于文本聚类的图表区域检测 ===
             // 当矢量 path 检测失效时（PPT 导出 PDF 常见），
             // 通过数据标签（数字/百分比/年份）的空间聚集来识别图表区域
@@ -832,10 +855,11 @@ impl Pipeline {
                     let chart_id = format!("chart_p{}_{}", page_index, region_idx);
 
                     // 尝试渲染图表区域 + Vision LLM 描述
+                    // 如果是复杂 PPT 布局，跳过（全页 VLM 会覆盖）
                     let mut ocr_text: Option<String> = None;
 
                     #[cfg(feature = "pdfium")]
-                    {
+                    if !likely_complex_ppt {
                         // 渲染整页然后裁剪图表区域
                         if let Ok(full_png) = backend
                             .render_page_to_image(page_index, self.config.figure_render_width)
@@ -922,8 +946,14 @@ impl Pipeline {
             // === 嵌入图片 → FigureRegion 升级 ===
             // 条件：面积 > 阈值 OR 附近有 Figure/Fig./图 caption 文字
             let page_area = page_info.size.width * page_info.size.height;
+
             for img_ir in images.iter_mut() {
                 if img_ir.source != ImageSource::Embedded {
+                    continue;
+                }
+
+                // 跳过二维码图片的 VLM 描述
+                if img_ir.is_qrcode {
                     continue;
                 }
 
@@ -1026,8 +1056,9 @@ impl Pipeline {
                 };
 
                 // 方案1：Vision LLM 语义描述（图表/图形）
+                // 如果是复杂 PPT 布局，跳过嵌入图片的逐个 VLM（全页 VLM 会覆盖）
                 #[cfg(feature = "vision")]
-                if ocr_text.is_none() {
+                if ocr_text.is_none() && !likely_complex_ppt {
                     if let Some(vision) = &self.vision_describer {
                         if let Some(ref img_bytes) = region_img {
                             // 构建 context hint（用 caption 文字帮助 LLM 理解）
