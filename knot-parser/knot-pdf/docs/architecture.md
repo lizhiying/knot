@@ -1,6 +1,6 @@
 # knot-pdf 项目架构全景
 
-> 最后更新：2026-02-26  |  版本：0.1.0  |  总代码量：19,108 行（源码） + 7,157 行（测试）
+> 最后更新：2026-02-27  |  版本：0.1.0  |  总代码量：19,500+ 行（源码） + 7,157 行（测试）
 
 ## 1. 项目简介
 
@@ -95,7 +95,7 @@ DocumentIR
   │     │     │     └── cells: Vec<TableCell>
   │     │     ├── extraction_mode: Ruled/Stream
   │     │     └── fallback_text
-  │     ├── images: Vec<ImageIR>        ← 图片
+  │     ├── images: Vec<ImageIR>        ← 图片（含 is_qrcode 标志）
   │     ├── formulas: Vec<FormulaIR>    ← 公式 (M12)
   │     │     ├── formula_type: Inline/Display
   │     │     ├── raw_text / latex
@@ -124,6 +124,7 @@ pub struct Pipeline {
     ocr_renderer: Option<Box<dyn OcrRenderer>>,
     layout_detector: Option<Box<dyn LayoutDetector>>,
     formula_recognizer: Option<Box<dyn FormulaRecognizer>>,
+    vision_describer: Option<VisionDescriber>, // Vision LLM 图片描述
     postprocess_pipeline: PostProcessPipeline,  // M13
     max_ocr_workers: usize,
 }
@@ -132,17 +133,22 @@ pub struct Pipeline {
 **处理流程（per page）：**
 
 ```
-1. extract_chars()          → 提取字符
-2. extract_images()         → 提取图片
-3. build_blocks()           → 构建文本块（含多栏检测、稀疏列检测）
-4. extract_tables()         → 表格提取（Stream + Ruled + Booktabs）
-5. layout_detect()          → 版面检测：修正 BlockRole (M10)
-6. compute_page_score()     → 文本质量评分
-7. select_parse_strategy()  → 策略选择 (M14)
-8. detect_formulas()        → 公式检测 (M12)
-9. formula_ocr()            → 公式 OCR → LaTeX (M12, 可选)
-10. postprocess_pipeline()  → 后处理：水印/脚注/列表/URL (M13)
-11. → PageIR
+1.  extract_chars()          → 提取字符
+2.  extract_images()         → 提取图片（含原始字节用于 QR 检测）
+3.  build_blocks()           → 构建文本块（含多栏检测、稀疏列检测）
+4.  detect_qrcode()          → 二维码检测（bbox 宽高比 + 像素分析）
+5.  likely_complex_ppt?      → 提前检测 PPT 复杂布局（跳过逐图 VLM）
+6.  chart_regions_detect()   → 图表区域检测（文本聚类 + Vision LLM）
+7.  embedded_image_vlm()     → 嵌入图片 VLM 描述（跳过 QR 和复杂 PPT）
+8.  extract_tables()         → 表格提取（Stream + Ruled + Booktabs）
+9.  layout_detect()          → 版面检测：修正 BlockRole (M10)
+10. compute_page_score()     → 文本质量评分
+11. select_parse_strategy()  → 策略选择 (M14)
+12. detect_formulas()        → 公式检测 (M12)
+13. formula_ocr()            → 公式 OCR → LaTeX (M12, 可选)
+14. postprocess_pipeline()   → 后处理：水印/脚注/列表/URL (M13)
+15. complex_ppt_vlm?         → PPT 复杂布局 Vision LLM 全页回退
+16. → PageIR
 ```
 
 **API：**
@@ -239,13 +245,13 @@ pub trait PostProcessor: Send + Sync {
 }
 ```
 
-| 处理器             | 文件           | 功能                                          |
-| ------------------ | -------------- | --------------------------------------------- |
-| `WatermarkFilter`  | `watermark.rs` | 常见水印文本匹配 + 大面积检测 → 标记并移除    |
-| `FootnoteDetector` | `footnote.rs`  | 底部区域 + 脚注标记(¹/[1]/*/†) + 字号对比     |
-| `ListDetector`     | `list.rs`      | 有序(1./①/(a))和无序(•/-/–)列表 → `role=List` |
-| `UrlFixer`         | `url.rs`       | 碎片化 URL span 合并                          |
-| `ParagraphMerger`  | `paragraph.rs` | 跨页段落检测辅助函数                          |
+| 处理器             | 文件           | 功能                                                       |
+| ------------------ | -------------- | ---------------------------------------------------------- |
+| `WatermarkFilter`  | `watermark.rs` | 常见水印文本匹配 + 大面积检测 → 标记并移除（联系方式豁免） |
+| `FootnoteDetector` | `footnote.rs`  | 底部区域 + 脚注标记(¹/[1]/*/†) + 字号对比                  |
+| `ListDetector`     | `list.rs`      | 有序(1./①/(a))和无序(•/-/–)列表 → `role=List`              |
+| `UrlFixer`         | `url.rs`       | 碎片化 URL span 合并                                       |
+| `ParagraphMerger`  | `paragraph.rs` | 跨页段落检测辅助函数                                       |
 
 ### 3.10 `hybrid/` — 混合解析模式 (580 行, 4 文件)
 
@@ -265,16 +271,16 @@ text_score < 0.3  →  FullWithVlm        (VLM 外部调用)
 
 ### 3.11 其他模块
 
-| 模块           | 行数     | 说明                                              |
-| -------------- | -------- | ------------------------------------------------- |
-| `ocr/`         | 452 行   | OCR 后端抽象：Tesseract / PaddleOCR / Mock        |
-| `figure/`      | 417 行   | 图表区域检测与渲染（矢量图→PNG）                  |
-| `render/`      | 572 行   | Markdown 渲染器 + RAG 文本导出器                  |
-| `hf_detect/`   | 303 行   | 页眉/页脚/页码检测（跨页重复文本分析）            |
-| `store/`       | 182 行   | sled 缓存（避免重复解析）                         |
-| `vision/`      | 163 行   | Vision LLM 图片描述（调外部 API）                 |
-| `mem_track.rs` | 163 行   | RSS 内存监控                                      |
-| `bin/`         | 1,042 行 | CLI 工具（parse/markdown/rag/info/config 子命令） |
+| 模块           | 行数     | 说明                                                         |
+| -------------- | -------- | ------------------------------------------------------------ |
+| `ocr/`         | 452 行   | OCR 后端抽象：Tesseract / PaddleOCR / Mock                   |
+| `figure/`      | 417 行   | 图表区域检测与渲染（矢量图→PNG）                             |
+| `render/`      | 700+ 行  | Markdown 渲染器 + RAG 导出器 + OCR 表格自动格式化            |
+| `hf_detect/`   | 303 行   | 页眉/页脚/页码检测（跨页重复文本分析）                       |
+| `store/`       | 182 行   | sled 缓存（避免重复解析）                                    |
+| `vision/`      | 200+ 行  | Vision LLM 图片描述（OpenAI 兼容 API，含错误诊断和大小限制） |
+| `mem_track.rs` | 163 行   | RSS 内存监控                                                 |
+| `bin/`         | 1,042 行 | CLI 工具（parse/markdown/rag/info/config 子命令）            |
 
 ---
 
@@ -449,12 +455,21 @@ PDF 文件
   │
   ▼
 Backend.extract_chars()         ← 提取字符（text, bbox, font）
-Backend.extract_images()        ← 提取嵌入图片
+Backend.extract_images()        ← 提取嵌入图片（含原始字节）
 Backend.extract_graphics()      ← 提取矢量线段
   │
   ├─→ build_blocks()            ← 字符 → 行 → 块，含多栏检测
+  │     ├─→ detect_implicit_grids()      ← 隐式网格检测（保护跨全宽标题）
   │     ├─→ detect_sparse_column_grid()  ← 稀疏列检测
   │     └─→ xy_cut / reading_order()     ← 阅读顺序重建
+  │
+  ├─→ detect_qrcode()           ← 二维码检测（宽高比 + 像素对比度）
+  │
+  ├─→ likely_complex_ppt?       ← PPT 复杂布局提前检测（优化跳过逐图 VLM）
+  │
+  ├─→ chart_region_vlm()        ← 图表 VLM 描述（跳过复杂 PPT）
+  │
+  ├─→ embedded_image_vlm()      ← 嵌入图片 VLM（跳过 QR 和复杂 PPT）
   │
   ├─→ extract_tables()          ← 检测 + 提取表格
   │     ├─→ has_enough_lines() → Stream 模式
@@ -470,11 +485,13 @@ Backend.extract_graphics()      ← 提取矢量线段
   ├─→ detect_formulas()         ← 公式区域检测
   │     └─→ formula_ocr()       ← [可选] LaTeX 识别
   │
-  └─→ PostProcessPipeline       ← 后处理
-        ├─→ WatermarkFilter
-        ├─→ FootnoteDetector
-        ├─→ ListDetector
-        └─→ UrlFixer
+  ├─→ PostProcessPipeline       ← 后处理
+  │     ├─→ WatermarkFilter     （联系方式豁免，避免 PPT 尾页误删）
+  │     ├─→ FootnoteDetector
+  │     ├─→ ListDetector
+  │     └─→ UrlFixer
+  │
+  └─→ complex_ppt_vlm?          ← PPT 复杂布局全页 VLM 回退
             │
             ▼
          PageIR                  ← 最终输出
@@ -535,23 +552,24 @@ cargo test
 
 ## 7. Milestone 进度
 
-| #   | Milestone                   | 状态 | 核心交付                         |
-| --- | --------------------------- | ---- | -------------------------------- |
-| M1  | IR + Fast Track             | ✅    | 基础 PDF 解析 → IR               |
-| M2  | PageScore + 页眉页脚 + 多栏 | ✅    | 文本评分、页眉页脚检测、多栏支持 |
-| M3  | Stream 表格                 | ✅    | 无边框表格提取                   |
-| M4  | Ruled 表格                  | ✅    | 有边框表格提取                   |
-| M5  | OCR 回退 + Store            | ✅    | 扫描件 OCR、sled 缓存            |
-| M6  | 性能评测                    | ✅    | 基准测试、评测框架               |
-| M7  | CLI 工具                    | ✅    | knot-pdf 命令行                  |
-| M8  | 图表检测                    | ✅    | 矢量图渲染、嵌入图提取           |
-| M9  | XY-Cut 阅读顺序             | ✅    | 递归分割阅读顺序                 |
-| M10 | 版面检测                    | ✅    | 规则 + ONNX 版面检测             |
-| M11 | 表格模型增强                | ✅    | Booktabs、ONNX 结构检测          |
-| M12 | 公式检测与识别              | ✅    | 规则检测 + 纯 Rust ONNX OCR      |
-| M13 | 后处理增强                  | ✅    | 水印/脚注/列表/URL 后处理管线    |
-| M14 | Hybrid 解析模式             | ✅    | 三级策略 + VLM 接口 + 结果融合   |
-| M15 | 基准对比                    | 📋    | MinerU 对比评测（规划中）        |
+| #   | Milestone                   | 状态 | 核心交付                                     |
+| --- | --------------------------- | ---- | -------------------------------------------- |
+| M1  | IR + Fast Track             | ✅    | 基础 PDF 解析 → IR                           |
+| M2  | PageScore + 页眉页脚 + 多栏 | ✅    | 文本评分、页眉页脚检测、多栏支持             |
+| M3  | Stream 表格                 | ✅    | 无边框表格提取                               |
+| M4  | Ruled 表格                  | ✅    | 有边框表格提取                               |
+| M5  | OCR 回退 + Store            | ✅    | 扫描件 OCR、sled 缓存                        |
+| M6  | 性能评测                    | ✅    | 基准测试、评测框架                           |
+| M7  | CLI 工具                    | ✅    | knot-pdf 命令行                              |
+| M8  | 图表检测                    | ✅    | 矢量图渲染、嵌入图提取                       |
+| M9  | XY-Cut 阅读顺序             | ✅    | 递归分割阅读顺序                             |
+| M10 | 版面检测                    | ✅    | 规则 + ONNX 版面检测                         |
+| M11 | 表格模型增强                | ✅    | Booktabs、ONNX 结构检测                      |
+| M12 | 公式检测与识别              | ✅    | 规则检测 + 纯 Rust ONNX OCR                  |
+| M13 | 后处理增强                  | ✅    | 水印/脚注/列表/URL 后处理管线                |
+| M14 | Hybrid 解析模式             | ✅    | 三级策略 + VLM 接口 + 结果融合               |
+| —   | QR 检测 + VLM 性能优化      | ✅    | 二维码自动标记、PPT VLM 跳过、OCR 表格格式化 |
+| M15 | 基准对比                    | 📋    | MinerU 对比评测（规划中）                    |
 
 ---
 
