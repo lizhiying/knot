@@ -1548,8 +1548,15 @@ impl Pipeline {
                                 // 清洗后如果内容太短，视为 VLM 失败
                                 if vlm_text.len() < 5 {
                                     log::warn!(
-                                        "VLM output too short after cleaning ({} chars) for page {}, skipping",
+                                        "VLM output too short after cleaning ({} chars) for page {}, trying OCR fallback",
                                         vlm_text.len(), page_index
+                                    );
+                                    // OCR 回退
+                                    Self::ocr_fallback_for_page(
+                                        &self.ocr_backend,
+                                        &full_png,
+                                        page_index,
+                                        &mut page_ir,
                                     );
                                 } else {
                                     log::info!(
@@ -1676,9 +1683,23 @@ impl Pipeline {
                             }
                             Ok(_) => {
                                 log::debug!("Vision LLM returned empty for page {}", page_index);
+                                // OCR 回退
+                                Self::ocr_fallback_for_page(
+                                    &self.ocr_backend,
+                                    &full_png,
+                                    page_index,
+                                    &mut page_ir,
+                                );
                             }
                             Err(e) => {
                                 log::warn!("Vision LLM failed for page {}: {}", page_index, e);
+                                // OCR 回退
+                                Self::ocr_fallback_for_page(
+                                    &self.ocr_backend,
+                                    &full_png,
+                                    page_index,
+                                    &mut page_ir,
+                                );
                             }
                         }
                     }
@@ -1687,6 +1708,74 @@ impl Pipeline {
         }
 
         Ok(page_ir)
+    }
+    /// VLM 失败后的 OCR 回退：渲染好的页面图片直接传给 OCR 后端识别
+    #[cfg(feature = "vision")]
+    fn ocr_fallback_for_page(
+        ocr_backend: &Option<Box<dyn crate::ocr::OcrBackend>>,
+        rendered_png: &[u8],
+        page_index: usize,
+        page_ir: &mut PageIR,
+    ) {
+        if let Some(ocr_b) = ocr_backend {
+            log::info!("Attempting OCR fallback for page {}", page_index);
+            match ocr_b.ocr_full_page(rendered_png) {
+                Ok(ocr_blocks) => {
+                    let text: String = ocr_blocks
+                        .iter()
+                        .map(|b| b.text.as_str())
+                        .collect::<Vec<_>>()
+                        .join("\n");
+
+                    // 跳过 MockOcrBackend 的输出
+                    if text.is_empty() || text.contains("Mocked full page text") {
+                        log::debug!(
+                            "OCR fallback returned empty/mock text for page {}",
+                            page_index
+                        );
+                        return;
+                    }
+
+                    log::info!(
+                        "OCR fallback extracted {} chars for page {}",
+                        text.len(),
+                        page_index
+                    );
+
+                    page_ir.blocks.clear();
+                    page_ir.images.clear();
+                    page_ir.blocks.push(crate::ir::BlockIR {
+                        block_id: format!("ocr_fallback_p{}", page_index),
+                        bbox: crate::ir::BBox::new(
+                            0.0,
+                            0.0,
+                            page_ir.size.width,
+                            page_ir.size.height,
+                        ),
+                        role: Default::default(),
+                        lines: vec![crate::ir::TextLine {
+                            spans: vec![crate::ir::TextSpan {
+                                text: text.clone(),
+                                font_size: Some(12.0),
+                                is_bold: false,
+                                font_name: None,
+                            }],
+                            bbox: None,
+                        }],
+                        normalized_text: text,
+                    });
+                    page_ir.source = PageSource::Ocr;
+                }
+                Err(e) => {
+                    log::warn!("OCR fallback also failed for page {}: {}", page_index, e);
+                }
+            }
+        } else {
+            log::debug!(
+                "No OCR backend available for fallback on page {}",
+                page_index
+            );
+        }
     }
 
     /// 带超时的单页处理
