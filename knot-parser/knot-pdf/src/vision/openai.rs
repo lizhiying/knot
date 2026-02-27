@@ -46,6 +46,34 @@ impl OpenAiVisionDescriber {
         self.system_prompt = prompt.to_string();
         self
     }
+
+    /// 压缩图片：缩放到指定最大宽度并重新编码为 PNG
+    fn compress_image(png_data: &[u8], max_width: u32) -> Result<Vec<u8>, String> {
+        use image::ImageReader;
+        use std::io::Cursor;
+
+        let img = ImageReader::new(Cursor::new(png_data))
+            .with_guessed_format()
+            .map_err(|e| format!("format guess failed: {}", e))?
+            .decode()
+            .map_err(|e| format!("decode failed: {}", e))?;
+
+        let (w, h) = (img.width(), img.height());
+        if w <= max_width {
+            return Err("image already small enough".to_string());
+        }
+
+        let new_w = max_width;
+        let new_h = (h as f64 * max_width as f64 / w as f64) as u32;
+        let resized = img.resize_exact(new_w, new_h, image::imageops::FilterType::Lanczos3);
+
+        let mut buf = Vec::new();
+        resized
+            .write_to(&mut Cursor::new(&mut buf), image::ImageFormat::Png)
+            .map_err(|e| format!("encode failed: {}", e))?;
+
+        Ok(buf)
+    }
 }
 
 impl VisionDescriber for OpenAiVisionDescriber {
@@ -58,8 +86,31 @@ impl VisionDescriber for OpenAiVisionDescriber {
         let img_size_kb = image_png.len() / 1024;
         log::debug!("VisionDescriber: image size = {} KB", img_size_kb);
 
+        // 如果图片过大（> 500KB），缩放压缩以避免 VLM 模型 OOM
+        let image_bytes: std::borrow::Cow<[u8]> = if image_png.len() > 500 * 1024 {
+            match Self::compress_image(image_png, 1024) {
+                Ok(compressed) => {
+                    log::info!(
+                        "VisionDescriber: compressed image from {} KB to {} KB",
+                        img_size_kb,
+                        compressed.len() / 1024
+                    );
+                    std::borrow::Cow::Owned(compressed)
+                }
+                Err(e) => {
+                    log::debug!(
+                        "VisionDescriber: compression failed ({}), using original",
+                        e
+                    );
+                    std::borrow::Cow::Borrowed(image_png)
+                }
+            }
+        } else {
+            std::borrow::Cow::Borrowed(image_png)
+        };
+
         // 将图片编码为 base64
-        let b64 = base64::engine::general_purpose::STANDARD.encode(image_png);
+        let b64 = base64::engine::general_purpose::STANDARD.encode(&*image_bytes);
         let image_url = format!("data:image/png;base64,{}", b64);
 
         // 构建用户消息
