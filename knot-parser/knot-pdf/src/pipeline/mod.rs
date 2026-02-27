@@ -1293,6 +1293,85 @@ impl Pipeline {
         self.postprocess_pipeline
             .process_page(&mut page_ir, &self.config);
 
+        // === PPT 复杂布局 Vision LLM 回退 ===
+        // 当页面有大量散布短块（PPT 信息图/卡片布局特征）且 Vision LLM 可用时，
+        // 渲染整页让 LLM 提取结构化内容，替代碎片化的文本块
+        #[cfg(feature = "vision")]
+        if self.config.figure_detection_enabled {
+            if let Some(vision) = &self.vision_describer {
+                let is_complex = is_complex_ppt_layout(&page_ir);
+                if is_complex {
+                    log::info!(
+                        "Complex PPT layout detected on page {} ({} blocks), using Vision LLM fallback",
+                        page_index,
+                        page_ir.blocks.len()
+                    );
+
+                    // 渲染整页
+                    if let Ok(full_png) = backend.render_page_to_image(
+                        page_index,
+                        self.config.figure_render_width.max(1200), // 用更高分辨率
+                    ) {
+                        let prompt =
+                            "这是一页PPT幻灯片。请提取页面中所有文字内容，保持原有的结构和层次。\
+                            对于标题使用 ## 标记，对于图表用文字描述其主要数据和趋势。\
+                            对于分栏/卡片布局，按从左到右、从上到下的顺序逐块提取。\
+                            输出纯文本，不要添加额外解释。";
+
+                        match vision.describe_image(&full_png, Some(prompt)) {
+                            Ok(vlm_text) if !vlm_text.is_empty() => {
+                                log::info!(
+                                    "Vision LLM extracted {} chars for page {} (replacing {} blocks)",
+                                    vlm_text.len(),
+                                    page_index,
+                                    page_ir.blocks.len()
+                                );
+
+                                // 用 VLM 输出替代原有碎片化的块
+                                page_ir.blocks.clear();
+                                page_ir.blocks.push(crate::ir::BlockIR {
+                                    block_id: format!("vlm_p{}", page_index),
+                                    bbox: crate::ir::BBox::new(
+                                        0.0,
+                                        0.0,
+                                        page_ir.size.width,
+                                        page_ir.size.height,
+                                    ),
+                                    role: crate::ir::BlockRole::Body,
+                                    lines: vec![crate::ir::TextLine {
+                                        spans: vec![crate::ir::TextSpan {
+                                            text: vlm_text,
+                                            font_size: None,
+                                            is_bold: false,
+                                            font_name: None,
+                                        }],
+                                        bbox: None,
+                                    }],
+                                    normalized_text: String::new(), // 将在下面设置
+                                });
+                                // 设置 normalized_text
+                                let text = page_ir.blocks[0].full_text();
+                                page_ir.blocks[0].normalized_text = text;
+
+                                // 清除已被 VLM 描述覆盖的图片
+                                page_ir
+                                    .images
+                                    .retain(|img| img.source != ImageSource::FigureRegion);
+
+                                page_ir.source = PageSource::Ocr; // 标记为 VLM 解析
+                            }
+                            Ok(_) => {
+                                log::debug!("Vision LLM returned empty for page {}", page_index);
+                            }
+                            Err(e) => {
+                                log::warn!("Vision LLM failed for page {}: {}", page_index, e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Ok(page_ir)
     }
 
@@ -1509,4 +1588,52 @@ fn is_chart_data_label_text(text: &str) -> bool {
     }
 
     false
+}
+
+/// 判断页面是否为 PPT 复杂布局（需要 Vision LLM 回退）
+///
+/// 检测特征：
+/// 1. 大量短块（平均文本长度 < 25 字符）
+/// 2. 多个块的 y 坐标分散在页面不同区域
+/// 3. 块总数 > 8（非简单页面）
+#[allow(dead_code)]
+fn is_complex_ppt_layout(page: &crate::ir::PageIR) -> bool {
+    let blocks = &page.blocks;
+
+    if blocks.len() < 8 {
+        return false;
+    }
+
+    // 计算平均文本长度
+    let total_chars: usize = blocks.iter().map(|b| b.full_text().chars().count()).sum();
+    let avg_len = total_chars as f32 / blocks.len() as f32;
+
+    // PPT 特征：大量短块（平均 < 30 字符）
+    if avg_len > 30.0 {
+        return false;
+    }
+
+    // 检查 y 坐标分散度：将页面垂直分为 4 个区域，看块分布是否跨多个区域
+    let page_height = page.size.height;
+    let mut y_zones = [0usize; 4];
+    for blk in blocks {
+        let zone = ((blk.bbox.center_y() / page_height) * 4.0).min(3.0) as usize;
+        y_zones[zone] += 1;
+    }
+    let occupied_zones = y_zones.iter().filter(|&&c| c > 0).count();
+
+    // 至少占据 3 个 y 区域 → 内容散布在页面各处（PPT 信息图特征）
+    if occupied_zones < 3 {
+        return false;
+    }
+
+    log::debug!(
+        "Complex PPT layout check: blocks={}, avg_len={:.1}, y_zones={:?}, occupied={}",
+        blocks.len(),
+        avg_len,
+        y_zones,
+        occupied_zones
+    );
+
+    true
 }
