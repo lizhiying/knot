@@ -837,7 +837,14 @@ impl Pipeline {
                                 if let Some(vision) = &self.vision_describer {
                                     match vision.describe_image(
                                         &region_img,
-                                        Some("这是一个数据图表，请描述图表的主要内容和数据趋势"),
+                                        Some("这是一个数据图表。请详细描述：\n\
+                                        1. 图表标题\n\
+                                        2. 图表类型（柱状图/折线图/饼图/组合图等）\n\
+                                        3. 横轴（X轴）：字段名称和单位\n\
+                                        4. 纵轴（Y轴）：字段名称和单位（如有双轴请分别说明左轴和右轴）\n\
+                                        5. 所有数据点：逐一列出每个数据值\n\
+                                        6. 数据趋势：总结整体变化趋势\n\
+                                        7. 图例说明"),
                                     ) {
                                         Ok(desc) => {
                                             ocr_text = Some(desc.clone());
@@ -1010,7 +1017,7 @@ impl Pipeline {
                     if let Some(vision) = &self.vision_describer {
                         if let Some(ref img_bytes) = region_img {
                             // 构建 context hint（用 caption 文字帮助 LLM 理解）
-                            let hint = blocks
+                            let hint: Option<String> = blocks
                                 .iter()
                                 .find(|b| {
                                     let t = b.normalized_text.trim();
@@ -1018,9 +1025,22 @@ impl Pipeline {
                                         || t.starts_with("Fig.")
                                         || t.starts_with("图")
                                 })
-                                .map(|b| b.normalized_text.as_str());
+                                .map(|b| {
+                                    format!(
+                                        "图片标题：{}。请详细描述此图的内容：\n\
+                                        - 如果是数据图表：说明图表类型、横轴、纵轴（含单位）、所有数据点、趋势\n\
+                                        - 如果是流程图/架构图：描述每个节点和连接关系\n\
+                                        - 如果是照片/插图：描述核心内容和关键信息",
+                                        b.normalized_text
+                                    )
+                                })
+                                .or_else(|| Some(
+                                    "请详细描述此图片的内容。如果是图表，说明图表类型、横纵轴、数据点和趋势；\
+                                    如果是流程图/架构图，描述节点和连接关系；\
+                                    如果是照片/示意图，描述核心内容和关键信息。".to_string()
+                                ));
 
-                            match vision.describe_image(img_bytes, hint) {
+                            match vision.describe_image(img_bytes, hint.as_deref()) {
                                 Ok(desc) => {
                                     log::info!(
                                         "Vision LLM described image {} ({} chars)",
@@ -1322,13 +1342,21 @@ impl Pipeline {
                     {
                         let prompt = format!(
                             "这是一页PPT幻灯片。请严格提取页面中【所有】文字内容，不要遗漏任何一个区块。\n\
-                            要求：\n\
+                            \n要求：\n\
                             1. 页面大标题用 ## 标记\n\
-                            2. 图表区域：描述图表的标题、数据趋势和关键数值\n\
+                            2. 图表区域必须详细描述，格式如下：\n\
+                               - 图表标题\n\
+                               - 图表类型（柱状图/折线图/饼图/组合图等）\n\
+                               - 横轴（X轴）：字段名称和单位\n\
+                               - 纵轴（Y轴）：字段名称和单位（如有双轴请分别说明）\n\
+                               - 所有数据点：逐一列出每个数据值\n\
+                               - 数据趋势：总结整体变化趋势\n\
+                               - 图例说明\n\
                             3. 分栏/卡片区域：每个卡片都要提取，包含编号、标题和正文。按编号顺序排列\n\
-                            4. 页脚信息（数据来源、版权等）也要提取\n\
-                            5. 不要遗漏任何编号卡片或文字区块\n\
-                            6. 输出纯 Markdown 文本\n\
+                            4. 流程图/架构图/关系图：描述每个节点名称、箭头方向和连接关系\n\
+                            5. 页脚信息（数据来源、版权等）也要提取\n\
+                            6. 不要遗漏任何编号卡片或文字区块\n\
+                            7. 输出纯 Markdown 文本\n\
                             \n参考文字片段（可能有乱序）：{}", raw_text_hint
                         );
 
@@ -1367,7 +1395,31 @@ impl Pipeline {
                                 let text = page_ir.blocks[0].full_text();
                                 page_ir.blocks[0].normalized_text = text;
 
-                                // 清除已被 VLM 描述覆盖的图片
+                                // 收集已有的图表 figure 描述（之前步骤已单独用 VLM 分析过）
+                                // 追加到文本块末尾，保留精细分析结果
+                                let figure_descs: Vec<String> = page_ir
+                                    .images
+                                    .iter()
+                                    .filter(|img| {
+                                        img.source == ImageSource::FigureRegion
+                                            && img.ocr_text.is_some()
+                                    })
+                                    .map(|img| {
+                                        let desc = img.ocr_text.as_ref().unwrap();
+                                        format!("\n\n**[图表：{}]**\n{}", img.image_id, desc)
+                                    })
+                                    .collect();
+
+                                if !figure_descs.is_empty() {
+                                    let combined = format!(
+                                        "{}{}",
+                                        page_ir.blocks[0].normalized_text,
+                                        figure_descs.join("")
+                                    );
+                                    page_ir.blocks[0].normalized_text = combined;
+                                }
+
+                                // 清除 FigureRegion 图片（已合并到文本中）
                                 page_ir
                                     .images
                                     .retain(|img| img.source != ImageSource::FigureRegion);
