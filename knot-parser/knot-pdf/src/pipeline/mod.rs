@@ -1336,14 +1336,47 @@ impl Pipeline {
                         .collect::<Vec<_>>()
                         .join(" | ");
 
+                    // 提取标题文本（Title/Heading 角色），注入 prompt 中
+                    let title_hint: String = page_ir
+                        .blocks
+                        .iter()
+                        .filter(|b| {
+                            matches!(
+                                b.role,
+                                crate::ir::BlockRole::Title | crate::ir::BlockRole::Heading
+                            )
+                        })
+                        .map(|b| b.full_text())
+                        .filter(|t| {
+                            let clean: String = t
+                                .chars()
+                                .filter(|c| {
+                                    !c.is_whitespace()
+                                        && !matches!(*c, '"' | '"' | '\u{201C}' | '\u{201D}' | '"')
+                                })
+                                .collect();
+                            clean.len() >= 3 // 过滤噪声
+                        })
+                        .collect::<Vec<_>>()
+                        .join(" ");
+
                     // 渲染整页（高分辨率确保小文字清晰）
                     if let Ok(full_png) = backend
                         .render_page_to_image(page_index, self.config.figure_render_width.max(2000))
                     {
+                        let title_instruction = if !title_hint.is_empty() {
+                            format!(
+                                "\n注意：页面标题可能是「{}」，输出必须以完整标题开头（用 ## 标记）。",
+                                title_hint
+                            )
+                        } else {
+                            String::new()
+                        };
+
                         let prompt = format!(
                             "这是一页PPT幻灯片。请严格提取页面中【所有】文字内容，不要遗漏任何一个区块。\n\
                             \n要求：\n\
-                            1. 页面大标题用 ## 标记\n\
+                            1. 页面大标题用 ## 标记，必须完整提取（不要截断）\n\
                             2. 图表区域必须详细描述，格式如下：\n\
                                - 图表标题\n\
                                - 图表类型（柱状图/折线图/饼图/组合图等）\n\
@@ -1356,8 +1389,8 @@ impl Pipeline {
                             4. 流程图/架构图/关系图：描述每个节点名称、箭头方向和连接关系\n\
                             5. 页脚信息（数据来源、版权等）也要提取\n\
                             6. 不要遗漏任何编号卡片或文字区块\n\
-                            7. 输出纯 Markdown 文本\n\
-                            \n参考文字片段（可能有乱序）：{}", raw_text_hint
+                            7. 输出纯 Markdown 文本{}\n\
+                            \n参考文字片段（可能有乱序）：{}", title_instruction, raw_text_hint
                         );
 
                         match vision.describe_image(&full_png, Some(&prompt)) {
@@ -1370,6 +1403,7 @@ impl Pipeline {
                                 );
 
                                 // 用 VLM 输出替代原有碎片化的块
+                                // （标题信息已注入 prompt，VLM 会自行输出完整标题）
                                 page_ir.blocks.clear();
                                 page_ir.blocks.push(crate::ir::BlockIR {
                                     block_id: format!("vlm_p{}", page_index),
@@ -1391,13 +1425,14 @@ impl Pipeline {
                                     }],
                                     normalized_text: String::new(), // 将在下面设置
                                 });
-                                // 设置 normalized_text
-                                let text = page_ir.blocks[0].full_text();
-                                page_ir.blocks[0].normalized_text = text;
+                                // 设置 normalized_text（VLM 块是最后一个）
+                                let last_idx = page_ir.blocks.len() - 1;
+                                let text = page_ir.blocks[last_idx].full_text();
+                                page_ir.blocks[last_idx].normalized_text = text;
 
                                 // 收集已有的图表 figure 描述（之前步骤已单独用 VLM 分析过）
                                 // 只追加"真正的图表描述"，跳过与 VLM 输出重复的纯文本 figure
-                                let vlm_text_ref = &page_ir.blocks[0].normalized_text;
+                                let vlm_text_ref = &page_ir.blocks[last_idx].normalized_text;
                                 let figure_descs: Vec<String> = page_ir
                                     .images
                                     .iter()
@@ -1458,10 +1493,10 @@ impl Pipeline {
                                 if !figure_descs.is_empty() {
                                     let combined = format!(
                                         "{}{}",
-                                        page_ir.blocks[0].normalized_text,
+                                        page_ir.blocks[last_idx].normalized_text,
                                         figure_descs.join("")
                                     );
-                                    page_ir.blocks[0].normalized_text = combined;
+                                    page_ir.blocks[last_idx].normalized_text = combined;
                                 }
 
                                 // 清除 FigureRegion 图片（已合并到文本中）
