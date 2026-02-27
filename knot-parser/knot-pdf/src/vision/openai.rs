@@ -59,11 +59,9 @@ impl VisionDescriber for OpenAiVisionDescriber {
         let image_url = format!("data:image/png;base64,{}", b64);
 
         // 构建用户消息
+        // 如果有自定义 hint（如中文 prompt），直接使用；否则用默认英文提示
         let user_text = if let Some(hint) = context_hint {
-            format!(
-                "Please describe this figure. Context: the caption reads \"{}\".",
-                hint
-            )
+            hint.to_string()
         } else {
             "Please describe this figure from a PDF document.".to_string()
         };
@@ -87,14 +85,19 @@ impl VisionDescriber for OpenAiVisionDescriber {
                             "type": "image_url",
                             "image_url": {
                                 "url": image_url,
-                                "detail": "low"
+                                "detail": "high"
                             }
                         }
                     ]
                 }
             ],
-            "max_tokens": 500,
-            "temperature": 0.2
+            "max_tokens": 4096,
+            "temperature": 0.2,
+            // Ollama 特有参数：增大上下文窗口和输出长度
+            "options": {
+                "num_ctx": 8192,
+                "num_predict": 4096
+            }
         });
 
         log::debug!(
