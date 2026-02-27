@@ -11,6 +11,9 @@
 - **表格抽取** — 支持有线框（Ruled）和无线框（Stream）两种表格，自动检测抽取模式
 - **多种导出格式** — Markdown、RAG 扁平化文本、IR JSON、CSV
 - **OCR 集成**（可选）— PaddleOCR / Tesseract 后端，扫描件也能解析
+- **Vision LLM 集成**（可选）— VLM 自动识别复杂排版页面（PPT、信息图），JPEG 压缩优化
+- **乱码自动修复** — 检测字体编码错误，自动切换 VLM/OCR 重新提取
+- **多级回退链** — pdfium 文本 → VLM 视觉理解 → PaddleOCR → 空页面
 - **异步 API**（可选）— 基于 tokio 的 `async/await`，支持流式逐页推送
 - **断点续传**（可选）— 基于 sled 的页面缓存，中断后跳过已完成页
 - **内存友好** — 逐页处理 + 及时释放，100 页 PDF 峰值 ~200MB
@@ -244,15 +247,16 @@ let config = Config::from_toml_file("my-config.toml").unwrap();
 
 ## 🔧 Feature Flags
 
-| Feature         | 说明                                    | 依赖                     |
-| --------------- | --------------------------------------- | ------------------------ |
-| *(默认)*        | 文本抽取 + 表格识别 + Markdown/RAG 导出 | `pdf-extract`, `lopdf`   |
-| `async`         | 异步 API（`parse_pdf_async` 等）        | `tokio`                  |
-| `cli`           | 命令行工具（`knot-pdf-cli`）            | `clap`, `env_logger`     |
-| `ocr_paddle`    | PaddleOCR (PP-OCRv5) 后端               | `pure-onnx-ocr`, `image` |
-| `pdfium`        | PDFium 页面渲染（OCR 前置步骤）         | `pdfium-render`, `image` |
-| `ocr_tesseract` | Tesseract OCR 后端                      | `leptess`                |
-| `store_sled`    | 断点续传（页面级缓存）                  | `sled`                   |
+| Feature         | 说明                                    | 依赖                      |
+| --------------- | --------------------------------------- | ------------------------- |
+| *(默认)*        | 文本抽取 + 表格识别 + Markdown/RAG 导出 | `pdf-extract`, `lopdf`    |
+| `async`         | 异步 API（`parse_pdf_async` 等）        | `tokio`                   |
+| `cli`           | 命令行工具（`knot-pdf-cli`）            | `clap`, `env_logger`      |
+| `ocr_paddle`    | PaddleOCR (PP-OCRv5) 后端               | `pure-onnx-ocr`, `image`  |
+| `pdfium`        | PDFium 页面渲染（OCR 前置步骤）         | `pdfium-render`, `image`  |
+| `vision`        | Vision LLM 图片描述 + 乱码修复          | `ureq`, `base64`, `image` |
+| `ocr_tesseract` | Tesseract OCR 后端                      | `leptess`                 |
+| `store_sled`    | 断点续传（页面级缓存）                  | `sled`                    |
 
 可组合使用：
 
