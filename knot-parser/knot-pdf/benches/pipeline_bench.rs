@@ -44,6 +44,7 @@ fn make_sample_page(index: usize, block_count: usize) -> PageIR {
         blocks,
         tables: vec![],
         images: vec![],
+        formulas: vec![],
         diagnostics: PageDiagnostics::default(),
         text_score: 0.95,
         is_scanned_guess: false,

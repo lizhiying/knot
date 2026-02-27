@@ -137,6 +137,7 @@ fn make_page_ir(page_index: usize, blocks: Vec<BlockIR>) -> PageIR {
         blocks,
         tables: Vec::new(),
         images: Vec::new(),
+        formulas: Vec::new(),
         diagnostics: PageDiagnostics::default(),
         text_score: 1.0,
         is_scanned_guess: false,

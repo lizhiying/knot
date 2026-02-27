@@ -120,6 +120,7 @@ fn make_test_page(index: usize) -> PageIR {
             caption_refs: vec![format!("block_p{}_1", index)],
             source: ImageSource::Embedded,
             ocr_text: None,
+            is_qrcode: false,
         }],
         formulas: vec![],
         diagnostics: PageDiagnostics {
@@ -129,6 +130,7 @@ fn make_test_page(index: usize) -> PageIR {
             table_count: 1,
             image_count: 1,
             ocr_quality_score: None,
+            parse_strategy: None,
         },
         text_score: 0.85,
         is_scanned_guess: false,
@@ -285,6 +287,7 @@ fn test_image_ir_serde_roundtrip() {
         caption_refs: vec!["block_3".to_string()],
         source: ImageSource::Embedded,
         ocr_text: None,
+        is_qrcode: false,
     };
     let json = serde_json::to_string(&img).expect("序列化失败");
     let img2: ImageIR = serde_json::from_str(&json).expect("反序列化失败");

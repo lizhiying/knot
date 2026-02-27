@@ -259,6 +259,7 @@ fn make_empty_page(index: usize) -> PageIR {
         blocks: vec![],
         tables: vec![],
         images: vec![],
+        formulas: vec![],
         diagnostics: PageDiagnostics::default(),
         text_score: 1.0,
         is_scanned_guess: false,
