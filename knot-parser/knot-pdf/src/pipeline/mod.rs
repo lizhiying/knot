@@ -1390,13 +1390,14 @@ impl Pipeline {
                 // 新增触发条件：文本极少但图片多的 PPT 页面
                 // 典型场景：目录页、图文混排页，文字被渲染为矢量图形，pdfium 无法提取
                 // 判断标准：每张图片平均不足 5 个字符 → 文本极度稀疏
+                let total_chars: usize = page_ir
+                    .blocks
+                    .iter()
+                    .map(|b| b.normalized_text.chars().count())
+                    .sum();
+
                 let is_sparse_text_rich_image = {
                     let is_ppt = page_ir.size.width > page_ir.size.height;
-                    let total_chars: usize = page_ir
-                        .blocks
-                        .iter()
-                        .map(|b| b.normalized_text.chars().count())
-                        .sum();
                     let embedded_count = page_ir
                         .images
                         .iter()
@@ -1410,16 +1411,28 @@ impl Pipeline {
                     is_ppt && embedded_count >= 5 && chars_per_image < 5.0
                 };
 
+                // 新增触发条件：任何页面文字极少（< 10 字符）
+                // 典型场景：PDF 封面页、矢量图形渲染页面（path objects 绘制文字）
+                let is_nearly_empty = total_chars < 10;
+
                 if is_sparse_text_rich_image && !is_complex {
                     log::info!(
                         "Sparse text + rich images on page {} ({} chars, {} images), using Vision LLM fallback",
                         page_index,
-                        page_ir.blocks.iter().map(|b| b.normalized_text.chars().count()).sum::<usize>(),
+                        total_chars,
                         page_ir.images.len()
                     );
                 }
 
-                if is_complex || is_sparse_text_rich_image {
+                if is_nearly_empty && !is_complex && !is_sparse_text_rich_image {
+                    log::info!(
+                        "Nearly empty page {} ({} chars), using Vision LLM fallback",
+                        page_index,
+                        total_chars
+                    );
+                }
+
+                if is_complex || is_sparse_text_rich_image || is_nearly_empty {
                     log::info!(
                         "Complex PPT layout detected on page {} ({} blocks), using Vision LLM fallback",
                         page_index,
@@ -1490,8 +1503,15 @@ impl Pipeline {
                             String::new()
                         };
 
+                        let is_ppt_page = page_ir.size.width > page_ir.size.height;
+                        let page_type_desc = if is_ppt_page {
+                            "这是一页PPT幻灯片"
+                        } else {
+                            "这是一页PDF文档"
+                        };
+
                         let prompt = format!(
-                            "这是一页PPT幻灯片。请严格提取页面中【所有】文字内容，不要遗漏任何一个区块。\n\
+                            "{}。请严格提取页面中【所有】文字内容，不要遗漏任何一个区块。\n\
                             \n要求：\n\
                             1. 页面大标题用 ## 标记，必须完整提取（不要截断）\n\
                             2. 图表区域必须详细描述，格式如下：\n\
@@ -1509,7 +1529,7 @@ impl Pipeline {
                             7. 页脚信息（数据来源、版权等）也要提取\n\
                             8. 不要遗漏任何编号卡片或文字区块\n\
                             9. 输出纯 Markdown 文本{}\n\
-                            \n参考文字片段（可能有乱序）：{}", title_instruction, raw_text_hint
+                            \n参考文字片段（可能有乱序）：{}", page_type_desc, title_instruction, raw_text_hint
                         );
 
                         match vision.describe_image(&full_png, Some(&prompt)) {
