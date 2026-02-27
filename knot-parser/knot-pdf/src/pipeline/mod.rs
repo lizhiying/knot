@@ -1604,12 +1604,15 @@ fn is_complex_ppt_layout(page: &crate::ir::PageIR) -> bool {
         return false;
     }
 
-    // 计算平均文本长度
-    let total_chars: usize = blocks.iter().map(|b| b.full_text().chars().count()).sum();
-    let avg_len = total_chars as f32 / blocks.len() as f32;
+    // 计算短块比例（≤40 字符的块占总块数的比例）
+    let short_count = blocks
+        .iter()
+        .filter(|b| b.full_text().chars().count() <= 40)
+        .count();
+    let short_ratio = short_count as f32 / blocks.len() as f32;
 
-    // PPT 特征：大量短块（平均 < 30 字符）
-    if avg_len > 30.0 {
+    // PPT 特征：超过 40% 的块是短块
+    if short_ratio < 0.4 {
         return false;
     }
 
@@ -1628,9 +1631,11 @@ fn is_complex_ppt_layout(page: &crate::ir::PageIR) -> bool {
     }
 
     log::debug!(
-        "Complex PPT layout check: blocks={}, avg_len={:.1}, y_zones={:?}, occupied={}",
+        "Complex PPT layout detected: blocks={}, short_ratio={:.1}% ({}/{}), y_zones={:?}, occupied={}",
         blocks.len(),
-        avg_len,
+        short_ratio * 100.0,
+        short_count,
+        blocks.len(),
         y_zones,
         occupied_zones
     );
