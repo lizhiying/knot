@@ -1368,6 +1368,7 @@ impl Pipeline {
 
                 // 新增触发条件：文本极少但图片多的 PPT 页面
                 // 典型场景：目录页、图文混排页，文字被渲染为矢量图形，pdfium 无法提取
+                // 判断标准：每张图片平均不足 5 个字符 → 文本极度稀疏
                 let is_sparse_text_rich_image = {
                     let is_ppt = page_ir.size.width > page_ir.size.height;
                     let total_chars: usize = page_ir
@@ -1380,7 +1381,12 @@ impl Pipeline {
                         .iter()
                         .filter(|img| img.source == ImageSource::Embedded)
                         .count();
-                    is_ppt && total_chars < 20 && embedded_count >= 5
+                    let chars_per_image = if embedded_count > 0 {
+                        total_chars as f32 / embedded_count as f32
+                    } else {
+                        f32::MAX
+                    };
+                    is_ppt && embedded_count >= 5 && chars_per_image < 5.0
                 };
 
                 if is_sparse_text_rich_image && !is_complex {
