@@ -1365,7 +1365,34 @@ impl Pipeline {
         if self.config.figure_detection_enabled {
             if let Some(vision) = &self.vision_describer {
                 let is_complex = is_complex_ppt_layout(&page_ir);
-                if is_complex {
+
+                // 新增触发条件：文本极少但图片多的 PPT 页面
+                // 典型场景：目录页、图文混排页，文字被渲染为矢量图形，pdfium 无法提取
+                let is_sparse_text_rich_image = {
+                    let is_ppt = page_ir.size.width > page_ir.size.height;
+                    let total_chars: usize = page_ir
+                        .blocks
+                        .iter()
+                        .map(|b| b.normalized_text.chars().count())
+                        .sum();
+                    let embedded_count = page_ir
+                        .images
+                        .iter()
+                        .filter(|img| img.source == ImageSource::Embedded)
+                        .count();
+                    is_ppt && total_chars < 20 && embedded_count >= 5
+                };
+
+                if is_sparse_text_rich_image && !is_complex {
+                    log::info!(
+                        "Sparse text + rich images on page {} ({} chars, {} images), using Vision LLM fallback",
+                        page_index,
+                        page_ir.blocks.iter().map(|b| b.normalized_text.chars().count()).sum::<usize>(),
+                        page_ir.images.len()
+                    );
+                }
+
+                if is_complex || is_sparse_text_rich_image {
                     log::info!(
                         "Complex PPT layout detected on page {} ({} blocks), using Vision LLM fallback",
                         page_index,
