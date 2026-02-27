@@ -54,6 +54,10 @@ impl VisionDescriber for OpenAiVisionDescriber {
         image_png: &[u8],
         context_hint: Option<&str>,
     ) -> Result<String, PdfError> {
+        // 记录图片大小
+        let img_size_kb = image_png.len() / 1024;
+        log::debug!("VisionDescriber: image size = {} KB", img_size_kb);
+
         // 将图片编码为 base64
         let b64 = base64::engine::general_purpose::STANDARD.encode(image_png);
         let image_url = format!("data:image/png;base64,{}", b64);
@@ -84,8 +88,7 @@ impl VisionDescriber for OpenAiVisionDescriber {
                         {
                             "type": "image_url",
                             "image_url": {
-                                "url": image_url,
-                                "detail": "high"
+                                "url": image_url
                             }
                         }
                     ]
@@ -101,9 +104,11 @@ impl VisionDescriber for OpenAiVisionDescriber {
         });
 
         log::debug!(
-            "VisionDescriber: calling {} with model {}",
+            "VisionDescriber: calling {} with model {} (image={} KB, request≈{} KB)",
             self.api_url,
-            self.model
+            self.model,
+            img_size_kb,
+            b64.len() / 1024,
         );
 
         // 发送请求
@@ -113,7 +118,22 @@ impl VisionDescriber for OpenAiVisionDescriber {
             .set("Content-Type", "application/json")
             .set("Authorization", &format!("Bearer {}", self.api_key))
             .send_json(&request_body)
-            .map_err(|e| PdfError::Backend(format!("Vision API request failed: {}", e)))?;
+            .map_err(|e| {
+                // 读取错误响应体获取详细信息
+                let detail = match e {
+                    ureq::Error::Status(code, resp) => {
+                        let body = resp.into_string().unwrap_or_default();
+                        format!(
+                            "{}: status code {} - {}",
+                            self.api_url,
+                            code,
+                            &body[..body.len().min(500)]
+                        )
+                    }
+                    other => format!("{}: {}", self.api_url, other),
+                };
+                PdfError::Backend(format!("Vision API request failed: {}", detail))
+            })?;
 
         // 解析响应
         let resp_body: serde_json::Value = response

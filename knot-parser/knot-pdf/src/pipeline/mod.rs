@@ -1378,9 +1378,9 @@ impl Pipeline {
                         .collect::<Vec<_>>()
                         .join(" ");
 
-                    // 渲染整页（高分辨率确保小文字清晰）
+                    // 渲染整页（适中分辨率：太高会触发某些 VLM 的 GGML 断言错误）
                     if let Ok(full_png) = backend
-                        .render_page_to_image(page_index, self.config.figure_render_width.max(2000))
+                        .render_page_to_image(page_index, self.config.figure_render_width.max(1500))
                     {
                         let title_instruction = if !title_hint.is_empty() {
                             format!(
