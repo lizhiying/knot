@@ -1306,19 +1306,33 @@ impl Pipeline {
                         page_index,
                         page_ir.blocks.len()
                     );
+                    // 收集原始文本碎片作为参考（帮助 VLM 识别遗漏内容）
+                    let raw_text_hint: String = page_ir
+                        .blocks
+                        .iter()
+                        .map(|b| b.full_text())
+                        .filter(|t| t.len() > 3)
+                        .take(10)
+                        .collect::<Vec<_>>()
+                        .join(" | ");
 
-                    // 渲染整页
-                    if let Ok(full_png) = backend.render_page_to_image(
-                        page_index,
-                        self.config.figure_render_width.max(1200), // 用更高分辨率
-                    ) {
-                        let prompt =
-                            "这是一页PPT幻灯片。请提取页面中所有文字内容，保持原有的结构和层次。\
-                            对于标题使用 ## 标记，对于图表用文字描述其主要数据和趋势。\
-                            对于分栏/卡片布局，按从左到右、从上到下的顺序逐块提取。\
-                            输出纯文本，不要添加额外解释。";
+                    // 渲染整页（高分辨率确保小文字清晰）
+                    if let Ok(full_png) = backend
+                        .render_page_to_image(page_index, self.config.figure_render_width.max(2000))
+                    {
+                        let prompt = format!(
+                            "这是一页PPT幻灯片。请严格提取页面中【所有】文字内容，不要遗漏任何一个区块。\n\
+                            要求：\n\
+                            1. 页面大标题用 ## 标记\n\
+                            2. 图表区域：描述图表的标题、数据趋势和关键数值\n\
+                            3. 分栏/卡片区域：每个卡片都要提取，包含编号、标题和正文。按编号顺序排列\n\
+                            4. 页脚信息（数据来源、版权等）也要提取\n\
+                            5. 不要遗漏任何编号卡片或文字区块\n\
+                            6. 输出纯 Markdown 文本\n\
+                            \n参考文字片段（可能有乱序）：{}", raw_text_hint
+                        );
 
-                        match vision.describe_image(&full_png, Some(prompt)) {
+                        match vision.describe_image(&full_png, Some(&prompt)) {
                             Ok(vlm_text) if !vlm_text.is_empty() => {
                                 log::info!(
                                     "Vision LLM extracted {} chars for page {} (replacing {} blocks)",
