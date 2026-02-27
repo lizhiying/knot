@@ -1534,55 +1534,73 @@ impl Pipeline {
 
                         match vision.describe_image(&full_png, Some(&prompt)) {
                             Ok(vlm_text) if !vlm_text.is_empty() => {
-                                log::info!(
+                                // 清洗 VLM 输出：移除模型控制 token 和空代码块
+                                let vlm_text = vlm_text
+                                    .replace("<|begin_of_image|>", "")
+                                    .replace("<|end_of_image|>", "")
+                                    .replace("<|im_start|>", "")
+                                    .replace("<|im_end|>", "")
+                                    .replace("```markdown", "")
+                                    .replace("```", "")
+                                    .trim()
+                                    .to_string();
+
+                                // 清洗后如果内容太短，视为 VLM 失败
+                                if vlm_text.len() < 5 {
+                                    log::warn!(
+                                        "VLM output too short after cleaning ({} chars) for page {}, skipping",
+                                        vlm_text.len(), page_index
+                                    );
+                                } else {
+                                    log::info!(
                                     "Vision LLM extracted {} chars for page {} (replacing {} blocks)",
                                     vlm_text.len(),
                                     page_index,
                                     page_ir.blocks.len()
                                 );
 
-                                // 用 VLM 输出替代原有碎片化的块
-                                // （标题信息已注入 prompt，VLM 会自行输出完整标题）
-                                page_ir.blocks.clear();
+                                    // 用 VLM 输出替代原有碎片化的块
+                                    // （标题信息已注入 prompt，VLM 会自行输出完整标题）
+                                    page_ir.blocks.clear();
 
-                                // 清除所有图片（VLM 已覆盖全页视觉内容，包括图表和装饰图片）
-                                let before_img_count = page_ir.images.len();
-                                page_ir.images.clear();
-                                if before_img_count > 0 {
-                                    log::debug!(
-                                        "VLM fallback: cleared {} images (embedded + figures)",
-                                        before_img_count
-                                    );
-                                }
-                                page_ir.blocks.push(crate::ir::BlockIR {
-                                    block_id: format!("vlm_p{}", page_index),
-                                    bbox: crate::ir::BBox::new(
-                                        0.0,
-                                        0.0,
-                                        page_ir.size.width,
-                                        page_ir.size.height,
-                                    ),
-                                    role: crate::ir::BlockRole::Body,
-                                    lines: vec![crate::ir::TextLine {
-                                        spans: vec![crate::ir::TextSpan {
-                                            text: vlm_text,
-                                            font_size: None,
-                                            is_bold: false,
-                                            font_name: None,
+                                    // 清除所有图片（VLM 已覆盖全页视觉内容，包括图表和装饰图片）
+                                    let before_img_count = page_ir.images.len();
+                                    page_ir.images.clear();
+                                    if before_img_count > 0 {
+                                        log::debug!(
+                                            "VLM fallback: cleared {} images (embedded + figures)",
+                                            before_img_count
+                                        );
+                                    }
+                                    page_ir.blocks.push(crate::ir::BlockIR {
+                                        block_id: format!("vlm_p{}", page_index),
+                                        bbox: crate::ir::BBox::new(
+                                            0.0,
+                                            0.0,
+                                            page_ir.size.width,
+                                            page_ir.size.height,
+                                        ),
+                                        role: crate::ir::BlockRole::Body,
+                                        lines: vec![crate::ir::TextLine {
+                                            spans: vec![crate::ir::TextSpan {
+                                                text: vlm_text,
+                                                font_size: None,
+                                                is_bold: false,
+                                                font_name: None,
+                                            }],
+                                            bbox: None,
                                         }],
-                                        bbox: None,
-                                    }],
-                                    normalized_text: String::new(), // 将在下面设置
-                                });
-                                // 设置 normalized_text（VLM 块是最后一个）
-                                let last_idx = page_ir.blocks.len() - 1;
-                                let text = page_ir.blocks[last_idx].full_text();
-                                page_ir.blocks[last_idx].normalized_text = text;
+                                        normalized_text: String::new(), // 将在下面设置
+                                    });
+                                    // 设置 normalized_text（VLM 块是最后一个）
+                                    let last_idx = page_ir.blocks.len() - 1;
+                                    let text = page_ir.blocks[last_idx].full_text();
+                                    page_ir.blocks[last_idx].normalized_text = text;
 
-                                // 收集已有的图表 figure 描述（之前步骤已单独用 VLM 分析过）
-                                // 只追加"真正的图表描述"，跳过与 VLM 输出重复的纯文本 figure
-                                let vlm_text_ref = &page_ir.blocks[last_idx].normalized_text;
-                                let figure_descs: Vec<String> = page_ir
+                                    // 收集已有的图表 figure 描述（之前步骤已单独用 VLM 分析过）
+                                    // 只追加"真正的图表描述"，跳过与 VLM 输出重复的纯文本 figure
+                                    let vlm_text_ref = &page_ir.blocks[last_idx].normalized_text;
+                                    let figure_descs: Vec<String> = page_ir
                                     .images
                                     .iter()
                                     .filter(|img| {
@@ -1639,21 +1657,22 @@ impl Pipeline {
                                     })
                                     .collect();
 
-                                if !figure_descs.is_empty() {
-                                    let combined = format!(
-                                        "{}{}",
-                                        page_ir.blocks[last_idx].normalized_text,
-                                        figure_descs.join("")
-                                    );
-                                    page_ir.blocks[last_idx].normalized_text = combined;
-                                }
+                                    if !figure_descs.is_empty() {
+                                        let combined = format!(
+                                            "{}{}",
+                                            page_ir.blocks[last_idx].normalized_text,
+                                            figure_descs.join("")
+                                        );
+                                        page_ir.blocks[last_idx].normalized_text = combined;
+                                    }
 
-                                // 清除 FigureRegion 图片（已合并到文本中）
-                                page_ir
-                                    .images
-                                    .retain(|img| img.source != ImageSource::FigureRegion);
+                                    // 清除 FigureRegion 图片（已合并到文本中）
+                                    page_ir
+                                        .images
+                                        .retain(|img| img.source != ImageSource::FigureRegion);
 
-                                page_ir.source = PageSource::Ocr; // 标记为 VLM 解析
+                                    page_ir.source = PageSource::Ocr; // 标记为 VLM 解析
+                                } // end else (vlm_text.len() >= 5)
                             }
                             Ok(_) => {
                                 log::debug!("Vision LLM returned empty for page {}", page_index);
