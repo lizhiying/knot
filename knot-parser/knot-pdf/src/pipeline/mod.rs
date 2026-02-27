@@ -1501,6 +1501,19 @@ impl Pipeline {
                                 // 用 VLM 输出替代原有碎片化的块
                                 // （标题信息已注入 prompt，VLM 会自行输出完整标题）
                                 page_ir.blocks.clear();
+
+                                // 清除嵌入式装饰小图片（VLM 已覆盖全页视觉内容）
+                                // 保留 FigureRegion（可能有独立图表描述）
+                                let before_img_count = page_ir.images.len();
+                                page_ir
+                                    .images
+                                    .retain(|img| img.source != ImageSource::Embedded);
+                                if before_img_count != page_ir.images.len() {
+                                    log::debug!(
+                                        "VLM fallback: cleared {} embedded images",
+                                        before_img_count - page_ir.images.len()
+                                    );
+                                }
                                 page_ir.blocks.push(crate::ir::BlockIR {
                                     block_id: format!("vlm_p{}", page_index),
                                     bbox: crate::ir::BBox::new(
