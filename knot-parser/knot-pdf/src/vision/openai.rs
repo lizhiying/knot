@@ -47,7 +47,7 @@ impl OpenAiVisionDescriber {
         self
     }
 
-    /// 压缩图片：缩放到指定最大宽度并重新编码为 PNG
+    /// 压缩图片：缩放到指定最大宽度并编码为 JPEG（质量 85%）
     fn compress_image(png_data: &[u8], max_width: u32) -> Result<Vec<u8>, String> {
         use image::ImageReader;
         use std::io::Cursor;
@@ -67,12 +67,14 @@ impl OpenAiVisionDescriber {
         let new_h = (h as f64 * max_width as f64 / w as f64) as u32;
         let resized = img.resize_exact(new_w, new_h, image::imageops::FilterType::Lanczos3);
 
-        let mut buf = Vec::new();
+        // 编码为 JPEG（质量 85%），比 PNG 小 5-10 倍
+        let mut buf = Cursor::new(Vec::new());
+        let encoder = image::codecs::jpeg::JpegEncoder::new_with_quality(&mut buf, 85);
         resized
-            .write_to(&mut Cursor::new(&mut buf), image::ImageFormat::Png)
-            .map_err(|e| format!("encode failed: {}", e))?;
+            .write_with_encoder(encoder)
+            .map_err(|e| format!("jpeg encode failed: {}", e))?;
 
-        Ok(buf)
+        Ok(buf.into_inner())
     }
 }
 
@@ -86,32 +88,33 @@ impl VisionDescriber for OpenAiVisionDescriber {
         let img_size_kb = image_png.len() / 1024;
         log::debug!("VisionDescriber: image size = {} KB", img_size_kb);
 
-        // 如果图片过大（> 500KB），缩放压缩以避免 VLM 模型 OOM
-        let image_bytes: std::borrow::Cow<[u8]> = if image_png.len() > 500 * 1024 {
-            match Self::compress_image(image_png, 1024) {
-                Ok(compressed) => {
-                    log::info!(
-                        "VisionDescriber: compressed image from {} KB to {} KB",
-                        img_size_kb,
-                        compressed.len() / 1024
-                    );
-                    std::borrow::Cow::Owned(compressed)
+        // 如果图片过大（> 500KB），缩放压缩为 JPEG 以避免 VLM 模型 OOM
+        let (image_bytes, mime_type): (std::borrow::Cow<[u8]>, &str) =
+            if image_png.len() > 500 * 1024 {
+                match Self::compress_image(image_png, 800) {
+                    Ok(compressed) => {
+                        log::info!(
+                            "VisionDescriber: compressed image from {} KB to {} KB (JPEG)",
+                            img_size_kb,
+                            compressed.len() / 1024
+                        );
+                        (std::borrow::Cow::Owned(compressed), "image/jpeg")
+                    }
+                    Err(e) => {
+                        log::debug!(
+                            "VisionDescriber: compression failed ({}), using original",
+                            e
+                        );
+                        (std::borrow::Cow::Borrowed(image_png), "image/png")
+                    }
                 }
-                Err(e) => {
-                    log::debug!(
-                        "VisionDescriber: compression failed ({}), using original",
-                        e
-                    );
-                    std::borrow::Cow::Borrowed(image_png)
-                }
-            }
-        } else {
-            std::borrow::Cow::Borrowed(image_png)
-        };
+            } else {
+                (std::borrow::Cow::Borrowed(image_png), "image/png")
+            };
 
         // 将图片编码为 base64
         let b64 = base64::engine::general_purpose::STANDARD.encode(&*image_bytes);
-        let image_url = format!("data:image/png;base64,{}", b64);
+        let image_url = format!("data:{};base64,{}", mime_type, b64);
 
         // 构建用户消息
         // 如果有自定义 hint（如中文 prompt），直接使用；否则用默认英文提示
