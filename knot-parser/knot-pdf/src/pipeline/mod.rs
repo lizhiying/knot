@@ -1396,13 +1396,58 @@ impl Pipeline {
                                 page_ir.blocks[0].normalized_text = text;
 
                                 // 收集已有的图表 figure 描述（之前步骤已单独用 VLM 分析过）
-                                // 追加到文本块末尾，保留精细分析结果
+                                // 只追加"真正的图表描述"，跳过与 VLM 输出重复的纯文本 figure
+                                let vlm_text_ref = &page_ir.blocks[0].normalized_text;
                                 let figure_descs: Vec<String> = page_ir
                                     .images
                                     .iter()
                                     .filter(|img| {
                                         img.source == ImageSource::FigureRegion
                                             && img.ocr_text.is_some()
+                                    })
+                                    .filter(|img| {
+                                        // 去重：如果 figure 描述中的文字大部分已在 VLM 输出中出现，
+                                        // 说明这不是真正的图表，而是文本区域被误检为 figure
+                                        let desc = img.ocr_text.as_ref().unwrap();
+                                        let desc_chars: Vec<char> = desc.chars()
+                                            .filter(|c| !c.is_whitespace() && !c.is_ascii_punctuation())
+                                            .collect();
+                                        if desc_chars.is_empty() {
+                                            return false;
+                                        }
+                                        let matched = desc_chars.iter()
+                                            .filter(|c| vlm_text_ref.contains(**c))
+                                            .count();
+                                        let overlap_ratio = matched as f32 / desc_chars.len() as f32;
+
+                                        // 用更精确的句子级别去重
+                                        let desc_sentences: Vec<&str> = desc.split(|c: char| c == '。' || c == '.' || c == '\n')
+                                            .filter(|s| s.trim().len() > 10)
+                                            .collect();
+                                        let dup_sentences = desc_sentences.iter()
+                                            .filter(|s| {
+                                                let trimmed = s.trim();
+                                                // 安全截取前 8 个字符（避免 UTF-8 边界问题）
+                                                let key_part: String = trimmed.chars().take(8).collect();
+                                                key_part.len() >= 6 && vlm_text_ref.contains(&key_part)
+                                            })
+                                            .count();
+                                        let sentence_dup_ratio = if desc_sentences.is_empty() {
+                                            0.0
+                                        } else {
+                                            dup_sentences as f32 / desc_sentences.len() as f32
+                                        };
+
+                                        if sentence_dup_ratio > 0.5 {
+                                            log::debug!(
+                                                "Skipping duplicate figure {}: {:.0}% sentences duplicated",
+                                                img.image_id,
+                                                sentence_dup_ratio * 100.0
+                                            );
+                                            return false;
+                                        }
+                                        let _ = overlap_ratio; // 保留备用
+                                        true
                                     })
                                     .map(|img| {
                                         let desc = img.ocr_text.as_ref().unwrap();
