@@ -1327,14 +1327,32 @@ impl Pipeline {
                         page_ir.blocks.len()
                     );
                     // 收集原始文本碎片作为参考（帮助 VLM 识别遗漏内容）
-                    let raw_text_hint: String = page_ir
-                        .blocks
-                        .iter()
-                        .map(|b| b.full_text())
-                        .filter(|t| t.len() > 3)
-                        .take(10)
-                        .collect::<Vec<_>>()
-                        .join(" | ");
+                    // 优先保留短块（卡片标题等），长块截断，总字符控制在 800 以内
+                    let mut hint_parts: Vec<String> = Vec::new();
+                    let mut hint_len = 0usize;
+                    // 先收集短块（≤60字符，如卡片标题），再收集长块（截断）
+                    let mut short_blocks: Vec<String> = Vec::new();
+                    let mut long_blocks: Vec<String> = Vec::new();
+                    for b in page_ir.blocks.iter() {
+                        let t = b.full_text();
+                        if t.len() <= 3 {
+                            continue;
+                        }
+                        if t.chars().count() <= 60 {
+                            short_blocks.push(t);
+                        } else {
+                            let truncated: String = t.chars().take(40).collect();
+                            long_blocks.push(format!("{}...", truncated));
+                        }
+                    }
+                    for part in short_blocks.into_iter().chain(long_blocks.into_iter()) {
+                        if hint_len + part.len() > 800 {
+                            break;
+                        }
+                        hint_len += part.len() + 3; // " | " separator
+                        hint_parts.push(part);
+                    }
+                    let raw_text_hint = hint_parts.join(" | ");
 
                     // 提取标题文本（Title/Heading 角色），注入 prompt 中
                     let title_hint: String = page_ir
