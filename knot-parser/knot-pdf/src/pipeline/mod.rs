@@ -1803,18 +1803,86 @@ impl Pipeline {
                         let ratio = uncommon_count as f32 / cjk_chars.len() as f32;
                         if ratio > 0.5 {
                             log::info!(
-                                "Garbled text detected on page {} ({:.0}% rare CJK chars, {} total chars), attempting OCR",
+                                "Garbled text detected on page {} ({:.0}% uncommon CJK, {} total chars), attempting VLM/OCR",
                                 page_index, ratio * 100.0, total_chars
                             );
-                            // 渲染页面并 OCR
+                            // 渲染页面
                             if let Ok(rendered_png) = backend.render_page_to_image(page_index, 1500)
                             {
-                                Self::ocr_fallback_for_page(
-                                    &self.ocr_backend,
-                                    &rendered_png,
-                                    page_index,
-                                    &mut page_ir,
-                                );
+                                let mut vlm_succeeded = false;
+
+                                // 先尝试 VLM（视觉理解更好，能处理复杂排版）
+                                #[cfg(feature = "vision")]
+                                if let Some(vision) = &self.vision_describer {
+                                    let is_ppt_page = page_ir.size.width > page_ir.size.height;
+                                    let page_type_desc = if is_ppt_page {
+                                        "这是一页PPT幻灯片"
+                                    } else {
+                                        "这是一页PDF文档"
+                                    };
+                                    let prompt = format!(
+                                        "{}。请严格提取页面中【所有】文字内容，不要遗漏任何一个区块。\n按从上到下、从左到右的顺序输出纯文本。\n保留原文的标题层级（用 ## 标记），保留列表和段落结构。",
+                                        page_type_desc
+                                    );
+                                    match vision.describe_image(&rendered_png, Some(&prompt)) {
+                                        Ok(vlm_text) if !vlm_text.is_empty() => {
+                                            let vlm_text = vlm_text
+                                                .replace("<|begin_of_image|>", "")
+                                                .replace("<|end_of_image|>", "")
+                                                .replace("<|im_start|>", "")
+                                                .replace("<|im_end|>", "")
+                                                .replace("```markdown", "")
+                                                .replace("```", "")
+                                                .trim()
+                                                .to_string();
+                                            if vlm_text.len() >= 20 {
+                                                log::info!(
+                                                    "VLM extracted {} chars for garbled page {}",
+                                                    vlm_text.len(),
+                                                    page_index
+                                                );
+                                                page_ir.blocks.clear();
+                                                page_ir.images.clear();
+                                                page_ir.blocks.push(crate::ir::BlockIR {
+                                                    block_id: format!(
+                                                        "vlm_garbled_p{}",
+                                                        page_index
+                                                    ),
+                                                    bbox: crate::ir::BBox::new(
+                                                        0.0,
+                                                        0.0,
+                                                        page_ir.size.width,
+                                                        page_ir.size.height,
+                                                    ),
+                                                    role: Default::default(),
+                                                    lines: vec![crate::ir::TextLine {
+                                                        spans: vec![crate::ir::TextSpan {
+                                                            text: vlm_text.clone(),
+                                                            font_size: Some(12.0),
+                                                            is_bold: false,
+                                                            font_name: None,
+                                                        }],
+                                                        bbox: None,
+                                                    }],
+                                                    normalized_text: vlm_text,
+                                                });
+                                                page_ir.source = PageSource::Ocr;
+                                                vlm_succeeded = true;
+                                            }
+                                        }
+                                        _ => {}
+                                    }
+                                }
+
+                                // VLM 失败则用 OCR
+                                if !vlm_succeeded {
+                                    Self::ocr_fallback_for_page(
+                                        &self.ocr_backend,
+                                        &rendered_png,
+                                        page_index,
+                                        &mut page_ir,
+                                    );
+                                }
                             }
                         }
                     }
