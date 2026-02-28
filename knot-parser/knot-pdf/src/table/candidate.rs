@@ -103,7 +103,13 @@ pub fn detect_table_candidates(
     // 4. 对每个区域评估置信度
     let mut candidates = Vec::new();
     for region in regions {
-        let region_chars: Vec<RawChar> = rows[region.start_row..=region.end_row]
+        // 收集区域字符，包含 region 范围内夹杂的噪声行（如千位分隔符逗号行）
+        // 扩展到 end_row 后的紧邻噪声行，避免最后一行数据的逗号丢失
+        let mut actual_end = region.end_row;
+        while actual_end + 1 < rows.len() && is_noise_row(&rows[actual_end + 1]) {
+            actual_end += 1;
+        }
+        let region_chars: Vec<RawChar> = rows[region.start_row..=actual_end]
             .iter()
             .flat_map(|row| row.iter().cloned())
             .collect();
