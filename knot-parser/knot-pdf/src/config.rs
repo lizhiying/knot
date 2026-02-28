@@ -263,7 +263,7 @@ pub enum OcrMode {
 
 impl Default for OcrMode {
     fn default() -> Self {
-        Self::Disabled
+        Self::Auto
     }
 }
 
@@ -394,7 +394,7 @@ impl Default for Config {
             max_columns: default_max_columns(),
             emit_markdown: true,
             emit_ir_json: false,
-            ocr_enabled: false,
+            ocr_enabled: true,
             ocr_mode: OcrMode::default(),
             ocr_languages: default_ocr_languages(),
             ocr_render_width: default_ocr_render_width(),
@@ -410,7 +410,7 @@ impl Default for Config {
             figure_min_area_ratio: default_figure_min_area_ratio(),
             figure_min_path_count: default_figure_min_path_count(),
             figure_render_width: default_figure_render_width(),
-            vision_api_url: None,
+            vision_api_url: Some("http://localhost:11434/v1/chat/completions".to_string()),
             vision_api_key: None,
             vision_model: default_vision_model(),
             reading_order_method: ReadingOrderMethod::default(),

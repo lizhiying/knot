@@ -65,7 +65,7 @@ PDF 文件
 
 ---
 
-## � 集成到你的 Rust 应用
+## 🔌 集成到你的 Rust 应用
 
 ### 第 1 步：添加依赖
 
@@ -79,6 +79,69 @@ knot-pdf = { path = "path/to/knot-pdf" }
 ```toml
 # 推荐：启用 pdfium（高质量文本抽取）+ PaddleOCR（扫描件）+ VLM（复杂表格）
 knot-pdf = { path = "path/to/knot-pdf", features = ["pdfium", "ocr_paddle", "vision"] }
+```
+
+> **注意**：knot-pdf 默认启用 OCR 和 Vision LLM。如果没有对应模型，运行时会输出下载指引并自动降级（不影响基本文本抽取）。
+
+### 第 1.5 步：下载模型文件（推荐）
+
+knot-pdf 默认开启 OCR 和 Vision LLM 增强。首次使用前需下载对应模型：
+
+#### OCR 模型 — PaddleOCR PP-OCRv5（~165MB）
+
+```bash
+# 在项目根目录（或可执行文件同级目录）下创建模型目录
+mkdir -p models/ppocrv5 && cd models/ppocrv5
+
+# 从 HuggingFace 下载三个文件
+wget https://huggingface.co/OpenPPOCR/PP-OCRv5/resolve/main/det.onnx
+wget https://huggingface.co/OpenPPOCR/PP-OCRv5/resolve/main/rec.onnx
+wget https://huggingface.co/OpenPPOCR/PP-OCRv5/resolve/main/ppocrv5_dict.txt
+```
+
+模型文件目录结构：
+
+```
+models/ppocrv5/
+├── det.onnx           # 文字检测模型 (84MB)
+├── rec.onnx           # 文字识别模型 (88MB)
+└── ppocrv5_dict.txt   # 字典文件 (72KB)
+```
+
+自动探测路径（按优先级）：
+1. `ocr_model_dir` 配置项指定的路径
+2. 可执行文件同级目录下的 `models/ppocrv5/`
+3. 当前工作目录下的 `models/ppocrv5/`
+
+#### Vision LLM — Ollama 本地部署（推荐）
+
+Vision LLM 用于增强 booktabs 表格提取和复杂排版页面理解：
+
+```bash
+# 安装 Ollama (macOS)
+brew install ollama
+
+# 启动服务
+ollama serve
+
+# 下载 GLM-OCR 模型（推荐，专为文档 OCR 优化）
+ollama pull glm-ocr:latest
+
+# 或使用其他视觉模型
+ollama pull llava:7b
+ollama pull minicpm-v:latest
+```
+
+默认配置已指向 `http://localhost:11434/v1/chat/completions`，Ollama 启动后即可自动使用。
+
+#### 不需要模型？
+
+如果不需要 OCR 和 VLM，在配置中关闭即可：
+
+```toml
+# knot-pdf.toml
+ocr_enabled = false
+vision_api_url = ""  # 留空禁用 VLM
 ```
 
 ### 第 2 步：选择 API

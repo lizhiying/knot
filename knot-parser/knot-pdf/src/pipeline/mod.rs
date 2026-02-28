@@ -95,13 +95,25 @@ impl Pipeline {
                             Some(Box::new(b) as Box<dyn OcrBackend>)
                         }
                         Err(e) => {
-                            log::warn!("PaddleOCR init failed: {}, falling back to mock", e);
-                            Some(Box::new(MockOcrBackend) as Box<dyn OcrBackend>)
+                            log::warn!("PaddleOCR init failed: {}, OCR disabled", e);
+                            None
                         }
                     }
                 } else {
-                    log::warn!("OCR enabled but no model dir found, falling back to mock");
-                    Some(Box::new(MockOcrBackend) as Box<dyn OcrBackend>)
+                    log::warn!(
+                        "OCR enabled but model not found. To use OCR, download PaddleOCR PP-OCRv5 models:\n\
+                        \n\
+                        \x20 mkdir -p models/ppocrv5 && cd models/ppocrv5\n\
+                        \x20 # Download from HuggingFace:\n\
+                        \x20 wget https://huggingface.co/OpenPPOCR/PP-OCRv5/resolve/main/det.onnx\n\
+                        \x20 wget https://huggingface.co/OpenPPOCR/PP-OCRv5/resolve/main/rec.onnx\n\
+                        \x20 wget https://huggingface.co/OpenPPOCR/PP-OCRv5/resolve/main/ppocrv5_dict.txt\n\
+                        \n\
+                        \x20 Place files in: models/ppocrv5/ (relative to working dir or executable)\n\
+                        \x20 Or set ocr_model_dir in knot-pdf.toml\n\
+                        \x20 To disable this warning: set ocr_enabled = false"
+                    );
+                    None
                 }
             }
             // 其次使用 Tesseract（需系统安装）
@@ -161,7 +173,20 @@ impl Pipeline {
                     &config.vision_model,
                 )))
             } else {
-                log::debug!("Vision LLM not configured (set vision_api_url in config)");
+                log::warn!(
+                    "Vision LLM not configured. To enable VLM table enhancement:\n\
+                    \n\
+                    \x20 # Install Ollama (macOS):\n\
+                    \x20 brew install ollama\n\
+                    \x20 ollama serve\n\
+                    \x20 ollama pull glm-ocr:latest\n\
+                    \n\
+                    \x20 # Then set in knot-pdf.toml:\n\
+                    \x20 vision_api_url = \"http://localhost:11434/v1/chat/completions\"\n\
+                    \x20 vision_model = \"glm-ocr:latest\"\n\
+                    \n\
+                    \x20 To disable this warning: set vision_api_url to empty or remove it"
+                );
                 None
             }
         };

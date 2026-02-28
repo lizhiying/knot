@@ -43,8 +43,8 @@ emit_ir_json = false
 # ── OCR 配置 ──────────────────────────────────────────
 # 需编译时启用 --features ocr_paddle 或 ocr_tesseract
 
-# 启用 OCR（扫描件自动触发）
-ocr_enabled = false
+# 启用 OCR（默认开启，扫描件自动触发）
+ocr_enabled = true
 
 # OCR 模式: "auto" | "force_all" | "disabled"
 #   auto      — 仅对扫描页触发（text_score < scoring_text_threshold）
@@ -150,7 +150,8 @@ vlm_enabled = false
 
 # Vision LLM API URL（OpenAI 兼容 Chat Completions 格式）
 # 支持: OpenAI, Claude (via proxy), Gemini (via proxy), Ollama 等
-# vision_api_url = "http://localhost:11434/v1/chat/completions"
+# 默认指向本地 Ollama，如未安装会自动跳过
+vision_api_url = "http://localhost:11434/v1/chat/completions"
 
 # Vision LLM API Key（也可通过环境变量 KNOT_VISION_API_KEY 设置）
 # vision_api_key = "sk-..."
