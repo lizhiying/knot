@@ -773,12 +773,14 @@ impl Pipeline {
                     if !center_in_table {
                         return true;
                     }
-                    // 保护大 block：如果 block 的文本行数远多于表格行数，
-                    // 说明 block 是跨多行的列内容，不应被小表格删除
-                    let blk_lines = blk.lines.len();
-                    let table_rows = table.rows.len();
-                    if blk_lines > table_rows * 2 {
-                        return true; // 保留大 block
+                    // 仅对 Stream 表格保护大 block（其边界不如 Ruled 可靠）
+                    // Ruled 表格边界由实际水平线确定，可以安全移除所有覆盖块
+                    if table.extraction_mode == crate::ir::ExtractionMode::Stream {
+                        let blk_lines = blk.lines.len();
+                        let table_rows = table.rows.len();
+                        if blk_lines > table_rows * 2 {
+                            return true; // 保留大 block
+                        }
                     }
                     false // 移除
                 });
