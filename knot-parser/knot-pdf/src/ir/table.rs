@@ -97,6 +97,66 @@ impl TableIR {
         lines.join("\n")
     }
 
+    /// 检测表格是否包含合并单元格（rowspan > 1 或 colspan > 1）
+    pub fn has_merged_cells(&self) -> bool {
+        // 检查表头行（headers 本身没有 span 信息，但第一行数据可能有）
+        for row in &self.rows {
+            for cell in &row.cells {
+                if cell.rowspan > 1 || cell.colspan > 1 {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
+    /// 智能导出：简单表格用 Markdown，复杂表格（有合并单元格）用 HTML
+    pub fn to_markdown_or_html(&self) -> String {
+        if self.has_merged_cells() {
+            self.to_html()
+        } else {
+            self.to_markdown()
+        }
+    }
+
+    /// 导出为 HTML 表格（支持 rowspan/colspan）
+    pub fn to_html(&self) -> String {
+        let mut html = String::new();
+        html.push_str("<table>\n");
+
+        // 表头行
+        if !self.headers.is_empty() {
+            html.push_str("  <thead>\n    <tr>");
+            for header in &self.headers {
+                html.push_str(&format!("<th>{}</th>", escape_html(header)));
+            }
+            html.push_str("</tr>\n  </thead>\n");
+        }
+
+        // 数据行
+        if !self.rows.is_empty() {
+            html.push_str("  <tbody>\n");
+            for row in &self.rows {
+                html.push_str("    <tr>");
+                for cell in &row.cells {
+                    let mut attrs = String::new();
+                    if cell.rowspan > 1 {
+                        attrs.push_str(&format!(" rowspan=\"{}\"", cell.rowspan));
+                    }
+                    if cell.colspan > 1 {
+                        attrs.push_str(&format!(" colspan=\"{}\"", cell.colspan));
+                    }
+                    html.push_str(&format!("<td{attrs}>{}</td>", escape_html(&cell.text)));
+                }
+                html.push_str("</tr>\n");
+            }
+            html.push_str("  </tbody>\n");
+        }
+
+        html.push_str("</table>");
+        html
+    }
+
     /// 导出为 KV 行格式（用于 RAG 检索）
     pub fn to_kv_lines(&self) -> Vec<String> {
         let mut result = Vec::new();
@@ -183,4 +243,12 @@ impl TableIR {
     pub fn cell_count(&self) -> usize {
         self.rows.iter().map(|r| r.cells.len()).sum()
     }
+}
+
+/// HTML 特殊字符转义
+fn escape_html(s: &str) -> String {
+    s.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
 }

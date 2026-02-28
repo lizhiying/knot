@@ -753,38 +753,182 @@ impl Pipeline {
             }
         }
 
+        // === VLM 表格发现：检测 "Table N." 标题但无对应 TableIR 的区域 ===
+        #[cfg(feature = "vision")]
+        if let Some(vision) = &self.vision_describer {
+            // 找出所有 "Table N." 标题块
+            let table_captions: Vec<(usize, &crate::ir::BlockIR)> = blocks
+                .iter()
+                .enumerate()
+                .filter(|(_, blk)| {
+                    let t = blk.normalized_text.trim();
+                    // 匹配 "Table 1." / "Table 2.xxx" / "TABLE 3" / "表1." 等
+                    // 排除 "Table of Contents" 等非表格标题
+                    let is_table_n = (t.starts_with("Table ") || t.starts_with("TABLE "))
+                        && t.chars()
+                            .skip_while(|c| c.is_alphabetic() || *c == ' ')
+                            .next()
+                            .map_or(false, |c| c.is_ascii_digit());
+                    let is_cn_table = t.starts_with("表")
+                        && t.chars()
+                            .nth(1)
+                            .map_or(false, |c| c.is_ascii_digit() || c == ' ');
+                    is_table_n || is_cn_table
+                })
+                .collect();
+
+            for (_cap_idx, cap_blk) in &table_captions {
+                let cap_bottom = cap_blk.bbox.bottom();
+
+                // 检查是否已有 table 在 caption 下方（±50pt）
+                let has_nearby_table = tables.iter().any(|t| {
+                    let t_top = t.bbox.y;
+                    t_top >= cap_blk.bbox.y - 50.0 && t_top <= cap_bottom + 200.0
+                });
+
+                if has_nearby_table {
+                    continue;
+                }
+
+                // 没有对应表格 → 估算表格区域
+                // 策略：从 caption 底部开始，到下一个非表格正文 block 或页面底部
+                let page_bottom = page_info.size.height;
+                let table_top = cap_bottom;
+
+                // 找下一个明确的正文段落或新章节标题
+                // 排除表格内容块（多行短文本、窄宽度等特征）
+                let page_width = page_info.size.width;
+                let table_bottom = blocks
+                    .iter()
+                    .filter(|blk| {
+                        let blk_top = blk.bbox.y;
+                        blk_top > cap_bottom + 10.0 // 在 caption 下方
+                    })
+                    .filter(|blk| {
+                        let text = blk.normalized_text.trim();
+                        // 新章节标题（如 "4.3 xxx"、"5. xxx"）
+                        let is_section_start = {
+                            let first_char = text.chars().next().unwrap_or(' ');
+                            first_char.is_ascii_digit()
+                                && (text.contains(". ") || text.contains("  "))
+                                && blk.bbox.width < page_width * 0.5
+                        };
+                        // 长正文段落：宽度接近全页（>70%）且是连续散文文本
+                        let is_prose = blk.bbox.width > page_width * 0.7
+                            && text.len() > 100
+                            && blk.lines.len() >= 2; // 至少 2 行连续文本
+                                                     // 下一个表格标题
+                        let is_next_table = text.starts_with("Table ")
+                            || text.starts_with("Figure ")
+                            || text.starts_with("Fig.");
+                        is_section_start || is_prose || is_next_table
+                    })
+                    .map(|blk| blk.bbox.y)
+                    .next()
+                    .unwrap_or(page_bottom - 20.0); // 如果后面没有正文，延伸到页底
+
+                let table_bbox = crate::ir::BBox::new(
+                    0.0, // 全宽
+                    table_top,
+                    page_info.size.width,
+                    (table_bottom - table_top).max(50.0),
+                );
+
+                log::info!(
+                    "VLM table discovery: caption='{}' on page {}, region y=[{:.0}..{:.0}]",
+                    cap_blk.normalized_text.trim(),
+                    page_index,
+                    table_top,
+                    table_bottom,
+                );
+
+                // 渲染区域
+                let page_png = backend.render_page_to_image(page_index, 1500).ok();
+
+                if let Some(page_png) = &page_png {
+                    match crop_region_from_page(
+                        page_png,
+                        table_bbox,
+                        page_info.size.width,
+                        page_info.size.height,
+                        10.0,
+                    ) {
+                        Ok(table_png) => {
+                            let prompt = "请将这个表格提取为 HTML table 格式。\n\
+                            要求：\n\
+                            1. 使用 <table>、<thead>、<tbody>、<tr>、<th>、<td> 标签\n\
+                            2. 如果有合并单元格，使用 rowspan 和 colspan 属性\n\
+                            3. 表头用 <th> 标签\n\
+                            4. 保持原始内容，不要翻译或改写\n\
+                            5. 只输出 HTML table，不要输出其他内容\n\
+                            6. 如果单元格内容有多行，用空格合并为一行";
+                            match vision.describe_image(&table_png, Some(prompt)) {
+                                Ok(html_text) if html_text.contains("<t") => {
+                                    if let Some(table_ir) = parse_vision_html_to_table_ir(
+                                        &html_text,
+                                        page_index,
+                                        tables.len(),
+                                        table_bbox,
+                                    ) {
+                                        log::info!(
+                                            "VLM table discovery: extracted {} on page {} ({} rows, merged={})",
+                                            table_ir.table_id,
+                                            page_index,
+                                            table_ir.rows.len(),
+                                            table_ir.has_merged_cells(),
+                                        );
+                                        tables.push(table_ir);
+                                    }
+                                }
+                                Ok(text) => {
+                                    log::debug!(
+                                        "VLM table discovery: non-table response ({} chars)",
+                                        text.len()
+                                    );
+                                }
+                                Err(e) => {
+                                    log::debug!("VLM table discovery failed: {}", e);
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            log::debug!("VLM table discovery crop failed: {}", e);
+                        }
+                    }
+                }
+            }
+        }
+
         // 合并隐式网格表格（方案B下为空）
         tables.extend(grid_tables);
 
         // === 移除被表格覆盖的文字块（避免表格数据既出现在表格又出现在正文中）===
         let mut blocks = blocks; // 转为 mut
         for table in &tables {
-            if table.extraction_mode == crate::ir::ExtractionMode::Ruled
-                || table.extraction_mode == crate::ir::ExtractionMode::Stream
-            {
-                blocks.retain(|blk| {
-                    let blk_cy = blk.bbox.center_y();
-                    let blk_cx = blk.bbox.center_x();
-                    // 如果文字块中心在表格 bbox 内，移除
-                    let center_in_table = blk_cx >= table.bbox.x
-                        && blk_cx <= table.bbox.right()
-                        && blk_cy >= table.bbox.y
-                        && blk_cy <= table.bbox.bottom();
-                    if !center_in_table {
-                        return true;
+            // 所有模式的表格都需要移除覆盖的文字块
+            // （包括 Ruled、Stream、Unknown/VLM 发现的表格）
+            blocks.retain(|blk| {
+                let blk_cy = blk.bbox.center_y();
+                let blk_cx = blk.bbox.center_x();
+                // 如果文字块中心在表格 bbox 内，移除
+                let center_in_table = blk_cx >= table.bbox.x
+                    && blk_cx <= table.bbox.right()
+                    && blk_cy >= table.bbox.y
+                    && blk_cy <= table.bbox.bottom();
+                if !center_in_table {
+                    return true;
+                }
+                // 仅对 Stream 表格保护大 block（其边界不如 Ruled 可靠）
+                // Ruled 和 VLM 表格边界较可靠，可以安全移除所有覆盖块
+                if table.extraction_mode == crate::ir::ExtractionMode::Stream {
+                    let blk_lines = blk.lines.len();
+                    let table_rows = table.rows.len();
+                    if blk_lines > table_rows * 2 {
+                        return true; // 保留大 block
                     }
-                    // 仅对 Stream 表格保护大 block（其边界不如 Ruled 可靠）
-                    // Ruled 表格边界由实际水平线确定，可以安全移除所有覆盖块
-                    if table.extraction_mode == crate::ir::ExtractionMode::Stream {
-                        let blk_lines = blk.lines.len();
-                        let table_rows = table.rows.len();
-                        if blk_lines > table_rows * 2 {
-                            return true; // 保留大 block
-                        }
-                    }
-                    false // 移除
-                });
-            }
+                }
+                false // 移除
+            });
         }
 
         // === 图表区域检测 ===
@@ -2619,4 +2763,199 @@ fn crop_region_from_page(
     })?;
 
     Ok(bytes)
+}
+
+/// 解析 VLM 返回的 HTML 表格为 TableIR（支持 rowspan/colspan）
+#[cfg(feature = "vision")]
+fn parse_vision_html_to_table_ir(
+    html: &str,
+    page_index: usize,
+    table_idx: usize,
+    bbox: crate::ir::BBox,
+) -> Option<crate::ir::TableIR> {
+    // 清洗 VLM 输出
+    let html = html
+        .replace("```html", "")
+        .replace("```", "")
+        .replace("<|begin_of_image|>", "")
+        .replace("<|end_of_image|>", "");
+
+    // 去换行统一处理
+    let flat = html.replace('\n', " ").replace('\r', "");
+
+    // 检查是否有合法的表格内容
+    if !flat.contains("<td") && !flat.contains("<th") {
+        return None;
+    }
+
+    // 解析每一行
+    let mut all_rows: Vec<Vec<VlmTableCell>> = Vec::new();
+
+    for tr_part in flat.split("<tr") {
+        if !tr_part.contains("<td") && !tr_part.contains("<th") {
+            continue;
+        }
+
+        let mut cells: Vec<VlmTableCell> = Vec::new();
+        let mut remaining = tr_part;
+
+        loop {
+            // 找到下一个 <td 或 <th
+            let td_pos = remaining.find("<td");
+            let th_pos = remaining.find("<th");
+            let (next_pos, is_header) = match (td_pos, th_pos) {
+                (Some(a), Some(b)) if a <= b => (Some(a), false),
+                (Some(_), Some(b)) => (Some(b), true),
+                (Some(a), None) => (Some(a), false),
+                (None, Some(b)) => (Some(b), true),
+                (None, None) => (None, false),
+            };
+            let Some(pos) = next_pos else { break };
+
+            let after_tag = &remaining[pos..];
+
+            // 提取标签属性（在 > 之前）
+            let Some(gt_pos) = after_tag.find('>') else {
+                break;
+            };
+            let tag_attrs = &after_tag[..gt_pos];
+
+            // 解析 rowspan
+            let rowspan = extract_attr_value(tag_attrs, "rowspan").unwrap_or(1);
+            // 解析 colspan
+            let colspan = extract_attr_value(tag_attrs, "colspan").unwrap_or(1);
+
+            // 提取内容
+            let content_start = pos + gt_pos + 1;
+            let content_area = &remaining[content_start..];
+            let end = content_area
+                .find("</td")
+                .or_else(|| content_area.find("</th"))
+                .or_else(|| content_area.find("</"))
+                .unwrap_or(content_area.len());
+
+            let cell_text = content_area[..end].trim().to_string();
+
+            cells.push(VlmTableCell {
+                text: cell_text,
+                rowspan,
+                colspan,
+                is_header,
+            });
+
+            let consumed = content_start + end;
+            if consumed >= remaining.len() {
+                break;
+            }
+            remaining = &remaining[consumed..];
+        }
+
+        if !cells.is_empty() {
+            all_rows.push(cells);
+        }
+    }
+
+    if all_rows.is_empty() {
+        return None;
+    }
+
+    // 将解析结果转为 TableIR
+    // 第一行（或 thead 中的行）作为 headers
+    let table_id = format!("t{}_{}", page_index, table_idx);
+
+    // 检测 headers: 如果第一行全是 is_header=true，或者只有一行是 header
+    let header_row_count = all_rows
+        .iter()
+        .take_while(|row| row.iter().all(|c| c.is_header))
+        .count()
+        .max(1); // 至少取第一行作为 header
+
+    // 简单情况：取第一行 header 行的文本作为 headers
+    let headers: Vec<String> = if header_row_count == 1 {
+        all_rows[0].iter().map(|c| c.text.clone()).collect()
+    } else {
+        // 多行 header，合并为一行
+        all_rows[0].iter().map(|c| c.text.clone()).collect()
+    };
+
+    // 构建 TableRow（包含 rowspan/colspan）
+    let mut rows: Vec<crate::ir::TableRow> = Vec::new();
+    for (ri, row_cells) in all_rows.iter().enumerate() {
+        // 跳过用作 headers 的行（只跳过第一行作为 header）
+        if ri == 0 && header_row_count == 1 {
+            continue;
+        }
+
+        let mut col_idx = 0;
+        let cells: Vec<crate::ir::TableCell> = row_cells
+            .iter()
+            .map(|c| {
+                let cell = crate::ir::TableCell {
+                    row: ri - header_row_count.min(1),
+                    col: col_idx,
+                    text: c.text.clone(),
+                    cell_type: crate::ir::CellType::Unknown,
+                    rowspan: c.rowspan,
+                    colspan: c.colspan,
+                };
+                col_idx += c.colspan;
+                cell
+            })
+            .collect();
+
+        rows.push(crate::ir::TableRow {
+            row_index: ri - header_row_count.min(1),
+            cells,
+        });
+    }
+
+    // 保留原始 HTML 作为 fallback
+    let fallback_text = html.trim().to_string();
+
+    let col_count = headers.len().max(1);
+
+    Some(crate::ir::TableIR {
+        table_id,
+        page_index,
+        bbox,
+        extraction_mode: crate::ir::ExtractionMode::Unknown,
+        headers,
+        rows,
+        column_types: vec![crate::ir::CellType::Unknown; col_count],
+        fallback_text,
+        confidence: None,
+    })
+}
+
+/// VLM 解析的临时单元格结构
+#[cfg(feature = "vision")]
+struct VlmTableCell {
+    text: String,
+    rowspan: usize,
+    colspan: usize,
+    is_header: bool,
+}
+
+/// 从 HTML 标签属性中提取数字属性值
+#[cfg(feature = "vision")]
+fn extract_attr_value(tag_attrs: &str, attr_name: &str) -> Option<usize> {
+    // 匹配 rowspan="3" 或 rowspan='3' 或 rowspan=3
+    let patterns = [
+        format!("{}=\"", attr_name),
+        format!("{}='", attr_name),
+        format!("{}=", attr_name),
+    ];
+
+    for pattern in &patterns {
+        if let Some(pos) = tag_attrs.find(pattern.as_str()) {
+            let after = &tag_attrs[pos + pattern.len()..];
+            let num_str: String = after.chars().take_while(|c| c.is_ascii_digit()).collect();
+            if let Ok(val) = num_str.parse::<usize>() {
+                if val > 0 {
+                    return Some(val);
+                }
+            }
+        }
+    }
+    None
 }

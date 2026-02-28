@@ -153,7 +153,7 @@ impl MarkdownRenderer {
                     }
                 },
                 PageElement::Table(table) => {
-                    output.push_str(&table.to_markdown());
+                    output.push_str(&table.to_markdown_or_html());
                     output.push_str("\n\n");
                 }
                 PageElement::Formula(formula) => {
