@@ -747,29 +747,44 @@ fn line_to_spans(line: &CharLine) -> Vec<TextSpan> {
             //    句号后跟大写字母时应保持正常间距
             // 3. 数字-数字相邻总是紧凑（数字内部不应有空格）
             // 4. 数字后跟序号后缀（st/nd/rd/th）时紧凑
+            // 5. 大写+小写(Aa)、小写+小写(aa)、大写+大写(AA) 使用紧凑阈值
+            //    小写+大写(aA) 不紧凑（通常是词边界，如 "of The"）
+            // 6. 连字符/括号两侧紧凑
             let tight = if prev.unicode == '@' || ch.unicode == '@' {
                 true
             } else if prev.unicode == '.' && ch.unicode.is_alphanumeric() {
                 true
             } else if ch.unicode == '.' && prev.unicode.is_alphanumeric() {
-                // `.` 前是数字/字母：后接小写字母或数字时紧凑
-                //  （句号后接大写字母 = 新句子，不紧凑）
                 let next_is_lower_or_digit = line.chars.get(i + 1).map_or(false, |nc| {
                     nc.unicode.is_lowercase() || nc.unicode.is_ascii_digit()
                 });
                 next_is_lower_or_digit
             } else if prev.unicode.is_ascii_digit() && ch.unicode.is_ascii_digit() {
-                // 数字之间永远紧凑
                 true
             } else if prev.unicode.is_ascii_digit() && ch.unicode.is_lowercase() {
-                // 数字后跟序号后缀（st/nd/rd/th）
                 is_ordinal_suffix(ch.unicode, line.chars.get(i + 1).map(|c| c.unicode))
+            } else if prev.unicode.is_uppercase() && ch.unicode.is_lowercase() {
+                // 大写+小写 (e.g. "In" in "Indicate"): 同词内 kerning 最常被误判
+                true
+            } else if prev.unicode.is_uppercase() && ch.unicode.is_uppercase() {
+                // 大写+大写 (e.g. "AN" in "AND"): 全大写文本有 tracking 间距
+                true
+            } else if prev.unicode.is_lowercase() && ch.unicode.is_lowercase() {
+                // 小写+小写 (e.g. "nd" in "and"): 也可能有 kerning
+                true
+            } else if prev.unicode == '-' || ch.unicode == '-' {
+                true
+            } else if (ch.unicode == '(' || ch.unicode == ')') && prev.unicode.is_alphanumeric() {
+                true
+            } else if (prev.unicode == '(' || prev.unicode == ')') && ch.unicode.is_alphanumeric() {
+                true
             } else {
+                // 小写+大写 (e.g. "f C" in "of Contents"): 通常是真词边界
                 false
             };
 
             let ratio = if tight {
-                WORD_SPACING_RATIO * 3.0
+                WORD_SPACING_RATIO * 2.0
             } else {
                 WORD_SPACING_RATIO
             };
