@@ -145,14 +145,18 @@ vision_api_url = ""  # 留空禁用 VLM
 
 ### 第 2 步：选择 API
 
-knot-pdf 提供 4 种 API，适用于不同场景：
+knot-pdf 提供 5 种 API，适用于不同场景：
 
-| API                  | 适用场景             | 返回值                                         |
-| -------------------- | -------------------- | ---------------------------------------------- |
-| `parse_pdf()`        | 一次性解析整个 PDF   | `Result<DocumentIR, PdfError>`                 |
-| `parse_pdf_pages()`  | 逐页迭代，节省内存   | `Result<impl Iterator<Item = Result<PageIR>>>` |
-| `parse_pdf_async()`  | 异步获取完整文档     | `Future<Result<DocumentIR>>`                   |
-| `parse_pdf_stream()` | 异步流式推送，生产级 | `AsyncParseHandle`（含 channel receiver）      |
+| API                      | 适用场景                             | 返回值                                         |
+| ------------------------ | ------------------------------------ | ---------------------------------------------- |
+| `parse_pdf()`            | 解析单个 PDF（每次重载模型）         | `Result<DocumentIR, PdfError>`                 |
+| `Pipeline::parse_file()` | **批量处理（推荐，模型只加载一次）** | `Result<DocumentIR, PdfError>`                 |
+| `parse_pdf_pages()`      | 逐页迭代，节省内存                   | `Result<impl Iterator<Item = Result<PageIR>>>` |
+| `parse_pdf_async()`      | 异步获取完整文档                     | `Future<Result<DocumentIR>>`                   |
+| `parse_pdf_stream()`     | 异步流式推送，生产级                 | `AsyncParseHandle`（含 channel receiver）      |
+
+> ⚡ **性能提醒**：`parse_pdf()` 每次调用都会重新创建 Pipeline 并加载全部模型（OCR ~165MB 等）。
+> 处理多个 PDF 时，请使用 `Pipeline` 复用实例（见下方 API 2）。
 
 #### API 1: 同步——获取完整文档（最常用）
 
@@ -262,25 +266,42 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### 第 3 步：使用 Pipeline 进行高级控制
+### 第 3 步：使用 Pipeline 批量处理（推荐）
 
-如果需要更细粒度的控制（如注入自定义 OCR 后端），可以直接使用 `Pipeline`：
+`Pipeline` 在 `new()` 时一次性加载所有模型（OCR、版面检测、公式识别等），
+之后可重复调用 `parse_file()` 处理多个 PDF，**模型不会重新加载**：
 
 ```rust
 use knot_pdf::{Pipeline, Config};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut config = Config::default();
-    config.ocr_enabled = true;
-    config.page_timeout_secs = 30;
-    config.page_indices = Some(vec![0, 1, 2]); // 只解析前 3 页
+    // 模型只在这里加载一次（OCR ~165MB, 版面模型, 公式模型...）
+    let pipeline = Pipeline::new(Config::default());
 
-    let pipeline = Pipeline::new(config);
-    let doc = pipeline.parse(std::path::Path::new("report.pdf"))?;
+    // 批量处理多个 PDF，每次调用不会重新加载模型
+    let files = vec!["report1.pdf", "report2.pdf", "report3.pdf"];
+    for file in &files {
+        let doc = pipeline.parse_file(file)?;
+        println!("{}: {} 页, {} 个表格",
+            file,
+            doc.pages.len(),
+            doc.pages.iter().map(|p| p.tables.len()).sum::<usize>(),
+        );
+    }
 
-    println!("解析 {} 页", doc.pages.len());
     Ok(())
 }
+```
+
+`Pipeline` 也支持更细粒度的控制：
+
+```rust
+let mut config = Config::default();
+config.page_timeout_secs = 30;
+config.page_indices = Some(vec![0, 1, 2]); // 只解析前 3 页
+
+let pipeline = Pipeline::new(config);
+let doc = pipeline.parse_file("report.pdf")?;
 ```
 
 ### 第 4 步：访问表格数据

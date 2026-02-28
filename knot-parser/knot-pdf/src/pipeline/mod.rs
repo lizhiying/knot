@@ -352,6 +352,23 @@ impl Pipeline {
         }
     }
 
+    /// 解析 PDF 文件（泛型路径版本）
+    ///
+    /// 与 [`parse`](Self::parse) 相同，但接受任意 `AsRef<Path>` 类型（如 `&str`、`String`、`PathBuf`）。
+    ///
+    /// Pipeline 实例可重复调用此方法，**模型只在 `Pipeline::new()` 时加载一次**：
+    ///
+    /// ```no_run
+    /// use knot_pdf::{Pipeline, Config};
+    ///
+    /// let pipeline = Pipeline::new(Config::default());
+    /// let doc1 = pipeline.parse_file("a.pdf").unwrap();
+    /// let doc2 = pipeline.parse_file("b.pdf").unwrap(); // 模型不会重新加载
+    /// ```
+    pub fn parse_file<P: AsRef<Path>>(&self, path: P) -> Result<DocumentIR, PdfError> {
+        self.parse(path.as_ref())
+    }
+
     /// 解析 PDF 文件，返回完整的 DocumentIR
     pub fn parse(&self, path: &Path) -> Result<DocumentIR, PdfError> {
         // 当 pdfium feature 启用时，优先使用 PdfiumBackend（文本抽取更准确）
