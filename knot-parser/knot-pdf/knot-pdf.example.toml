@@ -150,8 +150,8 @@ vlm_enabled = false
 
 # Vision LLM API URL（OpenAI 兼容 Chat Completions 格式）
 # 支持: OpenAI, Claude (via proxy), Gemini (via proxy), Ollama 等
-# 默认指向本地 Ollama，如未安装会自动跳过
-vision_api_url = "http://localhost:11434/v1/chat/completions"
+# 需要手动配置，启用后可增强 booktabs 表格提取
+# vision_api_url = "http://localhost:11434/v1/chat/completions"
 
 # Vision LLM API Key（也可通过环境变量 KNOT_VISION_API_KEY 设置）
 # vision_api_key = "sk-..."
