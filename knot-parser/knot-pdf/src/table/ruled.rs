@@ -1180,127 +1180,84 @@ fn extract_booktabs_table(
         });
     }
 
-    // ── 步骤2：仅用数据行（region_idx >= 1）检测列间隙 ──
-    // 根据表格宽度自适应间隙阈值：宽表格中 justified 文本的词间距较大需要更高阈值
-    let table_width = table_x_max - table_x_min;
-    let min_col_gap = (table_width / 15.0).max(20.0_f32);
-    let mut all_gap_positions: Vec<f32> = Vec::new();
+    // ── 步骤2：空白列投影法检测列间隙 ──
+    // 策略：将所有数据区域字符投影到 x 轴，构建覆盖直方图。
+    // 连续未被覆盖且宽度 >= MIN_BLANK_WIDTH 的空白区间 = 列分隔位置。
+    // 这比间隙阈值/投票法更可靠——真正的列分隔在 x 轴上不会有任何字符覆盖。
+    const MIN_BLANK_WIDTH: f32 = 8.0; // 最小空白列宽度（pt）
 
-    // 统计每个数据行的间隙数量，用于一致性验证
-    // 判定逻辑：按 min_col_gap 拆段，表格行应有 ≥3 个短段，段落行通常是 1-2 个长段
-    let mut per_row_gap_counts: Vec<usize> = Vec::new();
-
+    // 收集所有数据区域（region_idx >= 1）的字符 x 覆盖范围
+    let mut data_chars: Vec<(f32, f32)> = Vec::new(); // (x_start, x_end)
     for sub_row in &sub_rows {
-        if sub_row.region_idx < 1 {
-            continue; // 跳过表头区域
-        }
-
-        let row = &sub_row.chars;
-        // 按 min_col_gap 拆段，统计段数和各段字符数
-        let mut segments: Vec<usize> = Vec::new(); // 每段的字符数
-        let mut current_seg_len: usize = 1;
-
-        for i in 1..row.len() {
-            let prev_right = row[i - 1].bbox.x + row[i - 1].bbox.width;
-            let curr_left = row[i].bbox.x;
-            let gap = curr_left - prev_right;
-            if gap >= min_col_gap {
-                segments.push(current_seg_len);
-                current_seg_len = 1;
-            } else {
-                current_seg_len += 1;
-            }
-        }
-        if !row.is_empty() {
-            segments.push(current_seg_len);
-        }
-
-        let gap_count = if segments.len() >= 1 {
-            segments.len() - 1
-        } else {
-            0
-        };
-
-        // 表格行判定：≥3 段（≥2 个间隙），且各段平均长度 ≤ 30 字符
-        let avg_seg_len = if !segments.is_empty() {
-            segments.iter().sum::<usize>() as f32 / segments.len() as f32
-        } else {
-            0.0
-        };
-
-        if gap_count >= 2 && avg_seg_len <= 30.0 {
-            per_row_gap_counts.push(gap_count);
-        } else {
-            per_row_gap_counts.push(usize::MAX); // 标记为无效（段落行）
-        }
-    }
-
-    // 找出有效行（非 usize::MAX）中最常见的间隙数量（众数）
-    let mut gap_count_freq: std::collections::HashMap<usize, usize> =
-        std::collections::HashMap::new();
-    for &gc in &per_row_gap_counts {
-        if gc != usize::MAX && gc >= 2 {
-            // 只统计合理的间隙数量（≥2 意味着 ≥3 列）
-            *gap_count_freq.entry(gc).or_insert(0) += 1;
-        }
-    }
-
-    let (mode_gap_count, mode_freq) = gap_count_freq
-        .iter()
-        .max_by_key(|(_, &freq)| freq)
-        .map(|(&gc, &freq)| (gc, freq))
-        .unwrap_or((0, 0));
-
-    // 至少需要 2 行具有一致的间隙模式
-    if mode_freq < 2 || mode_gap_count < 2 {
-        return None;
-    }
-
-    // 只使用间隙数量等于众数的数据行来推断列边界
-    // 同时过滤 sub_rows：只保留有效的表格行
-    let mut valid_data_indices: Vec<usize> = Vec::new();
-    let mut data_row_idx = 0;
-    for (i, sub_row) in sub_rows.iter().enumerate() {
         if sub_row.region_idx < 1 {
             continue;
         }
-        if data_row_idx < per_row_gap_counts.len()
-            && per_row_gap_counts[data_row_idx] == mode_gap_count
-        {
-            valid_data_indices.push(i);
-
-            let row = &sub_row.chars;
-            for j in 1..row.len() {
-                let prev_right = row[j - 1].bbox.x + row[j - 1].bbox.width;
-                let curr_left = row[j].bbox.x;
-                let gap = curr_left - prev_right;
-                if gap >= min_col_gap {
-                    let gap_center = (prev_right + curr_left) / 2.0;
-                    all_gap_positions.push(gap_center);
-                }
-            }
+        for ch in &sub_row.chars {
+            data_chars.push((ch.bbox.x, ch.bbox.x + ch.bbox.width));
         }
-        data_row_idx += 1;
     }
 
-    if all_gap_positions.is_empty() {
+    if data_chars.is_empty() {
         return None;
     }
 
-    // 聚类间隙位置 → 列分隔 x 坐标
-    all_gap_positions.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    // 构建 1pt 精度的 x 轴覆盖直方图
+    let x_min = table_x_min.floor() as i32;
+    let x_max = (table_x_max.ceil() as i32) + 1;
+    let range = (x_max - x_min) as usize;
+    if range < 10 {
+        return None;
+    }
+    let mut coverage = vec![0u32; range];
 
+    for &(start, end) in &data_chars {
+        let s = ((start.floor() as i32) - x_min).max(0) as usize;
+        let e = ((end.ceil() as i32) - x_min).min(range as i32) as usize;
+        for idx in s..e {
+            coverage[idx] += 1;
+        }
+    }
+
+    // 找连续覆盖为 0 且宽度 >= MIN_BLANK_WIDTH 的区间
     let mut col_separators: Vec<f32> = Vec::new();
-    for &pos in &all_gap_positions {
-        if let Some(last) = col_separators.last() {
-            if (pos - last).abs() < min_col_gap {
-                let n = col_separators.len();
-                col_separators[n - 1] = (col_separators[n - 1] + pos) / 2.0;
-                continue;
+    let mut blank_start: Option<usize> = None;
+
+    for (idx, &count) in coverage.iter().enumerate() {
+        if count == 0 {
+            if blank_start.is_none() {
+                blank_start = Some(idx);
+            }
+        } else {
+            if let Some(start) = blank_start {
+                let width = (idx - start) as f32;
+                if width >= MIN_BLANK_WIDTH {
+                    let center = (start as f32 + idx as f32) / 2.0 + x_min as f32;
+                    col_separators.push(center);
+                }
+                blank_start = None;
             }
         }
-        col_separators.push(pos);
     }
+
+    log::debug!(
+        "Booktabs page {}: {} data chars, {} blank col separators, sep_x={:?}",
+        page_index,
+        data_chars.len(),
+        col_separators.len(),
+        col_separators
+    );
+
+    if col_separators.is_empty() {
+        return None;
+    }
+
+    // 确定有效数据行：所有非空的数据行都参与
+    let valid_data_indices: Vec<usize> = sub_rows
+        .iter()
+        .enumerate()
+        .filter(|(_, sr)| sr.region_idx >= 1 && !sr.chars.is_empty())
+        .map(|(i, _)| i)
+        .collect();
 
     // 构建列边界
     let mut col_bounds = vec![table_x_min];
