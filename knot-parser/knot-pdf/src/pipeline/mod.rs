@@ -2578,7 +2578,7 @@ fn parse_markdown_table(md_text: &str) -> Option<(Vec<String>, Vec<Vec<String>>)
 
 /// 从整页 PNG 图片中裁剪指定区域
 ///
-/// 将 PDF 坐标的 bbox 转换为像素坐标，裁剪后编码为 PNG
+/// 将 PDF 坐标的 bbox 转换为像素坐标，裁剪后编码为 JPEG（比 PNG 更小更快）
 #[cfg(feature = "vision")]
 fn crop_region_from_page(
     page_png: &[u8],
@@ -2607,12 +2607,14 @@ fn crop_region_from_page(
 
     let cropped = full_img.crop_imm(crop_x, crop_y, crop_w, crop_h);
     let rgb = cropped.to_rgb8();
+
+    // 编码为 JPEG（质量 90），比 PNG 小 3-5 倍，编码也更快
     let mut bytes: Vec<u8> = Vec::new();
     let mut cursor = std::io::Cursor::new(&mut bytes);
-    rgb.write_to(&mut cursor, image::ImageFormat::Png)
-        .map_err(|e| {
-            crate::error::PdfError::Backend(format!("Failed to encode cropped PNG: {}", e))
-        })?;
+    let encoder = image::codecs::jpeg::JpegEncoder::new_with_quality(&mut cursor, 90);
+    rgb.write_with_encoder(encoder).map_err(|e| {
+        crate::error::PdfError::Backend(format!("Failed to encode cropped JPEG: {}", e))
+    })?;
 
     Ok(bytes)
 }

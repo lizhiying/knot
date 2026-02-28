@@ -109,7 +109,13 @@ impl VisionDescriber for OpenAiVisionDescriber {
                     }
                 }
             } else {
-                (std::borrow::Cow::Borrowed(image_png), "image/png")
+                // 自动检测 MIME type：JPEG 以 FF D8 开头，PNG 以 89 50 开头
+                let mime = if image_png.starts_with(&[0xFF, 0xD8]) {
+                    "image/jpeg"
+                } else {
+                    "image/png"
+                };
+                (std::borrow::Cow::Borrowed(image_png), mime)
             };
 
         // 将图片编码为 base64
