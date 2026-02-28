@@ -656,6 +656,103 @@ impl Pipeline {
             total_overlap / table_area <= 0.3
         });
 
+        // === Vision 增强 booktabs 表格 ===
+        // 对 Ruled 模式表格（booktabs），用 vision 模型截图识别替换字符级分析结果
+        #[cfg(feature = "vision")]
+        if let Some(vision) = &self.vision_describer {
+            // 渲染整页图片（只渲染一次，供所有表格裁剪使用）
+            let page_png = backend.render_page_to_image(page_index, 1500).ok();
+            if let Some(page_png) = &page_png {
+                for table in tables.iter_mut() {
+                    if table.extraction_mode != crate::ir::ExtractionMode::Ruled {
+                        continue;
+                    }
+                    // 裁剪表格区域（加 5pt 边距）
+                    match crop_region_from_page(
+                        page_png,
+                        table.bbox,
+                        page_info.size.width,
+                        page_info.size.height,
+                        5.0,
+                    ) {
+                        Ok(table_png) => {
+                            let prompt = "请将这个表格完整提取为 Markdown 表格格式。\n\
+                            要求：\n\
+                            1. 第一行是表头，用 | 分隔\n\
+                            2. 第二行是分隔线 ---\n\
+                            3. 用 | 分隔每个单元格\n\
+                            4. 保持原始内容，不要翻译或改写\n\
+                            5. 只输出 Markdown 表格，不要输出其他内容\n\
+                            6. 如果单元格内容有多行，用空格合并为一行";
+                            match vision.describe_image(&table_png, Some(prompt)) {
+                                Ok(md_text)
+                                    if md_text.contains('|')
+                                        || md_text.contains("<table")
+                                        || md_text.contains("<td") =>
+                                {
+                                    // 解析 vision 返回的 markdown 或 HTML 表格
+                                    if let Some((headers, rows)) =
+                                        parse_vision_table_response(&md_text)
+                                    {
+                                        log::info!(
+                                        "Vision enhanced table {} on page {}: {} cols x {} rows",
+                                        table.table_id,
+                                        page_index,
+                                        headers.len(),
+                                        rows.len()
+                                    );
+                                        table.headers = headers.clone();
+                                        let col_count = headers.len();
+                                        table.rows = rows
+                                            .into_iter()
+                                            .enumerate()
+                                            .map(|(ri, cells)| crate::ir::TableRow {
+                                                row_index: ri,
+                                                cells: cells
+                                                    .into_iter()
+                                                    .enumerate()
+                                                    .map(|(ci, text)| crate::ir::TableCell {
+                                                        row: ri,
+                                                        col: ci,
+                                                        text,
+                                                        cell_type: crate::ir::CellType::Unknown,
+                                                        rowspan: 1,
+                                                        colspan: 1,
+                                                    })
+                                                    .collect(),
+                                            })
+                                            .collect();
+                                        table.column_types =
+                                            vec![crate::ir::CellType::Unknown; col_count];
+                                        // 更新 fallback_text
+                                        table.fallback_text = md_text;
+                                    }
+                                }
+                                Ok(md_text) => {
+                                    log::debug!(
+                                        "Vision returned non-table text for {} ({}chars): {:?}",
+                                        table.table_id,
+                                        md_text.len(),
+                                        md_text.chars().take(200).collect::<String>()
+                                    );
+                                }
+                                Err(e) => {
+                                    log::debug!(
+                                        "Vision failed for table {}: {}",
+                                        table.table_id,
+                                        e
+                                    );
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            log::debug!("Failed to render table region {}: {}", table.table_id, e);
+                        }
+                    }
+                }
+            }
+        }
+
         // 合并隐式网格表格（方案B下为空）
         tables.extend(grid_tables);
 
@@ -2328,4 +2425,194 @@ fn is_complex_ppt_layout(page: &crate::ir::PageIR) -> bool {
     );
 
     true
+}
+
+/// 解析 vision 模型返回的表格文本（支持 Markdown 和 HTML 格式）
+///
+/// 支持两种格式：
+/// 1. Markdown: `| Header1 | Header2 |`
+/// 2. HTML: `<table><tr><td>Header1</td><td>Header2</td></tr></table>`
+///
+/// 返回 (headers, rows)
+#[cfg(feature = "vision")]
+fn parse_vision_table_response(text: &str) -> Option<(Vec<String>, Vec<Vec<String>>)> {
+    // 优先尝试 HTML 格式
+    if text.contains("<td") || text.contains("<th") {
+        return parse_html_table(text);
+    }
+    // 然后尝试 markdown 格式
+    if text.contains('|') {
+        return parse_markdown_table(text);
+    }
+    None
+}
+
+/// 解析 HTML 表格
+#[cfg(feature = "vision")]
+fn parse_html_table(html: &str) -> Option<(Vec<String>, Vec<Vec<String>>)> {
+    let mut rows: Vec<Vec<String>> = Vec::new();
+
+    // 去掉所有换行，统一为一行
+    let flat = html.replace('\n', " ").replace('\r', "");
+
+    // 按 <tr 分割行
+    for tr_part in flat.split("<tr") {
+        if !tr_part.contains("<td") && !tr_part.contains("<th") {
+            continue;
+        }
+
+        let mut cells: Vec<String> = Vec::new();
+        let mut remaining = tr_part;
+
+        // 逐个提取 <td> 或 <th> 内容
+        loop {
+            // 找下一个 <td 或 <th
+            let td_pos = remaining.find("<td");
+            let th_pos = remaining.find("<th");
+            let next_pos = match (td_pos, th_pos) {
+                (Some(a), Some(b)) => Some(a.min(b)),
+                (Some(a), None) => Some(a),
+                (None, Some(b)) => Some(b),
+                (None, None) => None,
+            };
+            let Some(pos) = next_pos else { break };
+
+            // 跳过标签属性直到 >
+            let after_tag_start = &remaining[pos..];
+            let Some(gt_pos) = after_tag_start.find('>') else {
+                break;
+            };
+            let content_start = pos + gt_pos + 1;
+            let content_area = &remaining[content_start..];
+
+            // 找闭合标签 </td> 或 </th>
+            let end = content_area
+                .find("</td")
+                .or_else(|| content_area.find("</th"))
+                .or_else(|| content_area.find("</"))
+                .unwrap_or(content_area.len());
+
+            let cell_text = content_area[..end].trim().to_string();
+            cells.push(cell_text);
+
+            // 移动到闭合标签之后继续
+            let consumed = content_start + end;
+            if consumed >= remaining.len() {
+                break;
+            }
+            remaining = &remaining[consumed..];
+        }
+
+        if !cells.is_empty() {
+            rows.push(cells);
+        }
+    }
+
+    if rows.len() < 2 {
+        return None;
+    }
+
+    let headers = rows.remove(0);
+    let col_count = headers.len();
+
+    let data_rows: Vec<Vec<String>> = rows
+        .into_iter()
+        .map(|mut row| {
+            row.resize(col_count, String::new());
+            row.truncate(col_count);
+            row
+        })
+        .collect();
+
+    Some((headers, data_rows))
+}
+
+/// 解析 Markdown 表格
+#[cfg(feature = "vision")]
+fn parse_markdown_table(md_text: &str) -> Option<(Vec<String>, Vec<Vec<String>>)> {
+    let mut table_lines: Vec<Vec<String>> = Vec::new();
+
+    for line in md_text.lines() {
+        let trimmed = line.trim();
+        if !trimmed.starts_with('|') {
+            continue;
+        }
+        let cells: Vec<String> = trimmed
+            .split('|')
+            .filter(|s| !s.is_empty())
+            .map(|s| s.trim().to_string())
+            .collect();
+
+        if cells.is_empty() {
+            continue;
+        }
+
+        let is_separator = cells
+            .iter()
+            .all(|c| c.chars().all(|ch| ch == '-' || ch == ':' || ch == ' '));
+        if is_separator {
+            continue;
+        }
+
+        table_lines.push(cells);
+    }
+
+    if table_lines.len() < 2 {
+        return None;
+    }
+
+    let headers = table_lines.remove(0);
+    let col_count = headers.len();
+
+    let rows: Vec<Vec<String>> = table_lines
+        .into_iter()
+        .map(|mut row| {
+            row.resize(col_count, String::new());
+            row.truncate(col_count);
+            row
+        })
+        .collect();
+
+    Some((headers, rows))
+}
+
+/// 从整页 PNG 图片中裁剪指定区域
+///
+/// 将 PDF 坐标的 bbox 转换为像素坐标，裁剪后编码为 PNG
+#[cfg(feature = "vision")]
+fn crop_region_from_page(
+    page_png: &[u8],
+    bbox: crate::ir::BBox,
+    page_width: f32,
+    page_height: f32,
+    padding: f32,
+) -> Result<Vec<u8>, crate::error::PdfError> {
+    let full_img = image::load_from_memory(page_png).map_err(|e| {
+        crate::error::PdfError::Backend(format!("Failed to decode page image: {}", e))
+    })?;
+
+    let img_w = full_img.width() as f32;
+    let img_h = full_img.height() as f32;
+    let scale_x = img_w / page_width;
+    let scale_y = img_h / page_height;
+
+    let crop_x = ((bbox.x - padding).max(0.0) * scale_x) as u32;
+    let crop_y = ((bbox.y - padding).max(0.0) * scale_y) as u32;
+    let crop_w = ((bbox.width + padding * 2.0) * scale_x)
+        .min(img_w - crop_x as f32)
+        .max(1.0) as u32;
+    let crop_h = ((bbox.height + padding * 2.0) * scale_y)
+        .min(img_h - crop_y as f32)
+        .max(1.0) as u32;
+
+    let cropped = full_img.crop_imm(crop_x, crop_y, crop_w, crop_h);
+    let rgb = cropped.to_rgb8();
+    let mut bytes: Vec<u8> = Vec::new();
+    let mut cursor = std::io::Cursor::new(&mut bytes);
+    rgb.write_to(&mut cursor, image::ImageFormat::Png)
+        .map_err(|e| {
+            crate::error::PdfError::Backend(format!("Failed to encode cropped PNG: {}", e))
+        })?;
+
+    Ok(bytes)
 }
