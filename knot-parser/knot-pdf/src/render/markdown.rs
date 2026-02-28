@@ -44,6 +44,9 @@ impl MarkdownRenderer {
     }
 
     /// 渲染单个页面为 Markdown
+    ///
+    /// 所有元素（文本块、图片、表格、公式）按 y 坐标统一排序后交错输出，
+    /// 确保图表出现在原文流中正确的位置。
     pub fn render_page(&self, page: &PageIR) -> String {
         let mut output = String::new();
 
@@ -51,74 +54,83 @@ impl MarkdownRenderer {
             output.push_str(&format!("<!-- Page {} -->\n\n", page.page_index + 1));
         }
 
-        // 渲染文本块
+        // 将所有元素统一收集并按 y 坐标排序
+        enum PageElement<'a> {
+            Block(&'a crate::ir::BlockIR),
+            Image(&'a crate::ir::ImageIR),
+            Table(&'a crate::ir::TableIR),
+            Formula(&'a crate::ir::FormulaIR),
+        }
+
+        // 收集已被图片 caption_refs 引用的 block_id（避免重复输出）
+        let caption_block_ids: std::collections::HashSet<&str> = page
+            .images
+            .iter()
+            .flat_map(|img| img.caption_refs.iter().map(|s| s.as_str()))
+            .collect();
+
+        let mut elements: Vec<(f32, PageElement)> = Vec::new();
+
         for block in &page.blocks {
-            match block.role {
-                BlockRole::Title => {
-                    output.push_str(&format!("## {}\n\n", block.normalized_text));
-                }
-                BlockRole::Header | BlockRole::Footer => {
-                    // 页眉页脚默认不输出，或以注释形式输出
-                    continue;
-                }
-                BlockRole::List => {
-                    for line in &block.lines {
-                        output.push_str(&format!("- {}\n", line.text()));
-                    }
-                    output.push('\n');
-                }
-                BlockRole::Caption => {
-                    output.push_str(&format!("*{}*\n\n", block.normalized_text));
-                }
-                _ => {
-                    output.push_str(&block.normalized_text);
-                    output.push_str("\n\n");
-                }
+            // 跳过页眉页脚
+            if matches!(block.role, BlockRole::Header | BlockRole::Footer) {
+                continue;
             }
+            // 跳过已被图片 caption 引用的 block（会在图片处以斜体输出）
+            if caption_block_ids.contains(block.block_id.as_str()) {
+                continue;
+            }
+            elements.push((block.bbox.y, PageElement::Block(block)));
         }
 
-        // 渲染公式（M12）
-        if !page.formulas.is_empty() {
-            // 按 y 坐标排序
-            let mut formulas: Vec<&crate::ir::FormulaIR> = page.formulas.iter().collect();
-            formulas.sort_by(|a, b| {
-                a.bbox
-                    .y
-                    .partial_cmp(&b.bbox.y)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            });
-
-            for formula in formulas {
-                output.push_str(&formula.to_markdown());
-                output.push_str("\n\n");
-            }
-        }
-
-        // 渲染表格
-        if self.include_tables {
-            for table in &page.tables {
-                output.push_str(&table.to_markdown());
-                output.push_str("\n\n");
-            }
-        }
-
-        // 渲染图片引用
         if self.include_images {
             for image in &page.images {
-                match image.source {
+                elements.push((image.bbox.y, PageElement::Image(image)));
+            }
+        }
+
+        if self.include_tables {
+            for table in &page.tables {
+                elements.push((table.bbox.y, PageElement::Table(table)));
+            }
+        }
+
+        for formula in &page.formulas {
+            elements.push((formula.bbox.y, PageElement::Formula(formula)));
+        }
+
+        // 按 y 坐标排序（从上到下）
+        elements.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+
+        // 按顺序渲染
+        for (_y, elem) in &elements {
+            match elem {
+                PageElement::Block(block) => match block.role {
+                    BlockRole::Title => {
+                        output.push_str(&format!("## {}\n\n", block.normalized_text));
+                    }
+                    BlockRole::List => {
+                        for line in &block.lines {
+                            output.push_str(&format!("- {}\n", line.text()));
+                        }
+                        output.push('\n');
+                    }
+                    BlockRole::Caption => {
+                        output.push_str(&format!("*{}*\n\n", block.normalized_text));
+                    }
+                    _ => {
+                        output.push_str(&block.normalized_text);
+                        output.push_str("\n\n");
+                    }
+                },
+                PageElement::Image(image) => match image.source {
                     ImageSource::FigureRegion => {
-                        // 矢量图表区域：输出图片引用 + OCR 文字 + caption
-                        output.push_str(&format!("**[图表：{}]**\n", image.image_id,));
+                        output.push_str(&format!("**[图表：{}]**\n", image.image_id));
                         if let Some(ocr_text) = &image.ocr_text {
-                            // OCR/VLM 文本作为可见内容输出
-                            // 检测并格式化表格部分为 markdown table
                             output.push_str(&format_ocr_text_with_tables(ocr_text));
                             output.push('\n');
                         }
-                        // 输出关联 caption
                         for cap_id in &image.caption_refs {
-                            // 从 blocks 中查找 caption 文本（但 blocks 可能已被剔除）
-                            // 回退：使用 cap_id 作为提示
                             for block in &page.blocks {
                                 if &block.block_id == cap_id {
                                     output.push_str(&format!("*{}*\n\n", block.normalized_text));
@@ -129,7 +141,6 @@ impl MarkdownRenderer {
                     }
                     ImageSource::Embedded => {
                         if image.is_qrcode {
-                            // 二维码输出为标签，方便检索
                             output.push_str(&format!("[二维码/QR Code: {}]\n\n", image.image_id));
                         } else {
                             output.push_str(&format!(
@@ -140,6 +151,14 @@ impl MarkdownRenderer {
                             ));
                         }
                     }
+                },
+                PageElement::Table(table) => {
+                    output.push_str(&table.to_markdown());
+                    output.push_str("\n\n");
+                }
+                PageElement::Formula(formula) => {
+                    output.push_str(&formula.to_markdown());
+                    output.push_str("\n\n");
                 }
             }
         }
