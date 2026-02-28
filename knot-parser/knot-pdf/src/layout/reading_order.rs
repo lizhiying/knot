@@ -1262,6 +1262,19 @@ fn detect_sparse_column_grid(
         return None;
     }
 
+    // 过滤极端位置的 boundary：如果分界线在页面极左或极右（<15% 或 >85%），
+    // 很可能是缩进列表的 label-content 结构（如 TOC："Item 1.  Business"）
+    // 而不是真正的双栏布局。真正的列分界通常在页面的 15%-85% 区间。
+    let boundary_ratio = boundary_x / _page_width;
+    if boundary_ratio < 0.15 || boundary_ratio > 0.85 {
+        log::debug!(
+            "sparse_column: boundary_x={:.1} ({:.0}% of page) too close to edge, likely indented list, skipping",
+            boundary_x,
+            boundary_ratio * 100.0
+        );
+        return None;
+    }
+
     // 确定网格 y 范围：从第一个有间隙行到最后一个有间隙行
     // 只有这个范围内的行参与网格拆分
     let gap_profile_y_values: Vec<f32> = profiles

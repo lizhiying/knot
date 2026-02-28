@@ -1067,6 +1067,17 @@ fn extract_booktabs_table(
     );
     for (i, line) in h_sorted.iter().enumerate() {}
 
+    // 水平线过多（>40）说明不是真正的表格，可能是链接下划线装饰（如 TOC 页面）
+    // 正常 booktabs 表格通常只有 3-10 条水平线
+    if h_sorted.len() > 40 {
+        log::debug!(
+            "Booktabs page {}: {} h_lines too many (>40), likely underline decorations, skipping",
+            page_index,
+            h_sorted.len()
+        );
+        return None;
+    }
+
     if row_bounds.len() < 3 {
         return None;
     }
