@@ -669,10 +669,21 @@ impl Pipeline {
                     let blk_cy = blk.bbox.center_y();
                     let blk_cx = blk.bbox.center_x();
                     // 如果文字块中心在表格 bbox 内，移除
-                    !(blk_cx >= table.bbox.x
+                    let center_in_table = blk_cx >= table.bbox.x
                         && blk_cx <= table.bbox.right()
                         && blk_cy >= table.bbox.y
-                        && blk_cy <= table.bbox.bottom())
+                        && blk_cy <= table.bbox.bottom();
+                    if !center_in_table {
+                        return true;
+                    }
+                    // 保护大 block：如果 block 的文本行数远多于表格行数，
+                    // 说明 block 是跨多行的列内容，不应被小表格删除
+                    let blk_lines = blk.lines.len();
+                    let table_rows = table.rows.len();
+                    if blk_lines > table_rows * 2 {
+                        return true; // 保留大 block
+                    }
+                    false // 移除
                 });
             }
         }

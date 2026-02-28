@@ -955,6 +955,12 @@ fn detect_implicit_grids(
 
     let mut i = 0;
     while i < profiles.len() {
+        // 跳过已被 Step 1.5 消费的行
+        if consumed_indices[profiles[i].line_idx] {
+            i += 1;
+            continue;
+        }
+
         let ref_gap_count = profiles[i].gap_centers.len();
 
         // 至少需要 GRID_MIN_COLS - 1 个间隙
@@ -1281,7 +1287,7 @@ fn detect_sparse_column_grid(
     // 大间隙（区域分隔线）的阈值：中位行距的 2 倍
     let section_gap_threshold = avg_line_gap * 2.0;
 
-    // 向上扩展到第一个间隙行之前的连续行（不超过大间隙）
+    // 向上扩展到第一个间隙行之前的连续行（不超过大间隙，使用固定参考点）
     let mut y_start = grid_y_min;
     for line in lines.iter().rev() {
         if line.y_center >= grid_y_min {
@@ -1294,12 +1300,24 @@ fn detect_sparse_column_grid(
     }
 
     // 向下扩展到最后一个间隙行之后的连续行（不超过大间隙）
+    // 使用滚动窗口，但只纳入窄行（纯左列或纯右列），全宽行终止扩展
+    let max_extend = (grid_y_max - grid_y_min) * 0.5;
     let mut y_end = grid_y_max;
     for line in lines.iter() {
-        if line.y_center <= grid_y_max {
+        if line.y_center <= y_end {
             continue;
         }
-        if line.y_center - grid_y_max > section_gap_threshold {
+        if line.y_center - y_end > section_gap_threshold {
+            break;
+        }
+        if line.y_center - grid_y_max > max_extend {
+            break;
+        }
+        // 只扩展到纯左列或纯右列行，全宽行（横跨两列）终止扩展
+        let line_right = line.bbox.x + line.bbox.width;
+        let is_narrow = line_right < boundary_x + x_tolerance * 2.0
+            || line.bbox.x > boundary_x - x_tolerance * 2.0;
+        if !is_narrow {
             break;
         }
         y_end = line.y_center;
