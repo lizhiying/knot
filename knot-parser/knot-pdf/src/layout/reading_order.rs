@@ -747,8 +747,8 @@ fn line_to_spans(line: &CharLine) -> Vec<TextSpan> {
             //    句号后跟大写字母时应保持正常间距
             // 3. 数字-数字相邻总是紧凑（数字内部不应有空格）
             // 4. 数字后跟序号后缀（st/nd/rd/th）时紧凑
-            // 5. 大写+小写(Aa)、小写+小写(aa)、大写+大写(AA) 使用紧凑阈值
-            //    小写+大写(aA) 不紧凑（通常是词边界，如 "of The"）
+            // 5. 大写+小写(Aa)、大写+大写(AA) 使用紧凑阈值（PDF kerning 补偿）
+            //    小写+小写(aa)、小写+大写(aA) 不紧凑（通常是词边界）
             // 6. 连字符/括号两侧紧凑
             let tight = if prev.unicode == '@' || ch.unicode == '@' {
                 true
@@ -769,9 +769,6 @@ fn line_to_spans(line: &CharLine) -> Vec<TextSpan> {
             } else if prev.unicode.is_uppercase() && ch.unicode.is_uppercase() {
                 // 大写+大写 (e.g. "AN" in "AND"): 全大写文本有 tracking 间距
                 true
-            } else if prev.unicode.is_lowercase() && ch.unicode.is_lowercase() {
-                // 小写+小写 (e.g. "nd" in "and"): 也可能有 kerning
-                true
             } else if prev.unicode == '-' || ch.unicode == '-' {
                 true
             } else if (ch.unicode == '(' || ch.unicode == ')') && prev.unicode.is_alphanumeric() {
@@ -779,7 +776,7 @@ fn line_to_spans(line: &CharLine) -> Vec<TextSpan> {
             } else if (prev.unicode == '(' || prev.unicode == ')') && ch.unicode.is_alphanumeric() {
                 true
             } else {
-                // 小写+大写 (e.g. "f C" in "of Contents"): 通常是真词边界
+                // 小写+小写(aa)、小写+大写(aA): 通常是真词边界，不使用紧凑阈值
                 false
             };
 
