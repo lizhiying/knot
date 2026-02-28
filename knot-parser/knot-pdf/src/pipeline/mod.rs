@@ -625,10 +625,14 @@ impl Pipeline {
 
         // 过滤掉与文本块高度重叠的假阳性表格
         // （隐式网格已作为 BlockIR 输出，graphics 检测可能重复检测同一区域）
-        // 注意：ruled 表格（包括 booktabs）不过滤，因为表格区域内的文字就是表格数据
+        // 注意：ruled 和 stream 表格不过滤——表格区域内的文字就是表格数据，
+        //       后续会将这些重叠 blocks 从正文中移除
         tables.retain(|table| {
-            if table.extraction_mode == crate::ir::ExtractionMode::Ruled {
-                return true; // ruled 表格不做重叠过滤
+            // ruled 和 stream 表格都保留（stream 也是从 candidate 检测出来的正式表格）
+            if table.extraction_mode == crate::ir::ExtractionMode::Ruled
+                || table.extraction_mode == crate::ir::ExtractionMode::Stream
+            {
+                return true;
             }
             let table_area = (table.bbox.width * table.bbox.height).max(1.0);
             let total_overlap: f32 = blocks
@@ -655,10 +659,12 @@ impl Pipeline {
         // 合并隐式网格表格（方案B下为空）
         tables.extend(grid_tables);
 
-        // === 移除被 ruled 表格覆盖的文字块（避免表格数据既出现在表格又出现在正文中）===
+        // === 移除被表格覆盖的文字块（避免表格数据既出现在表格又出现在正文中）===
         let mut blocks = blocks; // 转为 mut
         for table in &tables {
-            if table.extraction_mode == crate::ir::ExtractionMode::Ruled {
+            if table.extraction_mode == crate::ir::ExtractionMode::Ruled
+                || table.extraction_mode == crate::ir::ExtractionMode::Stream
+            {
                 blocks.retain(|blk| {
                     let blk_cy = blk.bbox.center_y();
                     let blk_cx = blk.bbox.center_x();

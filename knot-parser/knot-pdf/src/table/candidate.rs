@@ -53,6 +53,11 @@ pub fn detect_table_candidates(
 
     // 1. 按 y 坐标聚类成行
     let rows = cluster_rows(chars);
+    log::debug!(
+        "Table candidate: {} chars -> {} rows",
+        chars.len(),
+        rows.len()
+    );
     if rows.len() < MIN_TABLE_ROWS {
         return Vec::new();
     }
@@ -63,8 +68,37 @@ pub fn detect_table_candidates(
         .map(|row| segment_row(row, page_width))
         .collect();
 
+    // debug: 打印每行的段数
+    for (i, segs) in row_segments.iter().enumerate() {
+        if i < 20 {
+            let seg_info: Vec<String> = segs
+                .iter()
+                .map(|s| {
+                    format!(
+                        "x={:.0}..{:.0} '{}'",
+                        s.x_start,
+                        s.x_end,
+                        &s.text[..s.text.len().min(15)]
+                    )
+                })
+                .collect();
+            log::trace!("  row[{}] {} segs: {:?}", i, segs.len(), seg_info);
+        }
+    }
+
     // 3. 寻找连续多行具有相似列结构的区域
     let regions = find_aligned_regions(&rows, &row_segments);
+    log::debug!("Table candidate: {} aligned regions found", regions.len());
+    for (i, r) in regions.iter().enumerate() {
+        log::debug!(
+            "  region[{}]: rows {}..{}, {} cols, col_x={:?}",
+            i,
+            r.start_row,
+            r.end_row,
+            r.col_count,
+            r.col_x_positions
+        );
+    }
 
     // 4. 对每个区域评估置信度
     let mut candidates = Vec::new();
@@ -243,12 +277,22 @@ fn find_aligned_regions(
         let col_x: Vec<f32> = row_segments[i].iter().map(|s| s.x_start).collect();
 
         let mut end = i;
-        for (j, seg) in row_segments.iter().enumerate().skip(i + 1) {
-            if is_column_compatible(seg, &col_x) {
+        let mut j = i + 1;
+        let mut consecutive_noise = 0;
+        while j < row_segments.len() {
+            if is_column_compatible(&row_segments[j], &col_x) {
                 end = j;
+                consecutive_noise = 0;
+            } else if is_noise_row(&rows[j]) {
+                // 噪声行（只含标点/空白/逗号）：跳过但不中断
+                consecutive_noise += 1;
+                if consecutive_noise > 2 {
+                    break; // 连续噪声太多，中断
+                }
             } else {
                 break;
             }
+            j += 1;
         }
 
         let row_count = end - i + 1;
@@ -266,6 +310,24 @@ fn find_aligned_regions(
     }
 
     regions
+}
+
+/// 判断一行是否为"噪声行"（只含标点/空白/逗号等）
+/// 典型场景：数字千位分隔符逗号被 PDF 渲染为独立的 y 行
+fn is_noise_row(row: &[RawChar]) -> bool {
+    if row.len() > 10 {
+        return false; // 超过 10 个字符不太可能是噪声
+    }
+    row.iter().all(|c| {
+        let ch = c.unicode;
+        ch == ','
+            || ch == '.'
+            || ch == ' '
+            || ch == '\u{00a0}'
+            || ch == ';'
+            || ch == ':'
+            || ch == '-'
+    })
 }
 
 /// 判断一行的段结构是否与参考列 x 坐标兼容

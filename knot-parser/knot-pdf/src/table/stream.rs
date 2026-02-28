@@ -35,12 +35,37 @@ pub fn extract_stream_table(
 
     // 1. 行聚类
     let rows = cluster_table_rows(chars);
+    // 过滤噪声行（只含标点/逗号/空白的行，通常是数字千位分隔符被渲染为独立 y 行）
+    let rows: Vec<TableRowChars> = rows
+        .into_iter()
+        .filter(|row| {
+            if row.chars.len() > 10 {
+                return true;
+            }
+            !row.chars.iter().all(|c| {
+                let ch = c.unicode;
+                ch == ','
+                    || ch == '.'
+                    || ch == ' '
+                    || ch == '\u{00a0}'
+                    || ch == ';'
+                    || ch == ':'
+                    || ch == '-'
+            })
+        })
+        .collect();
     if rows.len() < 2 {
         return None;
     }
 
     // 2. 列边界检测
     let col_boundaries = detect_column_boundaries(&rows);
+    log::debug!(
+        "Stream table: {} rows, {} col_boundaries: {:?}",
+        rows.len(),
+        col_boundaries.len(),
+        col_boundaries
+    );
     if col_boundaries.len() < 2 {
         return None;
     }
