@@ -71,17 +71,16 @@ PDF 文件
 
 ```toml
 [dependencies]
-knot-pdf = { path = "path/to/knot-pdf" }
+knot-pdf = { path = "path/to/knot-pdf", features = [
+    "pdfium",         # PDFium 高质量文本抽取 + 页面渲染
+    "ocr_paddle",     # PaddleOCR PP-OCRv5 扫描件识别
+    "vision",         # Vision LLM 表格增强 + 图表理解
+    "formula_model",  # 公式 OCR（LaTeX 识别）
+    "layout_model",   # ONNX 版面检测（改善分栏识别）
+] }
 ```
 
-按需启用 feature（参见下方 [Feature Flags](#-feature-flags)）：
-
-```toml
-# 推荐：启用 pdfium（高质量文本抽取）+ PaddleOCR（扫描件）+ VLM（复杂表格）
-knot-pdf = { path = "path/to/knot-pdf", features = ["pdfium", "ocr_paddle", "vision"] }
-```
-
-> **注意**：knot-pdf 默认启用 OCR 和 Vision LLM。如果没有对应模型，运行时会输出下载指引并自动降级（不影响基本文本抽取）。
+> **注意**：knot-pdf 默认启用 OCR。如果没有对应模型文件，运行时会输出下载指引并自动降级（不影响基本文本抽取）。
 
 ### 第 1.5 步：下载模型文件（推荐）
 
