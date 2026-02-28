@@ -78,7 +78,7 @@ pub fn detect_table_candidates(
                         "x={:.0}..{:.0} '{}'",
                         s.x_start,
                         s.x_end,
-                        &s.text[..s.text.len().min(15)]
+                        &s.text.chars().take(15).collect::<String>()
                     )
                 })
                 .collect();
@@ -297,8 +297,13 @@ fn find_aligned_regions(
 
         let row_count = end - i + 1;
         if row_count >= MIN_TABLE_ROWS {
+            // 尝试向上回溯一行作为表头：如果前一行段数 >= MIN_TABLE_COLS 且不是噪声行
+            let mut header_start = i;
+            if i > 0 && row_segments[i - 1].len() >= MIN_TABLE_COLS && !is_noise_row(&rows[i - 1]) {
+                header_start = i - 1;
+            }
             regions.push(AlignedRegion {
-                start_row: i,
+                start_row: header_start,
                 end_row: end,
                 col_count,
                 col_x_positions: col_x,

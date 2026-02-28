@@ -35,25 +35,50 @@ pub fn extract_stream_table(
 
     // 1. 行聚类
     let rows = cluster_table_rows(chars);
-    // 过滤噪声行（只含标点/逗号/空白的行，通常是数字千位分隔符被渲染为独立 y 行）
-    let rows: Vec<TableRowChars> = rows
-        .into_iter()
-        .filter(|row| {
-            if row.chars.len() > 10 {
-                return true;
-            }
-            !row.chars.iter().all(|c| {
-                let ch = c.unicode;
-                ch == ','
-                    || ch == '.'
-                    || ch == ' '
-                    || ch == '\u{00a0}'
-                    || ch == ';'
-                    || ch == ':'
-                    || ch == '-'
-            })
+    // 将噪声行（只含标点/逗号/空白的行，如数字千位分隔符）的字符合并到最近的数据行
+    let is_noise = |row: &TableRowChars| -> bool {
+        if row.chars.len() > 10 {
+            return false;
+        }
+        row.chars.iter().all(|c| {
+            let ch = c.unicode;
+            ch == ','
+                || ch == '.'
+                || ch == ' '
+                || ch == '\u{00a0}'
+                || ch == ';'
+                || ch == ':'
+                || ch == '-'
         })
-        .collect();
+    };
+    // 先分离噪声行和数据行
+    let mut data_rows: Vec<TableRowChars> = Vec::new();
+    let mut noise_rows: Vec<TableRowChars> = Vec::new();
+    for row in rows {
+        if is_noise(&row) {
+            noise_rows.push(row);
+        } else {
+            data_rows.push(row);
+        }
+    }
+    // 把噪声行字符合并到最近的数据行（按 y 距离）
+    for noise in noise_rows {
+        if let Some(nearest) = data_rows.iter_mut().min_by(|a, b| {
+            let da = (a.y_center - noise.y_center).abs();
+            let db = (b.y_center - noise.y_center).abs();
+            da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
+        }) {
+            nearest.chars.extend(noise.chars);
+            // 重新按 x 排序
+            nearest.chars.sort_by(|a, b| {
+                a.bbox
+                    .x
+                    .partial_cmp(&b.bbox.x)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            });
+        }
+    }
+    let rows = data_rows;
     if rows.len() < 2 {
         return None;
     }
