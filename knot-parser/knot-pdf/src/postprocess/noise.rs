@@ -53,6 +53,30 @@ impl PostProcessor for NoiseBlockFilter {
     }
 
     fn process_page(&self, page: &mut PageIR, _config: &Config) {
+        // Step 1: 从每个 block 内移除纯噪声行（如 ", , ," 等独立标点行）
+        for block in page.blocks.iter_mut() {
+            if matches!(block.role, BlockRole::PageNumber) {
+                continue;
+            }
+            let before_lines = block.lines.len();
+            block.lines.retain(|line| {
+                let line_text = line.text();
+                !Self::is_noise_text(&line_text)
+            });
+            if block.lines.len() < before_lines {
+                // 重建 normalized_text
+                block.normalized_text = block
+                    .lines
+                    .iter()
+                    .map(|l| l.text())
+                    .collect::<Vec<_>>()
+                    .join("\n")
+                    .trim()
+                    .to_string();
+            }
+        }
+
+        // Step 2: 移除变为空的噪声 block
         let before = page.blocks.len();
         page.blocks.retain(|b| {
             // PageNumber 不过滤（可能只有数字但有意义）

@@ -747,11 +747,12 @@ fn line_to_spans(line: &CharLine) -> Vec<TextSpan> {
             } else if prev.unicode == '.' && ch.unicode.is_alphanumeric() {
                 true
             } else if ch.unicode == '.' && prev.unicode.is_alphanumeric() {
-                let next_is_lower = line
-                    .chars
-                    .get(i + 1)
-                    .map_or(false, |nc| nc.unicode.is_lowercase());
-                next_is_lower
+                // `.` 前是数字/字母：后接小写字母或数字时紧凑
+                //  （句号后接大写字母 = 新句子，不紧凑）
+                let next_is_lower_or_digit = line.chars.get(i + 1).map_or(false, |nc| {
+                    nc.unicode.is_lowercase() || nc.unicode.is_ascii_digit()
+                });
+                next_is_lower_or_digit
             } else if prev.unicode.is_ascii_digit() && ch.unicode.is_ascii_digit() {
                 // 数字之间永远紧凑
                 true
