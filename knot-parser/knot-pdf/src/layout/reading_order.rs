@@ -922,9 +922,36 @@ fn detect_implicit_grids(
     // 对齐容差（基于页宽的百分比）
     let x_tolerance = page_width * GRID_X_ALIGN_RATIO;
 
-    // Step 2: 找到连续行中间隙模式匹配的区域
-    let mut grid_blocks: Vec<BlockIR> = Vec::new();
+    // Step 1.5: 先做 sparse 列检测（全量 profiles），识别局部双栏区域
+    // 这样可以避免 Step 2 把双栏行错误地作为常规网格消费
     let mut consumed_indices: Vec<bool> = vec![false; lines.len()];
+    let mut grid_blocks: Vec<BlockIR> = Vec::new();
+    {
+        let sparse_result =
+            detect_sparse_column_grid(lines, &profiles, page_width, x_tolerance, min_gap);
+        if let Some((sparse_blocks, sparse_remaining)) = sparse_result {
+            // 将 sparse 生成的列优先 blocks 加入 grid_blocks
+            grid_blocks.extend(sparse_blocks);
+            // 将 sparse 消费的原始行标记为已消费
+            for (idx, line) in lines.iter().enumerate() {
+                let is_original_remaining = sparse_remaining.iter().any(|r| {
+                    (r.y_center - line.y_center).abs() < 0.5
+                        && (r.bbox.x - line.bbox.x).abs() < 1.0
+                        && (r.bbox.width - line.bbox.width).abs() < 1.0
+                });
+                if !is_original_remaining {
+                    consumed_indices[idx] = true;
+                }
+            }
+            log::debug!(
+                "Step 1.5 sparse: consumed {} lines, {} blocks generated",
+                consumed_indices.iter().filter(|&&c| c).count(),
+                grid_blocks.len()
+            );
+        }
+    }
+
+    // Step 2: 找到连续行中间隙模式匹配的区域（跳过 Step 1.5 已消费的行）
 
     let mut i = 0;
     while i < profiles.len() {
@@ -1056,30 +1083,73 @@ fn detect_implicit_grids(
     }
 
     // Step 2b: 稀疏列检测
-    // 当 Step 2 没有消费任何行时，尝试通过间隙位置聚类找到稳定的列分界
-    // 典型场景：左窄标签+右宽内容布局（PPT 导出 PDF 的十大趋势页面等）
+    let mut sparse_split_lines: Vec<CharLine> = Vec::new();
+    // 对未被 Step 2 消费的行，尝试通过间隙位置聚类找到稳定的列分界
+    // 典型场景：左窄标签+右宽内容布局、学术论文 ARTICLE INFO | ABSTRACT 区域
     let any_consumed = consumed_indices.iter().any(|&c| c);
+    // 筛选未被消费行的 profiles
+    let unconsumed_profiles: Vec<&LineGapProfile> = profiles
+        .iter()
+        .filter(|p| !consumed_indices[p.line_idx])
+        .collect();
     log::debug!(
-        "Step 2b check: any_consumed={}, profiles_empty={}",
+        "Step 2b check: any_consumed={}, unconsumed_profiles={}",
         any_consumed,
-        profiles.is_empty()
+        unconsumed_profiles.len()
     );
-    if !any_consumed && !profiles.is_empty() {
+    if !unconsumed_profiles.is_empty() {
+        // 构造未消费行的 profiles（owned）
+        let uc_profiles: Vec<LineGapProfile> =
+            unconsumed_profiles.iter().map(|p| (*p).clone()).collect();
         let sparse_result =
-            detect_sparse_column_grid(lines, &profiles, page_width, x_tolerance, min_gap);
+            detect_sparse_column_grid(lines, &uc_profiles, page_width, x_tolerance, min_gap);
         log::debug!("Step 2b sparse_result: {:?}", sparse_result.is_some());
-        if let Some((blocks, consumed)) = sparse_result {
-            return (blocks, consumed);
+        if let Some((mut sparse_blocks, sparse_remaining)) = sparse_result {
+            grid_blocks.append(&mut sparse_blocks);
+            // 标记 sparse 消费的原始行
+            for (idx, line) in lines.iter().enumerate() {
+                if consumed_indices[idx] {
+                    continue;
+                }
+                // sparse 消费的行不会出现在 sparse_remaining 中（按 y_center 精确匹配原始行）
+                // 但 sparse_remaining 中可能有新创建的拆分行（与原始行同 y 但不同 x 范围）
+                let is_original_remaining = sparse_remaining.iter().any(|r| {
+                    (r.y_center - line.y_center).abs() < 0.5
+                        && (r.bbox.x - line.bbox.x).abs() < 1.0
+                        && (r.bbox.width - line.bbox.width).abs() < 1.0
+                });
+                if !is_original_remaining {
+                    consumed_indices[idx] = true;
+                }
+            }
+            // 收集 sparse 新创建的拆分行（非原始行的行）
+            for sr in sparse_remaining {
+                let is_original = lines.iter().any(|l| {
+                    (l.y_center - sr.y_center).abs() < 0.5
+                        && (l.bbox.x - sr.bbox.x).abs() < 1.0
+                        && (l.bbox.width - sr.bbox.width).abs() < 1.0
+                });
+                if !is_original {
+                    // 这是 sparse 拆分产生的新行，加入额外列表
+                    sparse_split_lines.push(sr);
+                }
+            }
         }
     }
 
-    // Step 3: 返回未消耗的行
-    let remaining: Vec<CharLine> = lines
+    // Step 3: 返回未消耗的行 + sparse 拆分产生的新行
+    let mut remaining: Vec<CharLine> = lines
         .iter()
         .enumerate()
         .filter(|(idx, _)| !consumed_indices[*idx])
         .map(|(_, line)| line.clone())
         .collect();
+    remaining.extend(sparse_split_lines);
+    remaining.sort_by(|a, b| {
+        a.y_center
+            .partial_cmp(&b.y_center)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
 
     (grid_blocks, remaining)
 }
@@ -1265,9 +1335,18 @@ fn detect_sparse_column_grid(
         return None;
     }
 
+    // 无间隙行应该完全在 boundary 的一侧（纯左列或纯右列），
+    // 而不是横跨两列。这样才说明 boundary 是真正的列分界。
     let aligned_count = no_gap_in_range
         .iter()
-        .filter(|line| line.bbox.x > boundary_x - x_tolerance * 2.0)
+        .filter(|line| {
+            let line_right = line.bbox.x + line.bbox.width;
+            // 纯右列：左边界在 boundary 右侧
+            let is_right_col = line.bbox.x > boundary_x - x_tolerance * 2.0;
+            // 纯左列：右边界在 boundary 左侧
+            let is_left_col = line_right < boundary_x + x_tolerance * 2.0;
+            is_right_col || is_left_col
+        })
         .count();
 
     let alignment_ratio = aligned_count as f32 / no_gap_in_range.len() as f32;
@@ -1292,6 +1371,7 @@ fn detect_sparse_column_grid(
     // 用 boundary_x 拆分网格范围内的行
     let gap_centers = vec![boundary_x];
     let mut left_col_profiles: Vec<LineGapProfile> = Vec::new();
+    let mut left_col_lines: Vec<CharLine> = Vec::new(); // 纯左列行（无间隙、完全在 boundary 左侧）
     let mut right_col_lines: Vec<CharLine> = Vec::new();
     let mut consumed: Vec<bool> = vec![false; lines.len()];
 
@@ -1308,11 +1388,16 @@ fn detect_sparse_column_grid(
             }
         }
 
-        // 无间隙行：检查是否是纯右列行
+        // 无间隙行：检查是否是纯右列行或纯左列行
+        let line_right = line.bbox.x + line.bbox.width;
         if line.bbox.x > boundary_x - x_tolerance * 2.0 {
             // 纯右列行 → 将整行作为右列内容
             consumed[li] = true;
             right_col_lines.push(line.clone());
+        } else if line_right < boundary_x + x_tolerance * 2.0 {
+            // 纯左列行 → 将整行作为左列内容
+            consumed[li] = true;
+            left_col_lines.push(line.clone());
         }
         // 否则这行不属于网格，交给后续处理
     }
@@ -1349,6 +1434,11 @@ fn detect_sparse_column_grid(
         }
     }
 
+    // 纯左列行直接添加
+    for line in &left_col_lines {
+        split_lines.push(line.clone());
+    }
+
     // 纯右列行直接添加
     for line in &right_col_lines {
         split_lines.push(line.clone());
@@ -1358,32 +1448,106 @@ fn detect_sparse_column_grid(
         return None;
     }
 
-    // 按 y 排序
-    split_lines.sort_by(|a, b| {
+    // 生成列优先的 BlockIR（先左列后右列）
+    // 将 split_lines 按 x 位置分为左右两列
+    let mut left_lines: Vec<CharLine> = Vec::new();
+    let mut right_lines: Vec<CharLine> = Vec::new();
+    for line in &split_lines {
+        if line.bbox.x < boundary_x - x_tolerance {
+            left_lines.push(line.clone());
+        } else {
+            right_lines.push(line.clone());
+        }
+    }
+    // 每列按 y 排序
+    left_lines.sort_by(|a, b| {
+        a.y_center
+            .partial_cmp(&b.y_center)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+    right_lines.sort_by(|a, b| {
         a.y_center
             .partial_cmp(&b.y_center)
             .unwrap_or(std::cmp::Ordering::Equal)
     });
 
-    // 返回空 blocks + 拆分后的行合并到 remaining 中
-    // 未消耗的行 + 拆分后的新行，一起交给下游处理
-    let mut remaining: Vec<CharLine> = lines
+    let mut blocks: Vec<BlockIR> = Vec::new();
+    // 左列 block
+    if !left_lines.is_empty() {
+        let mut text_lines = Vec::new();
+        let left_refs: Vec<&CharLine> = left_lines.iter().collect();
+        for line in &left_lines {
+            let spans = line_to_spans(line);
+            if !spans.is_empty() {
+                text_lines.push(TextLine {
+                    spans,
+                    bbox: Some(line.bbox),
+                });
+            }
+        }
+        if !text_lines.is_empty() {
+            let bbox = compute_block_bbox(&left_refs);
+            let normalized_text = text_lines
+                .iter()
+                .map(|l| l.text())
+                .collect::<Vec<_>>()
+                .join("\n")
+                .trim()
+                .to_string();
+            if !normalized_text.is_empty() {
+                blocks.push(BlockIR {
+                    block_id: String::new(),
+                    bbox,
+                    role: BlockRole::Body,
+                    lines: text_lines,
+                    normalized_text,
+                });
+            }
+        }
+    }
+    // 右列 block
+    if !right_lines.is_empty() {
+        let mut text_lines = Vec::new();
+        let right_refs: Vec<&CharLine> = right_lines.iter().collect();
+        for line in &right_lines {
+            let spans = line_to_spans(line);
+            if !spans.is_empty() {
+                text_lines.push(TextLine {
+                    spans,
+                    bbox: Some(line.bbox),
+                });
+            }
+        }
+        if !text_lines.is_empty() {
+            let bbox = compute_block_bbox(&right_refs);
+            let normalized_text = text_lines
+                .iter()
+                .map(|l| l.text())
+                .collect::<Vec<_>>()
+                .join("\n")
+                .trim()
+                .to_string();
+            if !normalized_text.is_empty() {
+                blocks.push(BlockIR {
+                    block_id: String::new(),
+                    bbox,
+                    role: BlockRole::Body,
+                    lines: text_lines,
+                    normalized_text,
+                });
+            }
+        }
+    }
+
+    // 返回列优先 blocks + 未消耗的原始行
+    let remaining: Vec<CharLine> = lines
         .iter()
         .enumerate()
         .filter(|(idx, _)| !consumed[*idx])
         .map(|(_, line)| line.clone())
         .collect();
 
-    remaining.extend(split_lines);
-
-    // 按 y 排序
-    remaining.sort_by(|a, b| {
-        a.y_center
-            .partial_cmp(&b.y_center)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-
-    Some((Vec::new(), remaining))
+    Some((blocks, remaining))
 }
 
 /// 对间隙位置聚类
