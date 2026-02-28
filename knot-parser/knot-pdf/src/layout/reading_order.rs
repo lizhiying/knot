@@ -180,17 +180,23 @@ pub fn build_blocks_and_grids(
         positioned_blocks.push((blk.bbox.y, blk));
     }
 
-    // 横幅行作为独立段落
-    for banner in &banner_lines {
-        let text_lines = vec![TextLine {
-            spans: line_to_spans(banner),
-            bbox: Some(compute_line_bbox(banner)),
-        }];
+    // 横幅行先做段落合并（避免单栏正文每行一个独立 block）
+    let banner_paragraphs = merge_paragraphs(&banner_lines);
+    for para in banner_paragraphs {
+        let bbox = compute_block_bbox(&para);
+        let text_lines: Vec<TextLine> = para
+            .iter()
+            .map(|line| TextLine {
+                spans: line_to_spans(line),
+                bbox: Some(compute_line_bbox(line)),
+            })
+            .collect();
+
         let normalized_text = text_lines
             .iter()
             .map(|l| l.text())
             .collect::<Vec<_>>()
-            .join(" ")
+            .join("\n")
             .trim()
             .to_string();
 
@@ -198,10 +204,9 @@ pub fn build_blocks_and_grids(
             continue;
         }
 
-        let bbox = compute_line_bbox(banner);
         let role = detect_block_role(&text_lines, &bbox, page_width);
         positioned_blocks.push((
-            banner.y_center,
+            para[0].y_center,
             BlockIR {
                 block_id: String::new(),
                 bbox,
