@@ -1022,7 +1022,11 @@ fn detect_implicit_grids(
 
         let grid_rows = end - i;
 
-        if grid_rows >= GRID_MIN_ROWS {
+        // 2 列（1 个间隙）需要更多行来确认——2 列对齐太容易偶然产生
+        // （例如 SEC 10-K 中 "Delaware / 94-3177549" 这种左右对齐排版）
+        let min_rows_for_grid = if ref_gap_count == 1 { 4 } else { GRID_MIN_ROWS };
+
+        if grid_rows >= min_rows_for_grid {
             let mut all_grid_profiles: Vec<LineGapProfile> = profiles[i..end].to_vec();
 
             // 网格延伸：用已知间隙位置尝试拆分紧邻的原始行

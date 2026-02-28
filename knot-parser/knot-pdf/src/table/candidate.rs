@@ -302,7 +302,9 @@ fn find_aligned_regions(
         }
 
         let row_count = end - i + 1;
-        if row_count >= MIN_TABLE_ROWS {
+        // 2 列（col_count==2）容易偶然产生（左右对齐排版），需要更多行来确认
+        let min_rows = if col_count <= 2 { 4 } else { MIN_TABLE_ROWS };
+        if row_count >= min_rows {
             // 尝试向上回溯一行作为表头：如果前一行段数 >= MIN_TABLE_COLS 且不是噪声行
             let mut header_start = i;
             if i > 0 && row_segments[i - 1].len() >= MIN_TABLE_COLS && !is_noise_row(&rows[i - 1]) {
