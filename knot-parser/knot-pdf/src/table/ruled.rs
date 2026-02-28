@@ -163,7 +163,7 @@ pub fn extract_ruled_table(
         rows: table_rows,
         column_types,
         fallback_text,
-            confidence: None,
+        confidence: None,
     })
 }
 
@@ -1043,7 +1043,6 @@ fn extract_booktabs_table(
     snap_lines(&mut h_sorted, true);
     h_sorted.sort_by(|a, b| a.y.partial_cmp(&b.y).unwrap_or(std::cmp::Ordering::Equal));
 
-
     if h_sorted.len() < 3 {
         return None;
     }
@@ -1066,8 +1065,7 @@ fn extract_booktabs_table(
         h_sorted.len(),
         row_bounds
     );
-    for (i, line) in h_sorted.iter().enumerate() {
-    }
+    for (i, line) in h_sorted.iter().enumerate() {}
 
     if row_bounds.len() < 3 {
         return None;
@@ -1183,11 +1181,13 @@ fn extract_booktabs_table(
     }
 
     // ── 步骤2：仅用数据行（region_idx >= 1）检测列间隙 ──
-    const MIN_COL_GAP: f32 = 20.0;
+    // 根据表格宽度自适应间隙阈值：宽表格中 justified 文本的词间距较大需要更高阈值
+    let table_width = table_x_max - table_x_min;
+    let min_col_gap = (table_width / 15.0).max(20.0_f32);
     let mut all_gap_positions: Vec<f32> = Vec::new();
 
     // 统计每个数据行的间隙数量，用于一致性验证
-    // 判定逻辑：按 MIN_COL_GAP 拆段，表格行应有 ≥3 个短段，段落行通常是 1-2 个长段
+    // 判定逻辑：按 min_col_gap 拆段，表格行应有 ≥3 个短段，段落行通常是 1-2 个长段
     let mut per_row_gap_counts: Vec<usize> = Vec::new();
 
     for sub_row in &sub_rows {
@@ -1196,7 +1196,7 @@ fn extract_booktabs_table(
         }
 
         let row = &sub_row.chars;
-        // 按 MIN_COL_GAP 拆段，统计段数和各段字符数
+        // 按 min_col_gap 拆段，统计段数和各段字符数
         let mut segments: Vec<usize> = Vec::new(); // 每段的字符数
         let mut current_seg_len: usize = 1;
 
@@ -1204,7 +1204,7 @@ fn extract_booktabs_table(
             let prev_right = row[i - 1].bbox.x + row[i - 1].bbox.width;
             let curr_left = row[i].bbox.x;
             let gap = curr_left - prev_right;
-            if gap >= MIN_COL_GAP {
+            if gap >= min_col_gap {
                 segments.push(current_seg_len);
                 current_seg_len = 1;
             } else {
@@ -1274,7 +1274,7 @@ fn extract_booktabs_table(
                 let prev_right = row[j - 1].bbox.x + row[j - 1].bbox.width;
                 let curr_left = row[j].bbox.x;
                 let gap = curr_left - prev_right;
-                if gap >= MIN_COL_GAP {
+                if gap >= min_col_gap {
                     let gap_center = (prev_right + curr_left) / 2.0;
                     all_gap_positions.push(gap_center);
                 }
@@ -1293,7 +1293,7 @@ fn extract_booktabs_table(
     let mut col_separators: Vec<f32> = Vec::new();
     for &pos in &all_gap_positions {
         if let Some(last) = col_separators.last() {
-            if (pos - last).abs() < MIN_COL_GAP {
+            if (pos - last).abs() < min_col_gap {
                 let n = col_separators.len();
                 col_separators[n - 1] = (col_separators[n - 1] + pos) / 2.0;
                 continue;
@@ -1442,7 +1442,6 @@ fn extract_booktabs_table(
         row_bounds.last().unwrap() - row_bounds[0],
     );
 
-
     Some(TableIR {
         table_id: table_id.to_string(),
         page_index,
@@ -1452,7 +1451,7 @@ fn extract_booktabs_table(
         rows: table_rows,
         column_types,
         fallback_text,
-            confidence: None,
+        confidence: None,
     })
 }
 
