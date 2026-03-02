@@ -125,7 +125,7 @@ merge_cross_page_paragraphs = true
 parse_mode = "auto"
 
 # 是否启用 VLM 外部调用（Full 模式所需）
-vlm_enabled = false
+vlm_enabled = true
 
 # VLM API 地址（OpenAI 兼容格式）
 # vlm_api_url = "https://api.openai.com/v1/chat/completions"

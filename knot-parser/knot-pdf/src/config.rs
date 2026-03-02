@@ -435,7 +435,7 @@ impl Default for Config {
             separate_footnotes: false,
             merge_cross_page_paragraphs: true,
             parse_mode: ParseMode::Auto,
-            vlm_enabled: false,
+            vlm_enabled: true,
             vlm_api_url: None,
             vlm_api_key: None,
             vlm_model: None,
