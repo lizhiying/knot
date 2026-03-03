@@ -35,6 +35,14 @@ impl Downloader {
         }
 
         let total_size = response.content_length().unwrap_or(0);
+
+        // 确保目标路径的父目录存在（如 ppocrv5/ 子目录）
+        if let Some(parent) = path.parent() {
+            tokio::fs::create_dir_all(parent)
+                .await
+                .map_err(|e| format!("Failed to create directory: {}", e))?;
+        }
+
         let mut file = tokio::fs::File::create(path)
             .await
             .map_err(|e| format!("Failed to create file: {}", e))?;

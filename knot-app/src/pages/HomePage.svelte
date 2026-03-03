@@ -35,11 +35,12 @@
 
     async function checkSetup() {
         try {
-            // Check Qwen (Core Chat Model)
-            const exists = await invoke("check_model_status", {
-                filename: "Qwen3-1.7B-Q4_K_M.gguf",
-            });
-            isSetupComplete = exists;
+            // Check all core models (LLM + OCR + PaddleOCR)
+            const result = await invoke("check_all_models");
+            isSetupComplete = result.all_ready;
+            if (!result.all_ready) {
+                console.log("[Setup] Missing models:", result.missing);
+            }
         } catch (e) {
             console.error("Setup check failed", e);
             isSetupComplete = false;

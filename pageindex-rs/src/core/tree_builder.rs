@@ -150,6 +150,100 @@ impl SemanticTreeBuilder {
                         }
                     }
 
+                    // 段落边界：确保段落之间有空行
+                    Event::Start(Tag::Paragraph) => {
+                        // 段落开始前插入空行（如果前面已有内容）
+                        if let Some(node) = stack.last_mut() {
+                            if !node.content.is_empty() && !node.content.ends_with('\n') {
+                                node.content.push_str("\n\n");
+                            } else if node.content.ends_with('\n')
+                                && !node.content.ends_with("\n\n")
+                            {
+                                node.content.push('\n');
+                            }
+                        }
+                    }
+                    Event::End(TagEnd::Paragraph) => {
+                        if let Some(node) = stack.last_mut() {
+                            node.content.push('\n');
+                        }
+                    }
+
+                    // 列表
+                    Event::Start(Tag::List(_)) => {
+                        if let Some(node) = stack.last_mut() {
+                            if !node.content.is_empty() && !node.content.ends_with('\n') {
+                                node.content.push('\n');
+                            }
+                        }
+                    }
+                    Event::End(TagEnd::List(_)) => {
+                        if let Some(node) = stack.last_mut() {
+                            node.content.push('\n');
+                        }
+                    }
+
+                    // 列表项
+                    Event::Start(Tag::Item) => {
+                        if let Some(node) = stack.last_mut() {
+                            node.content.push_str("- ");
+                        }
+                    }
+                    Event::End(TagEnd::Item) => {
+                        if let Some(node) = stack.last_mut() {
+                            if !node.content.ends_with('\n') {
+                                node.content.push('\n');
+                            }
+                        }
+                    }
+
+                    // 表格
+                    Event::Start(Tag::Table(_)) => {
+                        if let Some(node) = stack.last_mut() {
+                            if !node.content.is_empty() && !node.content.ends_with('\n') {
+                                node.content.push('\n');
+                            }
+                        }
+                    }
+                    Event::End(TagEnd::Table) => {
+                        if let Some(node) = stack.last_mut() {
+                            node.content.push('\n');
+                        }
+                    }
+                    Event::Start(Tag::TableHead) | Event::Start(Tag::TableRow) => {}
+                    Event::End(TagEnd::TableHead) | Event::End(TagEnd::TableRow) => {
+                        if let Some(node) = stack.last_mut() {
+                            node.content.push('\n');
+                        }
+                    }
+                    Event::Start(Tag::TableCell) => {
+                        if let Some(node) = stack.last_mut() {
+                            node.content.push_str("| ");
+                        }
+                    }
+                    Event::End(TagEnd::TableCell) => {
+                        if let Some(node) = stack.last_mut() {
+                            node.content.push(' ');
+                        }
+                    }
+
+                    // 图片
+                    Event::Start(Tag::Image {
+                        dest_url, title, ..
+                    }) => {
+                        if let Some(node) = stack.last_mut() {
+                            node.content
+                                .push_str(&format!("![{}]({})", title, dest_url));
+                        }
+                    }
+
+                    // 行内 HTML
+                    Event::Html(html) | Event::InlineHtml(html) => {
+                        if let Some(node) = stack.last_mut() {
+                            node.content.push_str(&html);
+                        }
+                    }
+
                     _ => {}
                 }
             }

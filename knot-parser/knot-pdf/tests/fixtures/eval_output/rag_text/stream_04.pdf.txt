@@ -1,4 +1,52 @@
-页=1 bbox=(31,31,145,12) Stream Table Sample #04
-页=1 bbox=(31,63,130,237) Item_1 Item_2 Item_3 Item_4 Item_5 Item_6 Item_7 Item_8 Item_9 Item_10 Item_11 Item_12 Item_13 Name
-页=1 bbox=(378,63,130,237) 50% $9,664 $1,613 75% 38% $2,266 $6,323 $2,153 $5,393 $5,475 $3,873 36% $9,338 Value
-页=1 bbox=(31,78,241,6) ------------------------------------------------------------------------------------------------------------------------
+表=t0_0 页=0 col_0=Item_1 col_1= col_2=50%
+表=t0_0 页=0 col_0=Item_2 col_1=$9,664 col_2=
+表=t0_0 页=0 col_0=Item_3 col_1=$1,613 col_2=
+表=t0_0 页=0 col_0=Item_4 col_1= col_2=75%
+表=t0_0 页=0 col_0=Item_5 col_1= col_2=38%
+表=t0_0 页=0 col_0=Item_6 col_1=$2,266 col_2=
+表=t0_0 页=0 col_0=Item_7 col_1=$6,323 col_2=
+表=t0_0 页=0 col_0=Item_8 col_1=$2,153 col_2=
+表=t0_0 页=0 col_0=Item_9 col_1=$5,393 col_2=
+表=t0_0 页=0 col_0=Item_10 col_1=$5,475 col_2=
+表=t0_0 页=0 col_0=Item_11 col_1=$3,873 col_2=
+表=t0_0 页=0 col_0=Item_12 col_1= col_2=36%
+表=t0_0 页=0 col_0=Item_13 col_1=$9,338 col_2=
+表=t0_0 页=0 行=0 列=col_0 值=Item_1 类型=Text
+表=t0_0 页=0 行=0 列=col_1 值= 类型=Currency
+表=t0_0 页=0 行=0 列=col_2 值=50% 类型=Percent
+表=t0_0 页=0 行=1 列=col_0 值=Item_2 类型=Text
+表=t0_0 页=0 行=1 列=col_1 值=$9,664 类型=Currency
+表=t0_0 页=0 行=1 列=col_2 值= 类型=Percent
+表=t0_0 页=0 行=2 列=col_0 值=Item_3 类型=Text
+表=t0_0 页=0 行=2 列=col_1 值=$1,613 类型=Currency
+表=t0_0 页=0 行=2 列=col_2 值= 类型=Percent
+表=t0_0 页=0 行=3 列=col_0 值=Item_4 类型=Text
+表=t0_0 页=0 行=3 列=col_1 值= 类型=Currency
+表=t0_0 页=0 行=3 列=col_2 值=75% 类型=Percent
+表=t0_0 页=0 行=4 列=col_0 值=Item_5 类型=Text
+表=t0_0 页=0 行=4 列=col_1 值= 类型=Currency
+表=t0_0 页=0 行=4 列=col_2 值=38% 类型=Percent
+表=t0_0 页=0 行=5 列=col_0 值=Item_6 类型=Text
+表=t0_0 页=0 行=5 列=col_1 值=$2,266 类型=Currency
+表=t0_0 页=0 行=5 列=col_2 值= 类型=Percent
+表=t0_0 页=0 行=6 列=col_0 值=Item_7 类型=Text
+表=t0_0 页=0 行=6 列=col_1 值=$6,323 类型=Currency
+表=t0_0 页=0 行=6 列=col_2 值= 类型=Percent
+表=t0_0 页=0 行=7 列=col_0 值=Item_8 类型=Text
+表=t0_0 页=0 行=7 列=col_1 值=$2,153 类型=Currency
+表=t0_0 页=0 行=7 列=col_2 值= 类型=Percent
+表=t0_0 页=0 行=8 列=col_0 值=Item_9 类型=Text
+表=t0_0 页=0 行=8 列=col_1 值=$5,393 类型=Currency
+表=t0_0 页=0 行=8 列=col_2 值= 类型=Percent
+表=t0_0 页=0 行=9 列=col_0 值=Item_10 类型=Text
+表=t0_0 页=0 行=9 列=col_1 值=$5,475 类型=Currency
+表=t0_0 页=0 行=9 列=col_2 值= 类型=Percent
+表=t0_0 页=0 行=10 列=col_0 值=Item_11 类型=Text
+表=t0_0 页=0 行=10 列=col_1 值=$3,873 类型=Currency
+表=t0_0 页=0 行=10 列=col_2 值= 类型=Percent
+表=t0_0 页=0 行=11 列=col_0 值=Item_12 类型=Text
+表=t0_0 页=0 行=11 列=col_1 值= 类型=Currency
+表=t0_0 页=0 行=11 列=col_2 值=36% 类型=Percent
+表=t0_0 页=0 行=12 列=col_0 值=Item_13 类型=Text
+表=t0_0 页=0 行=12 列=col_1 值=$9,338 类型=Currency
+表=t0_0 页=0 行=12 列=col_2 值= 类型=Percent

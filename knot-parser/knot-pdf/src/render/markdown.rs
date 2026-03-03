@@ -110,16 +110,28 @@ impl MarkdownRenderer {
                         output.push_str(&format!("## {}\n\n", block.normalized_text));
                     }
                     BlockRole::List => {
-                        for line in &block.lines {
-                            output.push_str(&format!("- {}\n", line.text()));
+                        // 检测是否为误分类的编号标题（单行，以 "N." 或 "N.N" 开头）
+                        if block.lines.len() == 1 {
+                            let text = block.lines[0].text();
+                            let trimmed = text.trim();
+                            if is_numbered_heading(trimmed) {
+                                output.push_str(&format!("## {}\n\n", trimmed));
+                            } else {
+                                output.push_str(&format!("- {}\n\n", trimmed));
+                            }
+                        } else {
+                            for line in &block.lines {
+                                output.push_str(&format!("- {}\n", line.text()));
+                            }
+                            output.push('\n');
                         }
-                        output.push('\n');
                     }
                     BlockRole::Caption => {
                         output.push_str(&format!("*{}*\n\n", block.normalized_text));
                     }
                     _ => {
-                        output.push_str(&block.normalized_text);
+                        let text = &block.normalized_text;
+                        output.push_str(&format_text_block(text));
                         output.push_str("\n\n");
                     }
                 },
@@ -127,7 +139,13 @@ impl MarkdownRenderer {
                     ImageSource::FigureRegion => {
                         output.push_str(&format!("**[图表：{}]**\n", image.image_id));
                         if let Some(ocr_text) = &image.ocr_text {
-                            output.push_str(&format_ocr_text_with_tables(ocr_text));
+                            // 1. 插入结构性换行（拆分粘连的标题/KV/段落）
+                            let with_breaks = insert_structural_breaks(ocr_text);
+                            // 2. 检测表格模式并转为 markdown table
+                            let with_tables = format_ocr_text_with_tables(&with_breaks);
+                            // 3. 逐行检测 KV 对并格式化
+                            let formatted = format_text_block(&with_tables);
+                            output.push_str(&formatted);
                             output.push('\n');
                         }
                         for cap_id in &image.caption_refs {
@@ -165,6 +183,343 @@ impl MarkdownRenderer {
 
         output
     }
+}
+
+/// 检测文本是否为编号章节标题
+///
+/// 匹配模式：以数字开头，后跟 `.` 和可选子编号（如 "1.", "4.1", "2.3.1"），
+/// 后面跟空格和标题文字，总长度不超过 80 字符
+fn is_numbered_heading(text: &str) -> bool {
+    let trimmed = text.trim();
+
+    // 长度检查：标题通常较短
+    if trimmed.len() > 80 || trimmed.is_empty() {
+        return false;
+    }
+
+    let chars: Vec<char> = trimmed.chars().collect();
+
+    // 必须以数字开头
+    if !chars[0].is_ascii_digit() {
+        return false;
+    }
+
+    // 扫描编号部分：数字和点的组合（如 "1.", "4.1", "2.3.1"）
+    let mut i = 0;
+    let mut has_dot = false;
+    while i < chars.len() {
+        if chars[i].is_ascii_digit() {
+            i += 1;
+        } else if chars[i] == '.' {
+            has_dot = true;
+            i += 1;
+        } else {
+            break;
+        }
+    }
+
+    // 必须有至少一个点
+    if !has_dot {
+        return false;
+    }
+
+    // 编号后面必须有空格
+    if i >= chars.len() || !chars[i].is_whitespace() {
+        // 允许编号后直接跟字母（如 "1.Introduction"）
+        if i >= chars.len() {
+            return false;
+        }
+    }
+
+    // 后面要有实际的标题文字（至少 1 个非空白字符）
+    let remainder: String = chars[i..].iter().collect();
+    let title_part = remainder.trim();
+    !title_part.is_empty() && title_part.len() >= 1
+}
+
+/// 检测字符是否为 CJK（中日韩统一表意文字）
+fn is_cjk(c: char) -> bool {
+    matches!(c,
+        '\u{4e00}'..='\u{9fff}' |
+        '\u{3400}'..='\u{4dbf}' |
+        '\u{f900}'..='\u{faff}'
+    )
+}
+
+/// 常见中文标题/区段结尾词
+const SECTION_SUFFIXES: &[&str] = &[
+    "信息", "需求", "配置", "备注", "详情", "说明", "概要", "列表", "汇总", "合计", "小计", "总计",
+    "明细",
+];
+
+/// 在 VLM/OCR 文本中插入结构性换行
+///
+/// 规则：
+/// 1. CJK 文字紧跟 `key:` 模式时，在 key 前断行
+/// 2. 标点符号（-、）、)等）后紧跟 CJK 文字时断行
+/// 3. 常见标题后缀（信息/需求/配置等）后紧跟 CJK 时断行
+fn insert_structural_breaks(text: &str) -> String {
+    let chars: Vec<char> = text.chars().collect();
+    let len = chars.len();
+    let mut result = String::new();
+
+    let mut i = 0;
+    while i < len {
+        // === 规则 1：在 key:value 模式的 key 前插入换行 ===
+        // 当前字符是 CJK，且前一个字符也非空白、也非换行
+        if i > 0 && is_cjk(chars[i]) && !chars[i - 1].is_whitespace() && chars[i - 1] != '\n' {
+            // 向前看：是否有 `:` 或 `：` 在接下来 2~10 个字符内（key 长度限制）
+            let search_end = (i + 10).min(len);
+            let mut j = i + 1;
+            let mut all_word = true;
+            let mut found_colon = false;
+            while j < search_end {
+                if chars[j] == ':' || chars[j] == '：' {
+                    let key_len = j - i;
+                    if key_len >= 2 && key_len <= 8 && all_word {
+                        found_colon = true;
+                    }
+                    break;
+                }
+                if chars[j].is_whitespace() {
+                    break;
+                }
+                if !is_cjk(chars[j]) && !chars[j].is_alphanumeric() {
+                    all_word = false;
+                    break;
+                }
+                j += 1;
+            }
+
+            if found_colon && is_cjk(chars[i - 1]) {
+                // 前面是 CJK 文字，后面紧跟 key:value → 在 key 前断行
+                result.push('\n');
+            }
+        }
+
+        // === 规则 2：标点后紧跟 CJK 文字 → 双换行（段落间距）===
+        if i > 0
+            && is_cjk(chars[i])
+            && !chars[i - 1].is_whitespace()
+            && matches!(chars[i - 1], '-' | '–' | '—' | ')' | '）' | ']' | '】')
+        {
+            result.push_str("\n\n");
+        }
+
+        // === 规则 3：常见标题后缀后紧跟 CJK → 断行 ===
+        // 检查当前位置 i 是否是一个标题后缀的结束位置
+        if i >= 2 && is_cjk(chars[i]) && i < len {
+            for suffix in SECTION_SUFFIXES {
+                let suffix_chars: Vec<char> = suffix.chars().collect();
+                let slen = suffix_chars.len();
+                if i >= slen {
+                    let start = i - slen;
+                    let candidate: String = chars[start..i].iter().collect();
+                    if candidate == *suffix {
+                        // 确保前面是 CJK（整体构成一个标题词）
+                        // 并且后面紧跟 CJK 而不是冒号（冒号的情况已由规则 1 处理）
+                        if (start == 0
+                            || is_cjk(chars[start - 1])
+                            || chars[start - 1].is_whitespace()
+                            || chars[start - 1] == '\n')
+                            && chars[i] != ':'
+                            && chars[i] != '：'
+                        {
+                            // 用双换行创建段落间距
+                            if !result.ends_with('\n') {
+                                result.push_str("\n\n");
+                            } else if !result.ends_with("\n\n") {
+                                result.push('\n');
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        result.push(chars[i]);
+        i += 1;
+    }
+
+    result
+}
+
+/// 格式化文本块：检测 KV 表单数据并优化排版
+///
+/// 当一行文本包含 2 个以上的 `key: value` 或 `key：value` 模式时，
+/// 将每个 KV 对拆分为独立行，以 `**key:** value` 格式输出。
+fn format_text_block(text: &str) -> String {
+    let lines: Vec<&str> = text.lines().collect();
+    let mut result = String::new();
+
+    for line in &lines {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            result.push('\n');
+            continue;
+        }
+
+        // 检测是否为区块标题（2-8 个 CJK 字符，无冒号，匹配常见标题后缀）
+        if is_section_header(trimmed) {
+            result.push_str(&format!("\n### {}\n\n", trimmed));
+            continue;
+        }
+
+        // 检测 KV 对数量
+        let kv_pairs = split_kv_pairs(trimmed);
+        if kv_pairs.len() >= 2 {
+            // 多个 KV 对，拆分为独立行
+            for (key, value) in &kv_pairs {
+                if value.is_empty() {
+                    result.push_str(&format!("**{}**  \n", key));
+                } else {
+                    result.push_str(&format!("**{}:** {}  \n", key, value));
+                }
+            }
+        } else {
+            // 单个 KV 对或普通文本
+            result.push_str(trimmed);
+            result.push('\n');
+        }
+    }
+
+    result
+}
+
+/// 检测一行文本是否为区块标题
+///
+/// 条件：2~8 个 CJK 字符，不含冒号，以常见中文标题后缀结尾
+fn is_section_header(line: &str) -> bool {
+    let trimmed = line.trim();
+    let char_count = trimmed.chars().count();
+
+    // 长度检查：2~8 个字符
+    if char_count < 2 || char_count > 8 {
+        return false;
+    }
+
+    // 不能包含冒号
+    if trimmed.contains(':') || trimmed.contains('：') {
+        return false;
+    }
+
+    // 必须全部是 CJK 字符
+    if !trimmed.chars().all(is_cjk) {
+        return false;
+    }
+
+    // 以常见标题后缀结尾
+    SECTION_SUFFIXES
+        .iter()
+        .any(|suffix| trimmed.ends_with(suffix))
+}
+
+/// 将一行文本拆分为 key:value 对
+///
+/// 匹配模式：`连续中文/字母（1~12字）` + `：` 或 `:` + `值`
+/// 返回 (key, value) 列表
+fn split_kv_pairs(line: &str) -> Vec<(String, String)> {
+    let mut pairs = Vec::new();
+    let chars: Vec<char> = line.chars().collect();
+    let len = chars.len();
+
+    let mut i = 0;
+    while i < len {
+        // 跳过前导空格
+        while i < len && chars[i].is_whitespace() {
+            i += 1;
+        }
+        if i >= len {
+            break;
+        }
+
+        // 寻找冒号位置
+        let key_start = i;
+        let mut colon_pos = None;
+
+        // key 最多 12 个字符
+        let max_key_end = (i + 12).min(len);
+        let mut j = i;
+        while j < max_key_end {
+            if chars[j] == ':' || chars[j] == '：' {
+                // 确保前面有至少1个非空白字符作为key
+                if j > key_start {
+                    colon_pos = Some(j);
+                }
+                break;
+            }
+            j += 1;
+        }
+
+        if let Some(cp) = colon_pos {
+            let key: String = chars[key_start..cp].iter().collect();
+            let key = key.trim().to_string();
+
+            // 跳过冒号和后面的空格
+            let mut val_start = cp + 1;
+            while val_start < len && chars[val_start].is_whitespace() {
+                val_start += 1;
+            }
+
+            // value 到下一个 KV key 的开始（或行尾）
+            let mut val_end = val_start;
+
+            // 向前扫描找到下一个 key: 的开始
+            let mut k = val_start;
+            let mut last_non_space = val_start;
+            while k < len {
+                if (chars[k] == ':' || chars[k] == '：') && k > val_start {
+                    // 回溯找到这个 key 的开始（连续非空白字符）
+                    let mut kb = k - 1;
+                    while kb > val_start && !chars[kb].is_whitespace() {
+                        kb -= 1;
+                    }
+                    if chars[kb].is_whitespace() {
+                        kb += 1;
+                    }
+                    // key 不能太长（最多 12 字）
+                    if k - kb <= 12 && k - kb >= 1 {
+                        val_end = kb;
+                        // 去掉 value 尾部空格
+                        while val_end > val_start && chars[val_end - 1].is_whitespace() {
+                            val_end -= 1;
+                        }
+                        let value: String = chars[val_start..val_end].iter().collect();
+                        pairs.push((key.clone(), value.trim().to_string()));
+                        i = kb;
+                        break;
+                    }
+                }
+                if !chars[k].is_whitespace() {
+                    last_non_space = k + 1;
+                }
+                k += 1;
+            }
+
+            if k >= len {
+                // 到行尾了
+                let value: String = chars[val_start..last_non_space].iter().collect();
+                pairs.push((key, value.trim().to_string()));
+                i = len;
+            }
+        } else {
+            // 没有找到冒号，剩余文本作为普通内容
+            if !pairs.is_empty() {
+                // 已有一些 KV 对，把剩余文本追加到最后一个 value
+                let remaining: String = chars[key_start..].iter().collect();
+                if let Some(last) = pairs.last_mut() {
+                    if !last.1.is_empty() {
+                        last.1.push(' ');
+                    }
+                    last.1.push_str(remaining.trim());
+                }
+            }
+            break;
+        }
+    }
+
+    pairs
 }
 
 /// 将 OCR 文本中的表格部分转为 markdown table 格式

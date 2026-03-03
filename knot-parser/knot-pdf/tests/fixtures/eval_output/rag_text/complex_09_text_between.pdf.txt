@@ -1,19 +1,28 @@
 页=1 bbox=(31,33,122,10) Tables with Text Between
-页=1 bbox=(31,51,145,10) The first table shows Q1 results:
-页=1 bbox=(31,74,144,72) Q1 Item 1 Q1 Item 2 Q1 Item 3 The following table shows Q2 im
-页=1 bbox=(175,74,134,72) $2,599 $5,416 $5,618 provement over Q1:
-页=1 bbox=(31,159,35,42) Q2 Item 1 Q2 Item 2 Q2 Item 3
-页=1 bbox=(285,159,24,42) $5,350 $2,991 $5,922
-页=1 bbox=(373,159,21,42) +13% +13% +10%
-表=t0_2 页=0 col_0=Q2 Item 1 col_1=$5,350 col_2=+13%
-表=t0_2 页=0 col_0=Q2 Item 2 col_1=$2,991 col_2=+13%
-表=t0_2 页=0 col_0=Q2 Item 3 col_1=$5,922 col_2=+10%
-表=t0_2 页=0 行=0 列=col_0 值=Q2 Item 1 类型=Text
-表=t0_2 页=0 行=0 列=col_1 值=$5,350 类型=Currency
-表=t0_2 页=0 行=0 列=col_2 值=+13% 类型=Percent
-表=t0_2 页=0 行=1 列=col_0 值=Q2 Item 2 类型=Text
-表=t0_2 页=0 行=1 列=col_1 值=$2,991 类型=Currency
-表=t0_2 页=0 行=1 列=col_2 值=+13% 类型=Percent
-表=t0_2 页=0 行=2 列=col_0 值=Q2 Item 3 类型=Text
-表=t0_2 页=0 行=2 列=col_1 值=$5,922 类型=Currency
-表=t0_2 页=0 行=2 列=col_2 值=+10% 类型=Percent
+页=1 bbox=(31,51,144,150) The first table shows Q1 results:
+Q1 Item 1
+Q1 Item 2
+Q1 Item 3
+The following table shows Q2 im
+Q2 Item 1
+Q2 Item 2
+Q2 Item 3
+页=1 bbox=(175,74,219,127) $2,599
+$5,416
+$5,618
+provement over Q1:
+$5,350 +13%
+$2,991 +13%
+$5,922 +10%
+表=t0_0 页=0 col_0=Q2 Item 1 col_1=$5,350 col_2=+13%
+表=t0_0 页=0 col_0=Q2 Item 2 col_1=$2,991 col_2=
+表=t0_0 页=0 col_0=Q2 Item 3 col_1=$5,922 col_2=+10%
+表=t0_0 页=0 行=0 列=col_0 值=Q2 Item 1 类型=Text
+表=t0_0 页=0 行=0 列=col_1 值=$5,350 类型=Currency
+表=t0_0 页=0 行=0 列=col_2 值=+13% 类型=Percent
+表=t0_0 页=0 行=1 列=col_0 值=Q2 Item 2 类型=Text
+表=t0_0 页=0 行=1 列=col_1 值=$2,991 类型=Currency
+表=t0_0 页=0 行=1 列=col_2 值= 类型=Percent
+表=t0_0 页=0 行=2 列=col_0 值=Q2 Item 3 类型=Text
+表=t0_0 页=0 行=2 列=col_1 值=$5,922 类型=Currency
+表=t0_0 页=0 行=2 列=col_2 值=+10% 类型=Percent

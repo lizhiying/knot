@@ -1,4 +1,41 @@
 页=1 bbox=(31,31,137,12) Ruled Table Sample #12
-页=1 bbox=(31,65,121,208) Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Row 7 Row 8 Row 9 TOTAL Category
-页=1 bbox=(285,65,55,208) $4,108 $17,877 $21,356 $32,482 $95,960 $7,691 4.9% $81,437 $89,057 39.3% Jan
-页=1 bbox=(420,65,88,208) $31,920 $49,358 $53,409 $18,459 $2,624 $89,142 -0.4% $53,758 $36,203 $89,922 Feb
+表=t0_0 页=0 Category=Row 1 Jan=$4,108 Feb=$31,920
+表=t0_0 页=0 Category=Row 2 Jan=$17,877 Feb=$49,358
+表=t0_0 页=0 Category=Row 3 Jan=$21,356 Feb=$53,409
+表=t0_0 页=0 Category=Row 4 Jan=$32,482 Feb=$18,459
+表=t0_0 页=0 Category=Row 5 Jan=$95,960 Feb=$2,624
+表=t0_0 页=0 Category=Row 6 Jan=$7,691 Feb=$89,142
+表=t0_2 页=0 col_0=Row 7 col_1=4.9% col_2=-0.4%
+表=t0_2 页=0 col_0=Row 8 col_1=$81,437 col_2=$53,758
+表=t0_2 页=0 col_0=Row 9 col_1=$89,057 col_2=$36,203
+表=t0_2 页=0 col_0=TOTAL col_1=39.3% col_2=$89,922
+表=t0_0 页=0 行=0 列=Category 值=Row 1 类型=Text
+表=t0_0 页=0 行=0 列=Jan 值=$4,108 类型=Currency
+表=t0_0 页=0 行=0 列=Feb 值=$31,920 类型=Currency
+表=t0_0 页=0 行=1 列=Category 值=Row 2 类型=Text
+表=t0_0 页=0 行=1 列=Jan 值=$17,877 类型=Currency
+表=t0_0 页=0 行=1 列=Feb 值=$49,358 类型=Currency
+表=t0_0 页=0 行=2 列=Category 值=Row 3 类型=Text
+表=t0_0 页=0 行=2 列=Jan 值=$21,356 类型=Currency
+表=t0_0 页=0 行=2 列=Feb 值=$53,409 类型=Currency
+表=t0_0 页=0 行=3 列=Category 值=Row 4 类型=Text
+表=t0_0 页=0 行=3 列=Jan 值=$32,482 类型=Currency
+表=t0_0 页=0 行=3 列=Feb 值=$18,459 类型=Currency
+表=t0_0 页=0 行=4 列=Category 值=Row 5 类型=Text
+表=t0_0 页=0 行=4 列=Jan 值=$95,960 类型=Currency
+表=t0_0 页=0 行=4 列=Feb 值=$2,624 类型=Currency
+表=t0_0 页=0 行=5 列=Category 值=Row 6 类型=Text
+表=t0_0 页=0 行=5 列=Jan 值=$7,691 类型=Currency
+表=t0_0 页=0 行=5 列=Feb 值=$89,142 类型=Currency
+表=t0_2 页=0 行=0 列=col_0 值=Row 7 类型=Text
+表=t0_2 页=0 行=0 列=col_1 值=4.9% 类型=Percent
+表=t0_2 页=0 行=0 列=col_2 值=-0.4% 类型=Currency
+表=t0_2 页=0 行=1 列=col_0 值=Row 8 类型=Text
+表=t0_2 页=0 行=1 列=col_1 值=$81,437 类型=Percent
+表=t0_2 页=0 行=1 列=col_2 值=$53,758 类型=Currency
+表=t0_2 页=0 行=2 列=col_0 值=Row 9 类型=Text
+表=t0_2 页=0 行=2 列=col_1 值=$89,057 类型=Percent
+表=t0_2 页=0 行=2 列=col_2 值=$36,203 类型=Currency
+表=t0_2 页=0 行=3 列=col_0 值=TOTAL 类型=Text
+表=t0_2 页=0 行=3 列=col_1 值=39.3% 类型=Percent
+表=t0_2 页=0 行=3 列=col_2 值=$89,922 类型=Currency

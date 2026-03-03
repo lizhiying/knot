@@ -86,7 +86,6 @@ fn test_ocr_quality_score_calculation() {
 fn test_ocr_workers_config_default() {
     let config = Config::default();
     assert_eq!(config.ocr_workers, 1);
-    assert!(!config.ocr_enabled);
 }
 
 #[test]

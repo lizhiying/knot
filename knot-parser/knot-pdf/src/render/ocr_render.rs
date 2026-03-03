@@ -4,7 +4,7 @@ use crate::error::PdfError;
 use crate::ir::BBox;
 
 /// OCR 渲染器 Trait
-pub trait OcrRenderer {
+pub trait OcrRenderer: Send {
     /// 将指定页面渲染为图片字节数据 (可选格式如 PNG)
     fn render_page_to_image(
         &self,

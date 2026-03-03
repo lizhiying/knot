@@ -1,4 +1,21 @@
-页=1 bbox=(228,33,140,14) APPLICATION FORM
-页=1 bbox=(31,75,84,169) Full Name: Date of Birth: Email: Phone: Address: Position Applied: Expected Salary:
-页=1 bbox=(173,75,200,169) John Smith 1990-05-15 john.smith@example.com +1-555-0123 123 Main St, Suite 400, New York, NY 10001 Senior Software Engineer $150,000
-页=1 bbox=(31,211,94,10) Experience (years):
+表=t0_0 页=0 Full Name:=Date of Birth: John Smith=1990-05-15
+表=t0_0 页=0 Full Name:=Email: John Smith=john.smith@example.com
+表=t0_0 页=0 Full Name:=Phone: John Smith=+1-555-0123
+表=t0_0 页=0 Full Name:=Address: John Smith=123 Main St, Suite 400, New York, NY 10001
+表=t0_0 页=0 Full Name:=Position Applied: John Smith=Senior Software Engineer
+表=t0_0 页=0 Full Name:=Experience (years): John Smith=8
+表=t0_0 页=0 Full Name:=Expected Salary: John Smith=$150,000
+表=t0_0 页=0 行=0 列=Full Name: 值=Date of Birth: 类型=Text
+表=t0_0 页=0 行=0 列=John Smith 值=1990-05-15 类型=Text
+表=t0_0 页=0 行=1 列=Full Name: 值=Email: 类型=Text
+表=t0_0 页=0 行=1 列=John Smith 值=john.smith@example.com 类型=Text
+表=t0_0 页=0 行=2 列=Full Name: 值=Phone: 类型=Text
+表=t0_0 页=0 行=2 列=John Smith 值=+1-555-0123 类型=Text
+表=t0_0 页=0 行=3 列=Full Name: 值=Address: 类型=Text
+表=t0_0 页=0 行=3 列=John Smith 值=123 Main St, Suite 400, New York, NY 10001 类型=Text
+表=t0_0 页=0 行=4 列=Full Name: 值=Position Applied: 类型=Text
+表=t0_0 页=0 行=4 列=John Smith 值=Senior Software Engineer 类型=Text
+表=t0_0 页=0 行=5 列=Full Name: 值=Experience (years): 类型=Text
+表=t0_0 页=0 行=5 列=John Smith 值=8 类型=Text
+表=t0_0 页=0 行=6 列=Full Name: 值=Expected Salary: 类型=Text
+表=t0_0 页=0 行=6 列=John Smith 值=$150,000 类型=Text

@@ -1,4 +1,44 @@
-页=1 bbox=(31,31,137,12) Ruled Table Sample #18
-页=1 bbox=(31,65,86,228) Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Row 7 Row 8 Row 9 Row 10 Row 11 Department
-页=1 bbox=(267,65,133,228) $7,803 $91,697 $92,014 $39,961 $58,396 -5.8% $47,485 42.3% $40,234 22.6% $15,492 Budget
-页=1 bbox=(444,65,63,228) $2,670 $88,837 $53,282 $96,294 16.2% $44,289 $28,924 $66,701 21.7% 46.0% 23.0% Actual
+表=t0_0 页=0 Department=Row 1 Budget=$7,803 Actual=$2,670
+表=t0_0 页=0 Department=Row 2 Budget=$91,697 Actual=$88,837
+表=t0_0 页=0 Department=Row 3 Budget=$92,014 Actual=$53,282
+表=t0_0 页=0 Department=Row 4 Budget=$39,961 Actual=$96,294
+表=t0_0 页=0 Department=Row 5 Budget=$58,396 Actual=16.2%
+表=t0_0 页=0 Department=Row 6 Budget=-5.8% Actual=$44,289
+表=t0_0 页=0 Department=Row 7 Budget=$47,485 Actual=$28,924
+表=t0_0 页=0 Department=Row 8 Budget=42.3% Actual=$66,701
+表=t0_0 页=0 Department=Row 9 Budget=$40,234 Actual=21.7%
+表=t0_0 页=0 Department=Row 10 Budget=22.6% Actual=46.0%
+表=t0_0 页=0 Department=Row 11 Budget=$15,492 Actual=23.0%
+表=t0_0 页=0 行=0 列=Department 值=Row 1 类型=Text
+表=t0_0 页=0 行=0 列=Budget 值=$7,803 类型=Currency
+表=t0_0 页=0 行=0 列=Actual 值=$2,670 类型=Currency
+表=t0_0 页=0 行=1 列=Department 值=Row 2 类型=Text
+表=t0_0 页=0 行=1 列=Budget 值=$91,697 类型=Currency
+表=t0_0 页=0 行=1 列=Actual 值=$88,837 类型=Currency
+表=t0_0 页=0 行=2 列=Department 值=Row 3 类型=Text
+表=t0_0 页=0 行=2 列=Budget 值=$92,014 类型=Currency
+表=t0_0 页=0 行=2 列=Actual 值=$53,282 类型=Currency
+表=t0_0 页=0 行=3 列=Department 值=Row 4 类型=Text
+表=t0_0 页=0 行=3 列=Budget 值=$39,961 类型=Currency
+表=t0_0 页=0 行=3 列=Actual 值=$96,294 类型=Currency
+表=t0_0 页=0 行=4 列=Department 值=Row 5 类型=Text
+表=t0_0 页=0 行=4 列=Budget 值=$58,396 类型=Currency
+表=t0_0 页=0 行=4 列=Actual 值=16.2% 类型=Currency
+表=t0_0 页=0 行=5 列=Department 值=Row 6 类型=Text
+表=t0_0 页=0 行=5 列=Budget 值=-5.8% 类型=Currency
+表=t0_0 页=0 行=5 列=Actual 值=$44,289 类型=Currency
+表=t0_0 页=0 行=6 列=Department 值=Row 7 类型=Text
+表=t0_0 页=0 行=6 列=Budget 值=$47,485 类型=Currency
+表=t0_0 页=0 行=6 列=Actual 值=$28,924 类型=Currency
+表=t0_0 页=0 行=7 列=Department 值=Row 8 类型=Text
+表=t0_0 页=0 行=7 列=Budget 值=42.3% 类型=Currency
+表=t0_0 页=0 行=7 列=Actual 值=$66,701 类型=Currency
+表=t0_0 页=0 行=8 列=Department 值=Row 9 类型=Text
+表=t0_0 页=0 行=8 列=Budget 值=$40,234 类型=Currency
+表=t0_0 页=0 行=8 列=Actual 值=21.7% 类型=Currency
+表=t0_0 页=0 行=9 列=Department 值=Row 10 类型=Text
+表=t0_0 页=0 行=9 列=Budget 值=22.6% 类型=Currency
+表=t0_0 页=0 行=9 列=Actual 值=46.0% 类型=Currency
+表=t0_0 页=0 行=10 列=Department 值=Row 11 类型=Text
+表=t0_0 页=0 行=10 列=Budget 值=$15,492 类型=Currency
+表=t0_0 页=0 行=10 列=Actual 值=23.0% 类型=Currency

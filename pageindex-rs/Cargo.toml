@@ -9,13 +9,10 @@ pulldown-cmark = "0.10"
 undoc = { version = "0.1", path = "../undoc", optional = true }
 thiserror = "2.0.18"
 async-trait = "0.1.89"
-lopdf = "0.32"
 regex = "1.10"
 serde_json = "1.0"
-pdfium-render = "0.8"
-base64 = "0.21"
-image = "0.25"
 uuid = { version = "1.0", features = ["v4"] }
+knot-pdf = { path = "../knot-parser/knot-pdf", features = ["pdfium", "ocr_paddle", "vision", "layout_model", "formula_model"] }
 
 [features]
 default = []

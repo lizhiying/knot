@@ -41,6 +41,8 @@ pub struct Pipeline {
     postprocess_pipeline: crate::postprocess::PostProcessPipeline,
     /// OCR 最大并发数（同步模式下天然为 1，为 async 预留）
     max_ocr_workers: usize,
+    /// 每页处理完成后的进度回调：(page_index, total_pages)
+    page_progress_callback: Option<Box<dyn Fn(usize, usize) + Send + Sync>>,
 }
 
 impl Pipeline {
@@ -105,9 +107,9 @@ impl Pipeline {
                         \n\
                         \x20 mkdir -p models/ppocrv5 && cd models/ppocrv5\n\
                         \x20 # Download from HuggingFace:\n\
-                        \x20 wget https://huggingface.co/OpenPPOCR/PP-OCRv5/resolve/main/det.onnx\n\
-                        \x20 wget https://huggingface.co/OpenPPOCR/PP-OCRv5/resolve/main/rec.onnx\n\
-                        \x20 wget https://huggingface.co/OpenPPOCR/PP-OCRv5/resolve/main/ppocrv5_dict.txt\n\
+                        \x20 wget -O det.onnx https://huggingface.co/bukuroo/PPOCRv5-ONNX/resolve/main/ppocrv5-mobile-det.onnx\n\
+                        \x20 wget -O rec.onnx https://huggingface.co/bukuroo/PPOCRv5-ONNX/resolve/main/ppocrv5-mobile-rec.onnx\n\
+                        \x20 wget https://huggingface.co/bukuroo/PPOCRv5-ONNX/resolve/main/ppocrv5_dict.txt\n\
                         \n\
                         \x20 Place files in: models/ppocrv5/ (relative to working dir or executable)\n\
                         \x20 Or set ocr_model_dir in knot-pdf.toml\n\
@@ -349,7 +351,16 @@ impl Pipeline {
             formula_recognizer,
             postprocess_pipeline,
             max_ocr_workers,
+            page_progress_callback: None,
         }
+    }
+
+    /// 设置每页处理完成后的进度回调
+    pub fn set_page_progress_callback<F>(&mut self, callback: F)
+    where
+        F: Fn(usize, usize) + Send + Sync + 'static,
+    {
+        self.page_progress_callback = Some(Box::new(callback));
     }
 
     /// 解析 PDF 文件（泛型路径版本）
@@ -515,6 +526,11 @@ impl Pipeline {
                         s.update_status(&doc_id, page_idx, PageStatus::Failed(err_msg))?;
                     }
                 }
+            }
+
+            // 通知调用者：当前页面处理完成
+            if let Some(ref cb) = self.page_progress_callback {
+                cb(page_idx + 1, page_count);
             }
         }
 
@@ -1194,6 +1210,7 @@ impl Pipeline {
                                 page_info.size.height,
                             ) {
                                 // Vision LLM 描述
+                                #[cfg(feature = "vision")]
                                 if let Some(vision) = &self.vision_describer {
                                     match vision.describe_image(
                                         &region_img,
@@ -1695,7 +1712,31 @@ impl Pipeline {
                 let total_chars: usize = page_ir
                     .blocks
                     .iter()
-                    .map(|b| b.normalized_text.chars().count())
+                    .map(|b| {
+                        // 去除 HTML 标签，只计算实际文本字符数
+                        // 避免空表格 <table><tr><td></td></tr></table> 被误算为有内容
+                        let text = &b.normalized_text;
+                        if text.contains('<') && text.contains('>') {
+                            let mut result = String::new();
+                            let mut in_tag = false;
+                            for c in text.chars() {
+                                if c == '<' {
+                                    in_tag = true;
+                                    continue;
+                                }
+                                if c == '>' {
+                                    in_tag = false;
+                                    continue;
+                                }
+                                if !in_tag {
+                                    result.push(c);
+                                }
+                            }
+                            result.trim().chars().count()
+                        } else {
+                            text.chars().count()
+                        }
+                    })
                     .sum();
 
                 let is_sparse_text_rich_image = {
@@ -1714,7 +1755,7 @@ impl Pipeline {
                 };
 
                 // 新增触发条件：任何页面文字极少（< 10 字符）
-                // 典型场景：PDF 封面页、矢量图形渲染页面（path objects 绘制文字）
+                // 典型场景：PDF 封面页、矢量图形渲染页面、扫描件空表格
                 let is_nearly_empty = total_chars < 10;
 
                 // 新增触发条件：字体编码乱码检测
@@ -1775,85 +1816,148 @@ impl Pipeline {
                     );
                 }
 
+                println!(
+                    "[VLM-Fallback] page {}: total_chars={}, is_complex={}, is_sparse={}, is_nearly_empty={}, is_garbled={}",
+                    page_index, total_chars, is_complex, is_sparse_text_rich_image, is_nearly_empty, is_garbled_text
+                );
+
                 if is_complex || is_sparse_text_rich_image || is_nearly_empty || is_garbled_text {
-                    log::info!(
+                    // 先检查：如果图片描述已经有足够内容，直接用图片描述替代，跳过 VLM 全页回退
+                    let img_desc_chars: usize = page_ir
+                        .images
+                        .iter()
+                        .filter_map(|img| img.ocr_text.as_ref())
+                        .map(|d| d.chars().count())
+                        .sum();
+
+                    if img_desc_chars >= 100 {
+                        println!(
+                            "[VLM-Fallback] Skipped: image descriptions already have {} chars, promoting to text blocks",
+                            img_desc_chars
+                        );
+                        // 把图片描述提升为文本块
+                        let desc_text: String = page_ir
+                            .images
+                            .iter()
+                            .filter_map(|img| img.ocr_text.as_ref())
+                            .cloned()
+                            .collect::<Vec<_>>()
+                            .join("\n\n");
+                        page_ir.blocks.clear();
+                        page_ir.blocks.push(crate::ir::BlockIR {
+                            block_id: format!("img_desc_p{}", page_index),
+                            bbox: crate::ir::BBox::new(
+                                0.0,
+                                0.0,
+                                page_ir.size.width,
+                                page_ir.size.height,
+                            ),
+                            role: crate::ir::BlockRole::Body,
+                            lines: vec![crate::ir::TextLine {
+                                spans: vec![crate::ir::TextSpan {
+                                    text: desc_text.clone(),
+                                    font_size: None,
+                                    is_bold: false,
+                                    font_name: None,
+                                }],
+                                bbox: None,
+                            }],
+                            normalized_text: desc_text,
+                        });
+                        page_ir.images.clear();
+                        println!(
+                            "[VLM-Fallback] After promotion: blocks={}, text_len={}",
+                            page_ir.blocks.len(),
+                            page_ir
+                                .blocks
+                                .iter()
+                                .map(|b| b.normalized_text.len())
+                                .sum::<usize>()
+                        );
+                    } else {
+                        println!("[VLM-Fallback] TRIGGERED for page {}", page_index);
+                        log::info!(
                         "Complex PPT layout detected on page {} ({} blocks), using Vision LLM fallback",
                         page_index,
                         page_ir.blocks.len()
                     );
-                    // 收集原始文本碎片作为参考（帮助 VLM 识别遗漏内容）
-                    // 优先保留短块（卡片标题等），长块截断，总字符控制在 800 以内
-                    let mut hint_parts: Vec<String> = Vec::new();
-                    let mut hint_len = 0usize;
-                    // 先收集短块（≤60字符，如卡片标题），再收集长块（截断）
-                    let mut short_blocks: Vec<String> = Vec::new();
-                    let mut long_blocks: Vec<String> = Vec::new();
-                    for b in page_ir.blocks.iter() {
-                        let t = b.full_text();
-                        if t.len() <= 3 {
-                            continue;
+                        // 收集原始文本碎片作为参考（帮助 VLM 识别遗漏内容）
+                        // 优先保留短块（卡片标题等），长块截断，总字符控制在 800 以内
+                        let mut hint_parts: Vec<String> = Vec::new();
+                        let mut hint_len = 0usize;
+                        // 先收集短块（≤60字符，如卡片标题），再收集长块（截断）
+                        let mut short_blocks: Vec<String> = Vec::new();
+                        let mut long_blocks: Vec<String> = Vec::new();
+                        for b in page_ir.blocks.iter() {
+                            let t = b.full_text();
+                            if t.len() <= 3 {
+                                continue;
+                            }
+                            if t.chars().count() <= 60 {
+                                short_blocks.push(t);
+                            } else {
+                                let truncated: String = t.chars().take(40).collect();
+                                long_blocks.push(format!("{}...", truncated));
+                            }
                         }
-                        if t.chars().count() <= 60 {
-                            short_blocks.push(t);
-                        } else {
-                            let truncated: String = t.chars().take(40).collect();
-                            long_blocks.push(format!("{}...", truncated));
+                        for part in short_blocks.into_iter().chain(long_blocks.into_iter()) {
+                            if hint_len + part.len() > 800 {
+                                break;
+                            }
+                            hint_len += part.len() + 3; // " | " separator
+                            hint_parts.push(part);
                         }
-                    }
-                    for part in short_blocks.into_iter().chain(long_blocks.into_iter()) {
-                        if hint_len + part.len() > 800 {
-                            break;
-                        }
-                        hint_len += part.len() + 3; // " | " separator
-                        hint_parts.push(part);
-                    }
-                    let raw_text_hint = hint_parts.join(" | ");
+                        let raw_text_hint = hint_parts.join(" | ");
 
-                    // 提取标题文本（Title/Heading 角色），注入 prompt 中
-                    let title_hint: String = page_ir
-                        .blocks
-                        .iter()
-                        .filter(|b| {
-                            matches!(
-                                b.role,
-                                crate::ir::BlockRole::Title | crate::ir::BlockRole::Heading
-                            )
-                        })
-                        .map(|b| b.full_text())
-                        .filter(|t| {
-                            let clean: String = t
-                                .chars()
-                                .filter(|c| {
-                                    !c.is_whitespace()
-                                        && !matches!(*c, '"' | '"' | '\u{201C}' | '\u{201D}' | '"')
-                                })
-                                .collect();
-                            clean.len() >= 3 // 过滤噪声
-                        })
-                        .collect::<Vec<_>>()
-                        .join(" ");
+                        // 提取标题文本（Title/Heading 角色），注入 prompt 中
+                        let title_hint: String = page_ir
+                            .blocks
+                            .iter()
+                            .filter(|b| {
+                                matches!(
+                                    b.role,
+                                    crate::ir::BlockRole::Title | crate::ir::BlockRole::Heading
+                                )
+                            })
+                            .map(|b| b.full_text())
+                            .filter(|t| {
+                                let clean: String = t
+                                    .chars()
+                                    .filter(|c| {
+                                        !c.is_whitespace()
+                                            && !matches!(
+                                                *c,
+                                                '"' | '"' | '\u{201C}' | '\u{201D}' | '"'
+                                            )
+                                    })
+                                    .collect();
+                                clean.len() >= 3 // 过滤噪声
+                            })
+                            .collect::<Vec<_>>()
+                            .join(" ");
 
-                    // 渲染整页（适中分辨率：太高会触发某些 VLM 的 GGML 断言错误）
-                    if let Ok(full_png) = backend
-                        .render_page_to_image(page_index, self.config.figure_render_width.max(1500))
-                    {
-                        let title_instruction = if !title_hint.is_empty() {
-                            format!(
+                        // 渲染整页（适中分辨率：太高会触发某些 VLM 的 GGML 断言错误）
+                        if let Ok(full_png) = backend.render_page_to_image(
+                            page_index,
+                            self.config.figure_render_width.max(1500),
+                        ) {
+                            let title_instruction = if !title_hint.is_empty() {
+                                format!(
                                 "\n注意：页面标题可能是「{}」，输出必须以完整标题开头（用 ## 标记）。",
                                 title_hint
                             )
-                        } else {
-                            String::new()
-                        };
+                            } else {
+                                String::new()
+                            };
 
-                        let is_ppt_page = page_ir.size.width > page_ir.size.height;
-                        let page_type_desc = if is_ppt_page {
-                            "这是一页PPT幻灯片"
-                        } else {
-                            "这是一页PDF文档"
-                        };
+                            let is_ppt_page = page_ir.size.width > page_ir.size.height;
+                            let page_type_desc = if is_ppt_page {
+                                "这是一页PPT幻灯片"
+                            } else {
+                                "这是一页PDF文档"
+                            };
 
-                        let prompt = format!(
+                            let prompt = format!(
                             "{}。请严格提取页面中【所有】文字内容，不要遗漏任何一个区块。\n\
                             \n要求：\n\
                             1. 页面大标题用 ## 标记，必须完整提取（不要截断）\n\
@@ -1875,82 +1979,116 @@ impl Pipeline {
                             \n参考文字片段（可能有乱序）：{}", page_type_desc, title_instruction, raw_text_hint
                         );
 
-                        match vision.describe_image(&full_png, Some(&prompt)) {
-                            Ok(vlm_text) if !vlm_text.is_empty() => {
-                                // 清洗 VLM 输出：移除模型控制 token 和空代码块
-                                let vlm_text = vlm_text
-                                    .replace("<|begin_of_image|>", "")
-                                    .replace("<|end_of_image|>", "")
-                                    .replace("<|im_start|>", "")
-                                    .replace("<|im_end|>", "")
-                                    .replace("```markdown", "")
-                                    .replace("```", "")
-                                    .trim()
-                                    .to_string();
+                            match vision.describe_image(&full_png, Some(&prompt)) {
+                                Ok(vlm_text) if !vlm_text.is_empty() => {
+                                    println!(
+                                        "[VLM-Fallback] Raw VLM response: {} chars, preview={:?}",
+                                        vlm_text.len(),
+                                        &vlm_text[..vlm_text.len().min(200)]
+                                    );
+                                    // 清洗 VLM 输出：移除模型控制 token 和空代码块
+                                    let vlm_text = vlm_text
+                                        .replace("<|begin_of_image|>", "")
+                                        .replace("<|end_of_image|>", "")
+                                        .replace("<|im_start|>", "")
+                                        .replace("<|im_end|>", "")
+                                        .replace("```markdown", "")
+                                        .replace("```", "")
+                                        .trim()
+                                        .to_string();
+                                    println!(
+                                        "[VLM-Fallback] Cleaned VLM text: {} chars",
+                                        vlm_text.len()
+                                    );
 
-                                // 清洗后如果内容太短，视为 VLM 失败
-                                if vlm_text.len() < 5 {
-                                    log::warn!(
-                                        "VLM output too short after cleaning ({} chars) for page {}, trying OCR fallback",
-                                        vlm_text.len(), page_index
+                                    // 清洗后如果内容太短（去除 HTML 标签后），视为 VLM 失败
+                                    // 避免空表格 HTML 被误判为有效内容
+                                    let text_only_len = {
+                                        let mut result = String::new();
+                                        let mut in_tag = false;
+                                        for c in vlm_text.chars() {
+                                            if c == '<' {
+                                                in_tag = true;
+                                                continue;
+                                            }
+                                            if c == '>' {
+                                                in_tag = false;
+                                                continue;
+                                            }
+                                            if !in_tag {
+                                                result.push(c);
+                                            }
+                                        }
+                                        result.trim().len()
+                                    };
+                                    println!(
+                                        "[VLM-Fallback] Text-only length: {} chars (raw: {})",
+                                        text_only_len,
+                                        vlm_text.len()
                                     );
-                                    // OCR 回退
-                                    Self::ocr_fallback_for_page(
-                                        &self.ocr_backend,
-                                        &full_png,
-                                        page_index,
-                                        &mut page_ir,
+                                    if text_only_len < 5 {
+                                        println!(
+                                        "[VLM-Fallback] VLM output too short ({} text chars) for page {}, trying OCR fallback",
+                                        text_only_len, page_index
                                     );
-                                } else {
-                                    log::info!(
+                                        // OCR 回退
+                                        Self::ocr_fallback_for_page(
+                                            &self.ocr_backend,
+                                            &full_png,
+                                            page_index,
+                                            &mut page_ir,
+                                        );
+                                    } else {
+                                        log::info!(
                                     "Vision LLM extracted {} chars for page {} (replacing {} blocks)",
                                     vlm_text.len(),
                                     page_index,
                                     page_ir.blocks.len()
                                 );
 
-                                    // 用 VLM 输出替代原有碎片化的块
-                                    // （标题信息已注入 prompt，VLM 会自行输出完整标题）
-                                    page_ir.blocks.clear();
+                                        // 用 VLM 输出替代原有碎片化的块
+                                        // （标题信息已注入 prompt，VLM 会自行输出完整标题）
+                                        page_ir.blocks.clear();
 
-                                    // 清除所有图片（VLM 已覆盖全页视觉内容，包括图表和装饰图片）
-                                    let before_img_count = page_ir.images.len();
-                                    page_ir.images.clear();
-                                    if before_img_count > 0 {
-                                        log::debug!(
+                                        // 清除所有图片（VLM 已覆盖全页视觉内容，包括图表和装饰图片）
+                                        let before_img_count = page_ir.images.len();
+                                        page_ir.images.clear();
+                                        if before_img_count > 0 {
+                                            log::debug!(
                                             "VLM fallback: cleared {} images (embedded + figures)",
                                             before_img_count
                                         );
-                                    }
-                                    page_ir.blocks.push(crate::ir::BlockIR {
-                                        block_id: format!("vlm_p{}", page_index),
-                                        bbox: crate::ir::BBox::new(
-                                            0.0,
-                                            0.0,
-                                            page_ir.size.width,
-                                            page_ir.size.height,
-                                        ),
-                                        role: crate::ir::BlockRole::Body,
-                                        lines: vec![crate::ir::TextLine {
-                                            spans: vec![crate::ir::TextSpan {
-                                                text: vlm_text,
-                                                font_size: None,
-                                                is_bold: false,
-                                                font_name: None,
+                                        }
+                                        page_ir.blocks.push(crate::ir::BlockIR {
+                                            block_id: format!("vlm_p{}", page_index),
+                                            bbox: crate::ir::BBox::new(
+                                                0.0,
+                                                0.0,
+                                                page_ir.size.width,
+                                                page_ir.size.height,
+                                            ),
+                                            role: crate::ir::BlockRole::Body,
+                                            lines: vec![crate::ir::TextLine {
+                                                spans: vec![crate::ir::TextSpan {
+                                                    text: vlm_text,
+                                                    font_size: None,
+                                                    is_bold: false,
+                                                    font_name: None,
+                                                }],
+                                                bbox: None,
                                             }],
-                                            bbox: None,
-                                        }],
-                                        normalized_text: String::new(), // 将在下面设置
-                                    });
-                                    // 设置 normalized_text（VLM 块是最后一个）
-                                    let last_idx = page_ir.blocks.len() - 1;
-                                    let text = page_ir.blocks[last_idx].full_text();
-                                    page_ir.blocks[last_idx].normalized_text = text;
+                                            normalized_text: String::new(), // 将在下面设置
+                                        });
+                                        // 设置 normalized_text（VLM 块是最后一个）
+                                        let last_idx = page_ir.blocks.len() - 1;
+                                        let text = page_ir.blocks[last_idx].full_text();
+                                        page_ir.blocks[last_idx].normalized_text = text;
 
-                                    // 收集已有的图表 figure 描述（之前步骤已单独用 VLM 分析过）
-                                    // 只追加"真正的图表描述"，跳过与 VLM 输出重复的纯文本 figure
-                                    let vlm_text_ref = &page_ir.blocks[last_idx].normalized_text;
-                                    let figure_descs: Vec<String> = page_ir
+                                        // 收集已有的图表 figure 描述（之前步骤已单独用 VLM 分析过）
+                                        // 只追加"真正的图表描述"，跳过与 VLM 输出重复的纯文本 figure
+                                        let vlm_text_ref =
+                                            &page_ir.blocks[last_idx].normalized_text;
+                                        let figure_descs: Vec<String> = page_ir
                                     .images
                                     .iter()
                                     .filter(|img| {
@@ -2007,45 +2145,49 @@ impl Pipeline {
                                     })
                                     .collect();
 
-                                    if !figure_descs.is_empty() {
-                                        let combined = format!(
-                                            "{}{}",
-                                            page_ir.blocks[last_idx].normalized_text,
-                                            figure_descs.join("")
-                                        );
-                                        page_ir.blocks[last_idx].normalized_text = combined;
-                                    }
+                                        if !figure_descs.is_empty() {
+                                            let combined = format!(
+                                                "{}{}",
+                                                page_ir.blocks[last_idx].normalized_text,
+                                                figure_descs.join("")
+                                            );
+                                            page_ir.blocks[last_idx].normalized_text = combined;
+                                        }
 
-                                    // 清除 FigureRegion 图片（已合并到文本中）
-                                    page_ir
-                                        .images
-                                        .retain(|img| img.source != ImageSource::FigureRegion);
+                                        // 清除 FigureRegion 图片（已合并到文本中）
+                                        page_ir
+                                            .images
+                                            .retain(|img| img.source != ImageSource::FigureRegion);
 
-                                    page_ir.source = PageSource::Ocr; // 标记为 VLM 解析
-                                } // end else (vlm_text.len() >= 5)
-                            }
-                            Ok(_) => {
-                                log::debug!("Vision LLM returned empty for page {}", page_index);
-                                // OCR 回退
-                                Self::ocr_fallback_for_page(
-                                    &self.ocr_backend,
-                                    &full_png,
-                                    page_index,
-                                    &mut page_ir,
-                                );
-                            }
-                            Err(e) => {
-                                log::warn!("Vision LLM failed for page {}: {}", page_index, e);
-                                // OCR 回退
-                                Self::ocr_fallback_for_page(
-                                    &self.ocr_backend,
-                                    &full_png,
-                                    page_index,
-                                    &mut page_ir,
-                                );
+                                        page_ir.source = PageSource::Ocr; // 标记为 VLM 解析
+                                    } // end else (vlm_text.len() >= 5)
+                                }
+                                Ok(_) => {
+                                    log::debug!(
+                                        "Vision LLM returned empty for page {}",
+                                        page_index
+                                    );
+                                    // OCR 回退
+                                    Self::ocr_fallback_for_page(
+                                        &self.ocr_backend,
+                                        &full_png,
+                                        page_index,
+                                        &mut page_ir,
+                                    );
+                                }
+                                Err(e) => {
+                                    log::warn!("Vision LLM failed for page {}: {}", page_index, e);
+                                    // OCR 回退
+                                    Self::ocr_fallback_for_page(
+                                        &self.ocr_backend,
+                                        &full_png,
+                                        page_index,
+                                        &mut page_ir,
+                                    );
+                                }
                             }
                         }
-                    }
+                    } // end else: VLM full-page fallback (not skipped by img desc)
                 }
             }
         }
@@ -2053,7 +2195,16 @@ impl Pipeline {
         // === 乱码检测 + OCR 回退（独立于 VLM，适用于所有策略）===
         // 某些 PDF 使用自定义字体编码，pdfium 提取出的文字是乱码
         // 典型特征：大量 CJK Extension A (U+3400-U+4DBF) 或 PUA 字符
-        {
+        // 注意：跳过来自 VisionAPI/VLM 的文本（不可能是字体编码乱码）
+        let skip_garbled_check = page_ir.blocks.iter().any(|b| {
+            b.block_id.starts_with("img_desc_")
+                || b.block_id.starts_with("vlm_")
+                || b.block_id.starts_with("ocr_fallback_")
+        });
+        if skip_garbled_check {
+            println!("[Pipeline] Skipping garbled text check (blocks from VisionAPI/OCR)");
+        }
+        if !skip_garbled_check {
             let total_chars: usize = page_ir
                 .blocks
                 .iter()
@@ -2191,6 +2342,106 @@ impl Pipeline {
                 }
             }
         }
+
+        // === 每页处理完成摘要 ===
+        let total_text: usize = page_ir.blocks.iter().map(|b| b.normalized_text.len()).sum();
+        let elapsed = start.elapsed().as_secs_f64();
+
+        // 推断使用了哪些处理模块
+        let mut modules: Vec<&str> = Vec::new();
+
+        // 1. 后端
+        let backend_name = std::any::type_name_of_val(backend);
+        let backend_short = backend_name.rsplit("::").next().unwrap_or(backend_name);
+
+        // 2. 文字提取（始终执行）
+        modules.push("TextExtract");
+
+        // 3. 检查是否使用了 VLM 图片描述
+        let vlm_img_desc_count = page_ir
+            .images
+            .iter()
+            .filter(|img| img.ocr_text.is_some())
+            .count();
+        if vlm_img_desc_count > 0 {
+            modules.push("VLM-图片描述");
+        }
+
+        // 4. 检查是否使用了图片描述提升（替代全页回退）
+        let has_img_desc_block = page_ir
+            .blocks
+            .iter()
+            .any(|b| b.block_id.starts_with("img_desc_"));
+        if has_img_desc_block {
+            modules.push("图片描述→文本提升");
+        }
+
+        // 5. 检查是否使用了 VLM 全页回退
+        let has_vlm_block = page_ir
+            .blocks
+            .iter()
+            .any(|b| b.block_id.starts_with("vlm_"));
+        if has_vlm_block {
+            modules.push("VLM-全页回退");
+        }
+
+        // 6. 检查是否使用了 OCR 回退
+        let has_ocr_block = page_ir
+            .blocks
+            .iter()
+            .any(|b| b.block_id.starts_with("ocr_fallback_"));
+        if has_ocr_block {
+            modules.push("OCR-回退");
+        }
+
+        // 7. 检查表格
+        let table_count = page_ir
+            .blocks
+            .iter()
+            .filter(|b| b.normalized_text.contains("<table") || b.normalized_text.contains("| ---"))
+            .count();
+        if table_count > 0 {
+            modules.push("表格检测");
+        }
+
+        // 8. 检查图表区域
+        let figure_count = page_ir
+            .images
+            .iter()
+            .filter(|img| img.source == ImageSource::FigureRegion)
+            .count();
+        if figure_count > 0 {
+            modules.push("图表区域检测");
+        }
+
+        // 9. 是否 scanned
+        if page_ir.is_scanned_guess {
+            modules.push("扫描件");
+        }
+
+        let source_label = match page_ir.source {
+            PageSource::BornDigital => "BornDigital",
+            PageSource::Ocr => "OCR/VLM",
+            PageSource::Mixed => "Mixed",
+        };
+
+        println!(
+            "┌─ [Page {}] ──────────────────────────────────────",
+            page_index
+        );
+        println!(
+            "│  Backend: {} | Source: {} | {:.2}s",
+            backend_short, source_label, elapsed
+        );
+        println!(
+            "│  Blocks: {} | Text: {} chars | Images: {} (VLM描述: {})",
+            page_ir.blocks.len(),
+            total_text,
+            page_ir.images.len(),
+            vlm_img_desc_count
+        );
+        println!("│  Modules: [{}]", modules.join(" → "));
+        println!("└──────────────────────────────────────────────────");
 
         Ok(page_ir)
     }

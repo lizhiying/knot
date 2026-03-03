@@ -20,331 +20,12 @@
       "rotation": 0.0,
       "blocks": [
         {
-          "block_id": "blk_0",
+          "block_id": "blk_13",
           "bbox": {
-            "x": 131.45,
-            "y": 129.06,
-            "width": 20.559998,
+            "x": 364.86,
+            "y": 249.54004,
+            "width": 43.329987,
             "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Item",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 131.45,
-                "y": 129.06,
-                "width": 20.559998,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Item"
-        },
-        {
-          "block_id": "blk_1",
-          "bbox": {
-            "x": 275.13,
-            "y": 129.06,
-            "width": 16.669983,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Qty",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 275.13,
-                "y": 129.06,
-                "width": 16.669983,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Qty"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 338.08,
-            "y": 129.06,
-            "width": 46.679993,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Unit Price",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 338.08,
-                "y": 129.06,
-                "width": 46.679993,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Unit Price"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 31.18,
-            "y": 150.32,
-            "width": 76.7,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Software License",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 150.32,
-                "width": 76.7,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Software License"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 377.61,
-            "y": 150.32,
-            "width": 30.579987,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$2,430",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 377.61,
-                "y": 150.32,
-                "width": 30.579987,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$2,430"
-        },
-        {
-          "block_id": "blk_5",
-          "bbox": {
-            "x": 31.18,
-            "y": 170.17004,
-            "width": 57.809998,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Support Plan",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 170.17004,
-                "width": 57.809998,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Support Plan"
-        },
-        {
-          "block_id": "blk_6",
-          "bbox": {
-            "x": 377.61,
-            "y": 170.17004,
-            "width": 30.579987,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$2,372",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 377.61,
-                "y": 170.17004,
-                "width": 30.579987,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$2,372"
-        },
-        {
-          "block_id": "blk_7",
-          "bbox": {
-            "x": 31.18,
-            "y": 190.01001,
-            "width": 76.69,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Training (3 days)",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 190.01001,
-                "width": 76.69,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Training (3 days)"
-        },
-        {
-          "block_id": "blk_8",
-          "bbox": {
-            "x": 377.61,
-            "y": 190.01001,
-            "width": 30.579987,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$2,102",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 377.61,
-                "y": 190.01001,
-                "width": 30.579987,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$2,102"
-        },
-        {
-          "block_id": "blk_9",
-          "bbox": {
-            "x": 31.18,
-            "y": 209.85004,
-            "width": 84.479996,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Custom Integration",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 209.85004,
-                "width": 84.479996,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Custom Integration"
-        },
-        {
-          "block_id": "blk_10",
-          "bbox": {
-            "x": 377.61,
-            "y": 209.85004,
-            "width": 30.579987,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$2,460",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 377.61,
-                "y": 209.85004,
-                "width": 30.579987,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$2,460"
-        },
-        {
-          "block_id": "blk_11",
-          "bbox": {
-            "x": 31.18,
-            "y": 229.69,
-            "width": 378.68,
-            "height": 69.53003
           },
           "role": "Body",
           "lines": [
@@ -360,10 +41,23 @@
               "bbox": {
                 "x": 364.86,
                 "y": 249.54004,
-                "width": 45.0,
+                "width": 43.329987,
                 "height": 10.0
               }
-            },
+            }
+          ],
+          "normalized_text": "Subtotal:"
+        },
+        {
+          "block_id": "blk_14",
+          "bbox": {
+            "x": 363.74,
+            "y": 269.38,
+            "width": 44.44998,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
             {
               "spans": [
                 {
@@ -376,10 +70,23 @@
               "bbox": {
                 "x": 363.74,
                 "y": 269.38,
-                "width": 46.119995,
+                "width": 44.44998,
                 "height": 10.0
               }
-            },
+            }
+          ],
+          "normalized_text": "Tax (8%):"
+        },
+        {
+          "block_id": "blk_15",
+          "bbox": {
+            "x": 371.53,
+            "y": 289.22003,
+            "width": 36.659973,
+            "height": 10.0
+          },
+          "role": "Body",
+          "lines": [
             {
               "spans": [
                 {
@@ -392,31 +99,15 @@
               "bbox": {
                 "x": 371.53,
                 "y": 289.22003,
-                "width": 38.329987,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Data Migration 8 $2,659",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 229.69,
-                "width": 377.00998,
+                "width": 36.659973,
                 "height": 10.0
               }
             }
           ],
-          "normalized_text": "Subtotal: Tax (8%): TOTAL: Data Migration 8 $2,659"
+          "normalized_text": "TOTAL:"
         },
         {
-          "block_id": "blk_12",
+          "block_id": "blk_16",
           "bbox": {
             "x": 470.72,
             "y": 32.75,
@@ -458,10 +149,10 @@
               }
             }
           ],
-          "normalized_text": "INVOICE Invoice #: INV-29747"
+          "normalized_text": "INVOICE\nInvoice #: INV-29747"
         },
         {
-          "block_id": "blk_13",
+          "block_id": "blk_17",
           "bbox": {
             "x": 486.28,
             "y": 80.869995,
@@ -490,157 +181,12 @@
           "normalized_text": "Date: 2024-06-15"
         },
         {
-          "block_id": "blk_14",
-          "bbox": {
-            "x": 448.68,
-            "y": 129.06,
-            "width": 26.109985,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Total",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 448.68,
-                "y": 129.06,
-                "width": 26.109985,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Total"
-        },
-        {
-          "block_id": "blk_15",
+          "block_id": "blk_24",
           "bbox": {
             "x": 471.26,
-            "y": 150.32,
+            "y": 249.54004,
             "width": 36.139984,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$19,440",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 471.26,
-                "y": 150.32,
-                "width": 36.139984,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$19,440"
-        },
-        {
-          "block_id": "blk_16",
-          "bbox": {
-            "x": 471.26,
-            "y": 170.17004,
-            "width": 36.139984,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$14,232",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 471.26,
-                "y": 170.17004,
-                "width": 36.139984,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$14,232"
-        },
-        {
-          "block_id": "blk_17",
-          "bbox": {
-            "x": 476.82,
-            "y": 190.01001,
-            "width": 30.579987,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$4,204",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 476.82,
-                "y": 190.01001,
-                "width": 30.579987,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$4,204"
-        },
-        {
-          "block_id": "blk_18",
-          "bbox": {
-            "x": 471.26,
-            "y": 209.85004,
-            "width": 36.139984,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$12,300",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 471.26,
-                "y": 209.85004,
-                "width": 36.139984,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "$12,300"
-        },
-        {
-          "block_id": "blk_19",
-          "bbox": {
-            "x": 471.26,
-            "y": 229.69,
-            "width": 36.139984,
-            "height": 69.53003
+            "height": 49.679993
           },
           "role": "Body",
           "lines": [
@@ -691,25 +237,9 @@
                 "width": 36.139984,
                 "height": 10.0
               }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$21,272",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 471.26,
-                "y": 229.69,
-                "width": 36.139984,
-                "height": 10.0
-              }
             }
           ],
-          "normalized_text": "$71,448 $5,715 $77,163 $21,272"
+          "normalized_text": "$71,448\n$5,715\n$77,163"
         }
       ],
       "tables": [
@@ -718,16 +248,16 @@
           "page_index": 0,
           "bbox": {
             "x": 31.18,
-            "y": 150.32,
+            "y": 129.06,
             "width": 476.22,
-            "height": 89.369995
+            "height": 110.630005
           },
           "extraction_mode": "Stream",
           "headers": [
-            "col_0",
-            "col_1",
-            "col_2",
-            "col_3"
+            "Item",
+            "Qty",
+            "Unit Price",
+            "Total"
           ],
           "rows": [
             {
@@ -922,26 +452,35 @@
             "Currency",
             "Currency"
           ],
-          "fallback_text": "[表t0_0 页0]\n行1: col_0=Software License col_1=8 col_2=$2,430 col_3=$19,440\n行2: col_0=Support Plan col_1=6 col_2=$2,372 col_3=$14,232\n行3: col_0=Training (3 days) col_1=2 col_2=$2,102 col_3=$4,204\n行4: col_0=Custom Integration col_1=5 col_2=$2,460 col_3=$12,300\n行5: col_0=Data Migration col_1=8 col_2=$2,659 col_3=$21,272"
+          "fallback_text": "[表t0_0 页0]\n行1: Item=Software License Qty=8 Unit Price=$2,430 Total=$19,440\n行2: Item=Support Plan Qty=6 Unit Price=$2,372 Total=$14,232\n行3: Item=Training (3 days) Qty=2 Unit Price=$2,102 Total=$4,204\n行4: Item=Custom Integration Qty=5 Unit Price=$2,460 Total=$12,300\n行5: Item=Data Migration Qty=8 Unit Price=$2,659 Total=$21,272",
+          "confidence": {
+            "score": 0.7499962,
+            "alignment_score": 0.8638889,
+            "spacing_score": 0.26473558,
+            "data_density_score": 0.6894118,
+            "consistency_score": 1.0
+          }
         }
       ],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 20,
+        "block_count": 8,
         "table_count": 1,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.9660015,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 19,
+        "extract_ms": 20,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21315584,
+        "peak_rss_bytes": 21938176,
         "rss_delta_bytes": 0
       }
     }

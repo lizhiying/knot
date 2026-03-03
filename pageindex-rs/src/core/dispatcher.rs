@@ -315,6 +315,12 @@ mod tests {
             enable_auto_summary: true,
             default_language: "en".into(),
             progress_callback: None,
+            page_content_callback: None,
+            pdf_ocr_enabled: false,
+            pdf_ocr_model_dir: None,
+            pdf_vision_api_url: None,
+            pdf_vision_model: None,
+            pdf_page_indices: None,
         };
 
         dispatcher.inject_summaries(&mut root, &config).await;
@@ -348,6 +354,12 @@ mod tests {
             enable_auto_summary: false,
             default_language: "en".into(),
             progress_callback: None,
+            page_content_callback: None,
+            pdf_ocr_enabled: false,
+            pdf_ocr_model_dir: None,
+            pdf_vision_api_url: None,
+            pdf_vision_model: None,
+            pdf_page_indices: None,
         };
 
         dispatcher.inject_embeddings(&mut root, &config).await;

@@ -24,7 +24,7 @@
           "bbox": {
             "x": 31.18,
             "y": 32.690002,
-            "width": 107.23,
+            "width": 105.560005,
             "height": 10.0
           },
           "role": "Body",
@@ -41,7 +41,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 32.690002,
-                "width": 107.23,
+                "width": 105.560005,
                 "height": 10.0
               }
             }
@@ -51,17 +51,17 @@
         {
           "block_id": "blk_1",
           "bbox": {
-            "x": 59.97,
+            "x": 31.18,
             "y": 55.340027,
-            "width": 21.783997,
-            "height": 8.0
+            "width": 231.768,
+            "height": 110.04999
           },
           "role": "Body",
           "lines": [
             {
               "spans": [
                 {
-                  "text": "Name",
+                  "text": "Name Description",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -70,85 +70,14 @@
               "bbox": {
                 "x": 59.97,
                 "y": 55.340027,
-                "width": 21.783997,
+                "width": 202.978,
                 "height": 8.0
               }
-            }
-          ],
-          "normalized_text": "Name"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 218.94,
-            "y": 55.340027,
-            "width": 44.007996,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
+            },
             {
               "spans": [
                 {
-                  "text": "Description",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 218.94,
-                "y": 55.340027,
-                "width": 44.007996,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "Description"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 401.24,
-            "y": 55.340027,
-            "width": 19.567993,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Price",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 401.24,
-                "y": 55.340027,
-                "width": 19.567993,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "Price"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 31.18,
-            "y": 72.35004,
-            "width": 35.128,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Product A",
+                  "text": "Product A High-performance computing",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -157,65 +86,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 72.35004,
-                "width": 35.128,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "Product A"
-        },
-        {
-          "block_id": "blk_5",
-          "bbox": {
-            "x": 116.22,
-            "y": 72.35004,
-            "width": 103.144,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "High-performance computing",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 116.22,
-                "y": 72.35004,
-                "width": 103.144,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "High-performance computing"
-        },
-        {
-          "block_id": "blk_6",
-          "bbox": {
-            "x": 31.18,
-            "y": 72.35004,
-            "width": 369.072,
-            "height": 36.349976
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$12,500",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 371.34,
-                "y": 72.35004,
-                "width": 28.911987,
+                "width": 188.18399,
                 "height": 8.0
               }
             },
@@ -238,7 +109,7 @@
             {
               "spans": [
                 {
-                  "text": "Product B",
+                  "text": "Product B Cloud-native platform",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -247,65 +118,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 100.70001,
-                "width": 35.128,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "$12,500 solution for enterprise Product B"
-        },
-        {
-          "block_id": "blk_7",
-          "bbox": {
-            "x": 116.22,
-            "y": 100.70001,
-            "width": 76.024,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Cloud-native platform",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 116.22,
-                "y": 100.70001,
-                "width": 76.024,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "Cloud-native platform"
-        },
-        {
-          "block_id": "blk_8",
-          "bbox": {
-            "x": 31.18,
-            "y": 100.70001,
-            "width": 364.624,
-            "height": 50.52002
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$8,900",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 371.34,
-                "y": 100.70001,
-                "width": 24.46399,
+                "width": 161.064,
                 "height": 8.0
               }
             },
@@ -344,7 +157,7 @@
             {
               "spans": [
                 {
-                  "text": "Product C",
+                  "text": "Product C Desktop application",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -353,65 +166,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 143.22003,
-                "width": 35.568,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "$8,900 with auto-scaling and monitoring Product C"
-        },
-        {
-          "block_id": "blk_9",
-          "bbox": {
-            "x": 116.22,
-            "y": 143.22003,
-            "width": 69.808,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Desktop application",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 116.22,
-                "y": 143.22003,
-                "width": 69.808,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "Desktop application"
-        },
-        {
-          "block_id": "blk_10",
-          "bbox": {
-            "x": 116.22,
-            "y": 143.22003,
-            "width": 279.58398,
-            "height": 22.169983
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "$3,200",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 371.34,
-                "y": 143.22003,
-                "width": 24.46399,
+                "width": 154.84799,
                 "height": 8.0
               }
             },
@@ -432,28 +187,107 @@
               }
             }
           ],
-          "normalized_text": "$3,200 for data analysis"
+          "normalized_text": "Name Description\nProduct A High-performance computing\nsolution for enterprise\nProduct B Cloud-native platform\nwith auto-scaling\nand monitoring\nProduct C Desktop application\nfor data analysis"
+        },
+        {
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 371.34,
+            "y": 55.340027,
+            "width": 49.467987,
+            "height": 95.880005
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Price",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 401.24,
+                "y": 55.340027,
+                "width": 19.567993,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$12,500",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 371.34,
+                "y": 72.35004,
+                "width": 28.911987,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$8,900",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 371.34,
+                "y": 100.70001,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "$3,200",
+                  "font_size": 8.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 371.34,
+                "y": 143.22003,
+                "width": 24.46399,
+                "height": 8.0
+              }
+            }
+          ],
+          "normalized_text": "Price\n$12,500\n$8,900\n$3,200"
         }
       ],
       "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 11,
+        "block_count": 3,
         "table_count": 0,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.915607,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 15,
+        "extract_ms": 12,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21266432,
-        "rss_delta_bytes": 32768
+        "peak_rss_bytes": 21872640,
+        "rss_delta_bytes": 16384
       }
     }
   ],

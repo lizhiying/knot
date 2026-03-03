@@ -26,7 +26,9 @@ pub struct OpenAiVisionDescriber {
 
 impl OpenAiVisionDescriber {
     pub fn new(api_url: &str, api_key: &str, model: &str) -> Self {
-        let client = ureq::Agent::new();
+        let client = ureq::AgentBuilder::new()
+            .timeout(std::time::Duration::from_secs(60))
+            .build();
         Self {
             api_url: api_url.to_string(),
             api_key: api_key.to_string(),
@@ -86,11 +88,15 @@ impl VisionDescriber for OpenAiVisionDescriber {
     ) -> Result<String, PdfError> {
         // 记录图片大小
         let img_size_kb = image_png.len() / 1024;
-        log::debug!("VisionDescriber: image size = {} KB", img_size_kb);
+        println!(
+            "[VisionAPI] describe_image called: image={} KB, model={}",
+            img_size_kb, self.model
+        );
 
-        // 如果图片过大（> 500KB），缩放压缩为 JPEG 以避免 VLM 模型 OOM
+        // 如果图片过大（> 200KB），缩放压缩为 JPEG 以避免 VLM 模型 OOM
+        // 阈值较低是因为本地 Ollama 和 Qwen3 共享 GPU 内存
         let (image_bytes, mime_type): (std::borrow::Cow<[u8]>, &str) =
-            if image_png.len() > 500 * 1024 {
+            if image_png.len() > 200 * 1024 {
                 match Self::compress_image(image_png, 800) {
                     Ok(compressed) => {
                         log::info!(
@@ -172,6 +178,11 @@ impl VisionDescriber for OpenAiVisionDescriber {
         );
 
         // 发送请求
+        println!(
+            "[VisionAPI] Sending request to {} (model={}, image={} KB)",
+            self.api_url, self.model, img_size_kb
+        );
+        let request_start = std::time::Instant::now();
         let response = self
             .client
             .post(&self.api_url)
@@ -183,6 +194,11 @@ impl VisionDescriber for OpenAiVisionDescriber {
                 let detail = match e {
                     ureq::Error::Status(code, resp) => {
                         let body = resp.into_string().unwrap_or_default();
+                        println!(
+                            "[VisionAPI] ERROR: status {} - {}",
+                            code,
+                            &body[..body.len().min(300)]
+                        );
                         format!(
                             "{}: status code {} - {}",
                             self.api_url,
@@ -190,10 +206,17 @@ impl VisionDescriber for OpenAiVisionDescriber {
                             &body[..body.len().min(500)]
                         )
                     }
-                    other => format!("{}: {}", self.api_url, other),
+                    other => {
+                        println!("[VisionAPI] ERROR: {}", other);
+                        format!("{}: {}", self.api_url, other)
+                    }
                 };
                 PdfError::Backend(format!("Vision API request failed: {}", detail))
             })?;
+        println!(
+            "[VisionAPI] Response received in {:.1}s",
+            request_start.elapsed().as_secs_f64()
+        );
 
         // 解析响应
         let resp_body: serde_json::Value = response
@@ -211,10 +234,7 @@ impl VisionDescriber for OpenAiVisionDescriber {
             })?
             .to_string();
 
-        log::info!(
-            "VisionDescriber: got {} chars description",
-            description.len()
-        );
+        println!("[VisionAPI] Got {} chars description", description.len());
 
         Ok(description)
     }

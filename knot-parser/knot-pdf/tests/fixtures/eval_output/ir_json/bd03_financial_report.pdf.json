@@ -20,525 +20,312 @@
       "rotation": 0.0,
       "blocks": [
         {
-          "block_id": "blk_1",
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 32.72003,
+            "width": 190.624,
+            "height": 14.0
+          },
+          "role": "Header",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Q1 2024 Financial Highlights",
+                  "font_size": 14.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 32.72003,
+                "width": 190.624,
+                "height": 14.0
+              }
+            }
+          ],
+          "normalized_text": "Q1 2024 Financial Highlights"
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t0_0",
+          "page_index": 0,
           "bbox": {
             "x": 31.18,
             "y": 82.98999,
-            "width": 91.453995,
+            "width": 462.053,
             "height": 112.47003
           },
-          "role": "Body",
-          "lines": [
+          "extraction_mode": "Stream",
+          "headers": [
+            "Item",
+            "Actual",
+            "Budget",
+            "Variance"
+          ],
+          "rows": [
             {
-              "spans": [
+              "row_index": 0,
+              "cells": [
                 {
-                  "text": "Item",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 104.13,
-                "y": 82.98999,
-                "width": 18.503998,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 0,
                   "text": "Revenue",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 101.420044,
-                "width": 36.017998,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "COGS",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 118.420044,
-                "width": 26.504997,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Gross Profit",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 135.43,
-                "width": 49.509003,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "OpEx",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 152.44,
-                "width": 22.508999,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "EBITDA",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 169.45001,
-                "width": 32.508,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Net Income",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 186.46002,
-                "width": 46.017,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "Item Revenue COGS Gross Profit OpEx EBITDA Net Income"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 234.28,
-            "y": 82.98999,
-            "width": 60.526,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Actual",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 234.28,
-                "y": 82.98999,
-                "width": 29.502014,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 1,
                   "text": "$7,765",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 267.28,
-                "y": 101.420044,
-                "width": 27.522003,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$82,501",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 118.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$61,164",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 135.43,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$95,168",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 152.44,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$18,314",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 169.45001,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$51,258",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 186.46002,
-                "width": 32.526,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "Actual $7,765 $82,501 $61,164 $95,168 $18,314 $51,258"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 331.75,
-            "y": 82.98999,
-            "width": 62.26599,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Budget",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 331.75,
-                "y": 82.98999,
-                "width": 32.498993,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 2,
                   "text": "$45,902",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 101.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$54,700",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 118.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$16,376",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 135.43,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$97,552",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 152.44,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$42,975",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 169.45001,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$43,462",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 186.46002,
-                "width": 32.526,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "Budget $45,902 $54,700 $16,376 $97,552 $42,975 $43,462"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 427.7,
-            "y": 82.98999,
-            "width": 65.53299,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Variance",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 427.7,
-                "y": 82.98999,
-                "width": 37.520996,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 3,
                   "text": "$-38,137",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 457.71,
-                "y": 101.420044,
-                "width": 35.52301,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 1,
+              "cells": [
                 {
+                  "row": 1,
+                  "col": 0,
+                  "text": "COGS",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "$82,501",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "$54,700",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 3,
                   "text": "$27,801",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 118.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 2,
+              "cells": [
                 {
+                  "row": 2,
+                  "col": 0,
+                  "text": "Gross Profit",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "$61,164",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "$16,376",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 3,
                   "text": "$44,788",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 135.43,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 3,
+              "cells": [
                 {
+                  "row": 3,
+                  "col": 0,
+                  "text": "OpEx",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "text": "$95,168",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "text": "$97,552",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 3,
                   "text": "$-2,384",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 462.71,
-                "y": 152.44,
-                "width": 30.519012,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 4,
+              "cells": [
                 {
+                  "row": 4,
+                  "col": 0,
+                  "text": "EBITDA",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 1,
+                  "text": "$18,314",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 2,
+                  "text": "$42,975",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 3,
                   "text": "$-24,661",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 457.71,
-                "y": 169.45001,
-                "width": 35.52301,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 5,
+              "cells": [
                 {
+                  "row": 5,
+                  "col": 0,
+                  "text": "Net Income",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 1,
+                  "text": "$51,258",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 2,
+                  "text": "$43,462",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 3,
                   "text": "$7,796",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 465.71,
-                "y": 186.46002,
-                "width": 27.522003,
-                "height": 9.0
-              }
+              ]
             }
           ],
-          "normalized_text": "Variance $-38,137 $27,801 $44,788 $-2,384 $-24,661 $7,796"
+          "column_types": [
+            "Text",
+            "Currency",
+            "Currency",
+            "Currency"
+          ],
+          "fallback_text": "[表t0_0 页0]\n行1: Item=Revenue Actual=$7,765 Budget=$45,902 Variance=$-38,137\n行2: Item=COGS Actual=$82,501 Budget=$54,700 Variance=$27,801\n行3: Item=Gross Profit Actual=$61,164 Budget=$16,376 Variance=$44,788\n行4: Item=OpEx Actual=$95,168 Budget=$97,552 Variance=$-2,384\n行5: Item=EBITDA Actual=$18,314 Budget=$42,975 Variance=$-24,661\n行6: Item=Net Income Actual=$51,258 Budget=$43,462 Variance=$7,796",
+          "confidence": {
+            "score": 0.8564227,
+            "alignment_score": 0.90000004,
+            "spacing_score": 0.63691366,
+            "data_density_score": 0.7952,
+            "consistency_score": 1.0
+          }
         }
       ],
-      "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 5,
-        "table_count": 0,
+        "block_count": 1,
+        "table_count": 1,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.94023955,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 55,
+        "extract_ms": 69,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 20758528,
-        "rss_delta_bytes": 327680
+        "peak_rss_bytes": 21315584,
+        "rss_delta_bytes": 671744
       }
     },
     {
@@ -550,525 +337,312 @@
       "rotation": 0.0,
       "blocks": [
         {
-          "block_id": "blk_1",
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 32.72003,
+            "width": 190.624,
+            "height": 14.0
+          },
+          "role": "Header",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Q2 2024 Financial Highlights",
+                  "font_size": 14.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 32.72003,
+                "width": 190.624,
+                "height": 14.0
+              }
+            }
+          ],
+          "normalized_text": "Q2 2024 Financial Highlights"
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t1_0",
+          "page_index": 1,
           "bbox": {
             "x": 31.18,
             "y": 82.98999,
-            "width": 91.453995,
+            "width": 462.053,
             "height": 112.47003
           },
-          "role": "Body",
-          "lines": [
+          "extraction_mode": "Stream",
+          "headers": [
+            "Item",
+            "Actual",
+            "Budget",
+            "Variance"
+          ],
+          "rows": [
             {
-              "spans": [
+              "row_index": 0,
+              "cells": [
                 {
+                  "row": 0,
+                  "col": 0,
                   "text": "Revenue",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 101.420044,
-                "width": 36.017998,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "COGS",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 118.420044,
-                "width": 26.504997,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Gross Profit",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 135.43,
-                "width": 49.509003,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "OpEx",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 152.44,
-                "width": 22.508999,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "EBITDA",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 169.45001,
-                "width": 32.508,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Net Income",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 186.46002,
-                "width": 46.017,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Item",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 104.13,
-                "y": 82.98999,
-                "width": 18.503998,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "Revenue COGS Gross Profit OpEx EBITDA Net Income Item"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 234.28,
-            "y": 82.98999,
-            "width": 60.526,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 1,
                   "text": "$45,358",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 101.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$42,761",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 118.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$54,414",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 135.43,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$74,508",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 152.44,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$53,443",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 169.45001,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$26,903",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 186.46002,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Actual",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 234.28,
-                "y": 82.98999,
-                "width": 29.502014,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "$45,358 $42,761 $54,414 $74,508 $53,443 $26,903 Actual"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 331.75,
-            "y": 82.98999,
-            "width": 62.26599,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 2,
                   "text": "$26,464",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 101.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$56,042",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 118.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$41,578",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 135.43,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$28,156",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 152.44,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$30,128",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 169.45001,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$5,406",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 366.49,
-                "y": 186.46002,
-                "width": 27.522003,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Budget",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 331.75,
-                "y": 82.98999,
-                "width": 32.498993,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "$26,464 $56,042 $41,578 $28,156 $30,128 $5,406 Budget"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 427.7,
-            "y": 82.98999,
-            "width": 65.53299,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 3,
                   "text": "$18,894",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 101.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 1,
+              "cells": [
                 {
+                  "row": 1,
+                  "col": 0,
+                  "text": "COGS",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "$42,761",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "$56,042",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 3,
                   "text": "$-13,281",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 457.71,
-                "y": 118.420044,
-                "width": 35.52301,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 2,
+              "cells": [
                 {
+                  "row": 2,
+                  "col": 0,
+                  "text": "Gross Profit",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "$54,414",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "$41,578",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 3,
                   "text": "$12,836",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 135.43,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 3,
+              "cells": [
                 {
+                  "row": 3,
+                  "col": 0,
+                  "text": "OpEx",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "text": "$74,508",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "text": "$28,156",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 3,
                   "text": "$46,352",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 152.44,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 4,
+              "cells": [
                 {
+                  "row": 4,
+                  "col": 0,
+                  "text": "EBITDA",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 1,
+                  "text": "$53,443",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 2,
+                  "text": "$30,128",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 3,
                   "text": "$23,315",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 169.45001,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 5,
+              "cells": [
                 {
+                  "row": 5,
+                  "col": 0,
+                  "text": "Net Income",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 1,
+                  "text": "$26,903",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 2,
+                  "text": "$5,406",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 3,
                   "text": "$21,497",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 186.46002,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Variance",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 427.7,
-                "y": 82.98999,
-                "width": 37.520996,
-                "height": 9.0
-              }
+              ]
             }
           ],
-          "normalized_text": "$18,894 $-13,281 $12,836 $46,352 $23,315 $21,497 Variance"
+          "column_types": [
+            "Text",
+            "Currency",
+            "Currency",
+            "Currency"
+          ],
+          "fallback_text": "[表t1_0 页1]\n行1: Item=Revenue Actual=$45,358 Budget=$26,464 Variance=$18,894\n行2: Item=COGS Actual=$42,761 Budget=$56,042 Variance=$-13,281\n行3: Item=Gross Profit Actual=$54,414 Budget=$41,578 Variance=$12,836\n行4: Item=OpEx Actual=$74,508 Budget=$28,156 Variance=$46,352\n行5: Item=EBITDA Actual=$53,443 Budget=$30,128 Variance=$23,315\n行6: Item=Net Income Actual=$26,903 Budget=$5,406 Variance=$21,497",
+          "confidence": {
+            "score": 0.85898274,
+            "alignment_score": 0.90000004,
+            "spacing_score": 0.63691366,
+            "data_density_score": 0.80799997,
+            "consistency_score": 1.0
+          }
         }
       ],
-      "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 5,
-        "table_count": 0,
+        "block_count": 1,
+        "table_count": 1,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.9388195,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 53,
+        "extract_ms": 54,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21037056,
-        "rss_delta_bytes": 278528
+        "peak_rss_bytes": 21544960,
+        "rss_delta_bytes": 229376
       }
     },
     {
@@ -1080,525 +654,312 @@
       "rotation": 0.0,
       "blocks": [
         {
-          "block_id": "blk_1",
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 32.72003,
+            "width": 190.624,
+            "height": 14.0
+          },
+          "role": "Header",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Q3 2024 Financial Highlights",
+                  "font_size": 14.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 32.72003,
+                "width": 190.624,
+                "height": 14.0
+              }
+            }
+          ],
+          "normalized_text": "Q3 2024 Financial Highlights"
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t2_0",
+          "page_index": 2,
           "bbox": {
             "x": 31.18,
             "y": 82.98999,
-            "width": 91.453995,
+            "width": 462.053,
             "height": 112.47003
           },
-          "role": "Body",
-          "lines": [
+          "extraction_mode": "Stream",
+          "headers": [
+            "Item",
+            "Actual",
+            "Budget",
+            "Variance"
+          ],
+          "rows": [
             {
-              "spans": [
+              "row_index": 0,
+              "cells": [
                 {
+                  "row": 0,
+                  "col": 0,
                   "text": "Revenue",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 101.420044,
-                "width": 36.017998,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "COGS",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 118.420044,
-                "width": 26.504997,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Gross Profit",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 135.43,
-                "width": 49.509003,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "OpEx",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 152.44,
-                "width": 22.508999,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "EBITDA",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 169.45001,
-                "width": 32.508,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Net Income",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 186.46002,
-                "width": 46.017,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Item",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 104.13,
-                "y": 82.98999,
-                "width": 18.503998,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "Revenue COGS Gross Profit OpEx EBITDA Net Income Item"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 234.28,
-            "y": 82.98999,
-            "width": 60.526,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 1,
                   "text": "$98,392",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 101.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$99,966",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 118.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$34,031",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 135.43,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$41,941",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 152.44,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$92,526",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 169.45001,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$80,537",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 186.46002,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Actual",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 234.28,
-                "y": 82.98999,
-                "width": 29.502014,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "$98,392 $99,966 $34,031 $41,941 $92,526 $80,537 Actual"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 331.75,
-            "y": 82.98999,
-            "width": 62.26599,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 2,
                   "text": "$29,619",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 101.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$2,645",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 366.49,
-                "y": 118.420044,
-                "width": 27.522003,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$66,375",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 135.43,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$74,833",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 152.44,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$55,287",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 169.45001,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$14,784",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 186.46002,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Budget",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 331.75,
-                "y": 82.98999,
-                "width": 32.498993,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "$29,619 $2,645 $66,375 $74,833 $55,287 $14,784 Budget"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 427.7,
-            "y": 82.98999,
-            "width": 65.53299,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 3,
                   "text": "$68,773",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 101.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 1,
+              "cells": [
                 {
+                  "row": 1,
+                  "col": 0,
+                  "text": "COGS",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "$99,966",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "$2,645",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 3,
                   "text": "$97,321",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 118.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 2,
+              "cells": [
                 {
+                  "row": 2,
+                  "col": 0,
+                  "text": "Gross Profit",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "$34,031",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "$66,375",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 3,
                   "text": "$-32,344",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 457.71,
-                "y": 135.43,
-                "width": 35.52301,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 3,
+              "cells": [
                 {
+                  "row": 3,
+                  "col": 0,
+                  "text": "OpEx",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "text": "$41,941",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "text": "$74,833",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 3,
                   "text": "$-32,892",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 457.71,
-                "y": 152.44,
-                "width": 35.52301,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 4,
+              "cells": [
                 {
+                  "row": 4,
+                  "col": 0,
+                  "text": "EBITDA",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 1,
+                  "text": "$92,526",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 2,
+                  "text": "$55,287",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 3,
                   "text": "$37,239",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 169.45001,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 5,
+              "cells": [
                 {
+                  "row": 5,
+                  "col": 0,
+                  "text": "Net Income",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 1,
+                  "text": "$80,537",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 2,
+                  "text": "$14,784",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 3,
                   "text": "$65,753",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 186.46002,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Variance",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 427.7,
-                "y": 82.98999,
-                "width": 37.520996,
-                "height": 9.0
-              }
+              ]
             }
           ],
-          "normalized_text": "$68,773 $97,321 $-32,344 $-32,892 $37,239 $65,753 Variance"
+          "column_types": [
+            "Text",
+            "Currency",
+            "Currency",
+            "Currency"
+          ],
+          "fallback_text": "[表t2_0 页2]\n行1: Item=Revenue Actual=$98,392 Budget=$29,619 Variance=$68,773\n行2: Item=COGS Actual=$99,966 Budget=$2,645 Variance=$97,321\n行3: Item=Gross Profit Actual=$34,031 Budget=$66,375 Variance=$-32,344\n行4: Item=OpEx Actual=$41,941 Budget=$74,833 Variance=$-32,892\n行5: Item=EBITDA Actual=$92,526 Budget=$55,287 Variance=$37,239\n行6: Item=Net Income Actual=$80,537 Budget=$14,784 Variance=$65,753",
+          "confidence": {
+            "score": 0.8584983,
+            "alignment_score": 0.90000004,
+            "spacing_score": 0.63691366,
+            "data_density_score": 0.8055777,
+            "consistency_score": 1.0
+          }
         }
       ],
-      "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 5,
-        "table_count": 0,
+        "block_count": 1,
+        "table_count": 1,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.9394698,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 59,
+        "extract_ms": 58,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21102592,
-        "rss_delta_bytes": 65536
+        "peak_rss_bytes": 21659648,
+        "rss_delta_bytes": 114688
       }
     },
     {
@@ -1610,525 +971,312 @@
       "rotation": 0.0,
       "blocks": [
         {
-          "block_id": "blk_1",
+          "block_id": "blk_0",
+          "bbox": {
+            "x": 31.18,
+            "y": 32.72003,
+            "width": 190.624,
+            "height": 14.0
+          },
+          "role": "Header",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "Q4 2024 Financial Highlights",
+                  "font_size": 14.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 31.18,
+                "y": 32.72003,
+                "width": 190.624,
+                "height": 14.0
+              }
+            }
+          ],
+          "normalized_text": "Q4 2024 Financial Highlights"
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t3_0",
+          "page_index": 3,
           "bbox": {
             "x": 31.18,
             "y": 82.98999,
-            "width": 91.453995,
+            "width": 462.053,
             "height": 112.47003
           },
-          "role": "Body",
-          "lines": [
+          "extraction_mode": "Stream",
+          "headers": [
+            "Item",
+            "Actual",
+            "Budget",
+            "Variance"
+          ],
+          "rows": [
             {
-              "spans": [
+              "row_index": 0,
+              "cells": [
                 {
-                  "text": "Item",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 104.13,
-                "y": 82.98999,
-                "width": 18.503998,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 0,
                   "text": "Revenue",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 101.420044,
-                "width": 36.017998,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "COGS",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 118.420044,
-                "width": 26.504997,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Gross Profit",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 135.43,
-                "width": 49.509003,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "OpEx",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 152.44,
-                "width": 22.508999,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "EBITDA",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 169.45001,
-                "width": 32.508,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Net Income",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 186.46002,
-                "width": 46.017,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "Item Revenue COGS Gross Profit OpEx EBITDA Net Income"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 234.28,
-            "y": 82.98999,
-            "width": 60.526,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Actual",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 234.28,
-                "y": 82.98999,
-                "width": 29.502014,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 1,
                   "text": "$43,501",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 101.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$79,621",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 118.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$31,043",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 135.43,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$48,034",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 152.44,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$26,719",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 169.45001,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$64,763",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 262.28,
-                "y": 186.46002,
-                "width": 32.526,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "Actual $43,501 $79,621 $31,043 $48,034 $26,719 $64,763"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 331.75,
-            "y": 82.98999,
-            "width": 62.26599,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Budget",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 331.75,
-                "y": 82.98999,
-                "width": 32.498993,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 2,
                   "text": "$85,654",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 101.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$30,325",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 118.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$60,952",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 135.43,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$17,939",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 152.44,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$48,436",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 169.45001,
-                "width": 32.526,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$78,151",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.49,
-                "y": 186.46002,
-                "width": 32.526,
-                "height": 9.0
-              }
-            }
-          ],
-          "normalized_text": "Budget $85,654 $30,325 $60,952 $17,939 $48,436 $78,151"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 427.7,
-            "y": 82.98999,
-            "width": 65.53299,
-            "height": 112.47003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Variance",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 427.7,
-                "y": 82.98999,
-                "width": 37.520996,
-                "height": 9.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 3,
                   "text": "$-42,153",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 457.71,
-                "y": 101.420044,
-                "width": 35.52301,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 1,
+              "cells": [
                 {
+                  "row": 1,
+                  "col": 0,
+                  "text": "COGS",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "$79,621",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "$30,325",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 3,
                   "text": "$49,296",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 118.420044,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 2,
+              "cells": [
                 {
+                  "row": 2,
+                  "col": 0,
+                  "text": "Gross Profit",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "$31,043",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "$60,952",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 3,
                   "text": "$-29,909",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 457.71,
-                "y": 135.43,
-                "width": 35.52301,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 3,
+              "cells": [
                 {
+                  "row": 3,
+                  "col": 0,
+                  "text": "OpEx",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "text": "$48,034",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "text": "$17,939",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 3,
                   "text": "$30,095",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 460.7,
-                "y": 152.44,
-                "width": 32.526,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 4,
+              "cells": [
                 {
+                  "row": 4,
+                  "col": 0,
+                  "text": "EBITDA",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 1,
+                  "text": "$26,719",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 2,
+                  "text": "$48,436",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 3,
                   "text": "$-21,717",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 457.71,
-                "y": 169.45001,
-                "width": 35.52301,
-                "height": 9.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 5,
+              "cells": [
                 {
+                  "row": 5,
+                  "col": 0,
+                  "text": "Net Income",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 1,
+                  "text": "$64,763",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 2,
+                  "text": "$78,151",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 3,
                   "text": "$-13,388",
-                  "font_size": 9.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 457.71,
-                "y": 186.46002,
-                "width": 35.52301,
-                "height": 9.0
-              }
+              ]
             }
           ],
-          "normalized_text": "Variance $-42,153 $49,296 $-29,909 $30,095 $-21,717 $-13,388"
+          "column_types": [
+            "Text",
+            "Currency",
+            "Currency",
+            "Currency"
+          ],
+          "fallback_text": "[表t3_0 页3]\n行1: Item=Revenue Actual=$43,501 Budget=$85,654 Variance=$-42,153\n行2: Item=COGS Actual=$79,621 Budget=$30,325 Variance=$49,296\n行3: Item=Gross Profit Actual=$31,043 Budget=$60,952 Variance=$-29,909\n行4: Item=OpEx Actual=$48,034 Budget=$17,939 Variance=$30,095\n行5: Item=EBITDA Actual=$26,719 Budget=$48,436 Variance=$-21,717\n行6: Item=Net Income Actual=$64,763 Budget=$78,151 Variance=$-13,388",
+          "confidence": {
+            "score": 0.8583276,
+            "alignment_score": 0.90000004,
+            "spacing_score": 0.63691366,
+            "data_density_score": 0.8047244,
+            "consistency_score": 1.0
+          }
         }
       ],
-      "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 5,
-        "table_count": 0,
+        "block_count": 1,
+        "table_count": 1,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.94048357,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 72,
+        "extract_ms": 49,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21184512,
-        "rss_delta_bytes": 81920
+        "peak_rss_bytes": 21872640,
+        "rss_delta_bytes": 212992
       }
     }
   ],

@@ -630,7 +630,7 @@ impl pdf_extract::OutputDev for CharCollector {
         for c in char.chars() {
             self.chars.push(RawChar {
                 unicode: c,
-                bbox: BBox::new(x, y_top - fs, char_width.max(fs * 0.5), fs),
+                bbox: BBox::new(x, y_top - fs, char_width.max(fs * 0.1), fs),
                 font_size: fs,
                 font_name: None,
                 is_bold: false,

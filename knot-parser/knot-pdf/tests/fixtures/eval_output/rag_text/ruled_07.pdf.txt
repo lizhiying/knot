@@ -1,5 +1,50 @@
-页=1 bbox=(31,31,137,12) Ruled Table Sample #07
-页=1 bbox=(31,65,65,208) Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Row 7 Row 8 Row 9 Row 10 Item
-页=1 bbox=(191,65,73,208) $41,533 $71,366 $25,994 $10,535 $62,801 $240 $83,358 -12.0% $97,771 $23,741 Quantity
-页=1 bbox=(316,65,66,208) $53,638 $70,349 $20,378 38.6% -20.0% $45,001 $7,586 $33,248 $9,244 $34,593 Price
-页=1 bbox=(431,65,77,208) -5.7% $295 $96,293 $83,638 $89,662 $78,155 19.5% $28,424 $45,771 $54,563 Discount
+表=t0_0 页=0 Item=Row 1 Quantity=$41,533 Price=$53,638 Discount=-5.7%
+表=t0_0 页=0 Item=Row 2 Quantity=$71,366 Price=$70,349 Discount=$295
+表=t0_0 页=0 Item=Row 3 Quantity=$25,994 Price=$20,378 Discount=$96,293
+表=t0_0 页=0 Item=Row 4 Quantity=$10,535 Price=38.6% Discount=$83,638
+表=t0_0 页=0 Item=Row 5 Quantity=$62,801 Price=-20.0% Discount=$89,662
+表=t0_0 页=0 Item=Row 6 Quantity=$240 Price=$45,001 Discount=$78,155
+表=t0_0 页=0 Item=Row 7 Quantity=$83,358 Price=$7,586 Discount=19.5%
+表=t0_0 页=0 Item=Row 8 Quantity=-12.0% Price=$33,248 Discount=$28,424
+表=t0_0 页=0 Item=Row 9 Quantity=$97,771 Price=$9,244 Discount=$45,771
+表=t0_0 页=0 Item=Row 10 Quantity=$23,741 Price=$34,593 Discount=$54,563
+表=t0_0 页=0 行=0 列=Item 值=Row 1 类型=Text
+表=t0_0 页=0 行=0 列=Quantity 值=$41,533 类型=Currency
+表=t0_0 页=0 行=0 列=Price 值=$53,638 类型=Currency
+表=t0_0 页=0 行=0 列=Discount 值=-5.7% 类型=Currency
+表=t0_0 页=0 行=1 列=Item 值=Row 2 类型=Text
+表=t0_0 页=0 行=1 列=Quantity 值=$71,366 类型=Currency
+表=t0_0 页=0 行=1 列=Price 值=$70,349 类型=Currency
+表=t0_0 页=0 行=1 列=Discount 值=$295 类型=Currency
+表=t0_0 页=0 行=2 列=Item 值=Row 3 类型=Text
+表=t0_0 页=0 行=2 列=Quantity 值=$25,994 类型=Currency
+表=t0_0 页=0 行=2 列=Price 值=$20,378 类型=Currency
+表=t0_0 页=0 行=2 列=Discount 值=$96,293 类型=Currency
+表=t0_0 页=0 行=3 列=Item 值=Row 4 类型=Text
+表=t0_0 页=0 行=3 列=Quantity 值=$10,535 类型=Currency
+表=t0_0 页=0 行=3 列=Price 值=38.6% 类型=Currency
+表=t0_0 页=0 行=3 列=Discount 值=$83,638 类型=Currency
+表=t0_0 页=0 行=4 列=Item 值=Row 5 类型=Text
+表=t0_0 页=0 行=4 列=Quantity 值=$62,801 类型=Currency
+表=t0_0 页=0 行=4 列=Price 值=-20.0% 类型=Currency
+表=t0_0 页=0 行=4 列=Discount 值=$89,662 类型=Currency
+表=t0_0 页=0 行=5 列=Item 值=Row 6 类型=Text
+表=t0_0 页=0 行=5 列=Quantity 值=$240 类型=Currency
+表=t0_0 页=0 行=5 列=Price 值=$45,001 类型=Currency
+表=t0_0 页=0 行=5 列=Discount 值=$78,155 类型=Currency
+表=t0_0 页=0 行=6 列=Item 值=Row 7 类型=Text
+表=t0_0 页=0 行=6 列=Quantity 值=$83,358 类型=Currency
+表=t0_0 页=0 行=6 列=Price 值=$7,586 类型=Currency
+表=t0_0 页=0 行=6 列=Discount 值=19.5% 类型=Currency
+表=t0_0 页=0 行=7 列=Item 值=Row 8 类型=Text
+表=t0_0 页=0 行=7 列=Quantity 值=-12.0% 类型=Currency
+表=t0_0 页=0 行=7 列=Price 值=$33,248 类型=Currency
+表=t0_0 页=0 行=7 列=Discount 值=$28,424 类型=Currency
+表=t0_0 页=0 行=8 列=Item 值=Row 9 类型=Text
+表=t0_0 页=0 行=8 列=Quantity 值=$97,771 类型=Currency
+表=t0_0 页=0 行=8 列=Price 值=$9,244 类型=Currency
+表=t0_0 页=0 行=8 列=Discount 值=$45,771 类型=Currency
+表=t0_0 页=0 行=9 列=Item 值=Row 10 类型=Text
+表=t0_0 页=0 行=9 列=Quantity 值=$23,741 类型=Currency
+表=t0_0 页=0 行=9 列=Price 值=$34,593 类型=Currency
+表=t0_0 页=0 行=9 列=Discount 值=$54,563 类型=Currency

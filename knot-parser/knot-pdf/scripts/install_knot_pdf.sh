@@ -27,6 +27,8 @@ echo ""
 #   formula_model — 公式 OCR（纯 Rust ONNX 推理）
 #   layout_model — ONNX 版面检测模型（改善分栏识别）
 
+# cargo install --path knot-parser/knot-pdf --features cli,pdfium,ocr_paddle,vision,formula_model,layout_model --force
+
 FEATURES="cli,pdfium,ocr_paddle,vision,formula_model,layout_model"
 
 echo "📦 编译 features: $FEATURES"

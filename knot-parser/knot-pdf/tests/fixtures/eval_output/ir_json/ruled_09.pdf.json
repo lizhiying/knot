@@ -18,841 +18,469 @@
         "height": 792.0
       },
       "rotation": 0.0,
-      "blocks": [
+      "blocks": [],
+      "tables": [
         {
-          "block_id": "blk_0",
-          "bbox": {
-            "x": 31.18,
-            "y": 31.29004,
-            "width": 137.388,
-            "height": 12.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Ruled Table Sample #09",
-                  "font_size": 12.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 31.29004,
-                "width": 137.388,
-                "height": 12.0
-              }
-            }
-          ],
-          "normalized_text": "Ruled Table Sample #09"
-        },
-        {
-          "block_id": "blk_1",
+          "table_id": "t0_0",
+          "page_index": 0,
           "bbox": {
             "x": 31.18,
             "y": 65.27002,
-            "width": 51.47,
+            "width": 476.224,
             "height": 168.15002
           },
-          "role": "Body",
-          "lines": [
+          "extraction_mode": "Stream",
+          "headers": [
+            "col_0",
+            "col_1",
+            "col_2",
+            "col_3",
+            "col_4"
+          ],
+          "rows": [
             {
-              "spans": [
+              "row_index": 0,
+              "cells": [
                 {
-                  "text": "Row 1",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 86.53003,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 2",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 106.369995,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 3",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 126.21002,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 4",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 146.04999,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 5",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 165.90002,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 6",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 185.73999,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 7",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 205.58002,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 8",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 225.42004,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 0,
                   "text": "Metric",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 59.09,
-                "y": 65.27002,
-                "width": 23.560001,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Row 7 Row 8 Metric"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 149.84,
-            "y": 65.27002,
-            "width": 51.422012,
-            "height": 168.15002
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$95,470",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 172.35,
-                "y": 86.53003,
-                "width": 28.912003,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$93,368",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 172.35,
-                "y": 106.369995,
-                "width": 28.912003,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "-5.8%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 180.36,
-                "y": 126.21002,
-                "width": 20.895996,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$77,483",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 172.35,
-                "y": 146.04999,
-                "width": 28.912003,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$71,787",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 172.35,
-                "y": 165.90002,
-                "width": 28.912003,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "41.4%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 178.58,
-                "y": 185.73999,
-                "width": 22.679993,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "23.2%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 178.58,
-                "y": 205.58002,
-                "width": 22.679993,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "47.5%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 178.58,
-                "y": 225.42004,
-                "width": 22.679993,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 1,
                   "text": "2022",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 149.84,
-                "y": 65.27002,
-                "width": 17.791992,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "$95,470 $93,368 -5.8% $77,483 $71,787 41.4% 23.2% 47.5% 2022"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 251.89,
-            "y": 65.27002,
-            "width": 62.759995,
-            "height": 168.15002
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$72,513",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 285.73,
-                "y": 86.53003,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$38,028",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 285.73,
-                "y": 106.369995,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "21.4%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 291.97,
-                "y": 126.21002,
-                "width": 22.679993,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$77,210",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 285.73,
-                "y": 146.04999,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$94,631",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 285.73,
-                "y": 165.90002,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$87,880",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 285.73,
-                "y": 185.73999,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$20,803",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 285.73,
-                "y": 205.58002,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$99,283",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 285.73,
-                "y": 225.42004,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 2,
                   "text": "2023",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 251.89,
-                "y": 65.27002,
-                "width": 17.792007,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "$72,513 $38,028 21.4% $77,210 $94,631 $87,880 $20,803 $99,283 2023"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 353.94,
-            "y": 65.27002,
-            "width": 51.415985,
-            "height": 168.15002
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "42.2%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 382.67,
-                "y": 86.53003,
-                "width": 22.679993,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$72,798",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 376.44,
-                "y": 106.369995,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$36,752",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 376.44,
-                "y": 126.21002,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "-1.4%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 384.46,
-                "y": 146.04999,
-                "width": 20.895996,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$56,896",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 376.44,
-                "y": 165.90002,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$51,204",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 376.44,
-                "y": 185.73999,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$99,566",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 376.44,
-                "y": 205.58002,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$42,974",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 376.44,
-                "y": 225.42004,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 3,
                   "text": "2024",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 353.94,
-                "y": 65.27002,
-                "width": 17.791992,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "42.2% $72,798 $36,752 -1.4% $56,896 $51,204 $99,566 $42,974 2024"
-        },
-        {
-          "block_id": "blk_5",
-          "bbox": {
-            "x": 447.88,
-            "y": 65.27002,
-            "width": 59.523987,
-            "height": 168.15002
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$37,262",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 478.49,
-                "y": 86.53003,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "-10.8%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 482.06,
-                "y": 106.369995,
-                "width": 25.343994,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$75,203",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 478.49,
-                "y": 126.21002,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$67,891",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 478.49,
-                "y": 146.04999,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$79,609",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 478.49,
-                "y": 165.90002,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$15,987",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 478.49,
-                "y": 185.73999,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$54,562",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 478.49,
-                "y": 205.58002,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$94,041",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 478.49,
-                "y": 225.42004,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 4,
                   "text": "YoY%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 447.88,
-                "y": 65.27002,
-                "width": 22.671997,
-                "height": 8.0
-              }
+              ]
+            },
+            {
+              "row_index": 1,
+              "cells": [
+                {
+                  "row": 1,
+                  "col": 0,
+                  "text": "Row 1",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "$95,470",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "$72,513",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 3,
+                  "text": "42.2%",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 4,
+                  "text": "$37,262",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 2,
+              "cells": [
+                {
+                  "row": 2,
+                  "col": 0,
+                  "text": "Row 2",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "$93,368",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "$38,028",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 3,
+                  "text": "$72,798",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 4,
+                  "text": "-10.8%",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 3,
+              "cells": [
+                {
+                  "row": 3,
+                  "col": 0,
+                  "text": "Row 3",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "text": "-5.8%",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "text": "21.4%",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 3,
+                  "text": "$36,752",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 4,
+                  "text": "$75,203",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 4,
+              "cells": [
+                {
+                  "row": 4,
+                  "col": 0,
+                  "text": "Row 4",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 1,
+                  "text": "$77,483",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 2,
+                  "text": "$77,210",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 3,
+                  "text": "-1.4%",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 4,
+                  "text": "$67,891",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 5,
+              "cells": [
+                {
+                  "row": 5,
+                  "col": 0,
+                  "text": "Row 5",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 1,
+                  "text": "$71,787",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 2,
+                  "text": "$94,631",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 3,
+                  "text": "$56,896",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 4,
+                  "text": "$79,609",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 6,
+              "cells": [
+                {
+                  "row": 6,
+                  "col": 0,
+                  "text": "Row 6",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 1,
+                  "text": "41.4%",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 2,
+                  "text": "$87,880",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 3,
+                  "text": "$51,204",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 4,
+                  "text": "$15,987",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 7,
+              "cells": [
+                {
+                  "row": 7,
+                  "col": 0,
+                  "text": "Row 7",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 1,
+                  "text": "23.2%",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 2,
+                  "text": "$20,803",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 3,
+                  "text": "$99,566",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 4,
+                  "text": "$54,562",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 8,
+              "cells": [
+                {
+                  "row": 8,
+                  "col": 0,
+                  "text": "Row 8",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 1,
+                  "text": "47.5%",
+                  "cell_type": "Percent",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 2,
+                  "text": "$99,283",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 3,
+                  "text": "$42,974",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 4,
+                  "text": "$94,041",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
             }
           ],
-          "normalized_text": "$37,262 -10.8% $75,203 $67,891 $79,609 $15,987 $54,562 $94,041 YoY%"
+          "column_types": [
+            "Text",
+            "Percent",
+            "Currency",
+            "Currency",
+            "Currency"
+          ],
+          "fallback_text": "[表t0_0 页0]\n行1: col_0=Metric col_1=2022 col_2=2023 col_3=2024 col_4=YoY%\n行2: col_0=Row 1 col_1=$95,470 col_2=$72,513 col_3=42.2% col_4=$37,262\n行3: col_0=Row 2 col_1=$93,368 col_2=$38,028 col_3=$72,798 col_4=-10.8%\n行4: col_0=Row 3 col_1=-5.8% col_2=21.4% col_3=$36,752 col_4=$75,203\n行5: col_0=Row 4 col_1=$77,483 col_2=$77,210 col_3=-1.4% col_4=$67,891\n行6: col_0=Row 5 col_1=$71,787 col_2=$94,631 col_3=$56,896 col_4=$79,609\n行7: col_0=Row 6 col_1=41.4% col_2=$87,880 col_3=$51,204 col_4=$15,987\n行8: col_0=Row 7 col_1=23.2% col_2=$20,803 col_3=$99,566 col_4=$54,562\n行9: col_0=Row 8 col_1=47.5% col_2=$99,283 col_3=$42,974 col_4=$94,041",
+          "confidence": {
+            "score": 0.89488953,
+            "alignment_score": 0.92222226,
+            "spacing_score": 0.591114,
+            "data_density_score": 1.0,
+            "consistency_score": 1.0
+          }
         }
       ],
-      "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 6,
-        "table_count": 0,
+        "block_count": 0,
+        "table_count": 1,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.9446063,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 28,
+        "extract_ms": 35,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21102592,
-        "rss_delta_bytes": 16384
+        "peak_rss_bytes": 21659648,
+        "rss_delta_bytes": 81920
       }
     }
   ],

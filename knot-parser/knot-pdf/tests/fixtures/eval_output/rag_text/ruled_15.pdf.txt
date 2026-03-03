@@ -1,8 +1,96 @@
-页=1 bbox=(31,31,137,12) Ruled Table Sample #15
-页=1 bbox=(31,65,45,248) Item Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Row 7 Row 8 Row 9 Row 10 Row 11 Row 12
-页=1 bbox=(114,65,36,248) Quantity $53,547 $16,876 $92,693 15.2% $844 $62,550 $65,073 $71,999 $85,629 34.5% $1,087 $2,339
-页=1 bbox=(176,65,40,248) Price $5,601 $85,501 $44,764 $66,921 13.4% 26.2% $24,367 8.3% $15,986 $38,979 $72,503 $13,601
-页=1 bbox=(238,65,51,248) Discount $35,671 $57,815 $19,849 $25,228 $54,469 45.9% $51,403 $44,550 $39,363 $98,250 $67,351 $28,496
-页=1 bbox=(318,65,37,248) Tax $44,446 $60,053 $26,172 $88,018 $90,520 $40,885 $10,576 $8,586 $53,632 $70,769 $47,235 $53,182
-页=1 bbox=(387,65,46,248) Total $14,149 $51,773 $1,447 $80,084 $8,493 $81,038 24.1% $16,185 $8,177 $83,229 31.8% 33.9%
-页=1 bbox=(462,65,45,248) Notes -18.0% $89,415 $43,439 -14.5% $67,985 33.7% $50,387 $8,368 $34,287 $98,198 $1,678 $86,539
+表=t0_0 页=0 Item=Row 1 Quantity=$53,547 Price=$5,601 Discount=$35,671 Tax=$44,446 Total=$14,149 Notes=-18.0%
+表=t0_0 页=0 Item=Row 2 Quantity=$16,876 Price=$85,501 Discount=$57,815 Tax=$60,053 Total=$51,773 Notes=$89,415
+表=t0_0 页=0 Item=Row 3 Quantity=$92,693 Price=$44,764 Discount=$19,849 Tax=$26,172 Total=$1,447 Notes=$43,439
+表=t0_0 页=0 Item=Row 4 Quantity=15.2% Price=$66,921 Discount=$25,228 Tax=$88,018 Total=$80,084 Notes=-14.5%
+表=t0_0 页=0 Item=Row 5 Quantity=$844 Price=13.4% Discount=$54,469 Tax=$90,520 Total=$8,493 Notes=$67,985
+表=t0_0 页=0 Item=Row 6 Quantity=$62,550 Price=26.2% Discount=45.9% Tax=$40,885 Total=$81,038 Notes=33.7%
+表=t0_0 页=0 Item=Row 7 Quantity=$65,073 Price=$24,367 Discount=$51,403 Tax=$10,576 Total=24.1% Notes=$50,387
+表=t0_0 页=0 Item=Row 8 Quantity=$71,999 Price=8.3% Discount=$44,550 Tax=$8,586 Total=$16,185 Notes=$8,368
+表=t0_0 页=0 Item=Row 9 Quantity=$85,629 Price=$15,986 Discount=$39,363 Tax=$53,632 Total=$8,177 Notes=$34,287
+表=t0_0 页=0 Item=Row 10 Quantity=34.5% Price=$38,979 Discount=$98,250 Tax=$70,769 Total=$83,229 Notes=$98,198
+表=t0_0 页=0 Item=Row 11 Quantity=$1,087 Price=$72,503 Discount=$67,351 Tax=$47,235 Total=31.8% Notes=$1,678
+表=t0_0 页=0 Item=Row 12 Quantity=$2,339 Price=$13,601 Discount=$28,496 Tax=$53,182 Total=33.9% Notes=$86,539
+表=t0_0 页=0 行=0 列=Item 值=Row 1 类型=Text
+表=t0_0 页=0 行=0 列=Quantity 值=$53,547 类型=Currency
+表=t0_0 页=0 行=0 列=Price 值=$5,601 类型=Currency
+表=t0_0 页=0 行=0 列=Discount 值=$35,671 类型=Currency
+表=t0_0 页=0 行=0 列=Tax 值=$44,446 类型=Currency
+表=t0_0 页=0 行=0 列=Total 值=$14,149 类型=Currency
+表=t0_0 页=0 行=0 列=Notes 值=-18.0% 类型=Currency
+表=t0_0 页=0 行=1 列=Item 值=Row 2 类型=Text
+表=t0_0 页=0 行=1 列=Quantity 值=$16,876 类型=Currency
+表=t0_0 页=0 行=1 列=Price 值=$85,501 类型=Currency
+表=t0_0 页=0 行=1 列=Discount 值=$57,815 类型=Currency
+表=t0_0 页=0 行=1 列=Tax 值=$60,053 类型=Currency
+表=t0_0 页=0 行=1 列=Total 值=$51,773 类型=Currency
+表=t0_0 页=0 行=1 列=Notes 值=$89,415 类型=Currency
+表=t0_0 页=0 行=2 列=Item 值=Row 3 类型=Text
+表=t0_0 页=0 行=2 列=Quantity 值=$92,693 类型=Currency
+表=t0_0 页=0 行=2 列=Price 值=$44,764 类型=Currency
+表=t0_0 页=0 行=2 列=Discount 值=$19,849 类型=Currency
+表=t0_0 页=0 行=2 列=Tax 值=$26,172 类型=Currency
+表=t0_0 页=0 行=2 列=Total 值=$1,447 类型=Currency
+表=t0_0 页=0 行=2 列=Notes 值=$43,439 类型=Currency
+表=t0_0 页=0 行=3 列=Item 值=Row 4 类型=Text
+表=t0_0 页=0 行=3 列=Quantity 值=15.2% 类型=Currency
+表=t0_0 页=0 行=3 列=Price 值=$66,921 类型=Currency
+表=t0_0 页=0 行=3 列=Discount 值=$25,228 类型=Currency
+表=t0_0 页=0 行=3 列=Tax 值=$88,018 类型=Currency
+表=t0_0 页=0 行=3 列=Total 值=$80,084 类型=Currency
+表=t0_0 页=0 行=3 列=Notes 值=-14.5% 类型=Currency
+表=t0_0 页=0 行=4 列=Item 值=Row 5 类型=Text
+表=t0_0 页=0 行=4 列=Quantity 值=$844 类型=Currency
+表=t0_0 页=0 行=4 列=Price 值=13.4% 类型=Currency
+表=t0_0 页=0 行=4 列=Discount 值=$54,469 类型=Currency
+表=t0_0 页=0 行=4 列=Tax 值=$90,520 类型=Currency
+表=t0_0 页=0 行=4 列=Total 值=$8,493 类型=Currency
+表=t0_0 页=0 行=4 列=Notes 值=$67,985 类型=Currency
+表=t0_0 页=0 行=5 列=Item 值=Row 6 类型=Text
+表=t0_0 页=0 行=5 列=Quantity 值=$62,550 类型=Currency
+表=t0_0 页=0 行=5 列=Price 值=26.2% 类型=Currency
+表=t0_0 页=0 行=5 列=Discount 值=45.9% 类型=Currency
+表=t0_0 页=0 行=5 列=Tax 值=$40,885 类型=Currency
+表=t0_0 页=0 行=5 列=Total 值=$81,038 类型=Currency
+表=t0_0 页=0 行=5 列=Notes 值=33.7% 类型=Currency
+表=t0_0 页=0 行=6 列=Item 值=Row 7 类型=Text
+表=t0_0 页=0 行=6 列=Quantity 值=$65,073 类型=Currency
+表=t0_0 页=0 行=6 列=Price 值=$24,367 类型=Currency
+表=t0_0 页=0 行=6 列=Discount 值=$51,403 类型=Currency
+表=t0_0 页=0 行=6 列=Tax 值=$10,576 类型=Currency
+表=t0_0 页=0 行=6 列=Total 值=24.1% 类型=Currency
+表=t0_0 页=0 行=6 列=Notes 值=$50,387 类型=Currency
+表=t0_0 页=0 行=7 列=Item 值=Row 8 类型=Text
+表=t0_0 页=0 行=7 列=Quantity 值=$71,999 类型=Currency
+表=t0_0 页=0 行=7 列=Price 值=8.3% 类型=Currency
+表=t0_0 页=0 行=7 列=Discount 值=$44,550 类型=Currency
+表=t0_0 页=0 行=7 列=Tax 值=$8,586 类型=Currency
+表=t0_0 页=0 行=7 列=Total 值=$16,185 类型=Currency
+表=t0_0 页=0 行=7 列=Notes 值=$8,368 类型=Currency
+表=t0_0 页=0 行=8 列=Item 值=Row 9 类型=Text
+表=t0_0 页=0 行=8 列=Quantity 值=$85,629 类型=Currency
+表=t0_0 页=0 行=8 列=Price 值=$15,986 类型=Currency
+表=t0_0 页=0 行=8 列=Discount 值=$39,363 类型=Currency
+表=t0_0 页=0 行=8 列=Tax 值=$53,632 类型=Currency
+表=t0_0 页=0 行=8 列=Total 值=$8,177 类型=Currency
+表=t0_0 页=0 行=8 列=Notes 值=$34,287 类型=Currency
+表=t0_0 页=0 行=9 列=Item 值=Row 10 类型=Text
+表=t0_0 页=0 行=9 列=Quantity 值=34.5% 类型=Currency
+表=t0_0 页=0 行=9 列=Price 值=$38,979 类型=Currency
+表=t0_0 页=0 行=9 列=Discount 值=$98,250 类型=Currency
+表=t0_0 页=0 行=9 列=Tax 值=$70,769 类型=Currency
+表=t0_0 页=0 行=9 列=Total 值=$83,229 类型=Currency
+表=t0_0 页=0 行=9 列=Notes 值=$98,198 类型=Currency
+表=t0_0 页=0 行=10 列=Item 值=Row 11 类型=Text
+表=t0_0 页=0 行=10 列=Quantity 值=$1,087 类型=Currency
+表=t0_0 页=0 行=10 列=Price 值=$72,503 类型=Currency
+表=t0_0 页=0 行=10 列=Discount 值=$67,351 类型=Currency
+表=t0_0 页=0 行=10 列=Tax 值=$47,235 类型=Currency
+表=t0_0 页=0 行=10 列=Total 值=31.8% 类型=Currency
+表=t0_0 页=0 行=10 列=Notes 值=$1,678 类型=Currency
+表=t0_0 页=0 行=11 列=Item 值=Row 12 类型=Text
+表=t0_0 页=0 行=11 列=Quantity 值=$2,339 类型=Currency
+表=t0_0 页=0 行=11 列=Price 值=$13,601 类型=Currency
+表=t0_0 页=0 行=11 列=Discount 值=$28,496 类型=Currency
+表=t0_0 页=0 行=11 列=Tax 值=$53,182 类型=Currency
+表=t0_0 页=0 行=11 列=Total 值=33.9% 类型=Currency
+表=t0_0 页=0 行=11 列=Notes 值=$86,539 类型=Currency

@@ -1,5 +1,60 @@
-页=1 bbox=(31,31,137,12) Ruled Table Sample #20
-页=1 bbox=(31,65,74,248) Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Row 7 Row 8 Row 9 Row 10 Row 11 TOTAL Category
-页=1 bbox=(200,65,64,248) $83,044 $53,897 $12,942 $87,296 $92,316 14.2% $23,939 -23.2% $91,402 15.6% 29.8% $87,513 Jan
-页=1 bbox=(319,65,64,248) $14,264 $12,863 $9,454 18.9% $36,942 $21,102 $317 $44,997 $10,696 -3.7% $64,368 $676 Feb
-页=1 bbox=(441,65,67,248) $98,544 -24.3% $94,763 $54,378 $62,482 $79,410 $19,001 $65,164 $24,247 $40,745 $40,749 $84,922 Mar
+表=t0_0 页=0 Category=Row 1 Jan=$83,044 Feb=$14,264 Mar=$98,544
+表=t0_0 页=0 Category=Row 2 Jan=$53,897 Feb=$12,863 Mar=-24.3%
+表=t0_0 页=0 Category=Row 3 Jan=$12,942 Feb=$9,454 Mar=$94,763
+表=t0_0 页=0 Category=Row 4 Jan=$87,296 Feb=18.9% Mar=$54,378
+表=t0_0 页=0 Category=Row 5 Jan=$92,316 Feb=$36,942 Mar=$62,482
+表=t0_0 页=0 Category=Row 6 Jan=14.2% Feb=$21,102 Mar=$79,410
+表=t0_0 页=0 Category=Row 7 Jan=$23,939 Feb=$317 Mar=$19,001
+表=t0_0 页=0 Category=Row 8 Jan=-23.2% Feb=$44,997 Mar=$65,164
+表=t0_0 页=0 Category=Row 9 Jan=$91,402 Feb=$10,696 Mar=$24,247
+表=t0_0 页=0 Category=Row 10 Jan=15.6% Feb=-3.7% Mar=$40,745
+表=t0_0 页=0 Category=Row 11 Jan=29.8% Feb=$64,368 Mar=$40,749
+表=t0_0 页=0 Category=TOTAL Jan=$87,513 Feb=$676 Mar=$84,922
+表=t0_0 页=0 行=0 列=Category 值=Row 1 类型=Text
+表=t0_0 页=0 行=0 列=Jan 值=$83,044 类型=Currency
+表=t0_0 页=0 行=0 列=Feb 值=$14,264 类型=Currency
+表=t0_0 页=0 行=0 列=Mar 值=$98,544 类型=Currency
+表=t0_0 页=0 行=1 列=Category 值=Row 2 类型=Text
+表=t0_0 页=0 行=1 列=Jan 值=$53,897 类型=Currency
+表=t0_0 页=0 行=1 列=Feb 值=$12,863 类型=Currency
+表=t0_0 页=0 行=1 列=Mar 值=-24.3% 类型=Currency
+表=t0_0 页=0 行=2 列=Category 值=Row 3 类型=Text
+表=t0_0 页=0 行=2 列=Jan 值=$12,942 类型=Currency
+表=t0_0 页=0 行=2 列=Feb 值=$9,454 类型=Currency
+表=t0_0 页=0 行=2 列=Mar 值=$94,763 类型=Currency
+表=t0_0 页=0 行=3 列=Category 值=Row 4 类型=Text
+表=t0_0 页=0 行=3 列=Jan 值=$87,296 类型=Currency
+表=t0_0 页=0 行=3 列=Feb 值=18.9% 类型=Currency
+表=t0_0 页=0 行=3 列=Mar 值=$54,378 类型=Currency
+表=t0_0 页=0 行=4 列=Category 值=Row 5 类型=Text
+表=t0_0 页=0 行=4 列=Jan 值=$92,316 类型=Currency
+表=t0_0 页=0 行=4 列=Feb 值=$36,942 类型=Currency
+表=t0_0 页=0 行=4 列=Mar 值=$62,482 类型=Currency
+表=t0_0 页=0 行=5 列=Category 值=Row 6 类型=Text
+表=t0_0 页=0 行=5 列=Jan 值=14.2% 类型=Currency
+表=t0_0 页=0 行=5 列=Feb 值=$21,102 类型=Currency
+表=t0_0 页=0 行=5 列=Mar 值=$79,410 类型=Currency
+表=t0_0 页=0 行=6 列=Category 值=Row 7 类型=Text
+表=t0_0 页=0 行=6 列=Jan 值=$23,939 类型=Currency
+表=t0_0 页=0 行=6 列=Feb 值=$317 类型=Currency
+表=t0_0 页=0 行=6 列=Mar 值=$19,001 类型=Currency
+表=t0_0 页=0 行=7 列=Category 值=Row 8 类型=Text
+表=t0_0 页=0 行=7 列=Jan 值=-23.2% 类型=Currency
+表=t0_0 页=0 行=7 列=Feb 值=$44,997 类型=Currency
+表=t0_0 页=0 行=7 列=Mar 值=$65,164 类型=Currency
+表=t0_0 页=0 行=8 列=Category 值=Row 9 类型=Text
+表=t0_0 页=0 行=8 列=Jan 值=$91,402 类型=Currency
+表=t0_0 页=0 行=8 列=Feb 值=$10,696 类型=Currency
+表=t0_0 页=0 行=8 列=Mar 值=$24,247 类型=Currency
+表=t0_0 页=0 行=9 列=Category 值=Row 10 类型=Text
+表=t0_0 页=0 行=9 列=Jan 值=15.6% 类型=Currency
+表=t0_0 页=0 行=9 列=Feb 值=-3.7% 类型=Currency
+表=t0_0 页=0 行=9 列=Mar 值=$40,745 类型=Currency
+表=t0_0 页=0 行=10 列=Category 值=Row 11 类型=Text
+表=t0_0 页=0 行=10 列=Jan 值=29.8% 类型=Currency
+表=t0_0 页=0 行=10 列=Feb 值=$64,368 类型=Currency
+表=t0_0 页=0 行=10 列=Mar 值=$40,749 类型=Currency
+表=t0_0 页=0 行=11 列=Category 值=TOTAL 类型=Text
+表=t0_0 页=0 行=11 列=Jan 值=$87,513 类型=Currency
+表=t0_0 页=0 行=11 列=Feb 值=$676 类型=Currency
+表=t0_0 页=0 行=11 列=Mar 值=$84,922 类型=Currency

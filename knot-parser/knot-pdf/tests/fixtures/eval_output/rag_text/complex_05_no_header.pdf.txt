@@ -1,5 +1,50 @@
-页=1 bbox=(31,33,108,10) Table Without Headers
-页=1 bbox=(31,55,44,148) Category 1 Category 2 Category 3 Category 4 Category 5 Category 6 Category 7 Category 8
-页=1 bbox=(206,55,33,148) $43,547 $15,525 $24,822 $13,752 $48,396 $5,648 $18,197 $14,310
-页=1 bbox=(319,55,18,148) 4% 35% 14% 34% 15% 78% 75% 32%
-页=1 bbox=(379,55,39,148) Excellent Good Excellent Fair Fair Good Good Fair
+表=t0_0 页=0 col_0=Category 1 col_1=$43,547 col_2=4% col_3=Excellent col_4=
+表=t0_0 页=0 col_0=Category 2 col_1=$15,525 col_2=35% col_3= col_4=Good
+表=t0_0 页=0 col_0=Category 3 col_1=$24,822 col_2=14% col_3=Excellent col_4=
+表=t0_0 页=0 col_0=Category 4 col_1=$13,752 col_2=34% col_3= col_4=Fair
+表=t0_0 页=0 col_0=Category 5 col_1=$48,396 col_2=15% col_3= col_4=
+表=t0_2 页=0 col_0=Category 5 col_1=$48,396 col_2=15% col_3=Fair
+表=t0_2 页=0 col_0=Category 6 col_1=$5,648 col_2=78% col_3=Good
+表=t0_2 页=0 col_0=Category 7 col_1=$18,197 col_2=75% col_3=
+表=t0_2 页=0 col_0=Category 8 col_1=$14,310 col_2=32% col_3=Fair
+表=t0_0 页=0 行=0 列=col_0 值=Category 1 类型=Text
+表=t0_0 页=0 行=0 列=col_1 值=$43,547 类型=Currency
+表=t0_0 页=0 行=0 列=col_2 值=4% 类型=Percent
+表=t0_0 页=0 行=0 列=col_3 值=Excellent 类型=Text
+表=t0_0 页=0 行=0 列=col_4 值= 类型=Text
+表=t0_0 页=0 行=1 列=col_0 值=Category 2 类型=Text
+表=t0_0 页=0 行=1 列=col_1 值=$15,525 类型=Currency
+表=t0_0 页=0 行=1 列=col_2 值=35% 类型=Percent
+表=t0_0 页=0 行=1 列=col_3 值= 类型=Text
+表=t0_0 页=0 行=1 列=col_4 值=Good 类型=Text
+表=t0_0 页=0 行=2 列=col_0 值=Category 3 类型=Text
+表=t0_0 页=0 行=2 列=col_1 值=$24,822 类型=Currency
+表=t0_0 页=0 行=2 列=col_2 值=14% 类型=Percent
+表=t0_0 页=0 行=2 列=col_3 值=Excellent 类型=Text
+表=t0_0 页=0 行=2 列=col_4 值= 类型=Text
+表=t0_0 页=0 行=3 列=col_0 值=Category 4 类型=Text
+表=t0_0 页=0 行=3 列=col_1 值=$13,752 类型=Currency
+表=t0_0 页=0 行=3 列=col_2 值=34% 类型=Percent
+表=t0_0 页=0 行=3 列=col_3 值= 类型=Text
+表=t0_0 页=0 行=3 列=col_4 值=Fair 类型=Text
+表=t0_0 页=0 行=4 列=col_0 值=Category 5 类型=Text
+表=t0_0 页=0 行=4 列=col_1 值=$48,396 类型=Currency
+表=t0_0 页=0 行=4 列=col_2 值=15% 类型=Percent
+表=t0_0 页=0 行=4 列=col_3 值= 类型=Text
+表=t0_0 页=0 行=4 列=col_4 值= 类型=Text
+表=t0_2 页=0 行=0 列=col_0 值=Category 5 类型=Text
+表=t0_2 页=0 行=0 列=col_1 值=$48,396 类型=Currency
+表=t0_2 页=0 行=0 列=col_2 值=15% 类型=Percent
+表=t0_2 页=0 行=0 列=col_3 值=Fair 类型=Text
+表=t0_2 页=0 行=1 列=col_0 值=Category 6 类型=Text
+表=t0_2 页=0 行=1 列=col_1 值=$5,648 类型=Currency
+表=t0_2 页=0 行=1 列=col_2 值=78% 类型=Percent
+表=t0_2 页=0 行=1 列=col_3 值=Good 类型=Text
+表=t0_2 页=0 行=2 列=col_0 值=Category 7 类型=Text
+表=t0_2 页=0 行=2 列=col_1 值=$18,197 类型=Currency
+表=t0_2 页=0 行=2 列=col_2 值=75% 类型=Percent
+表=t0_2 页=0 行=2 列=col_3 值= 类型=Text
+表=t0_2 页=0 行=3 列=col_0 值=Category 8 类型=Text
+表=t0_2 页=0 行=3 列=col_1 值=$14,310 类型=Currency
+表=t0_2 页=0 行=3 列=col_2 值=32% 类型=Percent
+表=t0_2 页=0 行=3 列=col_3 值=Fair 类型=Text

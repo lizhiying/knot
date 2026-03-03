@@ -34,9 +34,19 @@ impl PdfiumBackend {
     fn find_pdfium() -> Result<Box<dyn PdfiumLibraryBindings>, PdfError> {
         let mut search_paths: Vec<PathBuf> = Vec::new();
 
+        // 环境变量优先
+        if let Ok(path) = std::env::var("PDFIUM_LIB_PATH") {
+            search_paths.push(PathBuf::from(path));
+        }
+
         if let Ok(exe) = std::env::current_exe() {
+            println!("[PdfiumBackend] current_exe: {:?}", exe);
             if let Some(dir) = exe.parent() {
                 search_paths.push(dir.to_path_buf());
+                // Tauri 打包时 libpdfium.dylib 可能在 bin/ 子目录
+                search_paths.push(dir.join("bin"));
+                // 或者在 _up_/bin/ (Tauri bundle layout)
+                search_paths.push(dir.join("_up_").join("bin"));
             }
         }
         search_paths.push(PathBuf::from("."));
@@ -44,13 +54,21 @@ impl PdfiumBackend {
         for path in &search_paths {
             let lib_name =
                 Pdfium::pdfium_platform_library_name_at_path(path.to_str().unwrap_or("."));
-            if let Ok(bindings) = Pdfium::bind_to_library(lib_name) {
-                log::info!("PdfiumBackend: library bound from: {}", path.display());
-                return Ok(bindings);
+            println!("[PdfiumBackend] Trying: {:?}", lib_name);
+            match Pdfium::bind_to_library(&lib_name) {
+                Ok(bindings) => {
+                    println!("[PdfiumBackend] ✓ Bound from: {}", path.display());
+                    return Ok(bindings);
+                }
+                Err(e) => {
+                    println!("[PdfiumBackend] ✗ Failed: {} ({})", path.display(), e);
+                }
             }
         }
 
+        println!("[PdfiumBackend] Trying system library...");
         Pdfium::bind_to_system_library().map_err(|e| {
+            println!("[PdfiumBackend] ✗ System library failed: {}", e);
             PdfError::Backend(format!("PdfiumBackend: Failed to bind libpdfium: {}", e))
         })
     }
@@ -143,7 +161,7 @@ impl PdfBackend for PdfiumBackend {
                 }
 
                 // 获取字符边界框
-                let rect = match ch.tight_bounds() {
+                let rect = match ch.loose_bounds() {
                     Ok(r) => r,
                     Err(_) => continue,
                 };

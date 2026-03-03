@@ -126,8 +126,29 @@ pub struct PageIndexConfig<'a> {
     /// 文档语言偏好（辅助 OCR 和语义分割）
     pub default_language: String,
 
-    /// 进度回调：(current_page, total_pages)
-    pub progress_callback: Option<&'a (dyn Fn(usize, usize) + Send + Sync)>,
+    /// 进度回调：(current_page, total_pages) — 使用 Arc 以便传递给 Pipeline
+    pub progress_callback: Option<std::sync::Arc<dyn Fn(usize, usize) + Send + Sync>>,
+
+    /// 逐页内容回调：(page_index, total_pages, markdown_content)
+    /// 用于在 PDF 解析过程中实时推送每页的 markdown 内容
+    pub page_content_callback: Option<std::sync::Arc<dyn Fn(usize, usize, String) + Send + Sync>>,
+
+    // === PDF 专属配置（集成 knot-pdf） ===
+    /// 是否启用 PDF OCR（扫描件回退）
+    pub pdf_ocr_enabled: bool,
+
+    /// PaddleOCR 模型目录路径（包含 det.onnx / rec.onnx / ppocrv5_dict.txt）
+    pub pdf_ocr_model_dir: Option<String>,
+
+    /// Vision LLM API URL（用于复杂排版页面的智能理解）
+    /// 格式：OpenAI 兼容，如 "http://127.0.0.1:18080/v1/chat/completions"
+    pub pdf_vision_api_url: Option<String>,
+
+    /// Vision LLM 模型名称（如 "OCRFlux-3B", "gpt-4o"）
+    pub pdf_vision_model: Option<String>,
+
+    /// PDF 页码过滤（仅解析指定页面，0-indexed）
+    pub pdf_page_indices: Option<Vec<usize>>,
 }
 
 impl<'a> PageIndexConfig<'a> {
@@ -146,6 +167,12 @@ impl<'a> PageIndexConfig<'a> {
             enable_auto_summary: true, // 默认开启摘要生成
             default_language: "zh".to_string(),
             progress_callback: None,
+            page_content_callback: None,
+            pdf_ocr_enabled: false,
+            pdf_ocr_model_dir: None,
+            pdf_vision_api_url: None,
+            pdf_vision_model: None,
+            pdf_page_indices: None,
         }
     }
 
@@ -170,6 +197,26 @@ impl<'a> PageIndexConfig<'a> {
     /// Builder method to disable auto summary.
     pub fn without_auto_summary(mut self) -> Self {
         self.enable_auto_summary = false;
+        self
+    }
+
+    /// Builder method to enable PDF OCR.
+    pub fn with_pdf_ocr(mut self, model_dir: Option<&str>) -> Self {
+        self.pdf_ocr_enabled = true;
+        self.pdf_ocr_model_dir = model_dir.map(|s| s.to_string());
+        self
+    }
+
+    /// Builder method to set PDF Vision LLM.
+    pub fn with_pdf_vision(mut self, api_url: &str, model: &str) -> Self {
+        self.pdf_vision_api_url = Some(api_url.to_string());
+        self.pdf_vision_model = Some(model.to_string());
+        self
+    }
+
+    /// Builder method to set PDF page filter.
+    pub fn with_pdf_pages(mut self, pages: Vec<usize>) -> Self {
+        self.pdf_page_indices = Some(pages);
         self
     }
 }

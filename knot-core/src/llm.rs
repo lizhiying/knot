@@ -72,13 +72,22 @@ impl LlamaSidecar {
     ) -> Result<Self> {
         // 根据平台选择正确的二进制文件
         #[cfg(target_os = "macos")]
-        let server_name = "llama-server-mac-metal";
+        let bin_path = {
+            // macOS: 优先用 Homebrew 安装的版本（支持最新模型架构如 GLM-OCR）
+            let homebrew_path = std::path::PathBuf::from("/opt/homebrew/bin/llama-server");
+            if homebrew_path.exists() {
+                if !quiet {
+                    println!("[LLM] Using Homebrew llama-server: {:?}", homebrew_path);
+                }
+                homebrew_path
+            } else {
+                bin_dir.join("llama").join("llama-server-mac-metal")
+            }
+        };
         #[cfg(target_os = "windows")]
-        let server_name = "llama-server.exe";
+        let bin_path = bin_dir.join("llama").join("llama-server.exe");
         #[cfg(target_os = "linux")]
-        let server_name = "llama-server";
-
-        let bin_path = bin_dir.join("llama").join(server_name);
+        let bin_path = bin_dir.join("llama").join("llama-server");
 
         // CLEANUP: Check for zombie processes on the target port
         cleanup_process_on_port(port);

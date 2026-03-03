@@ -18,431 +18,234 @@
         "height": 792.0
       },
       "rotation": 0.0,
-      "blocks": [
+      "blocks": [],
+      "tables": [
         {
-          "block_id": "blk_0",
-          "bbox": {
-            "x": 31.18,
-            "y": 31.29004,
-            "width": 137.388,
-            "height": 12.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Ruled Table Sample #06",
-                  "font_size": 12.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 31.29004,
-                "width": 137.388,
-                "height": 12.0
-              }
-            }
-          ],
-          "normalized_text": "Ruled Table Sample #06"
-        },
-        {
-          "block_id": "blk_1",
+          "table_id": "t0_0",
+          "page_index": 0,
           "bbox": {
             "x": 31.18,
             "y": 65.27002,
-            "width": 71.754,
+            "width": 476.226,
             "height": 128.46997
           },
-          "role": "Body",
-          "lines": [
+          "extraction_mode": "Stream",
+          "headers": [
+            "Department",
+            "Budget",
+            "Actual"
+          ],
+          "rows": [
             {
-              "spans": [
+              "row_index": 0,
+              "cells": [
                 {
+                  "row": 0,
+                  "col": 0,
                   "text": "Row 1",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 86.53003,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "Row 2",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 106.369995,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 3",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 126.21002,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 4",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 146.04999,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 5",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 165.90002,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Row 6",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 185.73999,
-                "width": 22.671997,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Department",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 57.15,
-                "y": 65.27002,
-                "width": 45.783997,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Department"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 220.08,
-            "y": 65.27002,
-            "width": 114.41197,
-            "height": 128.46997
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 1,
                   "text": "-1.8%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 313.59,
-                "y": 86.53003,
-                "width": 20.895996,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "$98,146",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 305.58,
-                "y": 106.369995,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$43,071",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 305.58,
-                "y": 126.21002,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$25,383",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 305.58,
-                "y": 146.04999,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$2,450",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 310.02,
-                "y": 165.90002,
-                "width": 24.46399,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "$16,999",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 305.58,
-                "y": 185.73999,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Budget",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 220.08,
-                "y": 65.27002,
-                "width": 28.888,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "-1.8% $98,146 $43,071 $25,383 $2,450 $16,999 Budget"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 411.56,
-            "y": 65.27002,
-            "width": 95.84601,
-            "height": 128.46997
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 2,
                   "text": "-20.9%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 482.06,
-                "y": 86.53003,
-                "width": 25.343994,
-                "height": 8.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 1,
+              "cells": [
                 {
+                  "row": 1,
+                  "col": 0,
+                  "text": "Row 2",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "$98,146",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
                   "text": "$45,496",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 478.49,
-                "y": 106.369995,
-                "width": 28.911987,
-                "height": 8.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 2,
+              "cells": [
                 {
+                  "row": 2,
+                  "col": 0,
+                  "text": "Row 3",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "$43,071",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
                   "text": "-8.5%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 486.51,
-                "y": 126.21002,
-                "width": 20.895996,
-                "height": 8.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 3,
+              "cells": [
                 {
+                  "row": 3,
+                  "col": 0,
+                  "text": "Row 4",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "text": "$25,383",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
                   "text": "$31,266",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 478.49,
-                "y": 146.04999,
-                "width": 28.911987,
-                "height": 8.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 4,
+              "cells": [
                 {
+                  "row": 4,
+                  "col": 0,
+                  "text": "Row 5",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 1,
+                  "text": "$2,450",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 2,
                   "text": "-7.5%",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 486.51,
-                "y": 165.90002,
-                "width": 20.895996,
-                "height": 8.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 5,
+              "cells": [
                 {
+                  "row": 5,
+                  "col": 0,
+                  "text": "Row 6",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 1,
+                  "text": "$16,999",
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 2,
                   "text": "$13,466",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Currency",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 478.49,
-                "y": 185.73999,
-                "width": 28.911987,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Actual",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 411.56,
-                "y": 65.27002,
-                "width": 26.223999,
-                "height": 8.0
-              }
+              ]
             }
           ],
-          "normalized_text": "-20.9% $45,496 -8.5% $31,266 -7.5% $13,466 Actual"
+          "column_types": [
+            "Text",
+            "Currency",
+            "Currency"
+          ],
+          "fallback_text": "[表t0_0 页0]\n行1: Department=Row 1 Budget=-1.8% Actual=-20.9%\n行2: Department=Row 2 Budget=$98,146 Actual=$45,496\n行3: Department=Row 3 Budget=$43,071 Actual=-8.5%\n行4: Department=Row 4 Budget=$25,383 Actual=$31,266\n行5: Department=Row 5 Budget=$2,450 Actual=-7.5%\n行6: Department=Row 6 Budget=$16,999 Actual=$13,466",
+          "confidence": {
+            "score": 0.81936616,
+            "alignment_score": 0.8000001,
+            "spacing_score": 0.55683047,
+            "data_density_score": 0.84000003,
+            "consistency_score": 1.0
+          }
         }
       ],
-      "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 4,
-        "table_count": 0,
+        "block_count": 0,
+        "table_count": 1,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.94128776,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 20,
+        "extract_ms": 21,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 20938752,
-        "rss_delta_bytes": 180224
+        "peak_rss_bytes": 21348352,
+        "rss_delta_bytes": 163840
       }
     }
   ],

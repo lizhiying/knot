@@ -1,13 +1,85 @@
-页=1 bbox=(31,33,119,14) Feature Checklist
-页=1 bbox=(31,60,79,11) Text Extraction
-页=1 bbox=(31,81,113,61) - Character extraction - Font info - Reading order - Multi-column
-页=1 bbox=(281,81,37,61) [TODO] [TODO] [DONE] [DONE]
-页=1 bbox=(31,151,86,11) Table Extraction
-页=1 bbox=(31,172,99,61) - Stream detection - Ruled detection - Cell merging - Header detection
-页=1 bbox=(281,172,37,61) [DONE] [DONE] [DONE] [DONE]
-页=1 bbox=(31,242,24,11) OCR
-页=1 bbox=(31,262,98,61) - Page scoring - Region detection - PaddleOCR - Result merging
-页=1 bbox=(281,262,77,61) [IN PROGRESS] [DONE] [IN PROGRESS] [DONE]
-页=1 bbox=(31,332,67,11) Performance
-页=1 bbox=(31,353,97,61) - Per-page timing - Memory tracking - Async API - Backpressure
-页=1 bbox=(281,353,37,61) [TODO] [DONE] [DONE] [TODO]
+页=1 bbox=(31,33,117,14) Feature Checklist
+页=1 bbox=(31,60,113,354) Text Extraction
+Character extraction
+Font info
+Reading order
+Multi-column
+Table Extraction
+Stream detection
+Ruled detection
+Cell merging
+Header detection
+OCR
+Page scoring
+Region detection
+PaddleOCR
+Result merging
+Performance
+Per-page timing
+Memory tracking
+Async API
+Backpressure
+页=1 bbox=(281,81,75,333) [TODO]
+[TODO]
+[DONE]
+[DONE]
+[DONE]
+[DONE]
+[DONE]
+[DONE]
+[IN PROGRESS]
+[DONE]
+[IN PROGRESS]
+[DONE]
+[TODO]
+[DONE]
+[DONE]
+[TODO]
+表=t0_0 页=0 -=- Character extraction=Font info [TODO]=[TODO]
+表=t0_0 页=0 -= Character extraction=Reading order [TODO]=[DONE]
+表=t0_0 页=0 -= Character extraction=Multi-column [TODO]=
+表=t0_2 页=0 -=- Stream detection=Ruled detection [DONE]=[DONE]
+表=t0_2 页=0 -= Stream detection=Cell merging [DONE]=
+表=t0_2 页=0 -= Stream detection=Header detection [DONE]=
+表=t0_4 页=0 -=- Page scoring=Region detection [IN PROGRESS]=[DONE]
+表=t0_4 页=0 -= Page scoring=PaddleOCR [IN PROGRESS]=[IN PROGRESS]
+表=t0_4 页=0 -= Page scoring=Result merging [IN PROGRESS]=[DONE]
+表=t0_6 页=0 -=- Per-page timing=Memory tracking [TODO]=[DONE]
+表=t0_6 页=0 -= Per-page timing=Async API [TODO]=
+表=t0_6 页=0 -= Per-page timing=Backpressure [TODO]=[TODO]
+表=t0_0 页=0 行=0 列=- 值=- 类型=Text
+表=t0_0 页=0 行=0 列=Character extraction 值=Font info 类型=Text
+表=t0_0 页=0 行=0 列=[TODO] 值=[TODO] 类型=Text
+表=t0_0 页=0 行=1 列=- 值= 类型=Text
+表=t0_0 页=0 行=1 列=Character extraction 值=Reading order 类型=Text
+表=t0_0 页=0 行=1 列=[TODO] 值=[DONE] 类型=Text
+表=t0_0 页=0 行=2 列=- 值= 类型=Text
+表=t0_0 页=0 行=2 列=Character extraction 值=Multi-column 类型=Text
+表=t0_0 页=0 行=2 列=[TODO] 值= 类型=Text
+表=t0_2 页=0 行=0 列=- 值=- 类型=Text
+表=t0_2 页=0 行=0 列=Stream detection 值=Ruled detection 类型=Text
+表=t0_2 页=0 行=0 列=[DONE] 值=[DONE] 类型=Text
+表=t0_2 页=0 行=1 列=- 值= 类型=Text
+表=t0_2 页=0 行=1 列=Stream detection 值=Cell merging 类型=Text
+表=t0_2 页=0 行=1 列=[DONE] 值= 类型=Text
+表=t0_2 页=0 行=2 列=- 值= 类型=Text
+表=t0_2 页=0 行=2 列=Stream detection 值=Header detection 类型=Text
+表=t0_2 页=0 行=2 列=[DONE] 值= 类型=Text
+表=t0_4 页=0 行=0 列=- 值=- 类型=Text
+表=t0_4 页=0 行=0 列=Page scoring 值=Region detection 类型=Text
+表=t0_4 页=0 行=0 列=[IN PROGRESS] 值=[DONE] 类型=Text
+表=t0_4 页=0 行=1 列=- 值= 类型=Text
+表=t0_4 页=0 行=1 列=Page scoring 值=PaddleOCR 类型=Text
+表=t0_4 页=0 行=1 列=[IN PROGRESS] 值=[IN PROGRESS] 类型=Text
+表=t0_4 页=0 行=2 列=- 值= 类型=Text
+表=t0_4 页=0 行=2 列=Page scoring 值=Result merging 类型=Text
+表=t0_4 页=0 行=2 列=[IN PROGRESS] 值=[DONE] 类型=Text
+表=t0_6 页=0 行=0 列=- 值=- 类型=Text
+表=t0_6 页=0 行=0 列=Per-page timing 值=Memory tracking 类型=Text
+表=t0_6 页=0 行=0 列=[TODO] 值=[DONE] 类型=Text
+表=t0_6 页=0 行=1 列=- 值= 类型=Text
+表=t0_6 页=0 行=1 列=Per-page timing 值=Async API 类型=Text
+表=t0_6 页=0 行=1 列=[TODO] 值= 类型=Text
+表=t0_6 页=0 行=2 列=- 值= 类型=Text
+表=t0_6 页=0 行=2 列=Per-page timing 值=Backpressure 类型=Text
+表=t0_6 页=0 行=2 列=[TODO] 值=[TODO] 类型=Text

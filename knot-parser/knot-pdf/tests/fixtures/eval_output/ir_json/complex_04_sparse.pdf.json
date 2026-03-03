@@ -24,8 +24,8 @@
           "bbox": {
             "x": 31.18,
             "y": 32.690002,
-            "width": 156.73001,
-            "height": 10.0
+            "width": 250.784,
+            "height": 49.080017
           },
           "role": "Body",
           "lines": [
@@ -41,27 +41,14 @@
               "bbox": {
                 "x": 31.18,
                 "y": 32.690002,
-                "width": 156.73001,
+                "width": 155.06,
                 "height": 10.0
               }
-            }
-          ],
-          "normalized_text": "Sparse Table (many empty cells)"
-        },
-        {
-          "block_id": "blk_1",
-          "bbox": {
-            "x": 63.86,
-            "y": 55.340027,
-            "width": 25.344002,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
+            },
             {
               "spans": [
                 {
-                  "text": "Field 1",
+                  "text": "Field 1 Field 2 Field 3",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -70,139 +57,10 @@
               "bbox": {
                 "x": 63.86,
                 "y": 55.340027,
-                "width": 25.344002,
+                "width": 218.10399,
                 "height": 8.0
               }
-            }
-          ],
-          "normalized_text": "Field 1"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 160.24,
-            "y": 55.340027,
-            "width": 25.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Field 2",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 160.24,
-                "y": 55.340027,
-                "width": 25.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "Field 2"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 112.99,
-            "y": 175.82,
-            "width": 8.895996,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "43",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 112.99,
-                "y": 175.82,
-                "width": 8.895996,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "43"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 108.55,
-            "y": 192.83002,
-            "width": 13.344002,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "704",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 108.55,
-                "y": 192.83002,
-                "width": 13.344002,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "704"
-        },
-        {
-          "block_id": "blk_5",
-          "bbox": {
-            "x": 108.55,
-            "y": 209.83002,
-            "width": 13.344002,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "951",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 108.55,
-                "y": 209.83002,
-                "width": 13.344002,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "951"
-        },
-        {
-          "block_id": "blk_6",
-          "bbox": {
-            "x": 204.92,
-            "y": 73.77002,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
+            },
             {
               "spans": [
                 {
@@ -220,141 +78,22 @@
               }
             }
           ],
-          "normalized_text": "338"
+          "normalized_text": "Sparse Table (many empty cells)\nField 1 Field 2 Field 3\n338"
         },
         {
-          "block_id": "blk_7",
-          "bbox": {
-            "x": 204.92,
-            "y": 90.78003,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "836",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 204.92,
-                "y": 90.78003,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "836"
-        },
-        {
-          "block_id": "blk_8",
-          "bbox": {
-            "x": 204.92,
-            "y": 124.79004,
-            "width": 13.343994,
-            "height": 42.01996
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "706",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 204.92,
-                "y": 141.79999,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "987",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 204.92,
-                "y": 158.81,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "890",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 204.92,
-                "y": 124.79004,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "706 987 890"
-        },
-        {
-          "block_id": "blk_9",
-          "bbox": {
-            "x": 256.62,
-            "y": 55.340027,
-            "width": 25.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Field 3",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 256.62,
-                "y": 55.340027,
-                "width": 25.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "Field 3"
-        },
-        {
-          "block_id": "blk_10",
+          "block_id": "blk_5",
           "bbox": {
             "x": 353.0,
             "y": 55.340027,
-            "width": 25.343994,
-            "height": 8.0
+            "width": 121.724,
+            "height": 26.429993
           },
           "role": "Body",
           "lines": [
             {
               "spans": [
                 {
-                  "text": "Field 4",
+                  "text": "Field 4 Field 5",
                   "font_size": 8.0,
                   "is_bold": false,
                   "font_name": null
@@ -363,23 +102,10 @@
               "bbox": {
                 "x": 353.0,
                 "y": 55.340027,
-                "width": 25.343994,
+                "width": 121.724,
                 "height": 8.0
               }
-            }
-          ],
-          "normalized_text": "Field 4"
-        },
-        {
-          "block_id": "blk_11",
-          "bbox": {
-            "x": 397.68,
-            "y": 73.77002,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
+            },
             {
               "spans": [
                 {
@@ -397,258 +123,24 @@
               }
             }
           ],
-          "normalized_text": "748"
-        },
-        {
-          "block_id": "blk_12",
-          "bbox": {
-            "x": 449.38,
-            "y": 55.340027,
-            "width": 25.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Field 5",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 449.38,
-                "y": 55.340027,
-                "width": 25.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "Field 5"
-        },
-        {
-          "block_id": "blk_13",
-          "bbox": {
-            "x": 397.68,
-            "y": 107.79004,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "603",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 397.68,
-                "y": 107.79004,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "603"
-        },
-        {
-          "block_id": "blk_14",
-          "bbox": {
-            "x": 494.06,
-            "y": 107.79004,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "174",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 494.06,
-                "y": 107.79004,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "174"
-        },
-        {
-          "block_id": "blk_15",
-          "bbox": {
-            "x": 301.3,
-            "y": 124.79004,
-            "width": 206.104,
-            "height": 42.01996
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "457",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.3,
-                "y": 141.79999,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "172",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.3,
-                "y": 158.81,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "576 674",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.3,
-                "y": 124.79004,
-                "width": 206.104,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "457 172 576 674"
-        },
-        {
-          "block_id": "blk_16",
-          "bbox": {
-            "x": 301.3,
-            "y": 209.83002,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "142",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.3,
-                "y": 209.83002,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "142"
-        },
-        {
-          "block_id": "blk_17",
-          "bbox": {
-            "x": 397.68,
-            "y": 209.83002,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "658",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 397.68,
-                "y": 209.83002,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "658"
-        },
-        {
-          "block_id": "blk_18",
-          "bbox": {
-            "x": 494.06,
-            "y": 209.83002,
-            "width": 13.343994,
-            "height": 8.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "671",
-                  "font_size": 8.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 494.06,
-                "y": 209.83002,
-                "width": 13.343994,
-                "height": 8.0
-              }
-            }
-          ],
-          "normalized_text": "671"
+          "normalized_text": "Field 4 Field 5\n748"
         }
       ],
       "tables": [
         {
-          "table_id": "t0_1",
+          "table_id": "t0_0",
           "page_index": 0,
           "bbox": {
             "x": 204.92,
-            "y": 141.79999,
-            "width": 109.72398,
-            "height": 25.01001
+            "y": 107.79004,
+            "width": 302.484,
+            "height": 59.01996
           },
           "extraction_mode": "Stream",
           "headers": [
             "col_0",
-            "col_1"
+            "col_1",
+            "col_2"
           ],
           "rows": [
             {
@@ -657,7 +149,7 @@
                 {
                   "row": 0,
                   "col": 0,
-                  "text": "706",
+                  "text": "",
                   "cell_type": "Number",
                   "rowspan": 1,
                   "colspan": 1
@@ -665,7 +157,15 @@
                 {
                   "row": 0,
                   "col": 1,
-                  "text": "457",
+                  "text": "603",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 2,
+                  "text": "174",
                   "cell_type": "Number",
                   "rowspan": 1,
                   "colspan": 1
@@ -678,7 +178,7 @@
                 {
                   "row": 1,
                   "col": 0,
-                  "text": "987",
+                  "text": "890",
                   "cell_type": "Number",
                   "rowspan": 1,
                   "colspan": 1
@@ -686,7 +186,73 @@
                 {
                   "row": 1,
                   "col": 1,
+                  "text": "576",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "674",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 2,
+              "cells": [
+                {
+                  "row": 2,
+                  "col": 0,
+                  "text": "706",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "457",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 3,
+              "cells": [
+                {
+                  "row": 3,
+                  "col": 0,
+                  "text": "987",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
                   "text": "172",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "text": "",
                   "cell_type": "Number",
                   "rowspan": 1,
                   "colspan": 1
@@ -696,29 +262,55 @@
           ],
           "column_types": [
             "Number",
+            "Number",
             "Number"
           ],
-          "fallback_text": "[表t0_1 页0]\n行1: col_0=706 col_1=457\n行2: col_0=987 col_1=172"
+          "fallback_text": "[表t0_0 页0]\n行1: col_1=603 col_2=174\n行2: col_0=890 col_1=576 col_2=674\n行3: col_0=706 col_1=457\n行4: col_0=987 col_1=172",
+          "confidence": {
+            "score": 0.88009834,
+            "alignment_score": 0.875,
+            "spacing_score": 0.8081597,
+            "data_density_score": 0.77983195,
+            "consistency_score": 1.0
+          }
         }
       ],
-      "images": [],
+      "images": [
+        {
+          "image_id": "chart_p0_0",
+          "page_index": 0,
+          "bbox": {
+            "x": 78.55,
+            "y": 145.82,
+            "width": 458.854,
+            "height": 102.01001
+          },
+          "format": "Png",
+          "caption_refs": [],
+          "source": "FigureRegion",
+          "ocr_text": "43, 704, 951, 142, 658, 671",
+          "is_qrcode": false
+        }
+      ],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 19,
+        "block_count": 2,
         "table_count": 1,
-        "image_count": 0,
-        "ocr_quality_score": null
+        "image_count": 1,
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.9417007,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 28,
+        "extract_ms": 21,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21315584,
-        "rss_delta_bytes": 49152
+        "peak_rss_bytes": 21872640,
+        "rss_delta_bytes": 0
       }
     }
   ],

@@ -1,27 +1,24 @@
-页=1 bbox=(31,74,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=1 bbox=(31,100,533,11) The field of document processing has seen remarkable advances. Current systems achieve 87% accuracy on
-页=1 bbox=(31,117,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=1 bbox=(31,143,533,11) The field of document processing has seen remarkable advances. Current systems achieve 96% accuracy on
-页=1 bbox=(31,160,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=1 bbox=(31,185,533,11) The field of document processing has seen remarkable advances. Current systems achieve 94% accuracy on
-页=1 bbox=(31,202,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=1 bbox=(31,228,533,11) The field of document processing has seen remarkable advances. Current systems achieve 89% accuracy on
-页=1 bbox=(31,245,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=2 bbox=(31,74,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=2 bbox=(31,100,533,11) The field of document processing has seen remarkable advances. Current systems achieve 99% accuracy on
-页=2 bbox=(31,117,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=2 bbox=(31,143,533,11) The field of document processing has seen remarkable advances. Current systems achieve 96% accuracy on
-页=2 bbox=(31,160,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=2 bbox=(31,185,533,11) The field of document processing has seen remarkable advances. Current systems achieve 91% accuracy on
-页=2 bbox=(31,202,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=2 bbox=(31,228,533,11) The field of document processing has seen remarkable advances. Current systems achieve 97% accuracy on
-页=2 bbox=(31,245,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=3 bbox=(31,74,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=3 bbox=(31,100,533,11) The field of document processing has seen remarkable advances. Current systems achieve 97% accuracy on
-页=3 bbox=(31,117,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=3 bbox=(31,143,533,11) The field of document processing has seen remarkable advances. Current systems achieve 89% accuracy on
-页=3 bbox=(31,160,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=3 bbox=(31,185,533,11) The field of document processing has seen remarkable advances. Current systems achieve 93% accuracy on
-页=3 bbox=(31,202,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
-页=3 bbox=(31,228,533,11) The field of document processing has seen remarkable advances. Current systems achieve 88% accuracy on
-页=3 bbox=(31,245,441,11) standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=1 bbox=(31,100,533,28) The field of document processing has seen remarkable advances. Current systems achieve 87% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=1 bbox=(31,143,533,28) The field of document processing has seen remarkable advances. Current systems achieve 96% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=1 bbox=(31,185,533,28) The field of document processing has seen remarkable advances. Current systems achieve 94% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=1 bbox=(31,228,533,28) The field of document processing has seen remarkable advances. Current systems achieve 89% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=2 bbox=(31,100,533,28) The field of document processing has seen remarkable advances. Current systems achieve 99% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=2 bbox=(31,143,533,28) The field of document processing has seen remarkable advances. Current systems achieve 96% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=2 bbox=(31,185,533,28) The field of document processing has seen remarkable advances. Current systems achieve 91% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=2 bbox=(31,228,533,28) The field of document processing has seen remarkable advances. Current systems achieve 97% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=3 bbox=(31,100,533,28) The field of document processing has seen remarkable advances. Current systems achieve 97% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=3 bbox=(31,143,533,28) The field of document processing has seen remarkable advances. Current systems achieve 89% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=3 bbox=(31,185,533,28) The field of document processing has seen remarkable advances. Current systems achieve 93% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.
+页=3 bbox=(31,228,533,28) The field of document processing has seen remarkable advances. Current systems achieve 88% accuracy on
+standard benchmarks. This paragraph discusses the implications for enterprise workflows.

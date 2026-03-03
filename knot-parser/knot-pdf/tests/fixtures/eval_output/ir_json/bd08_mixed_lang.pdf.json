@@ -24,7 +24,7 @@
           "bbox": {
             "x": 31.18,
             "y": 32.72003,
-            "width": 314.259,
+            "width": 311.81702,
             "height": 35.77997
           },
           "role": "Body",
@@ -41,7 +41,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 32.72003,
-                "width": 184.366,
+                "width": 182.02802,
                 "height": 14.0
               }
             },
@@ -57,19 +57,19 @@
               "bbox": {
                 "x": 31.18,
                 "y": 57.5,
-                "width": 314.259,
+                "width": 311.81702,
                 "height": 11.0
               }
             }
           ],
-          "normalized_text": "Mixed Language Document Section 1: English content about document processing systems."
+          "normalized_text": "Mixed Language Document\nSection 1: English content about document processing systems."
         },
         {
           "block_id": "blk_1",
           "bbox": {
             "x": 31.18,
             "y": 83.01001,
-            "width": 299.58502,
+            "width": 297.14304,
             "height": 11.0
           },
           "role": "Body",
@@ -86,7 +86,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 83.01001,
-                "width": 299.58502,
+                "width": 297.14304,
                 "height": 11.0
               }
             }
@@ -98,7 +98,7 @@
           "bbox": {
             "x": 31.18,
             "y": 108.52002,
-            "width": 388.83902,
+            "width": 386.39703,
             "height": 11.0
           },
           "role": "Body",
@@ -115,7 +115,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 108.52002,
-                "width": 388.83902,
+                "width": 386.39703,
                 "height": 11.0
               }
             }
@@ -127,7 +127,7 @@
           "bbox": {
             "x": 31.18,
             "y": 134.03003,
-            "width": 251.27301,
+            "width": 248.83102,
             "height": 11.0
           },
           "role": "Body",
@@ -144,7 +144,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 134.03003,
-                "width": 251.27301,
+                "width": 248.83102,
                 "height": 11.0
               }
             }
@@ -156,7 +156,7 @@
           "bbox": {
             "x": 31.18,
             "y": 159.54004,
-            "width": 291.027,
+            "width": 288.58502,
             "height": 11.0
           },
           "role": "Body",
@@ -173,7 +173,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 159.54004,
-                "width": 291.027,
+                "width": 288.58502,
                 "height": 11.0
               }
             }
@@ -185,7 +185,7 @@
           "bbox": {
             "x": 31.18,
             "y": 185.06,
-            "width": 309.375,
+            "width": 306.933,
             "height": 11.0
           },
           "role": "Body",
@@ -202,7 +202,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 185.06,
-                "width": 309.375,
+                "width": 306.933,
                 "height": 11.0
               }
             }
@@ -214,7 +214,7 @@
           "bbox": {
             "x": 31.18,
             "y": 210.57,
-            "width": 358.864,
+            "width": 356.42203,
             "height": 11.0
           },
           "role": "Body",
@@ -231,7 +231,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 210.57,
-                "width": 358.864,
+                "width": 356.42203,
                 "height": 11.0
               }
             }
@@ -243,7 +243,7 @@
           "bbox": {
             "x": 31.18,
             "y": 236.08002,
-            "width": 272.074,
+            "width": 269.63202,
             "height": 11.0
           },
           "role": "Body",
@@ -260,7 +260,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 236.08002,
-                "width": 272.074,
+                "width": 269.63202,
                 "height": 11.0
               }
             }
@@ -270,23 +270,25 @@
       ],
       "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
         "block_count": 8,
         "table_count": 0,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
-      "text_score": 0.9183775,
+      "text_score": 0.91809154,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 18,
+        "extract_ms": 19,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21331968,
-        "rss_delta_bytes": 16384
+        "peak_rss_bytes": 21970944,
+        "rss_delta_bytes": 32768
       }
     }
   ],

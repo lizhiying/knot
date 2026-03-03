@@ -1,10 +1,7 @@
-use crate::{DocumentParser, LlmProvider, NodeMeta, PageIndexConfig, PageIndexError, PageNode};
+use crate::{DocumentParser, NodeMeta, PageIndexConfig, PageIndexError, PageNode};
 use async_trait::async_trait;
-use image::{DynamicImage, GenericImageView, ImageFormat};
-use pdfium_render::prelude::*;
-use regex::Regex;
+use knot_pdf::{Config as PdfConfig, MarkdownRenderer, Pipeline};
 use std::collections::HashMap;
-use std::io::Cursor;
 use std::path::Path;
 
 pub struct PdfParser;
@@ -14,197 +11,167 @@ impl PdfParser {
         Self
     }
 
-    /// Build the OCRFlux prompt for page-to-markdown
-    fn build_page_prompt(&self) -> String {
-        // Based on OCRFlux prompts.py
-        let prompt = "Below is the image of one page of a document. Just return the plain text representation of this document as if you were reading it naturally.\nALL tables should be presented in HTML format.\nIf there are images or figures in the page, present them as \"<Image>(left,top),(right,bottom)</Image>\", (left,top,right,bottom) are the coordinates of the top-left and bottom-right corners of the image or figure.\nPresent all titles and headings as H1 headings.\nDo not hallucinate.\n".to_string();
-        prompt
+    /// 使用自定义配置创建 PdfParser（保留兼容性）
+    pub fn with_config(_config: PdfConfig) -> Self {
+        // Pipeline 现在在 parse 时按需创建，不再缓存
+        Self
     }
 
-    /// Synchronous helper to load PDF and render pages to PNG bytes
-    /// This isolates non-Send Pdfium types from async await points
-    fn load_and_render_pages(&self, path: &Path) -> Result<Vec<Vec<u8>>, PageIndexError> {
-        // 1. Init PDFium
-        // 1. Init PDFium
-        let pdfium = Pdfium::new(
-            Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./")) // try local first
-                .or_else(|_| Pdfium::bind_to_system_library())
-                .map_err(|e| {
-                    PageIndexError::VisionError(format!("Failed to bind PDFium: {}", e))
-                })?,
-        );
+    /// 从 PageIndexConfig 构建 knot-pdf 的 Config（用于需要自定义配置的场景）
+    pub fn build_pdf_config(config: &PageIndexConfig) -> PdfConfig {
+        let mut pdf_config = PdfConfig::default();
 
-        // Load document
-        let document = pdfium
-            .load_pdf_from_file(path, None)
-            .map_err(|e| PageIndexError::ParseError(format!("Failed to load PDF: {}", e)))?;
-
-        // 2. Process all pages
-        let max_pages = document.pages().len();
-        println!("Processing all {} pages...", max_pages);
-
-        let mut page_images = Vec::with_capacity(max_pages as usize);
-
-        for i in 0..max_pages {
-            println!("Rendering Page {}...", i + 1);
-            let page = document.pages().get(i as u16).map_err(|e| {
-                PageIndexError::ParseError(format!("Failed to get page {}: {}", i, e))
-            })?;
-
-            // Render page
-            // Optimization: Use 768px width. This is the "sweet spot" for 3B models:
-            // High enough for readable text, low enough for <5s inference on M1 Pro.
-            let render_config = PdfRenderConfig::new()
-                .set_target_width(768)
-                .set_maximum_height(2000)
-                .rotate_if_landscape(PdfPageRenderRotation::None, true);
-
-            let bitmap = page.render_with_config(&render_config).map_err(|e| {
-                PageIndexError::VisionError(format!("Failed to render PDF page: {}", e))
-            })?;
-
-            let img = bitmap.as_image();
-
-            // Convert to RGB8 (drop alpha) because JPEG doesn't support RGBA
-            let rgb_img = img.to_rgb8();
-
-            let mut bytes: Vec<u8> = Vec::new();
-            // Create cursor to write to buffer
-            let mut cursor = Cursor::new(&mut bytes);
-
-            // Use write_to with standard ImageFormat enum
-            rgb_img
-                .write_to(&mut cursor, ImageFormat::Jpeg)
-                .map_err(|e| {
-                    PageIndexError::VisionError(format!("Failed to encode image to JPEG: {}", e))
-                })?;
-
-            page_images.push(bytes);
+        // OCR 配置
+        pdf_config.ocr_enabled = config.pdf_ocr_enabled;
+        if config.pdf_ocr_enabled {
+            pdf_config.ocr_mode = knot_pdf::config::OcrMode::Auto;
+            pdf_config.ocr_render_width = 1024;
         }
 
-        Ok(page_images)
+        // OCR 模型路径
+        if let Some(ref model_dir) = config.pdf_ocr_model_dir {
+            pdf_config.ocr_model_dir = Some(std::path::PathBuf::from(model_dir));
+        }
+
+        // Vision LLM 配置（同时用于图片描述和扫描件 VLM 全页回退）
+        // VLM 回退对扫描件（text_score=0）是唯一能获取内容的方式
+        if let Some(ref api_url) = config.pdf_vision_api_url {
+            // Vision API（图表/图片语义理解）
+            pdf_config.vision_api_url = Some(api_url.clone());
+            // VLM 全页回退（扫描件、低质量页面使用 Vision LLM 做 OCR）
+            pdf_config.vlm_enabled = true;
+            pdf_config.vlm_api_url = Some(api_url.clone());
+
+            if let Some(ref model) = config.pdf_vision_model {
+                pdf_config.vision_model = model.clone();
+                pdf_config.vlm_model = Some(model.clone());
+            }
+        }
+
+        // 页码过滤
+        if let Some(ref pages) = config.pdf_page_indices {
+            pdf_config.page_indices = Some(pages.clone());
+        }
+
+        // 资源保护
+        pdf_config.page_timeout_secs = 30;
+        pdf_config.max_memory_mb = 500;
+
+        pdf_config.validate();
+        pdf_config
     }
 
-    /// Process a page image with LLM
-    async fn process_page_image(
-        &self,
-        png_bytes: Vec<u8>,
-        provider: &dyn LlmProvider,
-    ) -> Result<(String, HashMap<String, String>), PageIndexError> {
-        let prompt = self.build_page_prompt();
-        let response = provider
-            .generate_content_with_image(&prompt, &png_bytes)
-            .await?;
+    /// 将 knot-pdf 的 DocumentIR 转换为 pageindex-rs 的 PageNode 列表
+    fn convert_to_page_nodes(doc: &knot_pdf::DocumentIR, file_path: &str) -> Vec<PageNode> {
+        let renderer = MarkdownRenderer::new();
+        let mut pages = Vec::new();
 
-        // OCRFlux often returns a JSON object with "natural_text"
-        #[derive(serde::Deserialize)]
-        struct FluxResponse {
-            natural_text: Option<String>,
-        }
+        for page in &doc.pages {
+            let markdown = renderer.render_page(page);
 
-        // Clean up markdown code blocks if present
-        let clean_json = response
-            .trim()
-            .trim_start_matches("```json")
-            .trim_start_matches("```")
-            .trim_end_matches("```")
-            .trim();
-
-        // Helper to safe-parse JSON
-        let mut final_text = response.clone();
-
-        // Try to extract natural_text
-        if let Ok(flux) = serde_json::from_str::<FluxResponse>(clean_json) {
-            if let Some(text) = flux.natural_text {
-                final_text = text;
+            // 推断使用的处理模块
+            let mut modules: Vec<&str> = vec!["TextExtract"];
+            let vlm_img = page.images.iter().filter(|i| i.ocr_text.is_some()).count();
+            if vlm_img > 0 {
+                modules.push("VLM-图片描述");
             }
-        } else if let Some(start) = clean_json.find('{') {
-            if let Some(end) = clean_json.rfind('}') {
-                if start < end {
-                    let potential_json = &clean_json[start..=end];
-                    if let Ok(flux) = serde_json::from_str::<FluxResponse>(potential_json) {
-                        if let Some(text) = flux.natural_text {
-                            final_text = text;
-                        }
-                    }
-                }
+            if page
+                .blocks
+                .iter()
+                .any(|b| b.block_id.starts_with("img_desc_"))
+            {
+                modules.push("图片描述→提升");
             }
-        }
-
-        // Post-process images: <Image>(x1,y1),(x2,y2)</Image>
-        let img_tag_regex = Regex::new(r"<Image>\((\d+),(\d+)\),\((\d+),(\d+)\)</Image>").unwrap();
-
-        // We only decode the image if we find tags (optimization)
-        let mut cached_image: Option<DynamicImage> = None;
-        let mut extra_metadata = HashMap::new();
-
-        // Collect replacements to insert analysis text into content
-        // Note: We are NOT replacing the <Image> tag with Base64 here anymore.
-        // We are appending analysis text after it.
-        let mut replacements = Vec::new();
-
-        for cap in img_tag_regex.captures_iter(&final_text) {
-            let full_match = cap.get(0).unwrap().as_str().to_string();
-            let x1: u32 = cap[1].parse().unwrap_or(0);
-            let y1: u32 = cap[2].parse().unwrap_or(0);
-            let x2: u32 = cap[3].parse().unwrap_or(0);
-            let y2: u32 = cap[4].parse().unwrap_or(0);
-
-            // Decode image if needed
-            if cached_image.is_none() {
-                if let Ok(img) = image::load_from_memory(&png_bytes) {
-                    cached_image = Some(img);
-                }
+            if page.blocks.iter().any(|b| b.block_id.starts_with("vlm_")) {
+                modules.push("VLM-全页回退");
+            }
+            if page
+                .blocks
+                .iter()
+                .any(|b| b.block_id.starts_with("ocr_fallback_"))
+            {
+                modules.push("OCR-回退");
+            }
+            if page.blocks.iter().any(|b| {
+                b.normalized_text.contains("<table") || b.normalized_text.contains("| ---")
+            }) {
+                modules.push("表格");
+            }
+            if page
+                .images
+                .iter()
+                .any(|i| i.source == knot_pdf::ir::ImageSource::FigureRegion)
+            {
+                modules.push("图表区域");
+            }
+            if page.is_scanned_guess {
+                modules.push("扫描件");
+            }
+            if !page.tables.is_empty() {
+                modules.push(&"Table-IR");
             }
 
-            if let Some(ref img) = cached_image {
-                let width = x2.saturating_sub(x1).max(1);
-                let height = y2.saturating_sub(y1).max(1);
-
-                // Crop
-                let cropped = img.view(x1, y1, width, height).to_image();
-
-                // Encode crop to JPEG
-                let mut crop_bytes = Cursor::new(Vec::new());
-                if let Ok(_) =
-                    DynamicImage::ImageRgba8(cropped).write_to(&mut crop_bytes, ImageFormat::Jpeg)
-                {
-                    let crop_vec = crop_bytes.into_inner();
-
-                    // 1. Analyze image
-                    println!("Analyzing cropped image ({}x{})...", width, height);
-                    let analysis_prompt = "Describe this image detail concisely. Focus on the key data or visual elements.";
-                    let analysis = match provider
-                        .generate_content_with_image(analysis_prompt, &crop_vec)
-                        .await
-                    {
-                        Ok(s) => s,
-                        Err(_) => "No analysis available.".to_string(),
-                    };
-
-                    // 2. Store Base64 in Metadata (Key: "image:(x1,y1),(x2,y2)")
-                    use base64::{engine::general_purpose, Engine as _};
-                    let b64 = general_purpose::STANDARD.encode(&crop_vec);
-                    let coords_key = format!("image:({},{})-({},{})", x1, y1, x2, y2);
-                    extra_metadata.insert(coords_key, b64);
-
-                    // 3. Prepare Content Modification (Append Analysis)
-                    // Original: <Image>...</Image>
-                    // New: <Image>...</Image>\n\n> **图表分析**: ...
-                    let content_modification =
-                        format!("{}\n\n> **图表分析**: {}\n\n", full_match, analysis);
-
-                    replacements.push((full_match, content_modification));
-                }
+            let total_text: usize = page.blocks.iter().map(|b| b.normalized_text.len()).sum();
+            println!(
+                "[PdfParser] page {}: blocks={} text={}chars images={} tables={} source={:?} | [{}]",
+                page.page_index,
+                page.blocks.len(),
+                total_text,
+                page.images.len(),
+                page.tables.len(),
+                page.source,
+                modules.join(" → ")
+            );
+            if markdown.trim().is_empty() {
+                println!(
+                    "[PdfParser] page {}: SKIPPED (empty markdown)",
+                    page.page_index
+                );
+                continue;
             }
+
+            let mut extra = HashMap::new();
+            extra.insert("text_score".to_string(), page.text_score.to_string());
+            extra.insert("is_scanned".to_string(), page.is_scanned_guess.to_string());
+            extra.insert("source".to_string(), format!("{:?}", page.source));
+
+            // 记录表格信息
+            if !page.tables.is_empty() {
+                let table_modes: Vec<String> = page
+                    .tables
+                    .iter()
+                    .map(|t| format!("{:?}", t.extraction_mode))
+                    .collect();
+                extra.insert("table_modes".to_string(), table_modes.join(","));
+                extra.insert("table_count".to_string(), page.tables.len().to_string());
+            }
+
+            // 记录图片信息
+            if !page.images.is_empty() {
+                extra.insert("image_count".to_string(), page.images.len().to_string());
+            }
+
+            let token_count = markdown.split_whitespace().count();
+
+            pages.push(PageNode {
+                node_id: format!("page-{}", page.page_index + 1),
+                title: format!("Page {}", page.page_index + 1),
+                level: 1,
+                content: markdown,
+                summary: None,
+                embedding: None,
+                metadata: NodeMeta {
+                    file_path: file_path.to_string(),
+                    page_number: Some((page.page_index + 1) as u32),
+                    line_number: None,
+                    token_count,
+                    extra,
+                },
+                children: Vec::new(),
+            });
         }
 
-        // Apply content modifications
-        for (target, replacement) in replacements {
-            final_text = final_text.replace(&target, &replacement);
-        }
-
-        Ok((final_text, extra_metadata))
+        pages
     }
 }
 
@@ -219,66 +186,165 @@ impl DocumentParser for PdfParser {
         path: &Path,
         config: &PageIndexConfig,
     ) -> Result<PageNode, PageIndexError> {
-        let start_time = std::time::Instant::now(); // Start timer
+        let start_time = std::time::Instant::now();
 
-        let llm_provider = config.llm_provider.ok_or_else(|| {
-            PageIndexError::ParseError(
-                "LLM Provider is required for OCRFlux PDF parsing".to_string(),
-            )
-        })?;
+        // 1. 根据 PageIndexConfig 构建 knot-pdf Config 并创建 Pipeline
+        let pdf_config = Self::build_pdf_config(config);
+        println!(
+            "[PdfParser] ocr_enabled={}, ocr_model_dir={:?}, vision_api={:?}",
+            pdf_config.ocr_enabled, pdf_config.ocr_model_dir, pdf_config.vision_api_url,
+        );
+        let mut pipeline = Pipeline::new(pdf_config);
 
-        // 1. Load and Render (Synchronous, no Send issues)
-        // This moves all Pdfium logic into a sync function, so no Pdfium types live across awaits here.
-        let page_images = self.load_and_render_pages(path)?;
+        // 将进度回调注入 Pipeline（在 Pipeline 内部逐页处理时实时通知）
+        if let Some(cb) = config.progress_callback.clone() {
+            pipeline.set_page_progress_callback(move |current, total| {
+                cb(current, total);
+            });
+        }
 
-        let mut pages = Vec::with_capacity(page_images.len());
+        // 2. 使用 Pipeline 解析 PDF → DocumentIR
+        let doc = pipeline
+            .parse(path)
+            .map_err(|e| PageIndexError::ParseError(format!("knot-pdf error: {}", e)))?;
 
-        // 2. Process images with LLM (Async)
-        let total_pages = page_images.len();
-        for (i, png_bytes) in page_images.into_iter().enumerate() {
-            // Callback: (current, total)
-            if let Some(cb) = config.progress_callback {
+        println!("[PdfParser] Pipeline returned {} pages", doc.pages.len());
+
+        // 2. 转换为 PageNode 列表，逐页通知前端
+        let file_path = path.to_string_lossy().to_string();
+        let total_pages = doc.pages.len();
+        let renderer = MarkdownRenderer::new();
+        let mut pages = Vec::new();
+
+        for (i, page) in doc.pages.iter().enumerate() {
+            let markdown = renderer.render_page(page);
+
+            // 推断使用的处理模块
+            let mut modules: Vec<&str> = vec!["TextExtract"];
+            let vlm_img = page
+                .images
+                .iter()
+                .filter(|im| im.ocr_text.is_some())
+                .count();
+            if vlm_img > 0 {
+                modules.push("VLM-图片描述");
+            }
+            if page
+                .blocks
+                .iter()
+                .any(|b| b.block_id.starts_with("img_desc_"))
+            {
+                modules.push("图片描述→提升");
+            }
+            if page.blocks.iter().any(|b| b.block_id.starts_with("vlm_")) {
+                modules.push("VLM-全页回退");
+            }
+            if page
+                .blocks
+                .iter()
+                .any(|b| b.block_id.starts_with("ocr_fallback_"))
+            {
+                modules.push("OCR-回退");
+            }
+            if !page.tables.is_empty() {
+                modules.push("Table-IR");
+            }
+            if page.is_scanned_guess {
+                modules.push("扫描件");
+            }
+
+            let total_text: usize = page.blocks.iter().map(|b| b.normalized_text.len()).sum();
+            println!(
+                "[PdfParser] page {}/{}: blocks={} text={}chars source={:?} | [{}]",
+                i + 1,
+                total_pages,
+                page.blocks.len(),
+                total_text,
+                page.source,
+                modules.join(" → ")
+            );
+
+            // 通知前端：进度更新
+            if let Some(cb) = &config.progress_callback {
                 cb(i + 1, total_pages);
             }
 
-            println!("Processing LLM for Page {}...", i + 1);
-
-            match self.process_page_image(png_bytes, llm_provider).await {
-                Ok((markdown, extra)) => {
-                    println!("Page {} processed successfully.", i + 1);
-                    // Add as a child node
-                    let node = PageNode {
-                        node_id: format!("page-{}", i + 1),
-                        title: format!("Page {}", i + 1),
-                        level: 1,
-                        content: markdown.clone(),
-                        summary: None,
-                        embedding: None,
-                        metadata: NodeMeta {
-                            file_path: path.to_string_lossy().to_string(),
-                            page_number: Some((i + 1) as u32),
-                            line_number: None,
-                            token_count: markdown.len() / 4, // Approx
-                            extra: extra.clone(),            // Page-level metadata
-                        },
-                        children: Vec::new(),
-                    };
-                    pages.push(node);
-                }
-                Err(e) => {
-                    eprintln!("Failed to process page {}: {}", i + 1, e);
-                }
+            // 通知前端：逐页 markdown 内容
+            if let Some(cb) = &config.page_content_callback {
+                cb(i, total_pages, markdown.clone());
             }
+
+            if markdown.trim().is_empty() {
+                continue;
+            }
+
+            let mut extra = HashMap::new();
+            extra.insert("text_score".to_string(), page.text_score.to_string());
+            extra.insert("is_scanned".to_string(), page.is_scanned_guess.to_string());
+            extra.insert("source".to_string(), format!("{:?}", page.source));
+
+            // 记录表格信息
+            if !page.tables.is_empty() {
+                let table_modes: Vec<String> = page
+                    .tables
+                    .iter()
+                    .map(|t| format!("{:?}", t.extraction_mode))
+                    .collect();
+                extra.insert("table_modes".to_string(), table_modes.join(","));
+                extra.insert("table_count".to_string(), page.tables.len().to_string());
+            }
+
+            // 记录图片信息
+            if !page.images.is_empty() {
+                extra.insert("image_count".to_string(), page.images.len().to_string());
+            }
+
+            let token_count = markdown.split_whitespace().count();
+
+            pages.push(PageNode {
+                node_id: format!("page-{}", page.page_index + 1),
+                title: format!("Page {}", page.page_index + 1),
+                level: 1,
+                content: markdown,
+                summary: None,
+                embedding: None,
+                metadata: NodeMeta {
+                    file_path: file_path.to_string(),
+                    page_number: Some((page.page_index + 1) as u32),
+                    line_number: None,
+                    token_count,
+                    extra,
+                },
+                children: Vec::new(),
+            });
         }
 
-        // 3. Post-process: Build Semantic Tree using H1/H2
-        let semantic_root = crate::core::tree_builder::SemanticTreeBuilder::build_from_pages(
-            path.file_stem().unwrap().to_string_lossy().to_string(),
-            path.to_string_lossy().to_string(),
-            pages,
+        println!(
+            "[PdfParser] Converted to {} page nodes (elapsed: {:.1}s)",
+            pages.len(),
+            start_time.elapsed().as_secs_f64()
         );
 
-        // Save duration
+        if pages.is_empty() {
+            return Err(PageIndexError::ParseError(
+                "knot-pdf: no content extracted from PDF".to_string(),
+            ));
+        }
+
+        // 3. 构建语义树
+        let file_path = path.to_string_lossy().to_string();
+        let title = doc.metadata.title.unwrap_or_else(|| {
+            path.file_stem()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .to_string()
+        });
+
+        let semantic_root = crate::core::tree_builder::SemanticTreeBuilder::build_from_pages(
+            title, file_path, pages,
+        );
+
+        // 4. 记录处理时间和解析元数据
         let duration = start_time.elapsed();
         let mut final_root = semantic_root;
         final_root.metadata.extra.insert(
@@ -287,8 +353,28 @@ impl DocumentParser for PdfParser {
         );
         final_root.metadata.extra.insert(
             "processing_time_display".to_string(),
-            format!("{:.2} s", duration.as_secs_f64()),
+            format!("{:.2}s", duration.as_secs_f64()),
         );
+        final_root
+            .metadata
+            .extra
+            .insert("parser".to_string(), "knot-pdf".to_string());
+        final_root
+            .metadata
+            .extra
+            .insert("total_pages".to_string(), doc.pages.len().to_string());
+        final_root.metadata.extra.insert(
+            "ocr_enabled".to_string(),
+            config.pdf_ocr_enabled.to_string(),
+        );
+
+        // 汇总诊断信息
+        if !doc.diagnostics.warnings.is_empty() {
+            final_root
+                .metadata
+                .extra
+                .insert("warnings".to_string(), doc.diagnostics.warnings.join("; "));
+        }
 
         Ok(final_root)
     }

@@ -1,8 +1,9 @@
-页=1 bbox=(31,33,314,36) Mixed Language Document Section 1: English content about document processing systems.
-页=1 bbox=(31,83,300,11) The PDF format was developed by Adobe in the early 1990s.
-页=1 bbox=(31,109,389,11) Table extraction requires understanding both visual layout and logical structure.
-页=1 bbox=(31,134,251,11) Performance: 593 pages/min on modern hardware.
-页=1 bbox=(31,160,291,11) Section 2: Technical specifications and API documentation.
-页=1 bbox=(31,185,309,11) The parse_pdf() function accepts a path and Config parameter.
-页=1 bbox=(31,211,359,11) Returns DocumentIR containing PageIR, BlockIR, TableIR, and ImageIR.
-页=1 bbox=(31,236,272,11) Memory usage: peak 184MB for a 100-page document.
+页=1 bbox=(31,33,312,36) Mixed Language Document
+Section 1: English content about document processing systems.
+页=1 bbox=(31,83,297,11) The PDF format was developed by Adobe in the early 1990s.
+页=1 bbox=(31,109,386,11) Table extraction requires understanding both visual layout and logical structure.
+页=1 bbox=(31,134,249,11) Performance: 593 pages/min on modern hardware.
+页=1 bbox=(31,160,289,11) Section 2: Technical specifications and API documentation.
+页=1 bbox=(31,185,307,11) The parse_pdf() function accepts a path and Config parameter.
+页=1 bbox=(31,211,356,11) Returns DocumentIR containing PageIR, BlockIR, TableIR, and ImageIR.
+页=1 bbox=(31,236,270,11) Memory usage: peak 184MB for a 100-page document.

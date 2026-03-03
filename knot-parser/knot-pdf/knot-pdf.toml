@@ -1,0 +1,10 @@
+# knot-pdf 配置文件
+# Vision LLM 配置（用于图片描述 + 扫描件全页 OCR）
+vision_api_url = "http://localhost:11434/v1/chat/completions"
+vision_model = "glm-ocr:latest"
+
+# VLM 全页回退（扫描件、低质量页面）
+vlm_enabled = true
+vlm_api_url = "http://localhost:11434/v1/chat/completions"
+vlm_model = "glm-ocr:latest"
+vlm_timeout_secs = 60

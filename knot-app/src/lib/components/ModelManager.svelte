@@ -11,21 +11,39 @@
     // Model Status State
     let models = $state([
         {
-            name: "OCRFlux-3B.Q4_K_M.gguf",
-            label: "OCR Model (Main)",
-            size: "2.1GB",
+            name: "GLM-OCR-Q8_0.gguf",
+            label: "OCR Model (GLM-OCR)",
+            size: "950MB",
             exists: false,
         },
         {
-            name: "OCRFlux-3B.mmproj-f16.gguf",
+            name: "mmproj-GLM-OCR-Q8_0.gguf",
             label: "OCR Vision (Projector)",
-            size: "600MB",
+            size: "484MB",
             exists: false,
         },
         {
             name: "Qwen3-1.7B-Q4_K_M.gguf",
             label: "Chat Logic (Qwen3)",
             size: "1.7GB",
+            exists: false,
+        },
+        {
+            name: "ppocrv5/det.onnx",
+            label: "PDF OCR Detection",
+            size: "5MB",
+            exists: false,
+        },
+        {
+            name: "ppocrv5/rec.onnx",
+            label: "PDF OCR Recognition",
+            size: "14MB",
+            exists: false,
+        },
+        {
+            name: "ppocrv5/ppocrv5_dict.txt",
+            label: "PDF OCR Dictionary",
+            size: "200KB",
             exists: false,
         },
     ]);

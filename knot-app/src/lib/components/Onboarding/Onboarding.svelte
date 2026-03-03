@@ -8,38 +8,80 @@
     let isDownloading = $state(false);
     let downloadProgress = $state(0);
     let statusMessage = $state("Checking system requirements...");
-
-    // Core model that is required
-    const CORE_MODEL = "Qwen3-1.7B-Q4_K_M.gguf";
+    let isReady = $state(false);
 
     // Models Metadata for Progress Calculation
     const SIZE_GB = 1024 * 1024 * 1024;
     const SIZE_MB = 1024 * 1024;
 
-    let models = [
-        {
-            name: "OCRFlux-3B.Q4_K_M.gguf",
-            sizeBytes: 2.1 * SIZE_GB,
-            currentBytes: 0,
+    // 所有模型元数据（含大小）
+    const ALL_MODELS = {
+        "GLM-OCR-Q8_0.gguf": {
+            label: "OCR Model",
+            sizeBytes: 950 * SIZE_MB,
         },
-        {
-            name: "OCRFlux-3B.mmproj-f16.gguf",
-            sizeBytes: 600 * SIZE_MB,
-            currentBytes: 0,
+        "mmproj-GLM-OCR-Q8_0.gguf": {
+            label: "OCR Vision Projector",
+            sizeBytes: 484 * SIZE_MB,
         },
-        {
-            name: "Qwen3-1.7B-Q4_K_M.gguf",
+        "Qwen3-1.7B-Q4_K_M.gguf": {
+            label: "Chat Logic",
             sizeBytes: 1.7 * SIZE_GB,
-            currentBytes: 0,
         },
-    ];
+        "ppocrv5/det.onnx": {
+            label: "PDF OCR Detection",
+            sizeBytes: 5 * SIZE_MB,
+        },
+        "ppocrv5/rec.onnx": {
+            label: "PDF OCR Recognition",
+            sizeBytes: 14 * SIZE_MB,
+        },
+        "ppocrv5/ppocrv5_dict.txt": {
+            label: "PDF OCR Dictionary",
+            sizeBytes: 0.2 * SIZE_MB,
+        },
+    };
 
-    let totalBytes = models.reduce((acc, m) => acc + m.sizeBytes, 0);
+    // 动态：只包含缺失的模型
+    let models = $state([]);
+    let totalBytes = $derived(models.reduce((acc, m) => acc + m.sizeBytes, 0));
+
+    // 格式化大小
+    function formatSize(bytes) {
+        if (bytes >= SIZE_GB) return `${(bytes / SIZE_GB).toFixed(1)} GB`;
+        if (bytes >= SIZE_MB) return `${(bytes / SIZE_MB).toFixed(0)} MB`;
+        return `${(bytes / 1024).toFixed(0)} KB`;
+    }
+
+    let totalSizeDisplay = $derived(formatSize(totalBytes));
 
     function recalcProgress() {
         if (totalBytes === 0) return;
         const downloaded = models.reduce((acc, m) => acc + m.currentBytes, 0);
         downloadProgress = (downloaded / totalBytes) * 100;
+    }
+
+    async function checkMissingModels() {
+        try {
+            const result = await invoke("check_all_models");
+            if (result.all_ready) {
+                // 全都有了，不应该出现在这里
+                isReady = true;
+                statusMessage = "All models are ready!";
+                return;
+            }
+
+            // 只添加缺失的模型
+            models = result.missing.map((name) => {
+                const meta = ALL_MODELS[name] || { label: name, sizeBytes: 0 };
+                return { name, sizeBytes: meta.sizeBytes, currentBytes: 0 };
+            });
+
+            statusMessage = `${models.length} model${models.length > 1 ? "s" : ""} needed`;
+        } catch (e) {
+            console.error("Failed to check models:", e);
+            statusMessage = "Failed to check models";
+        }
     }
 
     async function startDownload() {
@@ -50,7 +92,7 @@
         models.forEach((m) => (m.currentBytes = 0));
 
         try {
-            // Start download queue
+            // Start download queue (backend only downloads missing)
             await invoke("start_download_queue", { region: null });
         } catch (e) {
             console.error(e);
@@ -65,6 +107,9 @@
         // Resize window for onboarding
         const win = window.__TAURI__.webviewWindow.getCurrentWebviewWindow();
         await win.setSize(new LogicalSize(896, 600));
+
+        // 检查哪些模型缺失
+        await checkMissingModels();
 
         const unlistenProgress = listen("download-progress", (event) => {
             const { filename, percentage } = event.payload;
@@ -90,34 +135,28 @@
         const unlistenQueueFinished = listen("queue-finished", () => {
             isDownloading = false;
             statusMessage = "Setup complete!";
-            // Double check if model exists now
-            invoke("check_model_status", { filename: CORE_MODEL }).then(
-                async (exists) => {
-                    if (exists) {
-                        statusMessage = "Initializing inference engine...";
-                        try {
-                            // Notify backend to start LLM process now that models exist
-                            await invoke("reload_models");
+            // Double check if all models exist now
+            invoke("check_all_models").then(async (result) => {
+                if (result.all_ready) {
+                    statusMessage = "Initializing inference engine...";
+                    try {
+                        // Notify backend to start LLM process now that models exist
+                        await invoke("reload_models");
 
-                            const win =
-                                window.__TAURI__.webviewWindow.getCurrentWebviewWindow();
-                            win.setSize(new LogicalSize(896, 153)).then(() => {
-                                onComplete();
-                            });
-                        } catch (e) {
-                            console.error(
-                                "Failed to reload models or resize",
-                                e,
-                            );
-                            statusMessage = "Initialization failed: " + e;
+                        const win =
+                            window.__TAURI__.webviewWindow.getCurrentWebviewWindow();
+                        win.setSize(new LogicalSize(896, 153)).then(() => {
                             onComplete();
-                        }
-                    } else {
-                        statusMessage =
-                            "Verification failed. Please try again.";
+                        });
+                    } catch (e) {
+                        console.error("Failed to reload models or resize", e);
+                        statusMessage = "Initialization failed: " + e;
+                        onComplete();
                     }
-                },
-            );
+                } else {
+                    statusMessage = `Verification failed. Missing: ${result.missing.join(", ")}`;
+                }
+            });
         });
 
         const unlistenError = listen("download-error", (event) => {
@@ -215,7 +254,7 @@
                     <div
                         class="text-xs text-slate-500 dark:text-[#a1a1aa] mt-0.5"
                     >
-                        Required (~4.5 GB) • On-Device Storage
+                        Required (~{totalSizeDisplay}) • On-Device Storage
                     </div>
                 </div>
             </div>

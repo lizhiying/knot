@@ -1,4 +1,32 @@
-页=1 bbox=(31,31,137,12) Ruled Table Sample #03
-页=1 bbox=(31,65,102,168) Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Row 7 Row 8 Item
-页=1 bbox=(270,65,79,168) $56,295 $11,308 10.5% $63,106 $16,531 24.6% $42,688 $84,928 Quantity
-页=1 bbox=(421,65,86,168) $56,982 $58,888 $81,313 $66,417 $28,511 -15.9% $60,834 $80,491 Price
+表=t0_0 页=0 Item=Row 1 Quantity=$56,295 Price=$56,982
+表=t0_0 页=0 Item=Row 2 Quantity=$11,308 Price=$58,888
+表=t0_0 页=0 Item=Row 3 Quantity=10.5% Price=$81,313
+表=t0_0 页=0 Item=Row 4 Quantity=$63,106 Price=$66,417
+表=t0_0 页=0 Item=Row 5 Quantity=$16,531 Price=$28,511
+表=t0_0 页=0 Item=Row 6 Quantity=24.6% Price=-15.9%
+表=t0_0 页=0 Item=Row 7 Quantity=$42,688 Price=$60,834
+表=t0_0 页=0 Item=Row 8 Quantity=$84,928 Price=$80,491
+表=t0_0 页=0 行=0 列=Item 值=Row 1 类型=Text
+表=t0_0 页=0 行=0 列=Quantity 值=$56,295 类型=Currency
+表=t0_0 页=0 行=0 列=Price 值=$56,982 类型=Currency
+表=t0_0 页=0 行=1 列=Item 值=Row 2 类型=Text
+表=t0_0 页=0 行=1 列=Quantity 值=$11,308 类型=Currency
+表=t0_0 页=0 行=1 列=Price 值=$58,888 类型=Currency
+表=t0_0 页=0 行=2 列=Item 值=Row 3 类型=Text
+表=t0_0 页=0 行=2 列=Quantity 值=10.5% 类型=Currency
+表=t0_0 页=0 行=2 列=Price 值=$81,313 类型=Currency
+表=t0_0 页=0 行=3 列=Item 值=Row 4 类型=Text
+表=t0_0 页=0 行=3 列=Quantity 值=$63,106 类型=Currency
+表=t0_0 页=0 行=3 列=Price 值=$66,417 类型=Currency
+表=t0_0 页=0 行=4 列=Item 值=Row 5 类型=Text
+表=t0_0 页=0 行=4 列=Quantity 值=$16,531 类型=Currency
+表=t0_0 页=0 行=4 列=Price 值=$28,511 类型=Currency
+表=t0_0 页=0 行=5 列=Item 值=Row 6 类型=Text
+表=t0_0 页=0 行=5 列=Quantity 值=24.6% 类型=Currency
+表=t0_0 页=0 行=5 列=Price 值=-15.9% 类型=Currency
+表=t0_0 页=0 行=6 列=Item 值=Row 7 类型=Text
+表=t0_0 页=0 行=6 列=Quantity 值=$42,688 类型=Currency
+表=t0_0 页=0 行=6 列=Price 值=$60,834 类型=Currency
+表=t0_0 页=0 行=7 列=Item 值=Row 8 类型=Text
+表=t0_0 页=0 行=7 列=Quantity 值=$84,928 类型=Currency
+表=t0_0 页=0 行=7 列=Price 值=$80,491 类型=Currency

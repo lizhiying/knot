@@ -53,7 +53,7 @@
           "bbox": {
             "x": 31.18,
             "y": 72.369995,
-            "width": 334.02002,
+            "width": 331.80002,
             "height": 10.0
           },
           "role": "List",
@@ -70,7 +70,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 72.369995,
-                "width": 334.02002,
+                "width": 331.80002,
                 "height": 10.0
               }
             }
@@ -82,7 +82,7 @@
           "bbox": {
             "x": 31.18,
             "y": 95.04999,
-            "width": 368.34,
+            "width": 366.12,
             "height": 10.0
           },
           "role": "Body",
@@ -99,19 +99,19 @@
               "bbox": {
                 "x": 31.18,
                 "y": 95.04999,
-                "width": 368.34,
+                "width": 366.12,
                 "height": 10.0
               }
             }
           ],
-          "normalized_text": "1.1 \"Service\" means the software-as-a-service platform provided by the Provider."
+          "normalized_text": "   1.1 \"Service\" means the software-as-a-service platform provided by the Provider."
         },
         {
           "block_id": "blk_3",
           "bbox": {
             "x": 31.18,
             "y": 117.72003,
-            "width": 344.47,
+            "width": 342.25,
             "height": 10.0
           },
           "role": "Body",
@@ -128,19 +128,19 @@
               "bbox": {
                 "x": 31.18,
                 "y": 117.72003,
-                "width": 344.47,
+                "width": 342.25,
                 "height": 10.0
               }
             }
           ],
-          "normalized_text": "1.2 \"Customer Data\" means all data submitted by or on behalf of Customer."
+          "normalized_text": "   1.2 \"Customer Data\" means all data submitted by or on behalf of Customer."
         },
         {
           "block_id": "blk_4",
           "bbox": {
             "x": 31.18,
             "y": 140.40002,
-            "width": 140.01001,
+            "width": 137.79001,
             "height": 10.0
           },
           "role": "List",
@@ -157,7 +157,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 140.40002,
-                "width": 140.01001,
+                "width": 137.79001,
                 "height": 10.0
               }
             }
@@ -169,7 +169,7 @@
           "bbox": {
             "x": 31.18,
             "y": 163.08002,
-            "width": 381.85,
+            "width": 379.63,
             "height": 10.0
           },
           "role": "Body",
@@ -186,19 +186,19 @@
               "bbox": {
                 "x": 31.18,
                 "y": 163.08002,
-                "width": 381.85,
+                "width": 379.63,
                 "height": 10.0
               }
             }
           ],
-          "normalized_text": "2.1 This Agreement commences on the Effective Date and continues for 12 months."
+          "normalized_text": "   2.1 This Agreement commences on the Effective Date and continues for 12 months."
         },
         {
           "block_id": "blk_6",
           "bbox": {
             "x": 31.18,
             "y": 185.76001,
-            "width": 267.33002,
+            "width": 265.11002,
             "height": 10.0
           },
           "role": "Body",
@@ -215,19 +215,19 @@
               "bbox": {
                 "x": 31.18,
                 "y": 185.76001,
-                "width": 267.33002,
+                "width": 265.11002,
                 "height": 10.0
               }
             }
           ],
-          "normalized_text": "2.2 Either party may terminate with 30 days written notice."
+          "normalized_text": "   2.2 Either party may terminate with 30 days written notice."
         },
         {
           "block_id": "blk_7",
           "bbox": {
             "x": 31.18,
             "y": 208.43,
-            "width": 117.24999,
+            "width": 115.02999,
             "height": 10.0
           },
           "role": "List",
@@ -244,7 +244,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 208.43,
-                "width": 117.24999,
+                "width": 115.02999,
                 "height": 10.0
               }
             }
@@ -256,7 +256,7 @@
           "bbox": {
             "x": 31.18,
             "y": 231.10999,
-            "width": 196.76001,
+            "width": 194.54001,
             "height": 10.0
           },
           "role": "Body",
@@ -273,19 +273,19 @@
               "bbox": {
                 "x": 31.18,
                 "y": 231.10999,
-                "width": 196.76001,
+                "width": 194.54001,
                 "height": 10.0
               }
             }
           ],
-          "normalized_text": "3.1 Customer shall pay $1,282 per month."
+          "normalized_text": "   3.1 Customer shall pay $1,282 per month."
         },
         {
           "block_id": "blk_9",
           "bbox": {
             "x": 31.18,
             "y": 253.79004,
-            "width": 240.12,
+            "width": 237.9,
             "height": 10.0
           },
           "role": "Body",
@@ -302,19 +302,19 @@
               "bbox": {
                 "x": 31.18,
                 "y": 253.79004,
-                "width": 240.12,
+                "width": 237.9,
                 "height": 10.0
               }
             }
           ],
-          "normalized_text": "3.2 Late payments incur interest at 1.5% per month."
+          "normalized_text": "   3.2 Late payments incur interest at 1.5% per month."
         },
         {
           "block_id": "blk_10",
           "bbox": {
             "x": 31.18,
             "y": 276.46002,
-            "width": 137.26999,
+            "width": 135.04999,
             "height": 10.0
           },
           "role": "List",
@@ -331,7 +331,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 276.46002,
-                "width": 137.26999,
+                "width": 135.04999,
                 "height": 10.0
               }
             }
@@ -343,7 +343,7 @@
           "bbox": {
             "x": 31.18,
             "y": 299.14,
-            "width": 392.65,
+            "width": 390.43,
             "height": 10.0
           },
           "role": "Body",
@@ -360,33 +360,35 @@
               "bbox": {
                 "x": 31.18,
                 "y": 299.14,
-                "width": 392.65,
+                "width": 390.43,
                 "height": 10.0
               }
             }
           ],
-          "normalized_text": "4.1 Neither party's aggregate liability shall exceed the fees paid in the prior 12 months."
+          "normalized_text": "   4.1 Neither party's aggregate liability shall exceed the fees paid in the prior 12 months."
         }
       ],
       "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
         "block_count": 12,
         "table_count": 0,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
-      "text_score": 0.92446184,
+      "text_score": 0.92421937,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 16,
+        "extract_ms": 18,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21315584,
-        "rss_delta_bytes": 0
+        "peak_rss_bytes": 21938176,
+        "rss_delta_bytes": 16384
       }
     }
   ],

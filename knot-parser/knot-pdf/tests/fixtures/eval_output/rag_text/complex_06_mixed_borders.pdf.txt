@@ -1,7 +1,3 @@
-页=1 bbox=(31,33,93,10) Mixed Border Table
-页=1 bbox=(31,55,30,188) Item 1 Item 2 Item 3 Item 4 Item 5 Item 6 Item 7 Item 8 Item 9 Item 10
-页=1 bbox=(253,55,28,188) $1,643 $4,369 $4,453 $2,582 $1,190 $4,481 $9,369 $8,829 $1,960 $1,302
-页=1 bbox=(362,55,32,188) 98 units 51 units 59 units 1 units 38 units 16 units 35 units 97 units 58 units 14 units
 表=t0_0 页=0 Item 1=Item 2 $1,643=$4,369 98 units=51 units
 表=t0_0 页=0 Item 1=Item 3 $1,643=$4,453 98 units=59 units
 表=t0_0 页=0 Item 1=Item 4 $1,643=$2,582 98 units=1 units

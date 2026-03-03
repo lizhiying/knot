@@ -1,4 +1,4 @@
-页=1 bbox=(173,398,122,8) [Scanned image content - page 1]
-页=2 bbox=(173,398,122,8) [Scanned image content - page 2]
-页=3 bbox=(173,398,122,8) [Scanned image content - page 3]
-页=4 bbox=(173,398,122,8) [Scanned image content - page 4]
+页=1 bbox=(173,398,120,8) [Scanned image content - page 1]
+页=2 bbox=(173,398,120,8) [Scanned image content - page 2]
+页=3 bbox=(173,398,120,8) [Scanned image content - page 3]
+页=4 bbox=(173,398,120,8) [Scanned image content - page 4]

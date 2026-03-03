@@ -1,8 +1,96 @@
-页=1 bbox=(31,31,137,12) Ruled Table Sample #02
-页=1 bbox=(31,65,55,248) Department Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Row 7 Row 8 Row 9 Row 10 Row 11 Row 12
-页=1 bbox=(117,65,45,248) Budget -24.0% $73,778 $19,862 $31,468 $64,181 $95,391 $83,796 $88,830 $21,601 43.7% $95,356 $2,050
-页=1 bbox=(186,65,43,248) Actual $92,874 $52,411 $44,394 $19,888 $93,872 $58,465 $39,981 $62,471 $14,291 17.5% $14,073 $24,456
-页=1 bbox=(250,65,48,248) Variance $79,486 $48,615 $37,493 $61,479 $32,006 $86,243 2.9% -27.2% $28,559 $70,853 $64,645 46.9%
-页=1 bbox=(328,65,37,248) Pct $4,844 -3.1% $31,687 $43,208 $27,561 $87,595 $51,472 $27,219 $10,625 -10.9% $31,444 -14.7%
-页=1 bbox=(390,65,43,248) Status $77,072 -26.7% $98,479 12.2% $46,667 $6,608 42.9% -0.8% $29,678 31.1% -27.7% $44,764
-页=1 bbox=(462,65,45,248) Notes -13.3% $27,484 $41,641 $28,081 37.1% $34,193 $77,556 $66,716 $54,731 -15.8% $27,628 $74,539
+表=t0_0 页=0 Department=Row 1 Budget=-24.0% Actual=$92,874 Variance=$79,486 Pct=$4,844 Status=$77,072 Notes=-13.3%
+表=t0_0 页=0 Department=Row 2 Budget=$73,778 Actual=$52,411 Variance=$48,615 Pct=-3.1% Status=-26.7% Notes=$27,484
+表=t0_0 页=0 Department=Row 3 Budget=$19,862 Actual=$44,394 Variance=$37,493 Pct=$31,687 Status=$98,479 Notes=$41,641
+表=t0_0 页=0 Department=Row 4 Budget=$31,468 Actual=$19,888 Variance=$61,479 Pct=$43,208 Status=12.2% Notes=$28,081
+表=t0_0 页=0 Department=Row 5 Budget=$64,181 Actual=$93,872 Variance=$32,006 Pct=$27,561 Status=$46,667 Notes=37.1%
+表=t0_0 页=0 Department=Row 6 Budget=$95,391 Actual=$58,465 Variance=$86,243 Pct=$87,595 Status=$6,608 Notes=$34,193
+表=t0_0 页=0 Department=Row 7 Budget=$83,796 Actual=$39,981 Variance=2.9% Pct=$51,472 Status=42.9% Notes=$77,556
+表=t0_0 页=0 Department=Row 8 Budget=$88,830 Actual=$62,471 Variance=-27.2% Pct=$27,219 Status=-0.8% Notes=$66,716
+表=t0_0 页=0 Department=Row 9 Budget=$21,601 Actual=$14,291 Variance=$28,559 Pct=$10,625 Status=$29,678 Notes=$54,731
+表=t0_0 页=0 Department=Row 10 Budget=43.7% Actual=17.5% Variance=$70,853 Pct=-10.9% Status=31.1% Notes=-15.8%
+表=t0_0 页=0 Department=Row 11 Budget=$95,356 Actual=$14,073 Variance=$64,645 Pct=$31,444 Status=-27.7% Notes=$27,628
+表=t0_0 页=0 Department=Row 12 Budget=$2,050 Actual=$24,456 Variance=46.9% Pct=-14.7% Status=$44,764 Notes=$74,539
+表=t0_0 页=0 行=0 列=Department 值=Row 1 类型=Text
+表=t0_0 页=0 行=0 列=Budget 值=-24.0% 类型=Currency
+表=t0_0 页=0 行=0 列=Actual 值=$92,874 类型=Currency
+表=t0_0 页=0 行=0 列=Variance 值=$79,486 类型=Currency
+表=t0_0 页=0 行=0 列=Pct 值=$4,844 类型=Currency
+表=t0_0 页=0 行=0 列=Status 值=$77,072 类型=Currency
+表=t0_0 页=0 行=0 列=Notes 值=-13.3% 类型=Currency
+表=t0_0 页=0 行=1 列=Department 值=Row 2 类型=Text
+表=t0_0 页=0 行=1 列=Budget 值=$73,778 类型=Currency
+表=t0_0 页=0 行=1 列=Actual 值=$52,411 类型=Currency
+表=t0_0 页=0 行=1 列=Variance 值=$48,615 类型=Currency
+表=t0_0 页=0 行=1 列=Pct 值=-3.1% 类型=Currency
+表=t0_0 页=0 行=1 列=Status 值=-26.7% 类型=Currency
+表=t0_0 页=0 行=1 列=Notes 值=$27,484 类型=Currency
+表=t0_0 页=0 行=2 列=Department 值=Row 3 类型=Text
+表=t0_0 页=0 行=2 列=Budget 值=$19,862 类型=Currency
+表=t0_0 页=0 行=2 列=Actual 值=$44,394 类型=Currency
+表=t0_0 页=0 行=2 列=Variance 值=$37,493 类型=Currency
+表=t0_0 页=0 行=2 列=Pct 值=$31,687 类型=Currency
+表=t0_0 页=0 行=2 列=Status 值=$98,479 类型=Currency
+表=t0_0 页=0 行=2 列=Notes 值=$41,641 类型=Currency
+表=t0_0 页=0 行=3 列=Department 值=Row 4 类型=Text
+表=t0_0 页=0 行=3 列=Budget 值=$31,468 类型=Currency
+表=t0_0 页=0 行=3 列=Actual 值=$19,888 类型=Currency
+表=t0_0 页=0 行=3 列=Variance 值=$61,479 类型=Currency
+表=t0_0 页=0 行=3 列=Pct 值=$43,208 类型=Currency
+表=t0_0 页=0 行=3 列=Status 值=12.2% 类型=Currency
+表=t0_0 页=0 行=3 列=Notes 值=$28,081 类型=Currency
+表=t0_0 页=0 行=4 列=Department 值=Row 5 类型=Text
+表=t0_0 页=0 行=4 列=Budget 值=$64,181 类型=Currency
+表=t0_0 页=0 行=4 列=Actual 值=$93,872 类型=Currency
+表=t0_0 页=0 行=4 列=Variance 值=$32,006 类型=Currency
+表=t0_0 页=0 行=4 列=Pct 值=$27,561 类型=Currency
+表=t0_0 页=0 行=4 列=Status 值=$46,667 类型=Currency
+表=t0_0 页=0 行=4 列=Notes 值=37.1% 类型=Currency
+表=t0_0 页=0 行=5 列=Department 值=Row 6 类型=Text
+表=t0_0 页=0 行=5 列=Budget 值=$95,391 类型=Currency
+表=t0_0 页=0 行=5 列=Actual 值=$58,465 类型=Currency
+表=t0_0 页=0 行=5 列=Variance 值=$86,243 类型=Currency
+表=t0_0 页=0 行=5 列=Pct 值=$87,595 类型=Currency
+表=t0_0 页=0 行=5 列=Status 值=$6,608 类型=Currency
+表=t0_0 页=0 行=5 列=Notes 值=$34,193 类型=Currency
+表=t0_0 页=0 行=6 列=Department 值=Row 7 类型=Text
+表=t0_0 页=0 行=6 列=Budget 值=$83,796 类型=Currency
+表=t0_0 页=0 行=6 列=Actual 值=$39,981 类型=Currency
+表=t0_0 页=0 行=6 列=Variance 值=2.9% 类型=Currency
+表=t0_0 页=0 行=6 列=Pct 值=$51,472 类型=Currency
+表=t0_0 页=0 行=6 列=Status 值=42.9% 类型=Currency
+表=t0_0 页=0 行=6 列=Notes 值=$77,556 类型=Currency
+表=t0_0 页=0 行=7 列=Department 值=Row 8 类型=Text
+表=t0_0 页=0 行=7 列=Budget 值=$88,830 类型=Currency
+表=t0_0 页=0 行=7 列=Actual 值=$62,471 类型=Currency
+表=t0_0 页=0 行=7 列=Variance 值=-27.2% 类型=Currency
+表=t0_0 页=0 行=7 列=Pct 值=$27,219 类型=Currency
+表=t0_0 页=0 行=7 列=Status 值=-0.8% 类型=Currency
+表=t0_0 页=0 行=7 列=Notes 值=$66,716 类型=Currency
+表=t0_0 页=0 行=8 列=Department 值=Row 9 类型=Text
+表=t0_0 页=0 行=8 列=Budget 值=$21,601 类型=Currency
+表=t0_0 页=0 行=8 列=Actual 值=$14,291 类型=Currency
+表=t0_0 页=0 行=8 列=Variance 值=$28,559 类型=Currency
+表=t0_0 页=0 行=8 列=Pct 值=$10,625 类型=Currency
+表=t0_0 页=0 行=8 列=Status 值=$29,678 类型=Currency
+表=t0_0 页=0 行=8 列=Notes 值=$54,731 类型=Currency
+表=t0_0 页=0 行=9 列=Department 值=Row 10 类型=Text
+表=t0_0 页=0 行=9 列=Budget 值=43.7% 类型=Currency
+表=t0_0 页=0 行=9 列=Actual 值=17.5% 类型=Currency
+表=t0_0 页=0 行=9 列=Variance 值=$70,853 类型=Currency
+表=t0_0 页=0 行=9 列=Pct 值=-10.9% 类型=Currency
+表=t0_0 页=0 行=9 列=Status 值=31.1% 类型=Currency
+表=t0_0 页=0 行=9 列=Notes 值=-15.8% 类型=Currency
+表=t0_0 页=0 行=10 列=Department 值=Row 11 类型=Text
+表=t0_0 页=0 行=10 列=Budget 值=$95,356 类型=Currency
+表=t0_0 页=0 行=10 列=Actual 值=$14,073 类型=Currency
+表=t0_0 页=0 行=10 列=Variance 值=$64,645 类型=Currency
+表=t0_0 页=0 行=10 列=Pct 值=$31,444 类型=Currency
+表=t0_0 页=0 行=10 列=Status 值=-27.7% 类型=Currency
+表=t0_0 页=0 行=10 列=Notes 值=$27,628 类型=Currency
+表=t0_0 页=0 行=11 列=Department 值=Row 12 类型=Text
+表=t0_0 页=0 行=11 列=Budget 值=$2,050 类型=Currency
+表=t0_0 页=0 行=11 列=Actual 值=$24,456 类型=Currency
+表=t0_0 页=0 行=11 列=Variance 值=46.9% 类型=Currency
+表=t0_0 页=0 行=11 列=Pct 值=-14.7% 类型=Currency
+表=t0_0 页=0 行=11 列=Status 值=$44,764 类型=Currency
+表=t0_0 页=0 行=11 列=Notes 值=$74,539 类型=Currency

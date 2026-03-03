@@ -25,7 +25,7 @@
             "x": 31.18,
             "y": 32.690002,
             "width": 68.92,
-            "height": 10.0
+            "height": 69.52002
           },
           "role": "Body",
           "lines": [
@@ -44,20 +44,7 @@
                 "width": 68.92,
                 "height": 10.0
               }
-            }
-          ],
-          "normalized_text": "Tiny 2x2 Table"
-        },
-        {
-          "block_id": "blk_1",
-          "bbox": {
-            "x": 31.18,
-            "y": 69.54004,
-            "width": 43.910004,
-            "height": 32.669983
-          },
-          "role": "Body",
-          "lines": [
+            },
             {
               "spans": [
                 {
@@ -91,10 +78,10 @@
               }
             }
           ],
-          "normalized_text": "Revenue Expenses"
+          "normalized_text": "Tiny 2x2 Table\nRevenue\nExpenses"
         },
         {
-          "block_id": "blk_2",
+          "block_id": "blk_1",
           "bbox": {
             "x": 258.94,
             "y": 69.54004,
@@ -136,27 +123,29 @@
               }
             }
           ],
-          "normalized_text": "$1,234,567 $987,654"
+          "normalized_text": "$1,234,567\n$987,654"
         }
       ],
       "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 3,
+        "block_count": 2,
         "table_count": 0,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.9054787,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 17,
+        "extract_ms": 15,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21315584,
+        "peak_rss_bytes": 21938176,
         "rss_delta_bytes": 0
       }
     }

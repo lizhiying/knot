@@ -116,7 +116,7 @@ async fn ensure_parsing_llm(app: &tauri::AppHandle, state: AppState) -> Result<(
         }
     }
 
-    println!("[LazyLoad] Starting Parsing LLM (OCRFlux)...");
+    println!("[LazyLoad] Starting Parsing LLM (GLM-OCR)...");
     let _ = state.thread_safe_embedding.clone(); // Valid clone check
 
     // Prepare paths via ModelPathManager
@@ -124,14 +124,8 @@ async fn ensure_parsing_llm(app: &tauri::AppHandle, state: AppState) -> Result<(
     let bin_dir = get_bin_dir(app);
 
     // 使用 ModelPathManager 查找模型，不再硬编码 models_dir
-    let parsing_model_path = manager.get_model_path("OCRFlux-3B.Q4_K_M.gguf");
-    let parsing_mmproj_path = manager.get_model_path("OCRFlux-3B.mmproj-f16.gguf"); // 注意文件名根据 milestone 修正
-                                                                                    // 兼容旧名字 fallback
-    let parsing_mmproj_path = if parsing_mmproj_path.exists() {
-        parsing_mmproj_path
-    } else {
-        manager.get_model_path("OCRFlux-3B.mmproj-Q8_0.gguf")
-    };
+    let parsing_model_path = manager.get_model_path("GLM-OCR-Q8_0.gguf");
+    let parsing_mmproj_path = manager.get_model_path("mmproj-GLM-OCR-Q8_0.gguf");
 
     if !parsing_model_path.exists() {
         return Err(format!(
@@ -152,11 +146,14 @@ async fn ensure_parsing_llm(app: &tauri::AppHandle, state: AppState) -> Result<(
 
     // Use spawn_blocking for IO/Process operations
     let result = tokio::task::spawn_blocking(move || {
-        LlamaSidecar::spawn_with_mmap(
+        // VLM 图片解析需要大 context（图片 token 可能超过 4096）
+        // 使用 16384 上下文，parallel=2 时每个 slot 有 8192
+        LlamaSidecar::spawn_with_context(
             parsing_model_path.to_str().unwrap_or(""),
             &bin_dir,
             parsing_mmproj_arg.as_deref(),
             18080,
+            16384,
         )
     })
     .await
@@ -186,9 +183,6 @@ async fn parse_file(
     path: String,
     state: State<'_, AppState>,
 ) -> Result<PageNode, String> {
-    // Lazy Load Parsing LLM
-    ensure_parsing_llm(&app, state.inner().clone()).await?;
-
     let file_path = Path::new(&path);
 
     if !file_path.exists() {
@@ -197,7 +191,7 @@ async fn parse_file(
 
     let dispatcher = IndexDispatcher::new();
 
-    // Progress callback closure
+    // Progress callback closure（PDF 逐页进度）
     let app_handle = app.clone();
     let progress_callback = move |current: usize, total: usize| {
         let _ = app_handle.emit(
@@ -209,7 +203,24 @@ async fn parse_file(
         );
     };
 
+    // Page content callback（逐页 markdown 实时推送）
+    let app_handle2 = app.clone();
+    let page_callback = move |page_index: usize, total_pages: usize, markdown: String| {
+        let _ = app_handle2.emit(
+            "parse-page-ready",
+            serde_json::json!({
+                "pageIndex": page_index,
+                "totalPages": total_pages,
+                "markdown": markdown
+            }),
+        );
+    };
+
     // 基础配置
+    let manager = ModelPathManager::new(&app);
+    let ocr_model_dir = manager.get_download_target_path("ppocrv5");
+    let ocr_model_dir_str = ocr_model_dir.to_string_lossy().to_string();
+
     let mut config = PageIndexConfig {
         vision_provider: None,
         llm_provider: None,       // 稍后注入
@@ -218,18 +229,26 @@ async fn parse_file(
         summary_token_threshold: 50,
         enable_auto_summary: false, // 稍后启用
         default_language: "zh".to_string(),
-        progress_callback: Some(&progress_callback),
+        progress_callback: Some(std::sync::Arc::new(progress_callback)),
+        page_content_callback: Some(std::sync::Arc::new(page_callback)),
+        // PDF OCR 配置（PaddleOCR）
+        pdf_ocr_enabled: ocr_model_dir.join("det.onnx").exists(),
+        pdf_ocr_model_dir: Some(ocr_model_dir_str),
+        // PDF Vision 配置（使用 Ollama 的 glm-ocr）
+        pdf_vision_api_url: Some("http://localhost:11434/v1/chat/completions".to_string()),
+        pdf_vision_model: Some("glm-ocr:latest".to_string()),
+        pdf_page_indices: None,
     };
 
     // 1. 获取 Embedding Provider
     let embedding_provider_guard = state.thread_safe_embedding.read().await;
     let embedding_provider = embedding_provider_guard.as_ref().map(|p| p.as_ref());
 
-    // 2. 获取 LLM Provider (Parsing Client)
-    let llm_provider_guard = state.parsing_client.read().await;
+    // 2. 获取 LLM Provider (Chat Client / Qwen3)
+    let llm_provider_guard = state.chat_client.read().await;
     let llm_provider = llm_provider_guard.as_ref().map(|p| p.as_ref());
 
-    // 注入 LLM Provider (PDF 解析可能需要)
+    // 注入 LLM Provider (摘要生成)
     if let Some(provider) = llm_provider {
         config.llm_provider = Some(provider);
     }
@@ -248,7 +267,6 @@ async fn parse_file(
         println!("Warning: Embedding provider not available (model likely still loading). Embeddings will be null.");
     }
 
-    // 5. 注入摘要（暂时禁用，避免解析过慢）
     // 5. 注入摘要
     if let Some(provider) = llm_provider {
         config.llm_provider = Some(provider);
@@ -265,7 +283,7 @@ async fn stop_parsing_llm(state: State<'_, AppState>) -> Result<(), String> {
     let parsing_llm = state.parsing_llm.clone();
     let mut guard = parsing_llm.write().await;
     if guard.is_some() {
-        println!("[App] Stopping Parsing LLM (OCRFlux)...");
+        println!("[App] Stopping Parsing LLM (GLM-OCR)...");
         *guard = None; // Drop the Sidecar, which kills the process
     }
     Ok(())
@@ -427,6 +445,14 @@ fn main() {
                         "[Engine] Chat LLM model missing at {:?}. Waiting for download...",
                         chat_model_path
                     );
+                    // 模型不存在时也标记为 ready（避免 UI 永远等待）
+                    tokio::runtime::Runtime::new().unwrap().block_on(async {
+                        {
+                            let mut status = model_status_clone.write().await;
+                            *status = "ready".to_string();
+                        }
+                        let _ = app_handle_clone.emit("model-status", "ready");
+                    });
                     return;
                 }
 
@@ -463,7 +489,7 @@ fn main() {
                                 println!("[Engine] Startup warmup successful.");
                             }
 
-                            // Update status
+                            // 无论 warmup 是否成功都设为 ready（模型进程已启动）
                             {
                                 let mut status = model_status_g.write().await;
                                 *status = "ready".to_string();
@@ -474,6 +500,14 @@ fn main() {
                     }
                     Err(e) => {
                         eprintln!("[Engine] ✗ Failed to start Chat LLM: {}", e);
+                        // 即使 Chat LLM 失败也标记为 ready（搜索等核心功能不依赖 Chat）
+                        tokio::runtime::Runtime::new().unwrap().block_on(async {
+                            {
+                                let mut status = model_status_clone.write().await;
+                                *status = "ready".to_string();
+                            }
+                            let _ = app_handle_clone.emit("model-status", "ready");
+                        });
                     }
                 }
             });
@@ -665,6 +699,7 @@ fn main() {
             rag_search,
             rag_generate,
             check_model_status,
+            check_all_models,
             get_model_status,
             download_model,
             get_detected_region,
@@ -1593,6 +1628,37 @@ async fn check_model_status(app: tauri::AppHandle, filename: String) -> Result<b
     Ok(manager.get_model_path(&filename).exists())
 }
 
+/// 所有核心模型的完整性检查
+/// 返回 { all_ready: bool, missing: [String] }
+#[tauri::command]
+async fn check_all_models(app: tauri::AppHandle) -> Result<serde_json::Value, String> {
+    let manager = ModelPathManager::new(&app);
+
+    let core_models = vec![
+        "GLM-OCR-Q8_0.gguf",
+        "mmproj-GLM-OCR-Q8_0.gguf",
+        "Qwen3-1.7B-Q4_K_M.gguf",
+        "ppocrv5/det.onnx",
+        "ppocrv5/rec.onnx",
+        "ppocrv5/ppocrv5_dict.txt",
+    ];
+
+    let mut missing = Vec::new();
+    for model in &core_models {
+        let path = manager.get_model_path(model);
+        if !path.exists() {
+            missing.push(model.to_string());
+        }
+    }
+
+    let all_ready = missing.is_empty();
+
+    Ok(serde_json::json!({
+        "all_ready": all_ready,
+        "missing": missing,
+    }))
+}
+
 #[tauri::command]
 async fn download_model(
     app: tauri::AppHandle,
@@ -1636,11 +1702,37 @@ async fn start_download_queue(
         qm.set_region(r).await;
     }
 
-    // Add files in order: OCR Main -> OCR mmproj -> LLM
-    qm.add_to_queue("OCRFlux-3B.Q4_K_M.gguf".to_string()).await;
-    qm.add_to_queue("OCRFlux-3B.mmproj-f16.gguf".to_string())
-        .await;
-    qm.add_to_queue("Qwen3-1.7B-Q4_K_M.gguf".to_string()).await;
+    // 所有核心模型列表
+    let all_models = vec![
+        "GLM-OCR-Q8_0.gguf",
+        "mmproj-GLM-OCR-Q8_0.gguf",
+        "Qwen3-1.7B-Q4_K_M.gguf",
+        "ppocrv5/det.onnx",
+        "ppocrv5/rec.onnx",
+        "ppocrv5/ppocrv5_dict.txt",
+    ];
+
+    // 只下载缺失的模型
+    let manager = ModelPathManager::new(&app);
+    let mut added = 0;
+    for model in &all_models {
+        let path = manager.get_model_path(model);
+        if !path.exists() {
+            qm.add_to_queue(model.to_string()).await;
+            added += 1;
+            println!("[Queue] Added missing model: {}", model);
+        } else {
+            // 已存在的模型立即发出完成事件，让前端更新状态
+            let _ = app.emit("queue-item-complete", model.to_string());
+            println!("[Queue] Skipping existing model: {}", model);
+        }
+    }
+
+    if added == 0 {
+        // 全部已存在，直接完成
+        let _ = app.emit("queue-finished", ());
+        return Ok(());
+    }
 
     // Trigger async processing
     let app_handle = app.clone();

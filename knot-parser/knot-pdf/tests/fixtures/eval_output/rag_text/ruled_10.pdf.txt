@@ -1,6 +1,48 @@
-页=1 bbox=(31,31,137,12) Ruled Table Sample #10
-页=1 bbox=(31,65,69,168) Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Row 7 Row 8 Department
-页=1 bbox=(159,65,59,168) -13.0% $45,154 $13,930 $27,212 $32,174 $83,011 $6,436 -4.6% Budget
-页=1 bbox=(257,65,58,168) $1,283 $64,414 $8,582 $99,367 $66,028 -13.0% $33,292 $15,511 Actual
-页=1 bbox=(349,65,62,168) $35,447 -17.4% $63,830 $87,499 $73,893 $93,443 13.1% $90,949 Variance
-页=1 bbox=(456,65,52,168) $62,619 $69,530 -4.1% $22,701 $87,886 $16,174 $73,408 36.9% Pct
+表=t0_0 页=0 Department=Row 1 Budget=-13.0% Actual=$1,283 Variance=$35,447 Pct=$62,619
+表=t0_0 页=0 Department=Row 2 Budget=$45,154 Actual=$64,414 Variance=-17.4% Pct=$69,530
+表=t0_0 页=0 Department=Row 3 Budget=$13,930 Actual=$8,582 Variance=$63,830 Pct=-4.1%
+表=t0_0 页=0 Department=Row 4 Budget=$27,212 Actual=$99,367 Variance=$87,499 Pct=$22,701
+表=t0_0 页=0 Department=Row 5 Budget=$32,174 Actual=$66,028 Variance=$73,893 Pct=$87,886
+表=t0_0 页=0 Department=Row 6 Budget=$83,011 Actual=-13.0% Variance=$93,443 Pct=$16,174
+表=t0_0 页=0 Department=Row 7 Budget=$6,436 Actual=$33,292 Variance=13.1% Pct=$73,408
+表=t0_0 页=0 Department=Row 8 Budget=-4.6% Actual=$15,511 Variance=$90,949 Pct=36.9%
+表=t0_0 页=0 行=0 列=Department 值=Row 1 类型=Text
+表=t0_0 页=0 行=0 列=Budget 值=-13.0% 类型=Currency
+表=t0_0 页=0 行=0 列=Actual 值=$1,283 类型=Currency
+表=t0_0 页=0 行=0 列=Variance 值=$35,447 类型=Currency
+表=t0_0 页=0 行=0 列=Pct 值=$62,619 类型=Currency
+表=t0_0 页=0 行=1 列=Department 值=Row 2 类型=Text
+表=t0_0 页=0 行=1 列=Budget 值=$45,154 类型=Currency
+表=t0_0 页=0 行=1 列=Actual 值=$64,414 类型=Currency
+表=t0_0 页=0 行=1 列=Variance 值=-17.4% 类型=Currency
+表=t0_0 页=0 行=1 列=Pct 值=$69,530 类型=Currency
+表=t0_0 页=0 行=2 列=Department 值=Row 3 类型=Text
+表=t0_0 页=0 行=2 列=Budget 值=$13,930 类型=Currency
+表=t0_0 页=0 行=2 列=Actual 值=$8,582 类型=Currency
+表=t0_0 页=0 行=2 列=Variance 值=$63,830 类型=Currency
+表=t0_0 页=0 行=2 列=Pct 值=-4.1% 类型=Currency
+表=t0_0 页=0 行=3 列=Department 值=Row 4 类型=Text
+表=t0_0 页=0 行=3 列=Budget 值=$27,212 类型=Currency
+表=t0_0 页=0 行=3 列=Actual 值=$99,367 类型=Currency
+表=t0_0 页=0 行=3 列=Variance 值=$87,499 类型=Currency
+表=t0_0 页=0 行=3 列=Pct 值=$22,701 类型=Currency
+表=t0_0 页=0 行=4 列=Department 值=Row 5 类型=Text
+表=t0_0 页=0 行=4 列=Budget 值=$32,174 类型=Currency
+表=t0_0 页=0 行=4 列=Actual 值=$66,028 类型=Currency
+表=t0_0 页=0 行=4 列=Variance 值=$73,893 类型=Currency
+表=t0_0 页=0 行=4 列=Pct 值=$87,886 类型=Currency
+表=t0_0 页=0 行=5 列=Department 值=Row 6 类型=Text
+表=t0_0 页=0 行=5 列=Budget 值=$83,011 类型=Currency
+表=t0_0 页=0 行=5 列=Actual 值=-13.0% 类型=Currency
+表=t0_0 页=0 行=5 列=Variance 值=$93,443 类型=Currency
+表=t0_0 页=0 行=5 列=Pct 值=$16,174 类型=Currency
+表=t0_0 页=0 行=6 列=Department 值=Row 7 类型=Text
+表=t0_0 页=0 行=6 列=Budget 值=$6,436 类型=Currency
+表=t0_0 页=0 行=6 列=Actual 值=$33,292 类型=Currency
+表=t0_0 页=0 行=6 列=Variance 值=13.1% 类型=Currency
+表=t0_0 页=0 行=6 列=Pct 值=$73,408 类型=Currency
+表=t0_0 页=0 行=7 列=Department 值=Row 8 类型=Text
+表=t0_0 页=0 行=7 列=Budget 值=-4.6% 类型=Currency
+表=t0_0 页=0 行=7 列=Actual 值=$15,511 类型=Currency
+表=t0_0 页=0 行=7 列=Variance 值=$90,949 类型=Currency
+表=t0_0 页=0 行=7 列=Pct 值=36.9% 类型=Currency

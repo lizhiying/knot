@@ -1,8 +1,4 @@
 页=1 bbox=(211,31,172,16) TABLE OF CONTENTS
-页=1 bbox=(31,82,107,11) 1 Introduction
-页=1 bbox=(31,101,149,11) 2 System Architecture
-页=1 bbox=(74,121,161,130) Text Extraction Pipeline Table Detection and Extraction OCR Integration Performance Evaluation API Reference Appendix: Sample Outputs Appendix: Benchmark Data
-页=1 bbox=(552,121,12,130) 12 23 38 45 52 60 70
 表=t0_0 页=0 col_0=1 col_1=Introduction col_2=1
 表=t0_0 页=0 col_0=2 col_1=System Architecture col_2=5
 表=t0_0 页=0 col_0=3 col_1=Text Extraction Pipeline col_2=12

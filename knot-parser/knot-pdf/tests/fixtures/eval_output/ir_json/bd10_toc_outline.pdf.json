@@ -47,314 +47,6 @@
             }
           ],
           "normalized_text": "TABLE OF CONTENTS"
-        },
-        {
-          "block_id": "blk_1",
-          "bbox": {
-            "x": 31.18,
-            "y": 81.59003,
-            "width": 106.68299,
-            "height": 11.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "1 Introduction",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 81.59003,
-                "width": 106.68299,
-                "height": 11.0
-              }
-            }
-          ],
-          "normalized_text": "1 Introduction"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 31.18,
-            "y": 101.42999,
-            "width": 149.495,
-            "height": 11.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "2 System Architecture",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 101.42999,
-                "width": 149.495,
-                "height": 11.0
-              }
-            }
-          ],
-          "normalized_text": "2 System Architecture"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 73.7,
-            "y": 121.28003,
-            "width": 161.37,
-            "height": 130.04999
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Text Extraction Pipeline",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 73.7,
-                "y": 121.28003,
-                "width": 124.707,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Table Detection and Extraction",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 73.7,
-                "y": 141.12,
-                "width": 161.37,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "OCR Integration",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 73.7,
-                "y": 160.96002,
-                "width": 84.33699,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Performance Evaluation",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 73.7,
-                "y": 180.79999,
-                "width": 125.92799,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "API Reference",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 73.7,
-                "y": 200.65002,
-                "width": 74.58,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Appendix: Sample Outputs",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 73.7,
-                "y": 220.48999,
-                "width": 130.845,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "Appendix: Benchmark Data",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 73.7,
-                "y": 240.33002,
-                "width": 133.892,
-                "height": 11.0
-              }
-            }
-          ],
-          "normalized_text": "Text Extraction Pipeline Table Detection and Extraction OCR Integration Performance Evaluation API Reference Appendix: Sample Outputs Appendix: Benchmark Data"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 551.87,
-            "y": 121.28003,
-            "width": 12.232056,
-            "height": 130.04999
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "12",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 551.87,
-                "y": 121.28003,
-                "width": 12.232056,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "23",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 551.87,
-                "y": 141.12,
-                "width": 12.232056,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "38",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 551.87,
-                "y": 160.96002,
-                "width": 12.232056,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "45",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 551.87,
-                "y": 180.79999,
-                "width": 12.232056,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "52",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 551.87,
-                "y": 200.65002,
-                "width": 12.232056,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "60",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 551.87,
-                "y": 220.48999,
-                "width": 12.232056,
-                "height": 11.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "70",
-                  "font_size": 11.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 551.87,
-                "y": 240.33002,
-                "width": 12.232056,
-                "height": 11.0
-              }
-            }
-          ],
-          "normalized_text": "12 23 38 45 52 60 70"
         }
       ],
       "tables": [
@@ -641,17 +333,26 @@
             "Text",
             "Number"
           ],
-          "fallback_text": "[表t0_0 页0]\n行1: col_0=1 col_1=Introduction col_2=1\n行2: col_0=2 col_1=System Architecture col_2=5\n行3: col_0=3 col_1=Text Extraction Pipeline col_2=12\n行4: col_0=4 col_1=Table Detection and Extraction col_2=23\n行5: col_0=5 col_1=OCR Integration col_2=38\n行6: col_0=6 col_1=Performance Evaluation col_2=45\n行7: col_0=7 col_1=API Reference col_2=52\n行8: col_0=A col_1=Appendix: Sample Outputs col_2=60\n行9: col_0=B col_1=Appendix: Benchmark Data col_2=70"
+          "fallback_text": "[表t0_0 页0]\n行1: col_0=1 col_1=Introduction col_2=1\n行2: col_0=2 col_1=System Architecture col_2=5\n行3: col_0=3 col_1=Text Extraction Pipeline col_2=12\n行4: col_0=4 col_1=Table Detection and Extraction col_2=23\n行5: col_0=5 col_1=OCR Integration col_2=38\n行6: col_0=6 col_1=Performance Evaluation col_2=45\n行7: col_0=7 col_1=API Reference col_2=52\n行8: col_0=A col_1=Appendix: Sample Outputs col_2=60\n行9: col_0=B col_1=Appendix: Benchmark Data col_2=70",
+          "confidence": {
+            "score": 0.63800704,
+            "alignment_score": 0.9,
+            "spacing_score": 0.17647946,
+            "data_density_score": 0.16355555,
+            "consistency_score": 1.0
+          }
         }
       ],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 5,
+        "block_count": 1,
         "table_count": 1,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.95337355,
       "is_scanned_guess": false,
@@ -660,8 +361,8 @@
         "extract_ms": 16,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21151744,
-        "rss_delta_bytes": 0
+        "peak_rss_bytes": 22020096,
+        "rss_delta_bytes": 49152
       }
     }
   ],

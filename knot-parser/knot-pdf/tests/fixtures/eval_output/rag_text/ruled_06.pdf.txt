@@ -1,4 +1,24 @@
-页=1 bbox=(31,31,137,12) Ruled Table Sample #06
-页=1 bbox=(31,65,72,128) Row 1 Row 2 Row 3 Row 4 Row 5 Row 6 Department
-页=1 bbox=(220,65,114,128) -1.8% $98,146 $43,071 $25,383 $2,450 $16,999 Budget
-页=1 bbox=(412,65,96,128) -20.9% $45,496 -8.5% $31,266 -7.5% $13,466 Actual
+表=t0_0 页=0 Department=Row 1 Budget=-1.8% Actual=-20.9%
+表=t0_0 页=0 Department=Row 2 Budget=$98,146 Actual=$45,496
+表=t0_0 页=0 Department=Row 3 Budget=$43,071 Actual=-8.5%
+表=t0_0 页=0 Department=Row 4 Budget=$25,383 Actual=$31,266
+表=t0_0 页=0 Department=Row 5 Budget=$2,450 Actual=-7.5%
+表=t0_0 页=0 Department=Row 6 Budget=$16,999 Actual=$13,466
+表=t0_0 页=0 行=0 列=Department 值=Row 1 类型=Text
+表=t0_0 页=0 行=0 列=Budget 值=-1.8% 类型=Currency
+表=t0_0 页=0 行=0 列=Actual 值=-20.9% 类型=Currency
+表=t0_0 页=0 行=1 列=Department 值=Row 2 类型=Text
+表=t0_0 页=0 行=1 列=Budget 值=$98,146 类型=Currency
+表=t0_0 页=0 行=1 列=Actual 值=$45,496 类型=Currency
+表=t0_0 页=0 行=2 列=Department 值=Row 3 类型=Text
+表=t0_0 页=0 行=2 列=Budget 值=$43,071 类型=Currency
+表=t0_0 页=0 行=2 列=Actual 值=-8.5% 类型=Currency
+表=t0_0 页=0 行=3 列=Department 值=Row 4 类型=Text
+表=t0_0 页=0 行=3 列=Budget 值=$25,383 类型=Currency
+表=t0_0 页=0 行=3 列=Actual 值=$31,266 类型=Currency
+表=t0_0 页=0 行=4 列=Department 值=Row 5 类型=Text
+表=t0_0 页=0 行=4 列=Budget 值=$2,450 类型=Currency
+表=t0_0 页=0 行=4 列=Actual 值=-7.5% 类型=Currency
+表=t0_0 页=0 行=5 列=Department 值=Row 6 类型=Text
+表=t0_0 页=0 行=5 列=Budget 值=$16,999 类型=Currency
+表=t0_0 页=0 行=5 列=Actual 值=$13,466 类型=Currency

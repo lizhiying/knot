@@ -18,3490 +18,1797 @@
         "height": 792.0
       },
       "rotation": 0.0,
-      "blocks": [
+      "blocks": [],
+      "tables": [
         {
-          "block_id": "blk_0",
-          "bbox": {
-            "x": 31.18,
-            "y": 32.690002,
-            "width": 94.47,
-            "height": 10.0
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "Numeric-Only Table",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 32.690002,
-                "width": 94.47,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "Numeric-Only Table"
-        },
-        {
-          "block_id": "blk_1",
+          "table_id": "t0_0",
+          "page_index": 0,
           "bbox": {
             "x": 53.83,
             "y": 54.630005,
-            "width": 31.213997,
+            "width": 447.906,
             "height": 362.75
           },
-          "role": "Body",
-          "lines": [
+          "extraction_mode": "Stream",
+          "headers": [
+            "V1",
+            "V2",
+            "V3",
+            "V4",
+            "V5",
+            "V6",
+            "V7",
+            "V8"
+          ],
+          "rows": [
             {
-              "spans": [
+              "row_index": 0,
+              "cells": [
                 {
-                  "text": "V1",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 53.83,
-                "y": 54.630005,
-                "width": 8.560997,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 0,
                   "text": "399.21",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 70.22003,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "536.12",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 84.390015,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "249.47",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 98.56,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "46.39",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 67.53,
-                "y": 112.73999,
-                "width": 17.514,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "697.84",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 126.910034,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "868.22",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 141.08002,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "15.22",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 67.53,
-                "y": 155.26001,
-                "width": 17.514,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "120.10",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 169.43,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "499.16",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 183.60004,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "112.09",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 197.78003,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "658.07",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 211.95001,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "856.61",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 226.12,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "375.04",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 240.29999,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "851.79",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 254.47003,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "403.06",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 268.64,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "438.89",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 282.82,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "459.64",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 296.99,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "279.60",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 311.16003,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "250.80",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 325.34003,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "294.24",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 339.51,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "400.92",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 353.68002,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "293.59",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 367.86002,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "215.52",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 382.03003,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "916.47",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 396.2,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "576.21",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 63.63,
-                "y": 410.38,
-                "width": 21.406002,
-                "height": 7.0
-              }
-            }
-          ],
-          "normalized_text": "V1 399.21 536.12 249.47 46.39 697.84 868.22 15.22 120.10 499.16 112.09 658.07 856.61 375.04 851.79 403.06 438.89 459.64 279.60 250.80 294.24 400.92 293.59 215.52 916.47 576.21"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 113.36,
-            "y": 54.630005,
-            "width": 31.206009,
-            "height": 362.75
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "V2",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 113.36,
-                "y": 54.630005,
-                "width": 8.560997,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 1,
                   "text": "252.56",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 70.22003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "405.68",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 84.390015,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "654.70",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 98.56,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "55.60",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 127.05,
-                "y": 112.73999,
-                "width": 17.513992,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "123.43",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 126.910034,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "713.59",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 141.08002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "388.26",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 155.26001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "847.25",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 169.43,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "38.98",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 127.05,
-                "y": 183.60004,
-                "width": 17.513992,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "311.81",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 197.78003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "603.91",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 211.95001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "430.20",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 226.12,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "845.37",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 240.29999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "938.14",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 254.47003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "416.42",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 268.64,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "641.05",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 282.82,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "49.08",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 127.05,
-                "y": 296.99,
-                "width": 17.513992,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "946.89",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 311.16003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "756.01",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 325.34003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "18.41",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 127.05,
-                "y": 339.51,
-                "width": 17.513992,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "371.50",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 353.68002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "764.25",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 367.86002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "810.45",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 382.03003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "447.99",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 123.16,
-                "y": 396.2,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "33.48",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 127.05,
-                "y": 410.38,
-                "width": 17.513992,
-                "height": 7.0
-              }
-            }
-          ],
-          "normalized_text": "V2 252.56 405.68 654.70 55.60 123.43 713.59 388.26 847.25 38.98 311.81 603.91 430.20 845.37 938.14 416.42 641.05 49.08 946.89 756.01 18.41 371.50 764.25 810.45 447.99 33.48"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 172.88,
-            "y": 54.630005,
-            "width": 31.216003,
-            "height": 362.75
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "V3",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 172.88,
-                "y": 54.630005,
-                "width": 8.561005,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 2,
                   "text": "91.75",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 186.58,
-                "y": 70.22003,
-                "width": 17.513992,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "652.79",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 84.390015,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "218.24",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 98.56,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "291.18",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 112.73999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "318.13",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 126.910034,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "317.24",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 141.08002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "624.53",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 155.26001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "987.50",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 169.43,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "417.84",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 183.60004,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "415.53",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 197.78003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "774.86",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 211.95001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "119.98",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 226.12,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "764.89",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 240.29999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "532.32",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 254.47003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "87.03",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 186.58,
-                "y": 268.64,
-                "width": 17.513992,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "355.28",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 282.82,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "789.76",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 296.99,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "898.97",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 311.16003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "236.94",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 325.34003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "861.92",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 339.51,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "605.39",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 353.68002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "718.91",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 367.86002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "427.54",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 382.03003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "971.20",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 396.2,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "736.84",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 182.69,
-                "y": 410.38,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            }
-          ],
-          "normalized_text": "V3 91.75 652.79 218.24 291.18 318.13 317.24 624.53 987.50 417.84 415.53 774.86 119.98 764.89 532.32 87.03 355.28 789.76 898.97 236.94 861.92 605.39 718.91 427.54 971.20 736.84"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 232.41,
-            "y": 54.630005,
-            "width": 31.216003,
-            "height": 362.75
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "V4",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 232.41,
-                "y": 54.630005,
-                "width": 8.561005,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 3,
                   "text": "811.48",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 70.22003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "935.55",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 84.390015,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "469.23",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 98.56,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "272.20",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 112.73999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "254.82",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 126.910034,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "805.50",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 141.08002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "463.87",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 155.26001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "162.03",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 169.43,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "268.87",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 183.60004,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "549.39",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 197.78003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "29.18",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 246.11,
-                "y": 211.95001,
-                "width": 17.513992,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "256.45",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 226.12,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "430.58",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 240.29999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "837.97",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 254.47003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "880.74",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 268.64,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "385.53",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 282.82,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "591.39",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 296.99,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "798.14",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 311.16003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "169.39",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 325.34003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "434.64",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 339.51,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "332.25",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 353.68002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "152.63",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 367.86002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "622.72",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 382.03003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "333.78",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 396.2,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "137.36",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 242.22,
-                "y": 410.38,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            }
-          ],
-          "normalized_text": "V4 811.48 935.55 469.23 272.20 254.82 805.50 463.87 162.03 268.87 549.39 29.18 256.45 430.58 837.97 880.74 385.53 591.39 798.14 169.39 434.64 332.25 152.63 622.72 333.78 137.36"
-        },
-        {
-          "block_id": "blk_5",
-          "bbox": {
-            "x": 291.94,
-            "y": 54.630005,
-            "width": 31.21402,
-            "height": 362.75
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "V5",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 291.94,
-                "y": 54.630005,
-                "width": 8.561005,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 4,
                   "text": "689.36",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 70.22003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "82.21",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 305.64,
-                "y": 84.390015,
-                "width": 17.514008,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "581.02",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 98.56,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "894.26",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 112.73999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "51.29",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 305.64,
-                "y": 126.910034,
-                "width": 17.514008,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "400.15",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 141.08002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "518.90",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 155.26001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "719.18",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 169.43,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "652.26",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 183.60004,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "184.72",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 197.78003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "356.37",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 211.95001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "661.10",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 226.12,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "617.13",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 240.29999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "720.06",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 254.47003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "354.44",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 268.64,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "627.04",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 282.82,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "465.44",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 296.99,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "733.52",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 311.16003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "480.98",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 325.34003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "346.76",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 339.51,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "821.00",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 353.68002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "739.47",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 367.86002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "896.21",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 382.03003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "232.47",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 396.2,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "403.67",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 301.74,
-                "y": 410.38,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            }
-          ],
-          "normalized_text": "V5 689.36 82.21 581.02 894.26 51.29 400.15 518.90 719.18 652.26 184.72 356.37 661.10 617.13 720.06 354.44 627.04 465.44 733.52 480.98 346.76 821.00 739.47 896.21 232.47 403.67"
-        },
-        {
-          "block_id": "blk_6",
-          "bbox": {
-            "x": 351.47,
-            "y": 54.630005,
-            "width": 31.205994,
-            "height": 362.75
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "V6",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 351.47,
-                "y": 54.630005,
-                "width": 8.561005,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 5,
                   "text": "575.10",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 70.22003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "991.77",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 84.390015,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "564.76",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 98.56,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "383.25",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 112.73999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "917.12",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 126.910034,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "563.24",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 141.08002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "126.15",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 155.26001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "610.56",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 169.43,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "109.63",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 183.60004,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "315.10",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 197.78003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "788.83",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 211.95001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "273.12",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 226.12,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "468.01",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 240.29999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "85.54",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 365.16,
-                "y": 254.47003,
-                "width": 17.514008,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "365.54",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 268.64,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "115.79",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 282.82,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "185.09",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 296.99,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "633.04",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 311.16003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "619.41",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 325.34003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "114.98",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 339.51,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "455.64",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 353.68002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "345.46",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 367.86002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "665.45",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 382.03003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "651.92",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 396.2,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "602.43",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 361.27,
-                "y": 410.38,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            }
-          ],
-          "normalized_text": "V6 575.10 991.77 564.76 383.25 917.12 563.24 126.15 610.56 109.63 315.10 788.83 273.12 468.01 85.54 365.54 115.79 185.09 633.04 619.41 114.98 455.64 345.46 665.45 651.92 602.43"
-        },
-        {
-          "block_id": "blk_7",
-          "bbox": {
-            "x": 411.0,
-            "y": 54.630005,
-            "width": 31.205994,
-            "height": 362.75
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "V7",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 411.0,
-                "y": 54.630005,
-                "width": 8.561005,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 6,
                   "text": "989.60",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 70.22003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "89.50",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 424.69,
-                "y": 84.390015,
-                "width": 17.514008,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "353.26",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 98.56,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "966.51",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 112.73999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "744.00",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 126.910034,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "876.93",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 141.08002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "773.56",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 155.26001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "405.57",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 169.43,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "400.93",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 183.60004,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "591.40",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 197.78003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "435.90",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 211.95001,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "859.70",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 226.12,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "174.16",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 240.29999,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "920.60",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 254.47003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "301.91",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 268.64,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "201.85",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 282.82,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "240.09",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 296.99,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "833.33",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 311.16003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "893.44",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 325.34003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "199.30",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 339.51,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "223.32",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 353.68002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "856.25",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 367.86002,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "860.44",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 382.03003,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "869.90",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 396.2,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "148.46",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 420.8,
-                "y": 410.38,
-                "width": 21.406006,
-                "height": 7.0
-              }
-            }
-          ],
-          "normalized_text": "V7 989.60 89.50 353.26 966.51 744.00 876.93 773.56 405.57 400.93 591.40 435.90 859.70 174.16 920.60 301.91 201.85 240.09 833.33 893.44 199.30 223.32 856.25 860.44 869.90 148.46"
-        },
-        {
-          "block_id": "blk_8",
-          "bbox": {
-            "x": 470.52,
-            "y": 54.630005,
-            "width": 31.216003,
-            "height": 362.75
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "V8",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 470.52,
-                "y": 54.630005,
-                "width": 8.561005,
-                "height": 7.0
-              }
-            },
-            {
-              "spans": [
-                {
+                  "row": 0,
+                  "col": 7,
                   "text": "684.10",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 70.22003,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 1,
+              "cells": [
                 {
+                  "row": 1,
+                  "col": 0,
+                  "text": "536.12",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "405.68",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "652.79",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 3,
+                  "text": "935.55",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 4,
+                  "text": "82.21",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 5,
+                  "text": "991.77",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 6,
+                  "text": "89.50",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 7,
                   "text": "814.39",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 84.390015,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 2,
+              "cells": [
                 {
+                  "row": 2,
+                  "col": 0,
+                  "text": "249.47",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "654.70",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "218.24",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 3,
+                  "text": "469.23",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 4,
+                  "text": "581.02",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 5,
+                  "text": "564.76",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 6,
+                  "text": "353.26",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 7,
                   "text": "562.32",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 98.56,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 3,
+              "cells": [
                 {
+                  "row": 3,
+                  "col": 0,
+                  "text": "46.39",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 1,
+                  "text": "55.60",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 2,
+                  "text": "291.18",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 3,
+                  "text": "272.20",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 4,
+                  "text": "894.26",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 5,
+                  "text": "383.25",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 6,
+                  "text": "966.51",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 3,
+                  "col": 7,
                   "text": "259.09",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 112.73999,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 4,
+              "cells": [
                 {
+                  "row": 4,
+                  "col": 0,
+                  "text": "697.84",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 1,
+                  "text": "123.43",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 2,
+                  "text": "318.13",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 3,
+                  "text": "254.82",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 4,
+                  "text": "51.29",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 5,
+                  "text": "917.12",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 6,
+                  "text": "744.00",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 4,
+                  "col": 7,
                   "text": "950.19",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 126.910034,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 5,
+              "cells": [
                 {
+                  "row": 5,
+                  "col": 0,
+                  "text": "868.22",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 1,
+                  "text": "713.59",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 2,
+                  "text": "317.24",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 3,
+                  "text": "805.50",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 4,
+                  "text": "400.15",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 5,
+                  "text": "563.24",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 6,
+                  "text": "876.93",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 5,
+                  "col": 7,
                   "text": "484.09",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 141.08002,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 6,
+              "cells": [
                 {
+                  "row": 6,
+                  "col": 0,
+                  "text": "15.22",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 1,
+                  "text": "388.26",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 2,
+                  "text": "624.53",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 3,
+                  "text": "463.87",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 4,
+                  "text": "518.90",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 5,
+                  "text": "126.15",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 6,
+                  "text": "773.56",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 6,
+                  "col": 7,
                   "text": "28.80",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 484.22,
-                "y": 155.26001,
-                "width": 17.514008,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 7,
+              "cells": [
                 {
+                  "row": 7,
+                  "col": 0,
+                  "text": "120.10",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 1,
+                  "text": "847.25",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 2,
+                  "text": "987.50",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 3,
+                  "text": "162.03",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 4,
+                  "text": "719.18",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 5,
+                  "text": "610.56",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 6,
+                  "text": "405.57",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 7,
+                  "col": 7,
                   "text": "445.48",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 169.43,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 8,
+              "cells": [
                 {
+                  "row": 8,
+                  "col": 0,
+                  "text": "499.16",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 1,
+                  "text": "38.98",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 2,
+                  "text": "417.84",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 3,
+                  "text": "268.87",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 4,
+                  "text": "652.26",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 5,
+                  "text": "109.63",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 6,
+                  "text": "400.93",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 8,
+                  "col": 7,
                   "text": "10.45",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 484.22,
-                "y": 183.60004,
-                "width": 17.514008,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 9,
+              "cells": [
                 {
+                  "row": 9,
+                  "col": 0,
+                  "text": "112.09",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 9,
+                  "col": 1,
+                  "text": "311.81",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 9,
+                  "col": 2,
+                  "text": "415.53",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 9,
+                  "col": 3,
+                  "text": "549.39",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 9,
+                  "col": 4,
+                  "text": "184.72",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 9,
+                  "col": 5,
+                  "text": "315.10",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 9,
+                  "col": 6,
+                  "text": "591.40",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 9,
+                  "col": 7,
                   "text": "929.05",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 197.78003,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 10,
+              "cells": [
                 {
+                  "row": 10,
+                  "col": 0,
+                  "text": "658.07",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 10,
+                  "col": 1,
+                  "text": "603.91",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 10,
+                  "col": 2,
+                  "text": "774.86",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 10,
+                  "col": 3,
+                  "text": "29.18",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 10,
+                  "col": 4,
+                  "text": "356.37",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 10,
+                  "col": 5,
+                  "text": "788.83",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 10,
+                  "col": 6,
+                  "text": "435.90",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 10,
+                  "col": 7,
                   "text": "294.88",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 211.95001,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 11,
+              "cells": [
                 {
+                  "row": 11,
+                  "col": 0,
+                  "text": "856.61",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 11,
+                  "col": 1,
+                  "text": "430.20",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 11,
+                  "col": 2,
+                  "text": "119.98",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 11,
+                  "col": 3,
+                  "text": "256.45",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 11,
+                  "col": 4,
+                  "text": "661.10",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 11,
+                  "col": 5,
+                  "text": "273.12",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 11,
+                  "col": 6,
+                  "text": "859.70",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 11,
+                  "col": 7,
                   "text": "323.61",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 226.12,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 12,
+              "cells": [
                 {
+                  "row": 12,
+                  "col": 0,
+                  "text": "375.04",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 12,
+                  "col": 1,
+                  "text": "845.37",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 12,
+                  "col": 2,
+                  "text": "764.89",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 12,
+                  "col": 3,
+                  "text": "430.58",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 12,
+                  "col": 4,
+                  "text": "617.13",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 12,
+                  "col": 5,
+                  "text": "468.01",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 12,
+                  "col": 6,
+                  "text": "174.16",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 12,
+                  "col": 7,
                   "text": "370.67",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 240.29999,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 13,
+              "cells": [
                 {
+                  "row": 13,
+                  "col": 0,
+                  "text": "851.79",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 13,
+                  "col": 1,
+                  "text": "938.14",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 13,
+                  "col": 2,
+                  "text": "532.32",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 13,
+                  "col": 3,
+                  "text": "837.97",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 13,
+                  "col": 4,
+                  "text": "720.06",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 13,
+                  "col": 5,
+                  "text": "85.54",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 13,
+                  "col": 6,
+                  "text": "920.60",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 13,
+                  "col": 7,
                   "text": "898.65",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 254.47003,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 14,
+              "cells": [
                 {
+                  "row": 14,
+                  "col": 0,
+                  "text": "403.06",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 14,
+                  "col": 1,
+                  "text": "416.42",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 14,
+                  "col": 2,
+                  "text": "87.03",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 14,
+                  "col": 3,
+                  "text": "880.74",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 14,
+                  "col": 4,
+                  "text": "354.44",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 14,
+                  "col": 5,
+                  "text": "365.54",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 14,
+                  "col": 6,
+                  "text": "301.91",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 14,
+                  "col": 7,
                   "text": "649.03",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 268.64,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 15,
+              "cells": [
                 {
+                  "row": 15,
+                  "col": 0,
+                  "text": "438.89",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 15,
+                  "col": 1,
+                  "text": "641.05",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 15,
+                  "col": 2,
+                  "text": "355.28",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 15,
+                  "col": 3,
+                  "text": "385.53",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 15,
+                  "col": 4,
+                  "text": "627.04",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 15,
+                  "col": 5,
+                  "text": "115.79",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 15,
+                  "col": 6,
+                  "text": "201.85",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 15,
+                  "col": 7,
                   "text": "892.78",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 282.82,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 16,
+              "cells": [
                 {
+                  "row": 16,
+                  "col": 0,
+                  "text": "459.64",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 16,
+                  "col": 1,
+                  "text": "49.08",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 16,
+                  "col": 2,
+                  "text": "789.76",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 16,
+                  "col": 3,
+                  "text": "591.39",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 16,
+                  "col": 4,
+                  "text": "465.44",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 16,
+                  "col": 5,
+                  "text": "185.09",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 16,
+                  "col": 6,
+                  "text": "240.09",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 16,
+                  "col": 7,
                   "text": "729.00",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 296.99,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 17,
+              "cells": [
                 {
+                  "row": 17,
+                  "col": 0,
+                  "text": "279.60",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 17,
+                  "col": 1,
+                  "text": "946.89",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 17,
+                  "col": 2,
+                  "text": "898.97",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 17,
+                  "col": 3,
+                  "text": "798.14",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 17,
+                  "col": 4,
+                  "text": "733.52",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 17,
+                  "col": 5,
+                  "text": "633.04",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 17,
+                  "col": 6,
+                  "text": "833.33",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 17,
+                  "col": 7,
                   "text": "460.33",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 311.16003,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 18,
+              "cells": [
                 {
+                  "row": 18,
+                  "col": 0,
+                  "text": "250.80",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 18,
+                  "col": 1,
+                  "text": "756.01",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 18,
+                  "col": 2,
+                  "text": "236.94",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 18,
+                  "col": 3,
+                  "text": "169.39",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 18,
+                  "col": 4,
+                  "text": "480.98",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 18,
+                  "col": 5,
+                  "text": "619.41",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 18,
+                  "col": 6,
+                  "text": "893.44",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 18,
+                  "col": 7,
                   "text": "275.63",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 325.34003,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 19,
+              "cells": [
                 {
+                  "row": 19,
+                  "col": 0,
+                  "text": "294.24",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 19,
+                  "col": 1,
+                  "text": "18.41",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 19,
+                  "col": 2,
+                  "text": "861.92",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 19,
+                  "col": 3,
+                  "text": "434.64",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 19,
+                  "col": 4,
+                  "text": "346.76",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 19,
+                  "col": 5,
+                  "text": "114.98",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 19,
+                  "col": 6,
+                  "text": "199.30",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 19,
+                  "col": 7,
                   "text": "669.21",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 339.51,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 20,
+              "cells": [
                 {
+                  "row": 20,
+                  "col": 0,
+                  "text": "400.92",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 20,
+                  "col": 1,
+                  "text": "371.50",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 20,
+                  "col": 2,
+                  "text": "605.39",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 20,
+                  "col": 3,
+                  "text": "332.25",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 20,
+                  "col": 4,
+                  "text": "821.00",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 20,
+                  "col": 5,
+                  "text": "455.64",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 20,
+                  "col": 6,
+                  "text": "223.32",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 20,
+                  "col": 7,
                   "text": "466.11",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 353.68002,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 21,
+              "cells": [
                 {
+                  "row": 21,
+                  "col": 0,
+                  "text": "293.59",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 21,
+                  "col": 1,
+                  "text": "764.25",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 21,
+                  "col": 2,
+                  "text": "718.91",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 21,
+                  "col": 3,
+                  "text": "152.63",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 21,
+                  "col": 4,
+                  "text": "739.47",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 21,
+                  "col": 5,
+                  "text": "345.46",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 21,
+                  "col": 6,
+                  "text": "856.25",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 21,
+                  "col": 7,
                   "text": "573.94",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 367.86002,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 22,
+              "cells": [
                 {
+                  "row": 22,
+                  "col": 0,
+                  "text": "215.52",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 22,
+                  "col": 1,
+                  "text": "810.45",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 22,
+                  "col": 2,
+                  "text": "427.54",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 22,
+                  "col": 3,
+                  "text": "622.72",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 22,
+                  "col": 4,
+                  "text": "896.21",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 22,
+                  "col": 5,
+                  "text": "665.45",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 22,
+                  "col": 6,
+                  "text": "860.44",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 22,
+                  "col": 7,
                   "text": "95.95",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 484.22,
-                "y": 382.03003,
-                "width": 17.514008,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 23,
+              "cells": [
                 {
+                  "row": 23,
+                  "col": 0,
+                  "text": "916.47",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 23,
+                  "col": 1,
+                  "text": "447.99",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 23,
+                  "col": 2,
+                  "text": "971.20",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 23,
+                  "col": 3,
+                  "text": "333.78",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 23,
+                  "col": 4,
+                  "text": "232.47",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 23,
+                  "col": 5,
+                  "text": "651.92",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 23,
+                  "col": 6,
+                  "text": "869.90",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 23,
+                  "col": 7,
                   "text": "236.34",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 396.2,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 24,
+              "cells": [
                 {
+                  "row": 24,
+                  "col": 0,
+                  "text": "576.21",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 24,
+                  "col": 1,
+                  "text": "33.48",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 24,
+                  "col": 2,
+                  "text": "736.84",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 24,
+                  "col": 3,
+                  "text": "137.36",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 24,
+                  "col": 4,
+                  "text": "403.67",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 24,
+                  "col": 5,
+                  "text": "602.43",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 24,
+                  "col": 6,
+                  "text": "148.46",
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 24,
+                  "col": 7,
                   "text": "361.11",
-                  "font_size": 7.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "cell_type": "Number",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 480.33,
-                "y": 410.38,
-                "width": 21.406006,
-                "height": 7.0
-              }
+              ]
             }
           ],
-          "normalized_text": "V8 684.10 814.39 562.32 259.09 950.19 484.09 28.80 445.48 10.45 929.05 294.88 323.61 370.67 898.65 649.03 892.78 729.00 460.33 275.63 669.21 466.11 573.94 95.95 236.34 361.11"
+          "column_types": [
+            "Number",
+            "Number",
+            "Number",
+            "Number",
+            "Number",
+            "Number",
+            "Number",
+            "Number"
+          ],
+          "fallback_text": "[表t0_0 页0]\n行1: V1=399.21 V2=252.56 V3=91.75 V4=811.48 V5=689.36 V6=575.10 V7=989.60 V8=684.10\n行2: V1=536.12 V2=405.68 V3=652.79 V4=935.55 V5=82.21 V6=991.77 V7=89.50 V8=814.39\n行3: V1=249.47 V2=654.70 V3=218.24 V4=469.23 V5=581.02 V6=564.76 V7=353.26 V8=562.32\n行4: V1=46.39 V2=55.60 V3=291.18 V4=272.20 V5=894.26 V6=383.25 V7=966.51 V8=259.09\n行5: V1=697.84 V2=123.43 V3=318.13 V4=254.82 V5=51.29 V6=917.12 V7=744.00 V8=950.19\n行6: V1=868.22 V2=713.59 V3=317.24 V4=805.50 V5=400.15 V6=563.24 V7=876.93 V8=484.09\n行7: V1=15.22 V2=388.26 V3=624.53 V4=463.87 V5=518.90 V6=126.15 V7=773.56 V8=28.80\n行8: V1=120.10 V2=847.25 V3=987.50 V4=162.03 V5=719.18 V6=610.56 V7=405.57 V8=445.48\n行9: V1=499.16 V2=38.98 V3=417.84 V4=268.87 V5=652.26 V6=109.63 V7=400.93 V8=10.45\n行10: V1=112.09 V2=311.81 V3=415.53 V4=549.39 V5=184.72 V6=315.10 V7=591.40 V8=929.05\n行11: V1=658.07 V2=603.91 V3=774.86 V4=29.18 V5=356.37 V6=788.83 V7=435.90 V8=294.88\n行12: V1=856.61 V2=430.20 V3=119.98 V4=256.45 V5=661.10 V6=273.12 V7=859.70 V8=323.61\n行13: V1=375.04 V2=845.37 V3=764.89 V4=430.58 V5=617.13 V6=468.01 V7=174.16 V8=370.67\n行14: V1=851.79 V2=938.14 V3=532.32 V4=837.97 V5=720.06 V6=85.54 V7=920.60 V8=898.65\n行15: V1=403.06 V2=416.42 V3=87.03 V4=880.74 V5=354.44 V6=365.54 V7=301.91 V8=649.03\n行16: V1=438.89 V2=641.05 V3=355.28 V4=385.53 V5=627.04 V6=115.79 V7=201.85 V8=892.78\n行17: V1=459.64 V2=49.08 V3=789.76 V4=591.39 V5=465.44 V6=185.09 V7=240.09 V8=729.00\n行18: V1=279.60 V2=946.89 V3=898.97 V4=798.14 V5=733.52 V6=633.04 V7=833.33 V8=460.33\n行19: V1=250.80 V2=756.01 V3=236.94 V4=169.39 V5=480.98 V6=619.41 V7=893.44 V8=275.63\n行20: V1=294.24 V2=18.41 V3=861.92 V4=434.64 V5=346.76 V6=114.98 V7=199.30 V8=669.21\n行21: V1=400.92 V2=371.50 V3=605.39 V4=332.25 V5=821.00 V6=455.64 V7=223.32 V8=466.11\n行22: V1=293.59 V2=764.25 V3=718.91 V4=152.63 V5=739.47 V6=345.46 V7=856.25 V8=573.94\n行23: V1=215.52 V2=810.45 V3=427.54 V4=622.72 V5=896.21 V6=665.45 V7=860.44 V8=95.95\n行24: V1=916.47 V2=447.99 V3=971.20 V4=333.78 V5=232.47 V6=651.92 V7=869.90 V8=236.34\n行25: V1=576.21 V2=33.48 V3=736.84 V4=137.36 V5=403.67 V6=602.43 V7=148.46 V8=361.11",
+          "confidence": {
+            "score": 0.9137709,
+            "alignment_score": 0.9831731,
+            "spacing_score": 0.7924515,
+            "data_density_score": 0.8016434,
+            "consistency_score": 1.0
+          }
         }
       ],
-      "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [
           "PageScore flag: LowEntropy"
         ],
         "errors": [],
-        "block_count": 9,
-        "table_count": 0,
+        "block_count": 0,
+        "table_count": 1,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
       "text_score": 0.956357,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 54,
+        "extract_ms": 55,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21463040,
-        "rss_delta_bytes": 491520
+        "peak_rss_bytes": 21872640,
+        "rss_delta_bytes": -98304
       }
     }
   ],

@@ -24,7 +24,7 @@
           "bbox": {
             "x": 172.91,
             "y": 398.34003,
-            "width": 121.84799,
+            "width": 120.07199,
             "height": 8.0
           },
           "role": "Body",
@@ -41,7 +41,7 @@
               "bbox": {
                 "x": 172.91,
                 "y": 398.34003,
-                "width": 121.84799,
+                "width": 120.07199,
                 "height": 8.0
               }
             }
@@ -51,23 +51,25 @@
       ],
       "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
         "block_count": 2,
         "table_count": 0,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
-      "text_score": 0.9146251,
+      "text_score": 0.91432476,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 40,
+        "extract_ms": 46,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 20758528,
-        "rss_delta_bytes": 311296
+        "peak_rss_bytes": 21217280,
+        "rss_delta_bytes": 557056
       }
     },
     {
@@ -83,7 +85,7 @@
           "bbox": {
             "x": 172.91,
             "y": 398.34003,
-            "width": 121.84799,
+            "width": 120.07199,
             "height": 8.0
           },
           "role": "Body",
@@ -100,7 +102,7 @@
               "bbox": {
                 "x": 172.91,
                 "y": 398.34003,
-                "width": 121.84799,
+                "width": 120.07199,
                 "height": 8.0
               }
             }
@@ -110,23 +112,25 @@
       ],
       "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
         "block_count": 2,
         "table_count": 0,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
-      "text_score": 0.9146251,
+      "text_score": 0.91432476,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 42,
+        "extract_ms": 35,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 20987904,
-        "rss_delta_bytes": 229376
+        "peak_rss_bytes": 21495808,
+        "rss_delta_bytes": 278528
       }
     },
     {
@@ -142,7 +146,7 @@
           "bbox": {
             "x": 172.91,
             "y": 398.34003,
-            "width": 121.84799,
+            "width": 120.07199,
             "height": 8.0
           },
           "role": "Body",
@@ -159,7 +163,7 @@
               "bbox": {
                 "x": 172.91,
                 "y": 398.34003,
-                "width": 121.84799,
+                "width": 120.07199,
                 "height": 8.0
               }
             }
@@ -169,23 +173,25 @@
       ],
       "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
         "block_count": 2,
         "table_count": 0,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
-      "text_score": 0.9146251,
+      "text_score": 0.91432476,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 40,
+        "extract_ms": 55,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21086208,
-        "rss_delta_bytes": 98304
+        "peak_rss_bytes": 21626880,
+        "rss_delta_bytes": 131072
       }
     },
     {
@@ -201,7 +207,7 @@
           "bbox": {
             "x": 172.91,
             "y": 398.34003,
-            "width": 121.84799,
+            "width": 120.07199,
             "height": 8.0
           },
           "role": "Body",
@@ -218,7 +224,7 @@
               "bbox": {
                 "x": 172.91,
                 "y": 398.34003,
-                "width": 121.84799,
+                "width": 120.07199,
                 "height": 8.0
               }
             }
@@ -228,23 +234,25 @@
       ],
       "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
         "block_count": 2,
         "table_count": 0,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
-      "text_score": 0.9146251,
+      "text_score": 0.91432476,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 42,
+        "extract_ms": 41,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21102592,
-        "rss_delta_bytes": 16384
+        "peak_rss_bytes": 21676032,
+        "rss_delta_bytes": 49152
       }
     },
     {
@@ -260,7 +268,7 @@
           "bbox": {
             "x": 172.91,
             "y": 398.34003,
-            "width": 121.84799,
+            "width": 120.07199,
             "height": 8.0
           },
           "role": "Body",
@@ -277,7 +285,7 @@
               "bbox": {
                 "x": 172.91,
                 "y": 398.34003,
-                "width": 121.84799,
+                "width": 120.07199,
                 "height": 8.0
               }
             }
@@ -287,23 +295,25 @@
       ],
       "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
         "block_count": 2,
         "table_count": 0,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
-      "text_score": 0.9146251,
+      "text_score": 0.91432476,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 50,
+        "extract_ms": 37,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21168128,
-        "rss_delta_bytes": 65536
+        "peak_rss_bytes": 21872640,
+        "rss_delta_bytes": 196608
       }
     }
   ],

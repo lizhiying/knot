@@ -217,6 +217,12 @@ Content 2
             enable_auto_summary: false,
             default_language: "en".into(),
             progress_callback: None,
+            page_content_callback: None,
+            pdf_ocr_enabled: false,
+            pdf_ocr_model_dir: None,
+            pdf_vision_api_url: None,
+            pdf_vision_model: None,
+            pdf_page_indices: None,
         };
 
         let root = parser.parse(path, &config).await.unwrap();
@@ -287,6 +293,12 @@ Content 2
             enable_auto_summary: false,
             default_language: "zh".into(),
             progress_callback: None,
+            page_content_callback: None,
+            pdf_ocr_enabled: false,
+            pdf_ocr_model_dir: None,
+            pdf_vision_api_url: None,
+            pdf_vision_model: None,
+            pdf_page_indices: None,
         };
 
         let root = parser.parse(path, &config).await.unwrap();

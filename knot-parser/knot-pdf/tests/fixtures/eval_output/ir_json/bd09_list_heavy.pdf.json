@@ -24,7 +24,7 @@
           "bbox": {
             "x": 31.18,
             "y": 32.72003,
-            "width": 119.042,
+            "width": 116.704,
             "height": 14.0
           },
           "role": "Body",
@@ -41,7 +41,7 @@
               "bbox": {
                 "x": 31.18,
                 "y": 32.72003,
-                "width": 119.042,
+                "width": 116.704,
                 "height": 14.0
               }
             }
@@ -53,8 +53,8 @@
           "bbox": {
             "x": 31.18,
             "y": 60.330017,
-            "width": 79.464,
-            "height": 11.0
+            "width": 112.71,
+            "height": 353.69
           },
           "role": "Body",
           "lines": [
@@ -73,174 +73,71 @@
                 "width": 79.464,
                 "height": 11.0
               }
-            }
-          ],
-          "normalized_text": "Text Extraction"
-        },
-        {
-          "block_id": "blk_2",
-          "bbox": {
-            "x": 31.18,
-            "y": 80.869995,
-            "width": 112.71,
-            "height": 61.03003
-          },
-          "role": "Body",
-          "lines": [
+            },
             {
               "spans": [
                 {
-                  "text": "- Character extraction",
+                  "text": "Character extraction",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 80.869995,
-                "width": 112.71,
+                "width": 90.03,
                 "height": 10.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "- Font info",
+                  "text": "Font info",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 97.880005,
-                "width": 61.589996,
+                "width": 38.909996,
                 "height": 10.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "- Reading order",
+                  "text": "Reading order",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 114.890015,
-                "width": 87.71,
+                "width": 63.36,
                 "height": 10.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "- Multi-column",
+                  "text": "Multi-column",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 131.90002,
-                "width": 79.35,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "- Character extraction - Font info - Reading order - Multi-column"
-        },
-        {
-          "block_id": "blk_3",
-          "bbox": {
-            "x": 280.63,
-            "y": 80.869995,
-            "width": 36.670013,
-            "height": 61.03003
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "[TODO]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 80.869995,
-                "width": 36.670013,
+                "width": 56.67,
                 "height": 10.0
               }
             },
-            {
-              "spans": [
-                {
-                  "text": "[TODO]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 97.880005,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "[DONE]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 114.890015,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "[DONE]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 131.90002,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "[TODO] [TODO] [DONE] [DONE]"
-        },
-        {
-          "block_id": "blk_4",
-          "bbox": {
-            "x": 31.18,
-            "y": 151.04004,
-            "width": 85.58,
-            "height": 11.0
-          },
-          "role": "Body",
-          "lines": [
             {
               "spans": [
                 {
@@ -256,174 +153,71 @@
                 "width": 85.58,
                 "height": 11.0
               }
-            }
-          ],
-          "normalized_text": "Table Extraction"
-        },
-        {
-          "block_id": "blk_5",
-          "bbox": {
-            "x": 31.18,
-            "y": 171.58002,
-            "width": 98.829994,
-            "height": 61.02997
-          },
-          "role": "Body",
-          "lines": [
+            },
             {
               "spans": [
                 {
-                  "text": "- Stream detection",
+                  "text": "Stream detection",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 171.58002,
-                "width": 98.27,
+                "width": 75.59,
                 "height": 10.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "- Ruled detection",
+                  "text": "Ruled detection",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 188.59003,
-                "width": 92.159996,
+                "width": 69.479996,
                 "height": 10.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "- Cell merging",
+                  "text": "Cell merging",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 205.60004,
-                "width": 78.799995,
+                "width": 56.119995,
                 "height": 10.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "- Header detection",
+                  "text": "Header detection",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 222.60999,
-                "width": 98.829994,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "- Stream detection - Ruled detection - Cell merging - Header detection"
-        },
-        {
-          "block_id": "blk_6",
-          "bbox": {
-            "x": 280.63,
-            "y": 171.58002,
-            "width": 36.670013,
-            "height": 61.02997
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "[DONE]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 171.58002,
-                "width": 36.670013,
+                "width": 76.149994,
                 "height": 10.0
               }
             },
-            {
-              "spans": [
-                {
-                  "text": "[DONE]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 188.59003,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "[DONE]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 205.60004,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "[DONE]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 222.60999,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "[DONE] [DONE] [DONE] [DONE]"
-        },
-        {
-          "block_id": "blk_7",
-          "bbox": {
-            "x": 31.18,
-            "y": 241.75,
-            "width": 24.442001,
-            "height": 11.0
-          },
-          "role": "Body",
-          "lines": [
             {
               "spans": [
                 {
@@ -439,174 +233,71 @@
                 "width": 24.442001,
                 "height": 11.0
               }
-            }
-          ],
-          "normalized_text": "OCR"
-        },
-        {
-          "block_id": "blk_8",
-          "bbox": {
-            "x": 31.18,
-            "y": 262.29004,
-            "width": 97.72001,
-            "height": 61.01996
-          },
-          "role": "Body",
-          "lines": [
+            },
             {
               "spans": [
                 {
-                  "text": "- Page scoring",
+                  "text": "Page scoring",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 262.29004,
-                "width": 81.04,
+                "width": 58.36,
                 "height": 10.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "- Region detection",
+                  "text": "Region detection",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 279.3,
-                "width": 97.72001,
+                "width": 75.04001,
                 "height": 10.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "- PaddleOCR",
+                  "text": "PaddleOCR",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 296.31,
-                "width": 76.03,
+                "width": 53.35,
                 "height": 10.0
               }
             },
             {
               "spans": [
                 {
-                  "text": "- Result merging",
+                  "text": "Result merging",
                   "font_size": 10.0,
                   "is_bold": false,
                   "font_name": null
                 }
               ],
               "bbox": {
-                "x": 31.18,
+                "x": 53.86,
                 "y": 313.31,
-                "width": 89.92,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "- Page scoring - Region detection - PaddleOCR - Result merging"
-        },
-        {
-          "block_id": "blk_9",
-          "bbox": {
-            "x": 280.63,
-            "y": 262.29004,
-            "width": 77.23999,
-            "height": 61.01996
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "[IN PROGRESS]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 262.29004,
-                "width": 77.23999,
+                "width": 67.24,
                 "height": 10.0
               }
             },
-            {
-              "spans": [
-                {
-                  "text": "[DONE]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 279.3,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "[IN PROGRESS]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 296.31,
-                "width": 77.23999,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "[DONE]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 313.31,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            }
-          ],
-          "normalized_text": "[IN PROGRESS] [DONE] [IN PROGRESS] [DONE]"
-        },
-        {
-          "block_id": "blk_10",
-          "bbox": {
-            "x": 31.18,
-            "y": 332.46002,
-            "width": 67.243,
-            "height": 11.0
-          },
-          "role": "Body",
-          "lines": [
             {
               "spans": [
                 {
@@ -622,184 +313,838 @@
                 "width": 67.243,
                 "height": 11.0
               }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Per-page timing",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 53.86,
+                "y": 353.0,
+                "width": 70.579994,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Memory tracking",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 53.86,
+                "y": 370.01,
+                "width": 73.899994,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Async API",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 53.86,
+                "y": 387.02002,
+                "width": 46.129997,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Backpressure",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 53.86,
+                "y": 404.02002,
+                "width": 61.129997,
+                "height": 10.0
+              }
             }
           ],
-          "normalized_text": "Performance"
+          "normalized_text": "Text Extraction\nCharacter extraction\nFont info\nReading order\nMulti-column\nTable Extraction\nStream detection\nRuled detection\nCell merging\nHeader detection\nOCR\nPage scoring\nRegion detection\nPaddleOCR\nResult merging\nPerformance\nPer-page timing\nMemory tracking\nAsync API\nBackpressure"
         },
         {
-          "block_id": "blk_11",
+          "block_id": "blk_2",
+          "bbox": {
+            "x": 280.63,
+            "y": 80.869995,
+            "width": 75.01999,
+            "height": 333.15002
+          },
+          "role": "Body",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "text": "[TODO]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 80.869995,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[TODO]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 97.880005,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 114.890015,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 131.90002,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 171.58002,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 188.59003,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 205.60004,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 222.60999,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[IN PROGRESS]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 262.29004,
+                "width": 75.01999,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 279.3,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[IN PROGRESS]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 296.31,
+                "width": 75.01999,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 313.31,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[TODO]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 353.0,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 370.01,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[DONE]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 387.02002,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "[TODO]",
+                  "font_size": 10.0,
+                  "is_bold": false,
+                  "font_name": null
+                }
+              ],
+              "bbox": {
+                "x": 280.63,
+                "y": 404.02002,
+                "width": 34.450012,
+                "height": 10.0
+              }
+            }
+          ],
+          "normalized_text": "[TODO]\n[TODO]\n[DONE]\n[DONE]\n[DONE]\n[DONE]\n[DONE]\n[DONE]\n[IN PROGRESS]\n[DONE]\n[IN PROGRESS]\n[DONE]\n[TODO]\n[DONE]\n[DONE]\n[TODO]"
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t0_0",
+          "page_index": 0,
+          "bbox": {
+            "x": 31.18,
+            "y": 80.869995,
+            "width": 283.90002,
+            "height": 61.03003
+          },
+          "extraction_mode": "Stream",
+          "headers": [
+            "-",
+            "Character extraction",
+            "[TODO]"
+          ],
+          "rows": [
+            {
+              "row_index": 0,
+              "cells": [
+                {
+                  "row": 0,
+                  "col": 0,
+                  "text": "-",
+                  "cell_type": "Text",
+                  "rowspan": 3,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 1,
+                  "text": "Font info",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 2,
+                  "text": "[TODO]",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 1,
+              "cells": [
+                {
+                  "row": 1,
+                  "col": 0,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "Reading order",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "[DONE]",
+                  "cell_type": "Text",
+                  "rowspan": 2,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 2,
+              "cells": [
+                {
+                  "row": 2,
+                  "col": 0,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "Multi-column",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            }
+          ],
+          "column_types": [
+            "Text",
+            "Text",
+            "Text"
+          ],
+          "fallback_text": "[表t0_0 页0]\n行1: -=- Character extraction=Font info [TODO]=[TODO]\n行2: -=- Character extraction=Reading order [TODO]=[DONE]\n行3: -=- Character extraction=Multi-column [TODO]=[DONE]",
+          "confidence": {
+            "score": 0.7334659,
+            "alignment_score": 0.9,
+            "spacing_score": 0.7279992,
+            "data_density_score": 0.089330025,
+            "consistency_score": 1.0
+          }
+        },
+        {
+          "table_id": "t0_2",
+          "page_index": 0,
+          "bbox": {
+            "x": 31.18,
+            "y": 171.58002,
+            "width": 283.90002,
+            "height": 61.02997
+          },
+          "extraction_mode": "Stream",
+          "headers": [
+            "-",
+            "Stream detection",
+            "[DONE]"
+          ],
+          "rows": [
+            {
+              "row_index": 0,
+              "cells": [
+                {
+                  "row": 0,
+                  "col": 0,
+                  "text": "-",
+                  "cell_type": "Text",
+                  "rowspan": 3,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 1,
+                  "text": "Ruled detection",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 2,
+                  "text": "[DONE]",
+                  "cell_type": "Text",
+                  "rowspan": 3,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 1,
+              "cells": [
+                {
+                  "row": 1,
+                  "col": 0,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "Cell merging",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 2,
+              "cells": [
+                {
+                  "row": 2,
+                  "col": 0,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "Header detection",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            }
+          ],
+          "column_types": [
+            "Text",
+            "Text",
+            "Text"
+          ],
+          "fallback_text": "[表t0_2 页0]\n行1: -=- Stream detection=Ruled detection [DONE]=[DONE]\n行2: -=- Stream detection=Cell merging [DONE]=[DONE]\n行3: -=- Stream detection=Header detection [DONE]=[DONE]",
+          "confidence": {
+            "score": 0.7334659,
+            "alignment_score": 0.9,
+            "spacing_score": 0.7279992,
+            "data_density_score": 0.089330025,
+            "consistency_score": 1.0
+          }
+        },
+        {
+          "table_id": "t0_4",
+          "page_index": 0,
+          "bbox": {
+            "x": 31.18,
+            "y": 262.29004,
+            "width": 324.47,
+            "height": 61.01996
+          },
+          "extraction_mode": "Stream",
+          "headers": [
+            "-",
+            "Page scoring",
+            "[IN PROGRESS]"
+          ],
+          "rows": [
+            {
+              "row_index": 0,
+              "cells": [
+                {
+                  "row": 0,
+                  "col": 0,
+                  "text": "-",
+                  "cell_type": "Text",
+                  "rowspan": 3,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 1,
+                  "text": "Region detection",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 2,
+                  "text": "[DONE]",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 1,
+              "cells": [
+                {
+                  "row": 1,
+                  "col": 0,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "PaddleOCR",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "[IN PROGRESS]",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            },
+            {
+              "row_index": 2,
+              "cells": [
+                {
+                  "row": 2,
+                  "col": 0,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 1,
+                  "text": "Result merging",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "[DONE]",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                }
+              ]
+            }
+          ],
+          "column_types": [
+            "Text",
+            "Text",
+            "Text"
+          ],
+          "fallback_text": "[表t0_4 页0]\n行1: -=- Page scoring=Region detection [IN PROGRESS]=[DONE]\n行2: -=- Page scoring=PaddleOCR [IN PROGRESS]=[IN PROGRESS]\n行3: -=- Page scoring=Result merging [IN PROGRESS]=[DONE]",
+          "confidence": {
+            "score": 0.7334659,
+            "alignment_score": 0.9,
+            "spacing_score": 0.7279992,
+            "data_density_score": 0.089330025,
+            "consistency_score": 1.0
+          }
+        },
+        {
+          "table_id": "t0_6",
+          "page_index": 0,
           "bbox": {
             "x": 31.18,
             "y": 353.0,
-            "width": 96.579994,
+            "width": 283.90002,
             "height": 61.02002
           },
-          "role": "Body",
-          "lines": [
+          "extraction_mode": "Stream",
+          "headers": [
+            "-",
+            "Per-page timing",
+            "[TODO]"
+          ],
+          "rows": [
             {
-              "spans": [
+              "row_index": 0,
+              "cells": [
                 {
-                  "text": "- Per-page timing",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "row": 0,
+                  "col": 0,
+                  "text": "-",
+                  "cell_type": "Text",
+                  "rowspan": 3,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 1,
+                  "text": "Memory tracking",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 0,
+                  "col": 2,
+                  "text": "[DONE]",
+                  "cell_type": "Text",
+                  "rowspan": 2,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 353.0,
-                "width": 93.259995,
-                "height": 10.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 1,
+              "cells": [
                 {
-                  "text": "- Memory tracking",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "row": 1,
+                  "col": 0,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 1,
+                  "text": "Async API",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 1,
+                  "col": 2,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 370.01,
-                "width": 96.579994,
-                "height": 10.0
-              }
+              ]
             },
             {
-              "spans": [
+              "row_index": 2,
+              "cells": [
                 {
-                  "text": "- Async API",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 387.02002,
-                "width": 71.03,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
+                  "row": 2,
+                  "col": 0,
+                  "text": "",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
                 {
-                  "text": "- Backpressure",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
+                  "row": 2,
+                  "col": 1,
+                  "text": "Backpressure",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
+                },
+                {
+                  "row": 2,
+                  "col": 2,
+                  "text": "[TODO]",
+                  "cell_type": "Text",
+                  "rowspan": 1,
+                  "colspan": 1
                 }
-              ],
-              "bbox": {
-                "x": 31.18,
-                "y": 404.02002,
-                "width": 83.81,
-                "height": 10.0
-              }
+              ]
             }
           ],
-          "normalized_text": "- Per-page timing - Memory tracking - Async API - Backpressure"
-        },
-        {
-          "block_id": "blk_12",
-          "bbox": {
-            "x": 280.63,
-            "y": 353.0,
-            "width": 36.670013,
-            "height": 61.02002
-          },
-          "role": "Body",
-          "lines": [
-            {
-              "spans": [
-                {
-                  "text": "[TODO]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 353.0,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "[DONE]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 370.01,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "[DONE]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 387.02002,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            },
-            {
-              "spans": [
-                {
-                  "text": "[TODO]",
-                  "font_size": 10.0,
-                  "is_bold": false,
-                  "font_name": null
-                }
-              ],
-              "bbox": {
-                "x": 280.63,
-                "y": 404.02002,
-                "width": 36.670013,
-                "height": 10.0
-              }
-            }
+          "column_types": [
+            "Text",
+            "Text",
+            "Text"
           ],
-          "normalized_text": "[TODO] [DONE] [DONE] [TODO]"
+          "fallback_text": "[表t0_6 页0]\n行1: -=- Per-page timing=Memory tracking [TODO]=[DONE]\n行2: -=- Per-page timing=Async API [TODO]=[DONE]\n行3: -=- Per-page timing=Backpressure [TODO]=[TODO]",
+          "confidence": {
+            "score": 0.7334659,
+            "alignment_score": 0.9,
+            "spacing_score": 0.7279992,
+            "data_density_score": 0.089330025,
+            "consistency_score": 1.0
+          }
         }
       ],
-      "tables": [],
       "images": [],
+      "formulas": [],
       "diagnostics": {
         "warnings": [],
         "errors": [],
-        "block_count": 13,
-        "table_count": 0,
+        "block_count": 3,
+        "table_count": 4,
         "image_count": 0,
-        "ocr_quality_score": null
+        "ocr_quality_score": null,
+        "parse_strategy": "FastTrack"
       },
-      "text_score": 0.9609617,
+      "text_score": 0.9606993,
       "is_scanned_guess": false,
       "source": "BornDigital",
       "timings": {
-        "extract_ms": 19,
+        "extract_ms": 17,
         "render_ms": null,
         "ocr_ms": null,
-        "peak_rss_bytes": 21151744,
-        "rss_delta_bytes": -180224
+        "peak_rss_bytes": 21970944,
+        "rss_delta_bytes": 0
       }
     }
   ],

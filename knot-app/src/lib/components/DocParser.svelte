@@ -7,6 +7,12 @@
     import { marked } from "marked";
     import { listen } from "@tauri-apps/api/event";
 
+    // 配置 marked：启用 GFM 表格、换行、原始 HTML 渲染
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+    });
+
     const { invoke } = window.__TAURI__.core;
     const { open } = window.__TAURI__.dialog;
 
@@ -19,6 +25,7 @@
     // Progress
     let showProgress = $state(false);
     let progressPercent = $state(0);
+    let progressText = $state("Parsing document...");
 
     // Tab state
     let activeTab = $state("preview");
@@ -79,6 +86,8 @@
         parseDisabled = true;
         showProgress = true;
         progressPercent = 5;
+        progressText = "Initializing...";
+        renderContent = ""; // 清空之前的内容
 
         try {
             const result = await invoke("parse_file", {
@@ -257,11 +266,30 @@
             let percent = Math.round((current / total) * 100);
             if (percent >= 100) percent = 95;
             progressPercent = percent;
+            progressText = `Parsing page ${current}/${total}...`;
             if (!showProgress) showProgress = true;
+        });
+
+        // Listen for per-page markdown content
+        const unlisten2 = listen("parse-page-ready", (event) => {
+            const { pageIndex, totalPages, markdown } = event.payload;
+            if (markdown && markdown.trim()) {
+                // 追加到 render preview（每页之间加分页线）
+                const pageHtml = marked.parse(markdown);
+                const separator = renderContent
+                    ? `<hr class="page-divider" /><div class="page-label">Page ${pageIndex + 1}</div>`
+                    : `<div class="page-label">Page ${pageIndex + 1}</div>`;
+                renderContent = (renderContent || "") + separator + pageHtml;
+                // 自动切到 preview tab
+                if (activeTab !== "preview") {
+                    activeTab = "preview";
+                }
+            }
         });
 
         return () => {
             unlisten.then((fn) => fn());
+            unlisten2.then((fn) => fn());
         };
     });
 </script>
@@ -555,7 +583,7 @@
                 class="flex-1 overflow-y-auto relative p-6 bg-[var(--bg-card)]"
             >
                 <!-- Loading State -->
-                {#if isParsing}
+                {#if isParsing && !renderContent}
                     <div
                         class="absolute inset-0 flex flex-col items-center justify-center text-[var(--text-secondary)] bg-[var(--bg-card)] z-10"
                     >
@@ -563,7 +591,28 @@
                             class="material-symbols-outlined spin text-4xl mb-4 text-[var(--accent-primary)]"
                             >progress_activity</span
                         >
-                        <p>Parsing document...</p>
+                        <p>{progressText}</p>
+                    </div>
+                {:else if isParsing && renderContent}
+                    <!-- 正在解析但已有内容：显示内容 + 顶部进度条 -->
+                    <div class="view-preview animate-fade-in markdown-body">
+                        <div
+                            class="sticky top-0 z-10 bg-[var(--bg-card)] border-b border-[var(--border-color)] px-4 py-2 mb-4 flex items-center gap-2 text-xs text-[var(--accent-primary)]"
+                        >
+                            <span class="material-symbols-outlined spin text-sm"
+                                >progress_activity</span
+                            >
+                            <span>{progressText}</span>
+                            <div
+                                class="flex-1 h-1 bg-[var(--border-color)] rounded-full overflow-hidden ml-2"
+                            >
+                                <div
+                                    class="h-full bg-[var(--accent-primary)] rounded-full transition-all duration-300"
+                                    style="width: {progressPercent}%"
+                                ></div>
+                            </div>
+                        </div>
+                        {@html renderContent}
                     </div>
                 {:else if !treeContent && !renderContent && !jsonContent}
                     <div
@@ -753,5 +802,91 @@
         border-radius: 8px;
         border: 1px solid var(--border-color);
         max-width: 100%;
+    }
+
+    /* 段落间距 */
+    :global(.markdown-body p) {
+        margin: 0.8em 0;
+        line-height: 1.7;
+    }
+
+    /* 表格样式 */
+    :global(.markdown-body table) {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1em 0;
+        font-size: 13px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    :global(.markdown-body thead) {
+        background: var(--bg-sidebar);
+    }
+    :global(.markdown-body th) {
+        padding: 8px 12px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-primary);
+        border-bottom: 2px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+        white-space: nowrap;
+    }
+    :global(.markdown-body td) {
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }
+    :global(.markdown-body tr:nth-child(even)) {
+        background: var(--bg-sidebar);
+    }
+    :global(.markdown-body tr:hover) {
+        background: var(--bg-card-hover);
+    }
+
+    /* 列表样式 */
+    :global(.markdown-body ul, .markdown-body ol) {
+        padding-left: 1.5em;
+        margin: 0.5em 0;
+    }
+    :global(.markdown-body li) {
+        margin: 0.3em 0;
+    }
+
+    /* blockquote */
+    :global(.markdown-body blockquote) {
+        border-left: 3px solid var(--accent-primary);
+        padding: 0.5em 1em;
+        margin: 1em 0;
+        color: var(--text-secondary);
+        background: var(--bg-sidebar);
+        border-radius: 0 6px 6px 0;
+    }
+
+    /* 分割线 */
+    :global(.markdown-body hr) {
+        border: none;
+        border-top: 1px solid var(--border-color);
+        margin: 1.5em 0;
+    }
+
+    /* 分页线（逐页渲染时的页面分隔） */
+    :global(.page-divider) {
+        border: none;
+        border-top: 2px dashed var(--border-color);
+        margin: 2em 0 0.5em 0;
+    }
+    :global(.page-label) {
+        font-size: 10px;
+        color: var(--text-muted);
+        font-family: "JetBrains Mono", monospace;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1em;
+        padding: 2px 8px;
+        background: var(--bg-sidebar);
+        border-radius: 4px;
+        display: inline-block;
     }
 </style>

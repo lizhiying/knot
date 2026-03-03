@@ -69,7 +69,8 @@ mod tests {
 
     #[test]
     fn test_auto_strategy_low_score_no_vlm() {
-        let config = Config::default(); // vlm_enabled = false
+        let mut config = Config::default();
+        config.vlm_enabled = false;
         let strategy = select_parse_strategy(0.1, &config);
         assert_eq!(strategy, ParseStrategy::FastTrackPlusModels);
     }

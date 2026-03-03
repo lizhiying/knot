@@ -55,14 +55,32 @@ impl ModelSourceConfig {
     }
 
     fn get_timezone_offset() -> Result<i32, String> {
-        // Rust 标准库没有直接获取当前时区偏移的方法，通常依赖 `chrono`。
-        // 为了避免引入重依赖，这里可以用一种简单的 heuristic 或者假设
-        // 如果项目已经有了 `chrono`，直接用 `chrono::Local::now().offset().local_minus_utc()`
-        // 让我们检查 Cargo.toml 是否有 chrono
+        // 使用标准库计算 UTC 偏移（秒）
+        // 原理：比较本地时间和 UTC 时间的差值
+        use std::time::{SystemTime, UNIX_EPOCH};
 
-        // 这是一个简单的 Mock 实现，实际需要 chrono
-        // 暂时假设 Region::Global，后续集成 chrono
-        Ok(0)
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|e| e.to_string())?;
+        let utc_secs = now.as_secs() as i64;
+
+        // 获取本地时间的 tm 结构
+        // libc::localtime_r 可以获取本地时间的 tm_gmtoff
+        #[cfg(unix)]
+        {
+            let mut tm: libc::tm = unsafe { std::mem::zeroed() };
+            let time_t = utc_secs as libc::time_t;
+            unsafe {
+                libc::localtime_r(&time_t, &mut tm);
+            }
+            Ok(tm.tm_gmtoff as i32)
+        }
+
+        #[cfg(not(unix))]
+        {
+            // Windows 简单回退：假设 Global
+            Ok(0)
+        }
     }
 
     pub fn get_url(&self, filename: &str) -> String {
@@ -71,21 +89,24 @@ impl ModelSourceConfig {
             Region::China => "https://hf-mirror.com",
         };
 
-        // Hardcoded mapping logic as per requirements
-        // OCRFlux-3B.Q4_K_M.gguf -> mradermacher/OCRFlux-3B-GGUF/resolve/main/OCRFlux-3B.Q4_K_M.gguf
-        // OCRFlux-3B.mmproj-f16.gguf -> mradermacher/OCRFlux-3B-GGUF/resolve/main/OCRFlux-3B.mmproj-f16.gguf
+        // Hardcoded mapping logic
+        // GLM-OCR-Q8_0.gguf -> ggml-org/GLM-OCR-GGUF/resolve/main/GLM-OCR-Q8_0.gguf
+        // mmproj-GLM-OCR-Q8_0.gguf -> ggml-org/GLM-OCR-GGUF/resolve/main/mmproj-GLM-OCR-Q8_0.gguf
         // Qwen3-1.7B-Q4_K_M.gguf -> unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf
 
         let path = match filename {
-            "OCRFlux-3B.Q4_K_M.gguf" => {
-                "mradermacher/OCRFlux-3B-GGUF/resolve/main/OCRFlux-3B.Q4_K_M.gguf"
-            }
-            "OCRFlux-3B.mmproj-f16.gguf" => {
-                "mradermacher/OCRFlux-3B-GGUF/resolve/main/OCRFlux-3B.mmproj-f16.gguf"
+            "GLM-OCR-Q8_0.gguf" => "ggml-org/GLM-OCR-GGUF/resolve/main/GLM-OCR-Q8_0.gguf",
+            "mmproj-GLM-OCR-Q8_0.gguf" => {
+                "ggml-org/GLM-OCR-GGUF/resolve/main/mmproj-GLM-OCR-Q8_0.gguf"
             }
             "Qwen3-1.7B-Q4_K_M.gguf" => {
                 "unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf"
             }
+            // PaddleOCR PP-OCRv5 模型（knot-pdf OCR 依赖）
+            // HF 仓库: bukuroo/PPOCRv5-ONNX，使用 mobile 版本（体积小、速度快）
+            "ppocrv5/det.onnx" => "bukuroo/PPOCRv5-ONNX/resolve/main/ppocrv5-mobile-det.onnx",
+            "ppocrv5/rec.onnx" => "bukuroo/PPOCRv5-ONNX/resolve/main/ppocrv5-mobile-rec.onnx",
+            "ppocrv5/ppocrv5_dict.txt" => "bukuroo/PPOCRv5-ONNX/resolve/main/ppocrv5_dict.txt",
             _ => return format!("{}/unknown/{}", base, filename),
         };
 
