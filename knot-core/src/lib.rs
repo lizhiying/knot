@@ -1,4 +1,5 @@
 pub mod embedding;
+pub mod entity;
 pub mod index;
 pub mod llm;
 pub mod manager;
