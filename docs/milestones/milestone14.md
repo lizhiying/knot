@@ -169,24 +169,57 @@ fn default_context_expansion_enabled() -> bool {
 
 ---
 
+### Phase 3: 多跳检索（P2）✅
+
+#### 设计方案
+
+**方案 B：关键词扩展**，始终执行两轮搜索，无需条件判断。
+
+```
+搜索流程:
+  第 1 轮: 正常搜索 "实验结果"
+    → 命中 [第3章-实验结果: "SVM准确率95.2%, 决策树91.3%"]
+
+  提取关键词: "支持向量机", "决策树", "准确率", "分支", "神经网络"
+
+  第 2 轮: 搜索 "实验结果 支持向量机 决策树 准确率 分支 神经网络"
+    → 命中 [第2章-相关工作: "基线方法使用逻辑回归"]（新结果）
+    → 命中 [第3章-实验结果]（重复，去重）
+
+  合并去重: 3 条 → 2 条独立结果
+```
+
+**性能影响**：额外 ~100ms（1 次 embedding + 1 次搜索），总耗时约 2 倍。
+
+#### 任务分解
+
+| 任务                                      | 状态   | 文件                             | 说明                                          |
+| ----------------------------------------- | ------ | -------------------------------- | --------------------------------------------- |
+| 3.1 `AppConfig` 新增 `multi_hop_enabled`  | ✅ 完成 | `knot-app/src-tauri/src/main.rs` | 默认 true，配套 Tauri command                 |
+| 3.2 实现 `extract_key_terms()`            | ✅ 完成 | `knot-core/src/store.rs`         | Jieba 分词，过滤停用词和查询词，返回 top 5    |
+| 3.3 实现 `merge_search_results()`         | ✅ 完成 | `knot-core/src/store.rs`         | 按 id 去重，保留高分，按分数降序排列          |
+| 3.4 `rag_search`/`rag_query` 集成两轮搜索 | ✅ 完成 | `knot-app/src-tauri/src/main.rs` | 始终两轮，扩展查询+合并                       |
+| 3.5 前端设置页面增加"多跳检索"开关        | ✅ 完成 | `Settings.svelte`                | UI 开关组件                                   |
+| 3.6 添加测试                              | ✅ 完成 | `knot-core/src/store.rs`         | extract_key_terms + merge_search_results 测试 |
+
+---
+
 ## 涉及文件
 
-| 文件                                          | 变更类型 | Phase | 说明                                                                        |
-| --------------------------------------------- | -------- | ----- | --------------------------------------------------------------------------- |
-| `knot-core/src/index.rs`                      | 已修改   | 1     | `build_doc_summary()`, `collect_outline()`                                  |
-| `knot-core/src/store.rs`                      | 已修改   | 2     | `get_text_by_id()`, `get_records_by_parent_id()`, `expand_search_context()` |
-| `knot-app/src-tauri/src/main.rs`              | 已修改   | 2     | `AppConfig` + `set_context_expansion_enabled`                               |
-| `knot-app/src/lib/components/Settings.svelte` | 已修改   | 2     | 设置页面增加"上下文扩展"开关                                                |
-| `docs/rag-limitations-analysis.md`            | 已创建   | —     | RAG 架构局限性分析                                                          |
-| `docs/milestones/milestone14.md`              | 已创建   | —     | 本文件                                                                      |
+| 文件                                          | 变更类型 | Phase | 说明                                       |
+| --------------------------------------------- | -------- | ----- | ------------------------------------------ |
+| `knot-core/src/index.rs`                      | 已修改   | 1     | `build_doc_summary()`, `collect_outline()` |
+| `knot-core/src/store.rs`                      | 已修改   | 2, 3  | 上下文扩展 + 多跳检索工具方法              |
+| `knot-app/src-tauri/src/main.rs`              | 已修改   | 2, 3  | `AppConfig` 扩展 + 搜索流程集成            |
+| `knot-app/src/lib/components/Settings.svelte` | 已修改   | 2, 3  | "上下文扩展" + "多跳检索"开关              |
+| `docs/rag-limitations-analysis.md`            | 已创建   | —     | RAG 架构局限性分析                         |
+| `docs/milestones/milestone14.md`              | 已创建   | —     | 本文件                                     |
 
-## 后续方向（P2-P4）
+## 后续方向（P3-P4）
 
 以下为更长期的改进方向，不在本 milestone 范围内：
 
 | 方向            | 复杂度 | 说明                            |
 | --------------- | ------ | ------------------------------- |
-| P2 - 多跳检索   | ⭐⭐⭐    | 第一轮结果触发第二轮搜索        |
 | P3 - 文档引用图 | ⭐⭐⭐    | 解析 `[text](url)` 建立引用关系 |
 | P4 - GraphRAG   | ⭐⭐⭐⭐⭐  | 构建知识图谱，实体-关系推理     |
-
