@@ -713,6 +713,7 @@ fn main() {
             set_llm_context_size,
             set_llm_max_tokens,
             set_llm_think_enabled,
+            set_context_expansion_enabled,
             get_index_status
         ])
         .build(tauri::generate_context!())
@@ -803,6 +804,9 @@ struct AppConfig {
     /// 是否启用 LLM Think 模式
     #[serde(default = "default_llm_think_enabled")]
     llm_think_enabled: bool,
+    /// 搜索时是否自动扩展上下文（拉取 parent/sibling 节点）
+    #[serde(default = "default_context_expansion_enabled")]
+    context_expansion_enabled: bool,
 }
 
 fn default_streaming_enabled() -> bool {
@@ -823,6 +827,10 @@ fn default_llm_max_tokens() -> u32 {
 
 fn default_llm_think_enabled() -> bool {
     false // 默认关闭 Think 模式，因为会增加延迟
+}
+
+fn default_context_expansion_enabled() -> bool {
+    true // 默认开启上下文扩展
 }
 
 fn get_config_path(app: &tauri::AppHandle) -> PathBuf {
@@ -1272,7 +1280,7 @@ async fn rag_search(
     let distance_threshold = config.vector_distance_threshold;
 
     let search_start = Instant::now();
-    let search_results = store
+    let mut search_results = store
         .search(query_vec, &query, distance_threshold)
         .await
         .map_err(|e| e.to_string())?;
@@ -1282,19 +1290,36 @@ async fn rag_search(
         search_results.len()
     );
 
+    // 3.5 Context Expansion (if enabled)
+    if config.context_expansion_enabled {
+        let expand_start = Instant::now();
+        store.expand_search_context(&mut search_results);
+        println!(
+            "[rag_search] Context expansion: {:?}",
+            expand_start.elapsed()
+        );
+    }
+
     // 4. Format Context and Display Sources
     let mut context_str = String::new();
     let mut display_sources = Vec::new();
 
     for (i, res) in search_results.iter().take(5).enumerate() {
         let context_line = res.breadcrumbs.clone().unwrap_or_default();
+        // 拼入扩展上下文
+        let expanded = res.expanded_context.as_deref().unwrap_or("");
+        let content_with_context = if expanded.is_empty() {
+            res.text.clone()
+        } else {
+            format!("{}\n---\n{}", res.text, expanded)
+        };
         context_str.push_str(&format!(
             "[{}] (匹配度: {:.0}%) 文件: {} - 章节: {}\n内容: {}\n\n",
             i + 1,
             res.score,
             res.file_path,
             context_line,
-            res.text
+            content_with_context
         ));
 
         display_sources.push(HybridSearchResultDisplay {
@@ -1548,7 +1573,7 @@ async fn rag_query(
     let config = load_config(&app);
     let distance_threshold = config.vector_distance_threshold;
 
-    let search_results = store
+    let mut search_results = store
         .search(query_vec, &query, distance_threshold)
         .await
         .map_err(|e| e.to_string())?;
@@ -1557,22 +1582,30 @@ async fn rag_query(
         search_results.len()
     );
 
+    // Context Expansion (if enabled)
+    if config.context_expansion_enabled {
+        store.expand_search_context(&mut search_results);
+    }
+
     // 3. Format Context
     let mut context_str = String::new();
     let mut display_sources = Vec::new();
 
     for (i, res) in search_results.iter().take(5).enumerate() {
         let context_line = res.breadcrumbs.clone().unwrap_or_default();
-        // 按照 milestone1.md 的格式构建参考文档片段
-        // [1] (匹配度: 98%) 文件: {path} - 章节: {breadcrumbs}
-        // 内容: {content}
+        let expanded = res.expanded_context.as_deref().unwrap_or("");
+        let content_with_context = if expanded.is_empty() {
+            res.text.clone()
+        } else {
+            format!("{}\n---\n{}", res.text, expanded)
+        };
         context_str.push_str(&format!(
             "[{}] (匹配度: {:.0}%) 文件: {} - 章节: {}\n内容: {}\n\n",
             i + 1,
-            res.score, // Simple formatting of the score
+            res.score,
             res.file_path,
             context_line,
-            res.text
+            content_with_context
         ));
 
         display_sources.push(HybridSearchResultDisplay {
@@ -1879,6 +1912,18 @@ async fn set_llm_think_enabled(app: tauri::AppHandle, enabled: bool) -> Result<(
     save_config(&app, &config)?;
     println!(
         "[Config] LLM think mode: {}",
+        if enabled { "enabled" } else { "disabled" }
+    );
+    Ok(())
+}
+
+#[tauri::command]
+async fn set_context_expansion_enabled(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
+    let mut config = load_config(&app);
+    config.context_expansion_enabled = enabled;
+    save_config(&app, &config)?;
+    println!(
+        "[Config] Context expansion: {}",
         if enabled { "enabled" } else { "disabled" }
     );
     Ok(())

@@ -751,10 +751,11 @@ impl KnotStore {
                             id: doc_id.clone(),
                             text,
                             file_path,
-                            score: normalized_bm25, // 临时存储，后面用 RRF 重新计算
+                            score: normalized_bm25,
                             parent_id,
                             breadcrumbs,
                             source: SearchSource::Keyword,
+                            expanded_context: None,
                         };
                         results_map.insert(doc_id, new_result);
                     }
@@ -870,6 +871,7 @@ impl KnotStore {
                         parent_id: pid,
                         breadcrumbs: bc,
                         source: SearchSource::Vector,
+                        expanded_context: None,
                     },
                     distance,
                 });
@@ -893,6 +895,180 @@ impl KnotStore {
         }
 
         candidates
+    }
+
+    // --- 上下文扩展 (Context Expansion) ---
+
+    /// 根据 parent_id 查询 Tantivy 中同一父节点下的所有记录
+    fn get_records_by_parent_id(
+        &self,
+        parent_id: &str,
+        file_path: &str,
+    ) -> Result<Vec<(String, String)>> {
+        // 返回 Vec<(id, text)>
+        let index = self.get_tantivy_index();
+        let reader = index.reader()?;
+        let searcher = reader.searcher();
+        let schema = index.schema();
+
+        let f_pid = schema.get_field("parent_id")?;
+        let f_path = schema.get_field("file_path")?;
+        let f_id = schema.get_field("id")?;
+        let f_content = schema.get_field("content")?;
+
+        // 精确匹配 parent_id 和 file_path
+        let pid_query = tantivy::query::TermQuery::new(
+            tantivy::Term::from_field_text(f_pid, parent_id),
+            tantivy::schema::IndexRecordOption::Basic,
+        );
+        let path_query = tantivy::query::TermQuery::new(
+            tantivy::Term::from_field_text(f_path, file_path),
+            tantivy::schema::IndexRecordOption::Basic,
+        );
+        let combined = tantivy::query::BooleanQuery::new(vec![
+            (tantivy::query::Occur::Must, Box::new(pid_query)),
+            (tantivy::query::Occur::Must, Box::new(path_query)),
+        ]);
+
+        let top_docs = searcher.search(&combined, &tantivy::collector::TopDocs::with_limit(20))?;
+
+        let mut results = Vec::new();
+        for (_score, doc_address) in top_docs {
+            let doc: TantivyDocument = searcher.doc(doc_address)?;
+            let id = doc
+                .get_first(f_id)
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            let text = doc
+                .get_first(f_content)
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            if !id.is_empty() {
+                results.push((id, text));
+            }
+        }
+
+        // 按 id 排序以保持文档内的原始顺序
+        results.sort_by(|a, b| a.0.cmp(&b.0));
+        Ok(results)
+    }
+
+    /// 根据 id 查询 Tantivy 获取单条记录的 text
+    fn get_text_by_id(&self, record_id: &str) -> Result<Option<String>> {
+        let index = self.get_tantivy_index();
+        let reader = index.reader()?;
+        let searcher = reader.searcher();
+        let schema = index.schema();
+
+        let f_id = schema.get_field("id")?;
+        let f_content = schema.get_field("content")?;
+
+        let query = tantivy::query::TermQuery::new(
+            tantivy::Term::from_field_text(f_id, record_id),
+            tantivy::schema::IndexRecordOption::Basic,
+        );
+
+        let top_docs = searcher.search(&query, &tantivy::collector::TopDocs::with_limit(1))?;
+        if let Some((_score, doc_address)) = top_docs.first() {
+            let doc: TantivyDocument = searcher.doc(*doc_address)?;
+            let text = doc
+                .get_first(f_content)
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string());
+            return Ok(text);
+        }
+        Ok(None)
+    }
+
+    /// 截断文本到指定字符数
+    fn truncate_text(text: &str, max_chars: usize) -> String {
+        if text.chars().count() <= max_chars {
+            text.to_string()
+        } else {
+            let truncated: String = text.chars().take(max_chars).collect();
+            format!("{}...", truncated)
+        }
+    }
+
+    /// 对搜索结果进行上下文扩展
+    ///
+    /// 策略（方案 D）：
+    /// - parent: 仅取 breadcrumbs（已有）
+    /// - sibling: 前后各 1 个，每个截取最多 200 字符
+    /// - 总扩展上限: 500 字符/条
+    pub fn expand_search_context(&self, results: &mut Vec<SearchResult>) {
+        const MAX_SIBLING_CHARS: usize = 200;
+        const MAX_TOTAL_EXPANSION_CHARS: usize = 500;
+
+        for result in results.iter_mut() {
+            // 跳过没有 parent_id 的结果（root 节点或文档摘要）
+            let parent_id = match &result.parent_id {
+                Some(pid) if !pid.is_empty() => pid.clone(),
+                _ => continue,
+            };
+
+            // 查询同一 parent 下的所有 sibling
+            let siblings = match self.get_records_by_parent_id(&parent_id, &result.file_path) {
+                Ok(s) => s,
+                Err(_) => continue,
+            };
+
+            if siblings.is_empty() {
+                continue;
+            }
+
+            // 找到当前节点在 siblings 中的位置
+            let current_pos = siblings.iter().position(|(id, _)| id == &result.id);
+
+            let mut expansion_parts: Vec<String> = Vec::new();
+            let mut total_chars = 0usize;
+
+            // Parent 标题（从 breadcrumbs 提取最后一级，或用 parent_id）
+            if let Some(bc) = &result.breadcrumbs {
+                let parent_title = bc.split(" > ").last().unwrap_or(bc);
+                let parent_line = format!("[上级] {}", parent_title);
+                total_chars += parent_line.chars().count();
+                expansion_parts.push(parent_line);
+            }
+
+            if let Some(pos) = current_pos {
+                // 前一个 sibling
+                if pos > 0 {
+                    let (prev_id, prev_text) = &siblings[pos - 1];
+                    // 跳过 doc-summary 记录
+                    if !prev_id.ends_with("-doc-summary") {
+                        let remaining = MAX_TOTAL_EXPANSION_CHARS.saturating_sub(total_chars);
+                        let max_chars = remaining.min(MAX_SIBLING_CHARS);
+                        if max_chars > 0 {
+                            let snippet = Self::truncate_text(prev_text, max_chars);
+                            let line = format!("[前文] {}", snippet);
+                            total_chars += line.chars().count();
+                            expansion_parts.push(line);
+                        }
+                    }
+                }
+
+                // 后一个 sibling
+                if pos + 1 < siblings.len() {
+                    let (next_id, next_text) = &siblings[pos + 1];
+                    if !next_id.ends_with("-doc-summary") {
+                        let remaining = MAX_TOTAL_EXPANSION_CHARS.saturating_sub(total_chars);
+                        let max_chars = remaining.min(MAX_SIBLING_CHARS);
+                        if max_chars > 0 {
+                            let snippet = Self::truncate_text(next_text, max_chars);
+                            let line = format!("[后文] {}", snippet);
+                            expansion_parts.push(line);
+                        }
+                    }
+                }
+            }
+
+            if !expansion_parts.is_empty() {
+                result.expanded_context = Some(expansion_parts.join("\n"));
+            }
+        }
     }
 
     fn get_schema(&self) -> Arc<Schema> {
@@ -989,4 +1165,6 @@ pub struct SearchResult {
     pub parent_id: Option<String>,
     pub breadcrumbs: Option<String>,
     pub source: SearchSource,
+    /// 上下文扩展：parent 标题 + 前后 sibling 内容（可选）
+    pub expanded_context: Option<String>,
 }
