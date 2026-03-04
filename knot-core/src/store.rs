@@ -1168,3 +1168,49 @@ pub struct SearchResult {
     /// 上下文扩展：parent 标题 + 前后 sibling 内容（可选）
     pub expanded_context: Option<String>,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_truncate_text_short() {
+        let text = "Hello World";
+        assert_eq!(KnotStore::truncate_text(text, 20), "Hello World");
+    }
+
+    #[test]
+    fn test_truncate_text_exact() {
+        let text = "12345";
+        assert_eq!(KnotStore::truncate_text(text, 5), "12345");
+    }
+
+    #[test]
+    fn test_truncate_text_long() {
+        let text = "Hello World, this is a long text";
+        let result = KnotStore::truncate_text(text, 11);
+        assert_eq!(result, "Hello World...");
+    }
+
+    #[test]
+    fn test_truncate_text_chinese() {
+        let text = "这是一段中文测试文本，用于验证截断功能";
+        let result = KnotStore::truncate_text(text, 8);
+        assert_eq!(result, "这是一段中文测试...");
+    }
+
+    #[test]
+    fn test_search_result_default_expanded_context() {
+        let result = SearchResult {
+            id: "test-1".to_string(),
+            text: "content".to_string(),
+            file_path: "/test.md".to_string(),
+            score: 0.5,
+            parent_id: None,
+            breadcrumbs: None,
+            source: SearchSource::Vector,
+            expanded_context: None,
+        };
+        assert!(result.expanded_context.is_none());
+    }
+}
