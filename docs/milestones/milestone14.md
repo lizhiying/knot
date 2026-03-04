@@ -155,17 +155,17 @@ fn default_context_expansion_enabled() -> bool {
 
 #### 任务分解
 
-| 任务                                             | 状态   | 文件                             | 说明                                            |
-| ------------------------------------------------ | ------ | -------------------------------- | ----------------------------------------------- |
-| 2.1 `AppConfig` 新增 `context_expansion_enabled` | 🔲 待做 | `knot-app/src-tauri/src/main.rs` | 默认 `true`，配套 Tauri command                 |
-| 2.2 `KnotStore` 添加 `get_record_by_id()`        | 🔲 待做 | `knot-core/src/store.rs`         | 根据 id 查询单条 VectorRecord                   |
-| 2.3 `KnotStore` 添加 `get_siblings()`            | 🔲 待做 | `knot-core/src/store.rs`         | 根据 parent_id + file_path 查询同级节点         |
-| 2.4 实现 `expand_context()`                      | 🔲 待做 | `knot-core/src/store.rs`         | 组装 parent title + prev/next sibling，截断控制 |
-| 2.5 修改 `search()` 集成上下文扩展               | 🔲 待做 | `knot-core/src/store.rs`         | 搜索结果后处理调用 `expand_context()`           |
-| 2.6 `SearchResult` 新增 `expanded_context` 字段  | 🔲 待做 | `knot-core/src/store.rs`         | 存放扩展的上下文文本                            |
-| 2.7 前端 `rag_search` 透传扩展上下文             | 🔲 待做 | `knot-app/src-tauri/src/main.rs` | 读取配置开关，传入搜索                          |
-| 2.8 前端设置页面增加开关                         | 🔲 待做 | `knot-app/src/`                  | UI 开关组件                                     |
-| 2.9 添加测试                                     | 🔲 待做 | `knot-core/src/store.rs`         | 验证扩展逻辑的正确性和截断行为                  |
+| 任务                                              | 状态   | 文件                             | 说明                                            |
+| ------------------------------------------------- | ------ | -------------------------------- | ----------------------------------------------- |
+| 2.1 `AppConfig` 新增 `context_expansion_enabled`  | ✅ 完成 | `knot-app/src-tauri/src/main.rs` | 默认 `true`，配套 Tauri command                 |
+| 2.2 `KnotStore` 添加 `get_text_by_id()`           | ✅ 完成 | `knot-core/src/store.rs`         | 根据 id 查询单条记录文本                        |
+| 2.3 `KnotStore` 添加 `get_records_by_parent_id()` | ✅ 完成 | `knot-core/src/store.rs`         | 根据 parent_id + file_path 查询同级节点         |
+| 2.4 实现 `expand_search_context()`                | ✅ 完成 | `knot-core/src/store.rs`         | 组装 parent title + prev/next sibling，截断控制 |
+| 2.5 `rag_search`/`rag_query` 集成上下文扩展       | ✅ 完成 | `knot-app/src-tauri/src/main.rs` | 搜索后根据配置调用 `expand_search_context()`    |
+| 2.6 `SearchResult` 新增 `expanded_context` 字段   | ✅ 完成 | `knot-core/src/store.rs`         | 存放扩展的上下文文本                            |
+| 2.7 前端 `rag_search` 透传扩展上下文              | ✅ 完成 | `knot-app/src-tauri/src/main.rs` | 扩展内容拼入 LLM 的 context 格式中              |
+| 2.8 前端设置页面增加开关                          | 🔲 待做 | `knot-app/src/`                  | UI 开关组件                                     |
+| 2.9 添加测试                                      | 🔲 待做 | `knot-core/src/store.rs`         | 验证扩展逻辑的正确性和截断行为                  |
 
 ---
 
