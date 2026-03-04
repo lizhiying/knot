@@ -69,12 +69,82 @@ RelationRecord:
 
 ### 存储方案
 
-首选方案: **用 Tantivy 索引存储实体和关系**（轻量级，不引入新依赖）
-- 实体表: Tantivy 索引 (entity_id, entity_type, name, source_file)
-- 关系表: Tantivy 索引 (from_entity, to_entity, relation_type, source_file)
-- 图遍历: 多次 Tantivy 查询实现 1-2 跳
+**使用 SQLite（`rusqlite` bundled 模式）**
 
-备选方案: SQLite（如果查询模式更复杂）
+选型理由：
+- Knot 是 PC 端全盘索引工具，实体量可达百万级，纯内存方案（如 petgraph）内存占用过大
+- SQLite 是桌面应用标配（Chrome、VS Code 都用），单文件、零外部依赖
+- `bundled` 模式将 SQLite C 源码直接编译进二进制，用户无需安装任何东西
+- `WITH RECURSIVE` 原生支持多跳图遍历，无需手动拼接
+- 增量更新友好：`DELETE WHERE source_file = ?` + `INSERT` 事务性操作
+
+```toml
+# knot-core/Cargo.toml
+[dependencies]
+rusqlite = { version = "0.31", features = ["bundled"] }
+```
+
+**数据库 Schema：**
+
+```sql
+-- entities 表
+CREATE TABLE IF NOT EXISTS entities (
+    entity_id   TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    entity_type TEXT NOT NULL,    -- Person | Organization | Technology | Concept
+    source_file TEXT NOT NULL,
+    chunk_id    TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_entity_name ON entities(name);
+CREATE INDEX IF NOT EXISTS idx_entity_file ON entities(source_file);
+CREATE INDEX IF NOT EXISTS idx_entity_type ON entities(entity_type);
+
+-- relations 表
+CREATE TABLE IF NOT EXISTS relations (
+    from_entity   TEXT NOT NULL,
+    to_entity     TEXT NOT NULL,
+    relation_type TEXT NOT NULL,
+    source_file   TEXT NOT NULL,
+    confidence    REAL DEFAULT 1.0,
+    PRIMARY KEY (from_entity, to_entity, relation_type)
+);
+CREATE INDEX IF NOT EXISTS idx_rel_from ON relations(from_entity);
+CREATE INDEX IF NOT EXISTS idx_rel_to   ON relations(to_entity);
+CREATE INDEX IF NOT EXISTS idx_rel_file ON relations(source_file);
+```
+
+**图查询示例：**
+
+```sql
+-- 1 跳：查找 GPT-4 的所有关联实体（<1ms）
+SELECT r.to_entity, r.relation_type, e.entity_type
+FROM relations r JOIN entities e ON r.to_entity = e.entity_id
+WHERE r.from_entity = 'GPT-4';
+
+-- 2 跳：递归查找（<5ms）
+WITH RECURSIVE hops AS (
+    SELECT to_entity, relation_type, 1 AS depth
+    FROM relations WHERE from_entity = 'GPT-4'
+    UNION ALL
+    SELECT r.to_entity, r.relation_type, h.depth + 1
+    FROM relations r JOIN hops h ON r.from_entity = h.to_entity
+    WHERE h.depth < 2
+)
+SELECT DISTINCT to_entity, relation_type, depth FROM hops;
+
+-- 增量更新：文件重索引时清除旧数据
+DELETE FROM entities  WHERE source_file = '/path/to/updated.md';
+DELETE FROM relations WHERE source_file = '/path/to/updated.md';
+-- 然后重新 INSERT 新提取的实体和关系
+```
+
+**规模预估：**
+
+| 场景     | 文档数  | 实体数    | 关系数    | SQLite 文件大小 |
+| -------- | ------- | --------- | --------- | --------------- |
+| 轻度用户 | 1,000   | 10,000    | 50,000    | ~5 MB           |
+| 中度用户 | 10,000  | 100,000   | 500,000   | ~50 MB          |
+| 重度用户 | 100,000 | 1,000,000 | 5,000,000 | ~500 MB         |
 
 ## 涉及文件
 

@@ -7,9 +7,10 @@ Goal:
 
 Assumptions:
 - 实体提取先用规则方式（正则匹配中英文专有名词），后续迭代再接入 LLM
-- 存储用 Tantivy 索引（轻量级，不引入新依赖）
+- 存储用 SQLite（`rusqlite` bundled 模式，编译进二进制，零外部依赖）
 - 关系暂时只提取 "共现"（两个实体出现在同一段落 = 有关联）
 - 查询结果直接拼入 expanded_context，复用现有字段
+- SQLite 数据库文件放在 KnotStore 的 data_dir 下（`knot_graph.db`）
 
 Scope:
 
@@ -20,11 +21,12 @@ Tasks:
   - 实现 `extract_cooccurrence_relations()`: 同一段落内的实体对生成共现关系
   - 修改: 新建 `knot-core/src/entity.rs`，修改 `knot-core/src/lib.rs` 导出模块
 
-- [ ] 1.2 在 `KnotStore` 中添加实体存储
-  - 创建 entities Tantivy 索引 schema (entity_id, entity_type, name, source_file, chunk_id)
-  - 创建 relations Tantivy 索引 schema (from_entity, to_entity, relation_type, source_file)
+- [ ] 1.2 在 `KnotStore` 中添加 SQLite 实体图存储
+  - 添加 `rusqlite` 依赖（bundled 模式）
+  - 初始化 SQLite 数据库，创建 entities 和 relations 表（含索引）
   - 实现 `add_entities()` 和 `add_relations()` 写入方法
-  - 修改: `knot-core/src/store.rs`
+  - 实现 `delete_entities_by_file()` 用于增量更新时清除旧数据
+  - 修改: `knot-core/Cargo.toml`, `knot-core/src/store.rs`
 
 - [ ] 1.3 在 `index_file()` 中集成实体提取
   - 在 flatten_tree 之后，对每个 VectorRecord 的 text 调用 entity 提取
