@@ -1009,6 +1009,7 @@ async fn start_background_indexing(
 
             // GraphRAG: 提取实体（在 records 被 move 前）
             let config = load_config(&app);
+            let records_empty_for_graph = records.is_empty();
             let entity_data = if config.graph_rag_enabled && !records.is_empty() {
                 Some(knot_core::entity::extract_from_records(&records))
             } else {
@@ -1052,6 +1053,56 @@ async fn start_background_indexing(
                     Err(e) => eprintln!("[Indexer] Store Init Error: {}", e),
                 }
             }
+
+            // GraphRAG: 当 records 为空但图谱为空时，从已有 Tantivy 索引回填图谱
+            let config_recheck = load_config(&app);
+            if config_recheck.graph_rag_enabled && records_empty_for_graph {
+                let graph_db_path = index_path.replace("knot_index.lance", "knot_graph.db");
+                let graph_db_exists = std::path::Path::new(&graph_db_path).exists();
+                let graph_empty = if graph_db_exists {
+                    match knot_core::entity::EntityGraph::new(&graph_db_path).await {
+                        Ok(g) => g.entity_count().await.unwrap_or(0) == 0,
+                        Err(_) => true,
+                    }
+                } else {
+                    true
+                };
+
+                if graph_empty {
+                    println!("[GraphRAG] Graph is empty, backfilling from existing index...");
+                    match KnotStore::new(&index_path).await {
+                        Ok(store) => match store.get_all_texts() {
+                            Ok(texts) if !texts.is_empty() => {
+                                println!(
+                                    "[GraphRAG] Found {} existing records for backfill",
+                                    texts.len()
+                                );
+                                let (entities, relations) =
+                                    knot_core::entity::extract_from_records(&texts);
+                                let deduped = knot_core::entity::dedup_entities(entities);
+                                match knot_core::entity::EntityGraph::new(&graph_db_path).await {
+                                    Ok(graph) => {
+                                        let _ = graph.add_entities(&deduped).await;
+                                        let _ = graph.add_relations(&relations).await;
+                                        println!(
+                                            "[GraphRAG] Backfilled {} entities, {} relations",
+                                            deduped.len(),
+                                            relations.len()
+                                        );
+                                    }
+                                    Err(e) => {
+                                        eprintln!("[GraphRAG] Backfill graph init error: {}", e)
+                                    }
+                                }
+                            }
+                            Ok(_) => println!("[GraphRAG] No existing records to backfill"),
+                            Err(e) => eprintln!("[GraphRAG] Error reading existing records: {}", e),
+                        },
+                        Err(e) => eprintln!("[GraphRAG] Store init for backfill error: {}", e),
+                    }
+                }
+            }
+
             println!("[Indexer] Initial scan complete.");
             let _ = app.emit("indexing-status", "ready");
         }

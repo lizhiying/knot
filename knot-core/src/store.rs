@@ -982,6 +982,56 @@ impl KnotStore {
         Ok(None)
     }
 
+    /// 从 Tantivy 中读取所有文档的 (id, text, file_path)
+    ///
+    /// 用于 GraphRAG：当知识图谱为空但索引已有数据时，
+    /// 从已有索引中提取实体，无需重新扫描文件。
+    pub fn get_all_texts(&self) -> Result<Vec<VectorRecord>> {
+        let index = self.get_tantivy_index();
+        let reader = index.reader()?;
+        let searcher = reader.searcher();
+        let schema = index.schema();
+
+        let f_id = schema.get_field("id")?;
+        let f_content = schema.get_field("content")?;
+        let f_file_path = schema.get_field("file_path")?;
+
+        let mut records = Vec::new();
+        let query = tantivy::query::AllQuery;
+        let top_docs = searcher.search(&query, &tantivy::collector::TopDocs::with_limit(100000))?;
+
+        for (_score, doc_address) in top_docs {
+            let doc: TantivyDocument = searcher.doc(doc_address)?;
+            let id = doc
+                .get_first(f_id)
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            let text = doc
+                .get_first(f_content)
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            let file_path = doc
+                .get_first(f_file_path)
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+
+            if !text.is_empty() && !id.ends_with("-doc-summary") {
+                records.push(VectorRecord {
+                    id,
+                    text,
+                    vector: Vec::new(), // 不需要向量
+                    file_path,
+                    parent_id: None,
+                    breadcrumbs: None,
+                });
+            }
+        }
+        Ok(records)
+    }
+
     /// 截断文本到指定字符数
     fn truncate_text(text: &str, max_chars: usize) -> String {
         if text.chars().count() <= max_chars {
