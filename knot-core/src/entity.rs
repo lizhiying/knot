@@ -382,6 +382,179 @@ fn extract_short_quoted(
     }
 }
 
+// --- SQLite 实体图存储 ---
+
+use anyhow::Result;
+use sqlx::{sqlite::SqlitePoolOptions, Pool, Row, Sqlite};
+
+/// 基于 SQLite 的实体图存储
+#[derive(Clone)]
+pub struct EntityGraph {
+    pool: Pool<Sqlite>,
+}
+
+/// 图查询返回的关联实体
+#[derive(Debug, Clone)]
+pub struct RelatedEntity {
+    pub entity_id: String,
+    pub name: String,
+    pub entity_type: String,
+    pub relation_type: String,
+    pub depth: i32,
+}
+
+impl EntityGraph {
+    pub async fn new(db_path: &str) -> Result<Self> {
+        let db_url = format!("sqlite://{}?mode=rwc", db_path);
+        let pool = SqlitePoolOptions::new()
+            .max_connections(5)
+            .connect(&db_url)
+            .await?;
+
+        sqlx::query(
+            r#"CREATE TABLE IF NOT EXISTS entities (
+                entity_id TEXT PRIMARY KEY, name TEXT NOT NULL,
+                entity_type TEXT NOT NULL, source_file TEXT NOT NULL, chunk_id TEXT
+            )"#,
+        )
+        .execute(&pool)
+        .await?;
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_entity_name ON entities(name)")
+            .execute(&pool)
+            .await?;
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_entity_file ON entities(source_file)")
+            .execute(&pool)
+            .await?;
+
+        sqlx::query(
+            r#"CREATE TABLE IF NOT EXISTS relations (
+                from_entity TEXT NOT NULL, to_entity TEXT NOT NULL,
+                relation_type TEXT NOT NULL, source_file TEXT NOT NULL,
+                confidence REAL DEFAULT 1.0,
+                PRIMARY KEY (from_entity, to_entity, relation_type)
+            )"#,
+        )
+        .execute(&pool)
+        .await?;
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_rel_from ON relations(from_entity)")
+            .execute(&pool)
+            .await?;
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_rel_to ON relations(to_entity)")
+            .execute(&pool)
+            .await?;
+        sqlx::query("CREATE INDEX IF NOT EXISTS idx_rel_file ON relations(source_file)")
+            .execute(&pool)
+            .await?;
+
+        Ok(Self { pool })
+    }
+
+    pub async fn add_entities(&self, entities: &[EntityRecord]) -> Result<()> {
+        for entity in entities {
+            sqlx::query(
+                r#"INSERT INTO entities (entity_id, name, entity_type, source_file, chunk_id)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(entity_id) DO UPDATE SET
+                    name = excluded.name, entity_type = excluded.entity_type,
+                    source_file = excluded.source_file, chunk_id = excluded.chunk_id"#,
+            )
+            .bind(&entity.entity_id)
+            .bind(&entity.name)
+            .bind(entity.entity_type.as_str())
+            .bind(&entity.source_file)
+            .bind(&entity.chunk_id)
+            .execute(&self.pool)
+            .await?;
+        }
+        Ok(())
+    }
+
+    pub async fn add_relations(&self, relations: &[RelationRecord]) -> Result<()> {
+        for rel in relations {
+            sqlx::query(
+                r#"INSERT INTO relations (from_entity, to_entity, relation_type, source_file, confidence)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(from_entity, to_entity, relation_type) DO UPDATE SET
+                    source_file = excluded.source_file, confidence = excluded.confidence"#,
+            )
+            .bind(&rel.from_entity)
+            .bind(&rel.to_entity)
+            .bind(&rel.relation_type)
+            .bind(&rel.source_file)
+            .bind(rel.confidence)
+            .execute(&self.pool)
+            .await?;
+        }
+        Ok(())
+    }
+
+    pub async fn delete_by_file(&self, source_file: &str) -> Result<()> {
+        sqlx::query("DELETE FROM relations WHERE source_file = ?")
+            .bind(source_file)
+            .execute(&self.pool)
+            .await?;
+        sqlx::query("DELETE FROM entities WHERE source_file = ?")
+            .bind(source_file)
+            .execute(&self.pool)
+            .await?;
+        Ok(())
+    }
+
+    pub async fn get_related_entities(&self, entity_name: &str) -> Result<Vec<RelatedEntity>> {
+        let entity_id = entity_name.to_lowercase();
+        let rows = sqlx::query(
+            r#"SELECT e.entity_id, e.name, e.entity_type, r.relation_type, 1 as depth
+            FROM relations r JOIN entities e ON r.to_entity = e.entity_id
+            WHERE r.from_entity = ?
+            UNION
+            SELECT e.entity_id, e.name, e.entity_type, r.relation_type, 1 as depth
+            FROM relations r JOIN entities e ON r.from_entity = e.entity_id
+            WHERE r.to_entity = ?"#,
+        )
+        .bind(&entity_id)
+        .bind(&entity_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows
+            .into_iter()
+            .map(|r| RelatedEntity {
+                entity_id: r.get("entity_id"),
+                name: r.get("name"),
+                entity_type: r.get("entity_type"),
+                relation_type: r.get("relation_type"),
+                depth: r.get("depth"),
+            })
+            .collect())
+    }
+
+    pub async fn get_entity_chunk_ids(&self, entity_name: &str) -> Result<Vec<String>> {
+        let entity_id = entity_name.to_lowercase();
+        let rows = sqlx::query("SELECT chunk_id FROM entities WHERE entity_id = ?")
+            .bind(&entity_id)
+            .fetch_all(&self.pool)
+            .await?;
+        Ok(rows
+            .into_iter()
+            .filter_map(|r| r.get::<Option<String>, _>("chunk_id"))
+            .collect())
+    }
+
+    pub async fn entity_count(&self) -> Result<i64> {
+        let row = sqlx::query("SELECT COUNT(*) as cnt FROM entities")
+            .fetch_one(&self.pool)
+            .await?;
+        Ok(row.get::<i64, _>("cnt"))
+    }
+
+    pub async fn relation_count(&self) -> Result<i64> {
+        let row = sqlx::query("SELECT COUNT(*) as cnt FROM relations")
+            .fetch_one(&self.pool)
+            .await?;
+        Ok(row.get::<i64, _>("cnt"))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
