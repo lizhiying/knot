@@ -203,6 +203,257 @@ pub fn extract_from_records(
     (all_entities, relations)
 }
 
+// --- 关系类型 ---
+
+/// 关系类型枚举
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum RelationType {
+    /// 共现（同段落出现）
+    CoOccurrence,
+    /// 开发者/创建者（X 开发了 Y）
+    DevelopedBy,
+    /// 使用技术（X 使用了 Y）
+    Uses,
+    /// 属于分类（X 属于 Y）
+    BelongsTo,
+    /// 对比关系（X 与 Y 对比）
+    ComparedWith,
+    /// 因果关系（X 导致 Y）
+    CausedBy,
+    /// 时序关系（X 在 Y 之后）
+    FollowedBy,
+}
+
+impl RelationType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            RelationType::CoOccurrence => "co-occurrence",
+            RelationType::DevelopedBy => "developed-by",
+            RelationType::Uses => "uses",
+            RelationType::BelongsTo => "belongs-to",
+            RelationType::ComparedWith => "compared-with",
+            RelationType::CausedBy => "caused-by",
+            RelationType::FollowedBy => "followed-by",
+        }
+    }
+
+    pub fn from_str(s: &str) -> Self {
+        match s {
+            "developed-by" | "developed_by" | "created-by" => RelationType::DevelopedBy,
+            "uses" | "used-by" | "use" => RelationType::Uses,
+            "belongs-to" | "belongs_to" | "category" | "type-of" => RelationType::BelongsTo,
+            "compared-with" | "compared_with" | "vs" | "compare" => RelationType::ComparedWith,
+            "caused-by" | "caused_by" | "cause" | "leads-to" => RelationType::CausedBy,
+            "followed-by" | "followed_by" | "after" | "then" => RelationType::FollowedBy,
+            _ => RelationType::CoOccurrence,
+        }
+    }
+}
+
+// --- LLM 实体提取 ---
+
+/// 生成 LLM 实体提取的 prompt
+pub fn build_entity_extraction_prompt(text: &str) -> String {
+    format!(
+        r#"<|im_start|>system
+You are an entity extraction assistant. Extract entities and relations from text.
+Output ONLY valid JSON array, no other text.<|im_end|>
+<|im_start|>user
+Extract entities and their relationships from the following text.
+Output a JSON object with "entities" and "relations" arrays.
+
+Entity types: Person, Organization, Technology, Concept
+Relation types: developed-by, uses, belongs-to, compared-with, caused-by, followed-by, co-occurrence
+
+Example output:
+{{"entities":[{{"name":"GPT-4","type":"Technology"}},{{"name":"OpenAI","type":"Organization"}}],"relations":[{{"from":"GPT-4","to":"OpenAI","type":"developed-by"}}]}}
+
+Text:
+{}
+
+Output JSON only:<|im_end|>
+<|im_start|>assistant
+"#,
+        // 截断过长的文本，避免超出 LLM 上下文
+        if text.len() > 1500 {
+            &text[..1500]
+        } else {
+            text
+        }
+    )
+}
+
+/// 解析 LLM 返回的 JSON 结果为实体和关系
+pub fn parse_llm_entity_response(
+    response: &str,
+    source_file: &str,
+    chunk_id: &str,
+) -> Option<(Vec<EntityRecord>, Vec<RelationRecord>)> {
+    // 尝试寻找 JSON 对象
+    let json_str = extract_json_from_response(response)?;
+    let parsed: serde_json::Value = serde_json::from_str(&json_str).ok()?;
+
+    let mut entities = Vec::new();
+    let mut relations = Vec::new();
+
+    // 解析实体
+    if let Some(entity_arr) = parsed.get("entities").and_then(|v| v.as_array()) {
+        for item in entity_arr {
+            let name = item.get("name").and_then(|v| v.as_str()).unwrap_or("");
+            let etype = item
+                .get("type")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Concept");
+            if name.len() >= 2 {
+                entities.push(EntityRecord {
+                    entity_id: name.to_lowercase(),
+                    name: name.to_string(),
+                    entity_type: EntityType::from_str(etype),
+                    source_file: source_file.to_string(),
+                    chunk_id: chunk_id.to_string(),
+                });
+            }
+        }
+    }
+
+    // 解析关系
+    if let Some(rel_arr) = parsed.get("relations").and_then(|v| v.as_array()) {
+        for item in rel_arr {
+            let from = item.get("from").and_then(|v| v.as_str()).unwrap_or("");
+            let to = item.get("to").and_then(|v| v.as_str()).unwrap_or("");
+            let rtype = item
+                .get("type")
+                .and_then(|v| v.as_str())
+                .unwrap_or("co-occurrence");
+            if !from.is_empty() && !to.is_empty() {
+                relations.push(RelationRecord {
+                    from_entity: from.to_lowercase(),
+                    to_entity: to.to_lowercase(),
+                    relation_type: RelationType::from_str(rtype).as_str().to_string(),
+                    source_file: source_file.to_string(),
+                    confidence: 0.8,
+                });
+            }
+        }
+    }
+
+    if entities.is_empty() {
+        None
+    } else {
+        Some((entities, relations))
+    }
+}
+
+/// 从 LLM 响应中提取 JSON 内容
+fn extract_json_from_response(response: &str) -> Option<String> {
+    let trimmed = response.trim();
+
+    // 直接是 JSON
+    if trimmed.starts_with('{') {
+        // 找到匹配的结束大括号
+        let mut depth = 0;
+        let mut end = 0;
+        for (i, c) in trimmed.char_indices() {
+            match c {
+                '{' => depth += 1,
+                '}' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        end = i + 1;
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        if end > 0 {
+            return Some(trimmed[..end].to_string());
+        }
+    }
+
+    // Markdown code block: ```json ... ```
+    if let Some(start) = trimmed.find("```json") {
+        let content_start = start + 7;
+        if let Some(end) = trimmed[content_start..].find("```") {
+            return Some(
+                trimmed[content_start..content_start + end]
+                    .trim()
+                    .to_string(),
+            );
+        }
+    }
+
+    // 寻找第一个 { 到最后一个 }
+    if let (Some(start), Some(end)) = (trimmed.find('{'), trimmed.rfind('}')) {
+        if end > start {
+            return Some(trimmed[start..=end].to_string());
+        }
+    }
+
+    None
+}
+
+/// 混合提取：先尝试 LLM，失败则降级到规则提取
+///
+/// `llm_fn` 是一个异步函数，接受 prompt 并返回 LLM 的文本响应。
+/// 如果 `llm_fn` 为 None 或者 LLM 调用失败，自动降级到规则提取。
+pub async fn extract_from_records_with_llm<F, Fut>(
+    records: &[crate::store::VectorRecord],
+    llm_fn: Option<F>,
+) -> (Vec<EntityRecord>, Vec<RelationRecord>)
+where
+    F: Fn(String) -> Fut,
+    Fut: std::future::Future<Output = Option<String>>,
+{
+    let llm_fn = match llm_fn {
+        Some(f) => f,
+        None => return extract_from_records(records),
+    };
+
+    let mut all_entities = Vec::new();
+    let mut all_relations = Vec::new();
+    let mut llm_success = 0;
+    let mut llm_fallback = 0;
+
+    for record in records {
+        if record.id.ends_with("-doc-summary") {
+            continue;
+        }
+
+        // 尝试 LLM 提取
+        let prompt = build_entity_extraction_prompt(&record.text);
+        let llm_result = (llm_fn)(prompt).await;
+
+        if let Some(response) = llm_result {
+            if let Some((entities, relations)) =
+                parse_llm_entity_response(&response, &record.file_path, &record.id)
+            {
+                llm_success += 1;
+                all_entities.extend(entities);
+                all_relations.extend(relations);
+                continue;
+            }
+        }
+
+        // 降级到规则提取
+        llm_fallback += 1;
+        let entities = extract_entities_rule_based(&record.text, &record.file_path, &record.id);
+        let source_file = &record.file_path;
+        let relations = extract_cooccurrence_relations(&entities, source_file);
+        all_entities.extend(entities);
+        all_relations.extend(relations);
+    }
+
+    if llm_success > 0 || llm_fallback > 0 {
+        println!(
+            "[GraphRAG] LLM extraction: {} success, {} fallback to rules",
+            llm_success, llm_fallback
+        );
+    }
+
+    (all_entities, all_relations)
+}
+
 // --- 内部辅助函数 ---
 
 /// 判断一个词是否为英文专有名词
@@ -576,6 +827,66 @@ impl EntityGraph {
             .await?;
         Ok(row.get::<i64, _>("cnt"))
     }
+
+    /// 获取所有关系类型及其数量（用于统计）
+    pub async fn relation_type_stats(&self) -> Result<Vec<(String, i64)>> {
+        let rows = sqlx::query(
+            "SELECT relation_type, COUNT(*) as cnt FROM relations GROUP BY relation_type ORDER BY cnt DESC"
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(rows
+            .into_iter()
+            .map(|r| (r.get::<String, _>("relation_type"), r.get::<i64, _>("cnt")))
+            .collect())
+    }
+
+    /// 获取出现最频繁的实体（Top N）
+    pub async fn top_entities(&self, limit: i32) -> Result<Vec<(String, String, i64)>> {
+        let rows = sqlx::query(
+            r#"SELECT e.name, e.entity_type,
+                (SELECT COUNT(*) FROM relations WHERE from_entity = e.entity_id OR to_entity = e.entity_id) as rel_count
+            FROM entities e
+            ORDER BY rel_count DESC
+            LIMIT ?"#,
+        )
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(rows
+            .into_iter()
+            .map(|r| {
+                (
+                    r.get::<String, _>("name"),
+                    r.get::<String, _>("entity_type"),
+                    r.get::<i64, _>("rel_count"),
+                )
+            })
+            .collect())
+    }
+}
+
+/// 在内存中对实体列表做去重与合并
+///
+/// 合并策略：
+/// - 同 entity_id（lowercase）的实体合并为一个
+/// - 保留第一次出现的 name（保留原始大小写）
+/// - entity_type 优先选非 Concept 的类型
+pub fn dedup_entities(entities: Vec<EntityRecord>) -> Vec<EntityRecord> {
+    let mut map: HashMap<String, EntityRecord> = HashMap::new();
+    for entity in entities {
+        map.entry(entity.entity_id.clone())
+            .and_modify(|existing| {
+                // 如果 existing 是 Concept 但新的不是，升级类型
+                if existing.entity_type == EntityType::Concept
+                    && entity.entity_type != EntityType::Concept
+                {
+                    existing.entity_type = entity.entity_type.clone();
+                }
+            })
+            .or_insert(entity);
+    }
+    map.into_values().collect()
 }
 
 #[cfg(test)]
@@ -742,5 +1053,146 @@ mod tests {
         );
         assert_eq!(EntityType::from_str("Technology").as_str(), "Technology");
         assert_eq!(EntityType::from_str("unknown").as_str(), "Concept");
+    }
+
+    // --- Iteration 2 Tests ---
+
+    #[test]
+    fn test_relation_type_roundtrip() {
+        assert_eq!(
+            RelationType::from_str("developed-by").as_str(),
+            "developed-by"
+        );
+        assert_eq!(RelationType::from_str("uses").as_str(), "uses");
+        assert_eq!(RelationType::from_str("belongs-to").as_str(), "belongs-to");
+        assert_eq!(
+            RelationType::from_str("compared-with").as_str(),
+            "compared-with"
+        );
+        assert_eq!(RelationType::from_str("caused-by").as_str(), "caused-by");
+        assert_eq!(
+            RelationType::from_str("followed-by").as_str(),
+            "followed-by"
+        );
+        assert_eq!(RelationType::from_str("unknown").as_str(), "co-occurrence");
+    }
+
+    #[test]
+    fn test_relation_type_aliases() {
+        assert_eq!(
+            RelationType::from_str("created-by").as_str(),
+            "developed-by"
+        );
+        assert_eq!(RelationType::from_str("used-by").as_str(), "uses");
+        assert_eq!(RelationType::from_str("category").as_str(), "belongs-to");
+        assert_eq!(RelationType::from_str("vs").as_str(), "compared-with");
+        assert_eq!(RelationType::from_str("leads-to").as_str(), "caused-by");
+    }
+
+    #[test]
+    fn test_parse_llm_response_valid() {
+        let response = r#"{"entities":[{"name":"GPT-4","type":"Technology"},{"name":"OpenAI","type":"Organization"}],"relations":[{"from":"GPT-4","to":"OpenAI","type":"developed-by"}]}"#;
+        let result = parse_llm_entity_response(response, "/test.md", "chunk-1");
+        assert!(result.is_some());
+        let (entities, relations) = result.unwrap();
+        assert_eq!(entities.len(), 2);
+        assert_eq!(relations.len(), 1);
+        assert_eq!(relations[0].relation_type, "developed-by");
+        assert_eq!(relations[0].confidence, 0.8);
+    }
+
+    #[test]
+    fn test_parse_llm_response_with_markdown() {
+        let response = "Here is the result:\n```json\n{\"entities\":[{\"name\":\"BERT\",\"type\":\"Technology\"}],\"relations\":[]}\n```";
+        let result = parse_llm_entity_response(response, "/test.md", "chunk-1");
+        assert!(result.is_some());
+        let (entities, _) = result.unwrap();
+        assert_eq!(entities[0].name, "BERT");
+    }
+
+    #[test]
+    fn test_parse_llm_response_invalid() {
+        let response = "Sorry, I cannot extract entities from this text.";
+        let result = parse_llm_entity_response(response, "/test.md", "chunk-1");
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_parse_llm_response_empty_entities() {
+        let response = r#"{"entities":[],"relations":[]}"#;
+        let result = parse_llm_entity_response(response, "/test.md", "chunk-1");
+        assert!(result.is_none(), "Empty entities should return None");
+    }
+
+    #[test]
+    fn test_extract_json_from_response_noise() {
+        let response = "Sure! Here is the extracted data: {\"entities\":[{\"name\":\"AI\",\"type\":\"Concept\"}],\"relations\":[]} Let me know if you need more.";
+        let result = parse_llm_entity_response(response, "/test.md", "chunk-1");
+        assert!(result.is_some());
+        let (entities, _) = result.unwrap();
+        assert_eq!(entities[0].name, "AI");
+    }
+
+    #[test]
+    fn test_dedup_entities_basic() {
+        let entities = vec![
+            EntityRecord {
+                entity_id: "openai".to_string(),
+                name: "OpenAI".to_string(),
+                entity_type: EntityType::Concept,
+                source_file: "/a.md".to_string(),
+                chunk_id: "1".to_string(),
+            },
+            EntityRecord {
+                entity_id: "openai".to_string(),
+                name: "openai".to_string(),
+                entity_type: EntityType::Organization,
+                source_file: "/b.md".to_string(),
+                chunk_id: "2".to_string(),
+            },
+        ];
+        let deduped = dedup_entities(entities);
+        assert_eq!(deduped.len(), 1);
+        // 应合并为一个，类型升级为 Organization
+        assert_eq!(deduped[0].entity_type, EntityType::Organization);
+    }
+
+    #[test]
+    fn test_dedup_entities_preserves_different() {
+        let entities = vec![
+            EntityRecord {
+                entity_id: "openai".to_string(),
+                name: "OpenAI".to_string(),
+                entity_type: EntityType::Organization,
+                source_file: "/a.md".to_string(),
+                chunk_id: "1".to_string(),
+            },
+            EntityRecord {
+                entity_id: "gpt-4".to_string(),
+                name: "GPT-4".to_string(),
+                entity_type: EntityType::Technology,
+                source_file: "/a.md".to_string(),
+                chunk_id: "1".to_string(),
+            },
+        ];
+        let deduped = dedup_entities(entities);
+        assert_eq!(deduped.len(), 2);
+    }
+
+    #[test]
+    fn test_build_entity_extraction_prompt() {
+        let prompt = build_entity_extraction_prompt("GPT-4 was developed by OpenAI.");
+        assert!(prompt.contains("GPT-4 was developed by OpenAI."));
+        assert!(prompt.contains("entities"));
+        assert!(prompt.contains("relations"));
+        assert!(prompt.contains("<|im_start|>"));
+    }
+
+    #[test]
+    fn test_build_prompt_truncates_long_text() {
+        let long_text = "a".repeat(3000);
+        let prompt = build_entity_extraction_prompt(&long_text);
+        // 原文被截断到 1500 字节
+        assert!(!prompt.contains(&"a".repeat(3000)));
     }
 }

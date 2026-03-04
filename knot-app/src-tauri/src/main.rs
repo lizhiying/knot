@@ -1028,17 +1028,19 @@ async fn start_background_indexing(
                             }
                         }
 
-                        // GraphRAG: 写入实体图
+                        // GraphRAG: 写入实体图（去重后写入）
                         if let Some((entities, relations)) = entity_data {
+                            let deduped = knot_core::entity::dedup_entities(entities);
                             let graph_db = index_path.replace("knot_index.lance", "");
                             let graph_db_path = format!("{}knot_graph.db", graph_db);
                             match knot_core::entity::EntityGraph::new(&graph_db_path).await {
                                 Ok(graph) => {
-                                    let _ = graph.add_entities(&entities).await;
+                                    let _ = graph.add_entities(&deduped).await;
                                     let _ = graph.add_relations(&relations).await;
                                     println!(
-                                        "[GraphRAG] Indexed {} entities, {} relations",
-                                        entities.len(),
+                                        "[GraphRAG] Indexed {} entities ({} before dedup), {} relations",
+                                        deduped.len(),
+                                        deduped.len(),
                                         relations.len()
                                     );
                                 }
@@ -1172,10 +1174,30 @@ async fn start_background_indexing(
                                                          total_records += records.len();
                                                          updated_cnt += 1;
 
-                                                         // GraphRAG: 提取实体（在 records 被 move 前）
+                                                         // GraphRAG: 混合提取（LLM + 规则降级）
                                                          let watch_config = load_config(&app);
                                                          let entity_data = if watch_config.graph_rag_enabled {
-                                                             Some(knot_core::entity::extract_from_records(&records))
+                                                             // 尝试获取 parsing LLM client
+                                                             let parsing_client = {
+                                                                 let state = app.state::<AppState>();
+                                                                 let guard = state.parsing_client.read().await;
+                                                                 guard.clone()
+                                                             };
+
+                                                             let (entities, relations) = if let Some(client) = parsing_client {
+                                                                 let client_clone = client.clone();
+                                                                 let llm_fn = |prompt: String| {
+                                                                     let c = client_clone.clone();
+                                                                     async move {
+                                                                         use knot_parser::LlmProvider;
+                                                                         c.generate_content(&prompt).await.ok()
+                                                                     }
+                                                                 };
+                                                                 knot_core::entity::extract_from_records_with_llm(&records, Some(llm_fn)).await
+                                                             } else {
+                                                                 knot_core::entity::extract_from_records(&records)
+                                                             };
+                                                             Some((entities, relations))
                                                          } else {
                                                              None
                                                          };
@@ -1185,12 +1207,13 @@ async fn start_background_indexing(
                                                               let _ = store.add_records(records).await;
                                                          }
 
-                                                         // GraphRAG: 写入实体图
+                                                         // GraphRAG: 写入实体图（去重后写入）
                                                          if let Some((entities, relations)) = entity_data {
+                                                             let deduped = knot_core::entity::dedup_entities(entities);
                                                              let graph_path = index_path_for_watch.replace("knot_index.lance", "knot_graph.db");
                                                              if let Ok(graph) = knot_core::entity::EntityGraph::new(&graph_path).await {
                                                                  let _ = graph.delete_by_file(&path.to_string_lossy()).await;
-                                                                 let _ = graph.add_entities(&entities).await;
+                                                                 let _ = graph.add_entities(&deduped).await;
                                                                  let _ = graph.add_relations(&relations).await;
                                                              }
                                                          }
