@@ -29,6 +29,7 @@
     let llmThinkEnabled = $state(false);
     let contextExpansionEnabled = $state(true);
     let multiHopEnabled = $state(true);
+    let graphRagEnabled = $state(false);
     let indexingStatus = $state("ready");
     let isRecording = $state(false);
     let shortcutKey = $state("");
@@ -274,6 +275,20 @@
         }
     }
 
+    async function updateGraphRagEnabled(value) {
+        try {
+            graphRagEnabled = value;
+            await invoke("set_graph_rag_enabled", { enabled: value });
+        } catch (err) {
+            console.error("Failed to update graph RAG:", err);
+            graphRagEnabled = !value;
+            await message("Failed to update setting: " + err, {
+                title: "Error",
+                kind: "error",
+            });
+        }
+    }
+
     function handleKeyDown(e) {
         if (!isRecording) return;
         e.preventDefault();
@@ -324,6 +339,9 @@
             }
             if (config.multi_hop_enabled !== undefined) {
                 multiHopEnabled = config.multi_hop_enabled;
+            }
+            if (config.graph_rag_enabled !== undefined) {
+                graphRagEnabled = config.graph_rag_enabled;
             }
         } catch (e) {
             console.error("Failed to load config:", e);
@@ -839,6 +857,35 @@
                             >
                                 <span
                                     class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform {multiHopEnabled
+                                        ? 'translate-x-5'
+                                        : ''}"
+                                ></span>
+                            </button>
+                        </div>
+
+                        <!-- Knowledge Graph Toggle -->
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span
+                                    class="text-sm font-medium text-[var(--text-primary)]"
+                                    >知识图谱</span
+                                >
+                                <p
+                                    class="text-[10px] text-[var(--text-muted)] mt-0.5"
+                                >
+                                    实验性功能，自动提取文档中的实体和关系，增强关联查询
+                                </p>
+                            </div>
+                            <button
+                                class="relative w-11 h-6 rounded-full transition-colors {graphRagEnabled
+                                    ? 'bg-[var(--accent-primary)]'
+                                    : 'bg-[var(--bg-secondary)]'}"
+                                aria-label="Toggle knowledge graph"
+                                onclick={() =>
+                                    updateGraphRagEnabled(!graphRagEnabled)}
+                            >
+                                <span
+                                    class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform {graphRagEnabled
                                         ? 'translate-x-5'
                                         : ''}"
                                 ></span>
