@@ -827,7 +827,7 @@ fn default_vector_distance_threshold() -> f32 {
 }
 
 fn default_llm_context_size() -> u32 {
-    8192 // 默认上下文窗口大小
+    16384 // 默认上下文窗口大小 (parallel=2, 每 slot 8192)
 }
 
 fn default_llm_max_tokens() -> u32 {
