@@ -1,5 +1,5 @@
 [package]
-name = "pageindex-rs"
+name = "knot-parser"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,7 +12,8 @@ async-trait = "0.1.89"
 regex = "1.10"
 serde_json = "1.0"
 uuid = { version = "1.0", features = ["v4"] }
-knot-pdf = { path = "../knot-parser/knot-pdf", features = ["pdfium", "ocr_paddle", "vision", "layout_model", "formula_model"] }
+knot-pdf = { path = "../knot-pdf", features = ["pdfium", "ocr_paddle", "vision", "layout_model", "formula_model"] }
+knot-markdown = { path = "../knot-markdown" }
 
 [features]
 default = []

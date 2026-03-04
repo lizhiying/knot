@@ -4699,11 +4699,11 @@ dependencies = [
  "fs2",
  "futures-util",
  "knot-core",
+ "knot-parser",
  "libc",
  "md-5",
  "ndarray 0.16.1",
  "ort",
- "pageindex-rs",
  "reqwest",
  "serde",
  "serde_json",
@@ -4727,9 +4727,9 @@ dependencies = [
  "futures-util",
  "indicatif",
  "knot-core",
+ "knot-parser",
  "notify",
  "ort",
- "pageindex-rs",
  "reqwest",
  "serde",
  "serde_json",
@@ -4755,10 +4755,10 @@ dependencies = [
  "hex",
  "icu_segmenter",
  "jieba-rs",
+ "knot-parser",
  "lancedb",
  "notify",
  "ort",
- "pageindex-rs",
  "reqwest",
  "serde",
  "serde_json",
@@ -4767,6 +4767,32 @@ dependencies = [
  "tokenizers",
  "tokio",
  "walkdir",
+]
+
+[[package]]
+name = "knot-markdown"
+version = "0.1.0"
+dependencies = [
+ "pulldown-cmark 0.10.3",
+ "serde",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "knot-parser"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "knot-markdown",
+ "knot-pdf",
+ "pulldown-cmark 0.10.3",
+ "regex",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "undoc",
+ "uuid",
 ]
 
 [[package]]
@@ -6764,22 +6790,6 @@ checksum = "30d5b2194ed13191c1999ae0704b7839fb18384fa22e49b57eeaa97d79ce40da"
 dependencies = [
  "libc",
  "winapi",
-]
-
-[[package]]
-name = "pageindex-rs"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "knot-pdf",
- "pulldown-cmark 0.10.3",
- "regex",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
- "undoc",
- "uuid",
 ]
 
 [[package]]

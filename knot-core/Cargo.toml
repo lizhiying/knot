@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-pageindex-rs = { path = "../pageindex-rs", features = ["office"] }
+knot-parser = { path = "../knot-parser", features = ["office"] }
 lancedb = "0.10"
 arrow-array = "52.0"
 arrow-schema = "52.0"

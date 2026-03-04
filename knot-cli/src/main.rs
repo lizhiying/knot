@@ -686,7 +686,7 @@ async fn main() -> Result<()> {
             let text = KnotStore::preprocess_query(&text);
 
             // Generate query embedding
-            use pageindex_rs::EmbeddingProvider;
+            use knot_parser::EmbeddingProvider;
             let query_vec = embedding_engine
                 .generate_embedding(&text)
                 .await
@@ -812,7 +812,7 @@ async fn main() -> Result<()> {
             // 预处理查询文本（中英文边界、噪音去重）
             let query = KnotStore::preprocess_query(&query);
 
-            use pageindex_rs::EmbeddingProvider;
+            use knot_parser::EmbeddingProvider;
             let query_vec = embedding_engine
                 .generate_embedding(&query)
                 .await
@@ -1241,7 +1241,7 @@ async fn main() -> Result<()> {
                 let query = KnotStore::preprocess_query(query);
 
                 // Search for relevant chunks
-                use pageindex_rs::EmbeddingProvider;
+                use knot_parser::EmbeddingProvider;
                 let query_vec = match embedding_engine.generate_embedding(&query).await {
                     Ok(v) => v,
                     Err(e) => {

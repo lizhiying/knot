@@ -51,7 +51,7 @@ pub enum VisionOutput {
     /// 模式 A：模型直接给出了带结构的 Markdown 内容（如 OCRFlux-3B）
     StructuredMarkdown(String),
 
-    /// 模式 B：模型只给出了坐标和标签，需要 pageindex-rs 进一步处理（如 Florence-2）
+    /// 模式 B：模型只给出了坐标和标签，需要 knot-parser 进一步处理（如 Florence-2）
     LayoutElements(Vec<LayoutElement>),
 }
 

@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use pageindex_rs::{EmbeddingProvider, PageIndexError};
+use knot_parser::{EmbeddingProvider, PageIndexError};
 
 pub struct MockEmbeddingProvider;
 

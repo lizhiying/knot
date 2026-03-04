@@ -1,13 +1,13 @@
 //! 端到端集成测试：验证 PDF → PageNode 的完整链路
 
-use pageindex_rs::{IndexDispatcher, PageIndexConfig};
+use knot_parser::{IndexDispatcher, PageIndexConfig};
 use std::path::Path;
 
 /// 测试：使用 Attention_Is_All_You_Need.pdf 验证 PDF 解析
 #[tokio::test]
 async fn test_pdf_parse_attention_paper() {
     let pdf_path = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../knot-parser/knot-pdf/tests/fixtures/Attention_Is_All_You_Need.pdf");
+        .join("../knot-pdf/tests/fixtures/Attention_Is_All_You_Need.pdf");
 
     if !pdf_path.exists() {
         eprintln!("Skipping test: PDF fixture not found at {:?}", pdf_path);
@@ -104,7 +104,7 @@ async fn test_pdf_parse_nonexistent() {
 }
 
 /// 递归收集所有节点的内容
-fn collect_all_content(node: &pageindex_rs::PageNode) -> String {
+fn collect_all_content(node: &knot_parser::PageNode) -> String {
     let mut content = node.content.clone();
     for child in &node.children {
         content.push('\n');
@@ -114,6 +114,6 @@ fn collect_all_content(node: &pageindex_rs::PageNode) -> String {
 }
 
 /// 递归计算节点总数
-fn count_nodes(node: &pageindex_rs::PageNode) -> usize {
+fn count_nodes(node: &knot_parser::PageNode) -> usize {
     1 + node.children.iter().map(count_nodes).sum::<usize>()
 }

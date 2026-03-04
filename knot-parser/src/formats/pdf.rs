@@ -61,7 +61,7 @@ impl PdfParser {
         pdf_config
     }
 
-    /// 将 knot-pdf 的 DocumentIR 转换为 pageindex-rs 的 PageNode 列表
+    /// 将 knot-pdf 的 DocumentIR 转换为 knot-parser 的 PageNode 列表
     fn convert_to_page_nodes(doc: &knot_pdf::DocumentIR, file_path: &str) -> Vec<PageNode> {
         let renderer = MarkdownRenderer::new();
         let mut pages = Vec::new();

@@ -15,7 +15,7 @@ use tower_http::cors::{Any, CorsLayer};
 
 use knot_core::llm::LlamaClient;
 use knot_core::store::KnotStore;
-use pageindex_rs::EmbeddingProvider;
+use knot_parser::EmbeddingProvider;
 
 /// 评测 API 共享状态
 #[derive(Clone)]
@@ -58,7 +58,7 @@ async fn rag_query(
     State(state): State<EvalApiState>,
     Json(req): Json<RagQueryRequest>,
 ) -> Result<Json<RagQueryResponse>, (StatusCode, String)> {
-    use pageindex_rs::LlmProvider;
+    use knot_parser::LlmProvider;
 
     let query = req.query;
     println!("[EvalAPI] RAG query: {}", query);
@@ -195,7 +195,7 @@ async fn llm_judge(
     State(state): State<EvalApiState>,
     Json(req): Json<LlmJudgeRequest>,
 ) -> Result<Json<LlmJudgeResponse>, (StatusCode, String)> {
-    use pageindex_rs::LlmProvider;
+    use knot_parser::LlmProvider;
 
     println!("[EvalAPI] LLM judge: {}", req.question);
 

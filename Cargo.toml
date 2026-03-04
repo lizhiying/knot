@@ -1,9 +1,10 @@
 [workspace]
 members = [
-    "pageindex-rs",
     "knot-app/src-tauri",
     "undoc", "knot-core", "knot-cli",
-    "knot-parser/knot-pdf",
+    "knot-pdf",
+    "knot-markdown",
+    "knot-parser",
 ]
 resolver = "2"
 

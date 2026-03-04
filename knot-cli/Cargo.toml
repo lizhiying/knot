@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 knot-core = { path = "../knot-core" }
-pageindex-rs = { path = "../pageindex-rs" }
+knot-parser = { path = "../knot-parser" }
 tokio = { version = "1", features = ["full"] }
 anyhow = "1.0"
 clap = { version = "4", features = ["derive"] }

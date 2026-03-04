@@ -89,9 +89,9 @@ impl EmbeddingEngine {
     }
 }
 
-// 实现 pageindex_rs 的 EmbeddingProvider trait
+// 实现 knot_parser 的 EmbeddingProvider trait
 use async_trait::async_trait;
-use pageindex_rs::{EmbeddingProvider, PageIndexError};
+use knot_parser::{EmbeddingProvider, PageIndexError};
 use std::sync::Mutex;
 
 /// 线程安全的 EmbeddingEngine 包装器

@@ -176,7 +176,7 @@ impl Drop for LlamaSidecar {
 
 // Client for interacting with the running llama-server
 use async_trait::async_trait;
-use pageindex_rs::{LlmProvider, PageIndexError};
+use knot_parser::{LlmProvider, PageIndexError};
 use serde_json::json;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tokio::sync::{Mutex, MutexGuard};

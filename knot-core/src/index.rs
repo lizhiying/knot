@@ -3,11 +3,11 @@ use crate::path_processor::PathProcessor;
 use crate::store::VectorRecord;
 use anyhow::Result;
 use futures::stream::{self, StreamExt};
-use pageindex_rs::{IndexDispatcher, PageIndexConfig, PageNode};
+use knot_parser::{IndexDispatcher, PageIndexConfig, PageNode};
 use std::path::Path;
 use walkdir::WalkDir;
 
-use pageindex_rs::EmbeddingProvider;
+use knot_parser::EmbeddingProvider;
 use std::sync::Arc;
 
 pub struct KnotIndexer {
@@ -172,7 +172,7 @@ impl KnotIndexer {
         let file_name = PathProcessor::extract_file_name(&path.to_string_lossy());
         let directory_tags = PathProcessor::extract_directory_tags(&path.to_string_lossy());
 
-        self.enrich_node(&mut root_node, &file_name, &directory_tags)
+        self.enrich_node(&mut root_node, &file_name, &directory_tags, &[])
             .await?;
 
         // Flatten to records
@@ -184,12 +184,19 @@ impl KnotIndexer {
         node: &mut PageNode,
         file_name: &str,
         directory_tags: &str,
+        breadcrumbs: &[String],
     ) -> Result<()> {
         if node.embedding.is_none() && !node.content.is_empty() {
-            // Inject Metadata for Embedding Context
+            // 构建层级上下文：File + Path + Breadcrumbs + Content
+            let breadcrumb_str = if breadcrumbs.is_empty() {
+                String::new()
+            } else {
+                format!("Section: {}\n", breadcrumbs.join(" > "))
+            };
+
             let enriched_text = format!(
-                "File: {} | Path: {}\n\n{}",
-                file_name, directory_tags, node.content
+                "File: {} | Path: {}\n{}{}",
+                file_name, directory_tags, breadcrumb_str, node.content
             );
 
             let vec = self
@@ -199,8 +206,15 @@ impl KnotIndexer {
             node.embedding = Some(vec);
         }
 
+        // 子节点的 breadcrumbs = 当前 breadcrumbs + 当前 title
+        let mut child_breadcrumbs = breadcrumbs.to_vec();
+        if !node.title.is_empty() {
+            child_breadcrumbs.push(node.title.clone());
+        }
+
         for child in &mut node.children {
-            Box::pin(self.enrich_node(child, file_name, directory_tags)).await?;
+            Box::pin(self.enrich_node(child, file_name, directory_tags, &child_breadcrumbs))
+                .await?;
         }
         Ok(())
     }
@@ -270,7 +284,7 @@ impl KnotIndexer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pageindex_rs::{EmbeddingProvider, PageIndexError};
+    use knot_parser::{EmbeddingProvider, PageIndexError};
     use std::sync::Mutex;
 
     struct SpyEmbeddingProvider {
@@ -303,7 +317,7 @@ mod tests {
             content: "Original Content".to_string(),
             summary: None,
             embedding: None,
-            metadata: pageindex_rs::NodeMeta {
+            metadata: knot_parser::NodeMeta {
                 file_path: "test.md".to_string(),
                 page_number: None,
                 line_number: None,
@@ -318,7 +332,7 @@ mod tests {
 
         // Call the private method via test access (tests is child module so it can access private items)
         indexer
-            .enrich_node(&mut node, file_name, tags)
+            .enrich_node(&mut node, file_name, tags, &[])
             .await
             .unwrap();
 
@@ -331,5 +345,67 @@ mod tests {
         // Check if original content is preserved
         assert_eq!(node.content, "Original Content");
         assert!(node.embedding.is_some());
+    }
+
+    #[tokio::test]
+    async fn test_enrich_node_with_breadcrumbs() {
+        let last_text = Arc::new(Mutex::new(String::new()));
+        let provider = Arc::new(SpyEmbeddingProvider {
+            last_text: last_text.clone(),
+        });
+
+        let indexer = KnotIndexer::new(":memory:", Some(provider)).await;
+
+        // 构建两层嵌套：root → 第一章 → 1.1 节
+        let child_node = PageNode {
+            node_id: "child-1".to_string(),
+            title: "1.1 节".to_string(),
+            level: 2,
+            content: "监督学习的内容".to_string(),
+            summary: None,
+            embedding: None,
+            metadata: knot_parser::NodeMeta {
+                file_path: "ml.md".to_string(),
+                page_number: None,
+                line_number: None,
+                token_count: 0,
+                extra: std::collections::HashMap::new(),
+            },
+            children: vec![],
+        };
+
+        let mut root = PageNode {
+            node_id: "root".to_string(),
+            title: "第一章".to_string(),
+            level: 1,
+            content: "机器学习概述".to_string(),
+            summary: None,
+            embedding: None,
+            metadata: knot_parser::NodeMeta {
+                file_path: "ml.md".to_string(),
+                page_number: None,
+                line_number: None,
+                token_count: 0,
+                extra: std::collections::HashMap::new(),
+            },
+            children: vec![child_node],
+        };
+
+        indexer
+            .enrich_node(&mut root, "ml.md", "docs", &[])
+            .await
+            .unwrap();
+
+        // 子节点的 embedding 输入应包含 breadcrumbs
+        let captured = last_text.lock().unwrap().clone();
+        assert!(
+            captured.contains("Section: 第一章"),
+            "Child embedding should contain parent breadcrumb. Got: {}",
+            captured
+        );
+        assert!(
+            captured.contains("监督学习的内容"),
+            "Child embedding should contain its own content"
+        );
     }
 }

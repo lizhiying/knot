@@ -1,7 +1,7 @@
 use knot_core::embedding::{EmbeddingEngine, ThreadSafeEmbeddingEngine};
 use knot_core::llm::{LlamaClient, LlamaSidecar};
 use knot_core::manager::EngineManager;
-use pageindex_rs::{IndexDispatcher, PageIndexConfig, PageNode};
+use knot_parser::{IndexDispatcher, PageIndexConfig, PageNode};
 use std::env;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -649,7 +649,7 @@ fn main() {
                 // Cast ThreadSafeEmbeddingEngine to dyn EmbeddingProvider
                 let embedding_for_api: std::sync::Arc<
                     tokio::sync::RwLock<
-                        Option<std::sync::Arc<dyn pageindex_rs::EmbeddingProvider + Send + Sync>>,
+                        Option<std::sync::Arc<dyn knot_parser::EmbeddingProvider + Send + Sync>>,
                     >,
                 > = std::sync::Arc::new(tokio::sync::RwLock::new(None));
 
@@ -669,7 +669,7 @@ fn main() {
                             *guard = Some(
                                 provider
                                     as std::sync::Arc<
-                                        dyn pageindex_rs::EmbeddingProvider + Send + Sync,
+                                        dyn knot_parser::EmbeddingProvider + Send + Sync,
                                     >,
                             );
                             break;
@@ -968,7 +968,7 @@ async fn start_background_indexing(
     // Cast Arc<ThreadSafeEmbeddingEngine> to Arc<dyn EmbeddingProvider>
     // ThreadSafeEmbeddingEngine implements EmbeddingProvider.
     // However, Arc<Struct> does not automatically CoerceUnsized to Arc<dyn Trait> in all contexts easily without explicit cast.
-    let provider_dyn: Arc<dyn pageindex_rs::EmbeddingProvider + Send + Sync> = embedding_provider;
+    let provider_dyn: Arc<dyn knot_parser::EmbeddingProvider + Send + Sync> = embedding_provider;
 
     let indexer = KnotIndexer::new(&db_path, Some(provider_dyn)).await;
     let _ = app.emit("indexing-status", "scanning");
@@ -1253,7 +1253,7 @@ async fn rag_search(
     println!("[rag_search] Store ready: {:?}", store_start.elapsed());
 
     // 2. Generate Query Embedding
-    use pageindex_rs::EmbeddingProvider;
+    use knot_parser::EmbeddingProvider;
     let embedding_provider = {
         let guard = state.thread_safe_embedding.read().await;
         guard.clone()
@@ -1323,7 +1323,7 @@ async fn rag_generate(
     context: String,
 ) -> Result<(), String> {
     // Note: generate_content_stream is an inherent method of LlamaClient, not part of LlmProvider trait currently.
-    use pageindex_rs::LlmProvider;
+    use knot_parser::LlmProvider;
 
     println!("[rag_generate] Starting generation for query: {}", query);
 
@@ -1377,7 +1377,7 @@ async fn rag_generate(
             context.chars().take(12000).collect::<String>()
         );
 
-        use pageindex_rs::LlmProvider;
+        use knot_parser::LlmProvider;
         match llm_client.generate_content(&compress_prompt).await {
             Ok(compressed) => {
                 println!(
@@ -1479,7 +1479,7 @@ async fn rag_query(
     state: State<'_, AppState>,
     query: String,
 ) -> Result<RagResponse, String> {
-    use pageindex_rs::LlmProvider;
+    use knot_parser::LlmProvider;
 
     // 边缘情况：空查询直接返回空结果
     let query = query.trim().to_string();
@@ -1537,7 +1537,7 @@ async fn rag_query(
     .ok_or("Embedding Engine not ready")?;
 
     // Generate Query Embedding
-    use pageindex_rs::EmbeddingProvider;
+    use knot_parser::EmbeddingProvider;
     println!("[rag_query] Generating embedding...");
     let query_vec = embedding_provider
         .generate_embedding(&query)
