@@ -35,6 +35,37 @@
 
 详见 [iteration3.md](../../.plans/milestone15/iteration3.md)
 
+## 配置开关
+
+知识图谱为**实验性功能**，通过设置页面的开关控制，**默认关闭**。
+
+```rust
+// knot-app/src-tauri/src/main.rs
+struct AppConfig {
+    // ... existing fields ...
+    /// 是否启用知识图谱（实验性功能）
+    #[serde(default = "default_graph_rag_enabled")]
+    graph_rag_enabled: bool,
+}
+
+fn default_graph_rag_enabled() -> bool {
+    false // 默认关闭，实验性功能
+}
+```
+
+**开关影响范围：**
+
+| 阶段 | 开关关闭                       | 开关开启                                   |
+| ---- | ------------------------------ | ------------------------------------------ |
+| 索引 | 不提取实体，不创建 SQLite 数据 | 对每个文档提取实体和关系，写入 SQLite      |
+| 搜索 | 完全跳过图查询，行为与现有一致 | 从查询中提取实体 → 图查询 → 补充关联上下文 |
+
+**前端设置页面：**
+- 位于 LLM 配置区域，"多跳检索"开关下方
+- 标签：「知识图谱」
+- 副标签：「实验性功能，自动提取文档中的实体和关系，增强关联查询」
+- 配套 Tauri command: `set_graph_rag_enabled`
+
 ## 架构设计
 
 ```

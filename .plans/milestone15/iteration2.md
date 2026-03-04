@@ -40,12 +40,7 @@ Tasks:
   - 复用现有的文件变更检测机制
   - 修改: `knot-core/src/store.rs`, `knot-core/src/index.rs`
 
-- [ ] 2.6 前端设置页面增加 GraphRAG 开关
-  - `graph_rag_enabled` 开关组件
-  - 开关描述标注为"实验性功能"
-  - 修改: `knot-app/src/lib/components/Settings.svelte`
-
-- [ ] 2.7 补充测试
+- [ ] 2.6 补充测试
   - LLM 提取的 mock 测试
   - 实体合并和去重测试
   - 增量更新正确性测试
@@ -55,5 +50,4 @@ Exit criteria:
 - LLM 提取对常见文档能输出有意义的实体和关系
 - 关系类型覆盖 ≥ 5 种
 - 文件更新后实体图能正确增量刷新
-- 前端有 GraphRAG 开关
 - 所有新增测试通过

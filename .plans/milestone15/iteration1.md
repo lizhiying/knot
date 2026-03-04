@@ -42,10 +42,17 @@ Tasks:
   - 从用户查询中提取实体（复用 extract_entities）
   - 查找相关实体和关系
   - 将实体关系信息拼入 expanded_context
-  - AppConfig 新增 `graph_rag_enabled`（默认 false，因为是实验性功能）
+  - 仅在 `graph_rag_enabled` 为 true 时执行
   - 修改: `knot-app/src-tauri/src/main.rs`
 
-- [ ] 1.6 添加基础测试
+- [ ] 1.6 前端设置页面增加"知识图谱"开关
+  - AppConfig 新增 `graph_rag_enabled`（默认 false，实验性功能）
+  - Tauri command: `set_graph_rag_enabled`
+  - Settings.svelte 增加开关组件，描述标注「实验性功能」
+  - 开关控制：索引时是否提取实体、搜索时是否做图查询
+  - 修改: `knot-app/src-tauri/src/main.rs`, `knot-app/src/lib/components/Settings.svelte`
+
+- [ ] 1.7 添加基础测试
   - 测试规则提取：英文专有名词、中文引号术语
   - 测试共现关系提取
   - 测试实体去重
@@ -53,7 +60,8 @@ Tasks:
 
 Exit criteria:
 - 编译通过，现有 18 个测试不受影响
-- 对含有专有名词的文档，能自动提取实体并存入索引
+- 对含有专有名词的文档，能自动提取实体并存入 SQLite
 - 搜索 "GPT-4" 时，能通过图查询找到 "OpenAI"、"RLHF" 等关联实体
-- graph_rag_enabled 开关可通过 AppConfig 控制
-- 端到端可 demo：索引文档 → 搜索 → 结果包含实体关系补充信息
+- 前端设置页面有「知识图谱」开关，默认关闭
+- 开关关闭时索引和搜索行为与现有完全一致
+- 端到端可 demo：开启开关 → 索引文档 → 搜索 → 结果包含实体关系补充信息
