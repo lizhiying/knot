@@ -331,9 +331,8 @@ impl LlamaClient {
                                                         }
                                                     }
                                                 } else {
-                                                    println!(
-                                                        "[LlamaClient] Failed to parse JSON: {}",
-                                                        json_str
+                                                    debug_println!(
+                                                        "[LlamaClient] Non-content JSON frame (stop signal or metadata)"
                                                     );
                                                 }
                                             } else if !line.trim().is_empty() {
