@@ -664,6 +664,64 @@ fn add_entity(
         return;
     }
 
+    // 过滤：纯数字（如 "010", "083", "100", "1270017878"）
+    if cleaned
+        .chars()
+        .all(|c| c.is_ascii_digit() || c == '-' || c == ' ')
+    {
+        return;
+    }
+
+    // 过滤：字母太少（至少需要 2 个字母或中文字符，排除 "10KB" 等边界情况）
+    let alpha_count = cleaned
+        .chars()
+        .filter(|c| c.is_alphabetic() || *c > '\u{4E00}')
+        .count();
+    if alpha_count < 2 {
+        return;
+    }
+
+    // 过滤：Markdown/HTML 噪音（如 "br2", "img src", "div class"）
+    let lower = cleaned.to_lowercase();
+    let html_noise = [
+        "br",
+        "img",
+        "div",
+        "span",
+        "src",
+        "href",
+        "class",
+        "style",
+        "width",
+        "height",
+        "px",
+        "em",
+        "rem",
+        "auto",
+        "none",
+        "true",
+        "false",
+        "null",
+        "undefined",
+        "return",
+        "var",
+        "let",
+        "const",
+        "function",
+        "import",
+        "export",
+        "default",
+        "module",
+    ];
+    if html_noise.contains(&lower.as_str()) {
+        return;
+    }
+
+    // 过滤：名字含换行或过长空白（通常是解析噪音）
+    if cleaned.contains('\n') || cleaned.matches(' ').count() > 8 {
+        return;
+    }
+
     let entity_id = cleaned.to_lowercase();
     entities
         .entry(entity_id.clone())
@@ -869,20 +927,24 @@ impl EntityGraph {
     pub async fn get_related_entities(&self, entity_name: &str) -> Result<Vec<RelatedEntity>> {
         let entity_id = entity_name.to_lowercase();
         let rows = sqlx::query(
-            r#"SELECT e.entity_id, e.name, e.entity_type, r.relation_type, 1 as depth
+            r#"SELECT e.entity_id, e.name, e.entity_type, r.relation_type, 1 as depth,
+            (SELECT COUNT(*) FROM relations r2 WHERE r2.from_entity = e.entity_id OR r2.to_entity = e.entity_id) as rel_count
             FROM relations r JOIN entities e ON r.to_entity = e.entity_id
             WHERE r.from_entity = ?
             UNION
-            SELECT e.entity_id, e.name, e.entity_type, r.relation_type, 1 as depth
+            SELECT e.entity_id, e.name, e.entity_type, r.relation_type, 1 as depth,
+            (SELECT COUNT(*) FROM relations r2 WHERE r2.from_entity = e.entity_id OR r2.to_entity = e.entity_id) as rel_count
             FROM relations r JOIN entities e ON r.from_entity = e.entity_id
-            WHERE r.to_entity = ?"#,
+            WHERE r.to_entity = ?
+            ORDER BY rel_count DESC
+            LIMIT 20"#,
         )
         .bind(&entity_id)
         .bind(&entity_id)
         .fetch_all(&self.pool)
         .await?;
 
-        Ok(rows
+        let results: Vec<RelatedEntity> = rows
             .into_iter()
             .map(|r| RelatedEntity {
                 entity_id: r.get("entity_id"),
@@ -891,7 +953,15 @@ impl EntityGraph {
                 relation_type: r.get("relation_type"),
                 depth: r.get("depth"),
             })
-            .collect())
+            .filter(|r| {
+                // 过滤纯数字和单字符噪音
+                let has_alpha = r.name.chars().any(|c| c.is_alphabetic() || c > '\u{4E00}');
+                has_alpha && r.name.len() >= 2
+            })
+            .take(10)
+            .collect();
+
+        Ok(results)
     }
 
     pub async fn get_entity_chunk_ids(&self, entity_name: &str) -> Result<Vec<String>> {
