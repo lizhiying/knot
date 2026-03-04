@@ -75,4 +75,12 @@ impl FileRegistry {
             .await?;
         Ok(())
     }
+
+    /// 清除所有文件记录，强制下次索引时全量重新扫描
+    pub async fn clear_all(&self) -> Result<()> {
+        sqlx::query("DELETE FROM file_registry")
+            .execute(&self.pool)
+            .await?;
+        Ok(())
+    }
 }

@@ -1054,7 +1054,7 @@ async fn start_background_indexing(
                 }
             }
 
-            // GraphRAG: 当 records 为空但图谱为空时，从已有 Tantivy 索引回填图谱
+            // GraphRAG: 当 records 为空但图谱为空时，尝试回填
             let config_recheck = load_config(&app);
             if config_recheck.graph_rag_enabled && records_empty_for_graph {
                 let graph_db_path = index_path.replace("knot_index.lance", "knot_graph.db");
@@ -1069,36 +1069,74 @@ async fn start_background_indexing(
                 };
 
                 if graph_empty {
-                    println!("[GraphRAG] Graph is empty, backfilling from existing index...");
-                    match KnotStore::new(&index_path).await {
-                        Ok(store) => match store.get_all_texts() {
-                            Ok(texts) if !texts.is_empty() => {
-                                println!(
-                                    "[GraphRAG] Found {} existing records for backfill",
-                                    texts.len()
-                                );
+                    println!("[GraphRAG] Graph is empty, attempting backfill...");
+
+                    // 尝试从 Tantivy 读取已有数据
+                    let mut backfill_records = Vec::new();
+                    if let Ok(store) = KnotStore::new(&index_path).await {
+                        if let Ok(texts) = store.get_all_texts() {
+                            backfill_records = texts;
+                        }
+                    }
+
+                    if backfill_records.is_empty() {
+                        // Tantivy 也是空的（可能 Clear Index 后 registry 残留），
+                        // 清除 file registry 强制重新扫描
+                        println!(
+                            "[GraphRAG] Index is empty, clearing file registry for full re-scan..."
+                        );
+                        let db_path_for_reg = index_path.replace("knot_index.lance", "knot.db");
+                        let db_url = format!("sqlite:{}", db_path_for_reg);
+                        if let Ok(registry) = knot_core::registry::FileRegistry::new(&db_url).await
+                        {
+                            let _ = registry.clear_all().await;
+                            println!("[GraphRAG] File registry cleared, re-scanning...");
+                        }
+                        // 用 indexer 重新扫描
+                        match indexer.index_directory(&input_path).await {
+                            Ok((new_records, _)) if !new_records.is_empty() => {
+                                println!("[GraphRAG] Re-scan found {} records", new_records.len());
                                 let (entities, relations) =
-                                    knot_core::entity::extract_from_records(&texts);
+                                    knot_core::entity::extract_from_records(&new_records);
                                 let deduped = knot_core::entity::dedup_entities(entities);
-                                match knot_core::entity::EntityGraph::new(&graph_db_path).await {
-                                    Ok(graph) => {
-                                        let _ = graph.add_entities(&deduped).await;
-                                        let _ = graph.add_relations(&relations).await;
-                                        println!(
-                                            "[GraphRAG] Backfilled {} entities, {} relations",
-                                            deduped.len(),
-                                            relations.len()
-                                        );
-                                    }
-                                    Err(e) => {
-                                        eprintln!("[GraphRAG] Backfill graph init error: {}", e)
-                                    }
+                                // 保存 records 到 store
+                                if let Ok(store) = KnotStore::new(&index_path).await {
+                                    let _ = store.add_records(new_records).await;
+                                    let _ = store.create_fts_index().await;
+                                }
+                                // 写入图谱
+                                if let Ok(graph) =
+                                    knot_core::entity::EntityGraph::new(&graph_db_path).await
+                                {
+                                    let _ = graph.add_entities(&deduped).await;
+                                    let _ = graph.add_relations(&relations).await;
+                                    println!(
+                                        "[GraphRAG] Backfilled {} entities, {} relations (via re-scan)",
+                                        deduped.len(), relations.len()
+                                    );
                                 }
                             }
-                            Ok(_) => println!("[GraphRAG] No existing records to backfill"),
-                            Err(e) => eprintln!("[GraphRAG] Error reading existing records: {}", e),
-                        },
-                        Err(e) => eprintln!("[GraphRAG] Store init for backfill error: {}", e),
+                            _ => println!("[GraphRAG] Re-scan found no records"),
+                        }
+                    } else {
+                        // Tantivy 有数据，直接从已有数据提取
+                        println!(
+                            "[GraphRAG] Found {} existing records for backfill",
+                            backfill_records.len()
+                        );
+                        let (entities, relations) =
+                            knot_core::entity::extract_from_records(&backfill_records);
+                        let deduped = knot_core::entity::dedup_entities(entities);
+                        if let Ok(graph) = knot_core::entity::EntityGraph::new(&graph_db_path).await
+                        {
+                            let _ = graph.add_entities(&deduped).await;
+                            let _ = graph.add_relations(&relations).await;
+                            println!(
+                                "[GraphRAG] Backfilled {} entities, {} relations",
+                                deduped.len(),
+                                relations.len()
+                            );
+                        }
                     }
                 }
             }
