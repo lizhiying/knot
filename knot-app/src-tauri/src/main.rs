@@ -1524,15 +1524,31 @@ async fn rag_search(
             if let Ok(graph) =
                 knot_core::entity::EntityGraph::new(&graph_db_path.to_string_lossy()).await
             {
-                // 从查询中提取实体
+                // 策略 1: 从查询中提取实体
                 let query_entities = knot_core::entity::extract_entities_rule_based(&query, "", "");
+                let mut entity_names: Vec<String> =
+                    query_entities.iter().map(|e| e.name.clone()).collect();
+
+                // 策略 2: 直接用查询关键词查图谱（大小写不敏感）
+                // 这样 "rust"、"react" 等小写关键词也能匹配图谱中的 "Rust"、"React"
+                for word in query.split_whitespace() {
+                    let word_clean = word.trim_matches(|c: char| !c.is_alphanumeric());
+                    if word_clean.len() >= 2
+                        && !entity_names
+                            .iter()
+                            .any(|e| e.to_lowercase() == word_clean.to_lowercase())
+                    {
+                        entity_names.push(word_clean.to_string());
+                    }
+                }
+
                 let mut graph_context = String::new();
-                for entity in query_entities.iter().take(3) {
-                    if let Ok(related) = graph.get_related_entities(&entity.name).await {
+                for entity_name in entity_names.iter().take(5) {
+                    if let Ok(related) = graph.get_related_entities(entity_name).await {
                         if !related.is_empty() {
                             graph_context.push_str(&format!(
                                 "[知识图谱] {} 关联: {}\n",
-                                entity.name,
+                                entity_name,
                                 related
                                     .iter()
                                     .take(5)
@@ -1878,13 +1894,25 @@ async fn rag_query(
                 knot_core::entity::EntityGraph::new(&graph_db_path.to_string_lossy()).await
             {
                 let query_entities = knot_core::entity::extract_entities_rule_based(&query, "", "");
+                let mut entity_names: Vec<String> =
+                    query_entities.iter().map(|e| e.name.clone()).collect();
+                for word in query.split_whitespace() {
+                    let word_clean = word.trim_matches(|c: char| !c.is_alphanumeric());
+                    if word_clean.len() >= 2
+                        && !entity_names
+                            .iter()
+                            .any(|e| e.to_lowercase() == word_clean.to_lowercase())
+                    {
+                        entity_names.push(word_clean.to_string());
+                    }
+                }
                 let mut graph_context = String::new();
-                for entity in query_entities.iter().take(3) {
-                    if let Ok(related) = graph.get_related_entities(&entity.name).await {
+                for entity_name in entity_names.iter().take(5) {
+                    if let Ok(related) = graph.get_related_entities(entity_name).await {
                         if !related.is_empty() {
                             graph_context.push_str(&format!(
                                 "[知识图谱] {} 关联: {}\n",
-                                entity.name,
+                                entity_name,
                                 related
                                     .iter()
                                     .take(5)
