@@ -171,14 +171,14 @@ fn default_context_expansion_enabled() -> bool {
 
 ## 涉及文件
 
-| 文件                               | 变更类型 | Phase | 说明                                                       |
-| ---------------------------------- | -------- | ----- | ---------------------------------------------------------- |
-| `knot-core/src/index.rs`           | 已修改   | 1     | `build_doc_summary()`, `collect_outline()`                 |
-| `knot-core/src/store.rs`           | 待修改   | 2     | `get_record_by_id()`, `get_siblings()`, `expand_context()` |
-| `knot-app/src-tauri/src/main.rs`   | 待修改   | 2     | `AppConfig` + `set_context_expansion_enabled`              |
-| `knot-app/src/`                    | 待修改   | 2     | 设置页面增加上下文扩展开关                                 |
-| `docs/rag-limitations-analysis.md` | 已创建   | —     | RAG 架构局限性分析                                         |
-| `docs/milestones/milestone14.md`   | 已创建   | —     | 本文件                                                     |
+| 文件                                          | 变更类型 | Phase | 说明                                                                        |
+| --------------------------------------------- | -------- | ----- | --------------------------------------------------------------------------- |
+| `knot-core/src/index.rs`                      | 已修改   | 1     | `build_doc_summary()`, `collect_outline()`                                  |
+| `knot-core/src/store.rs`                      | 已修改   | 2     | `get_text_by_id()`, `get_records_by_parent_id()`, `expand_search_context()` |
+| `knot-app/src-tauri/src/main.rs`              | 已修改   | 2     | `AppConfig` + `set_context_expansion_enabled`                               |
+| `knot-app/src/lib/components/Settings.svelte` | 已修改   | 2     | 设置页面增加"上下文扩展"开关                                                |
+| `docs/rag-limitations-analysis.md`            | 已创建   | —     | RAG 架构局限性分析                                                          |
+| `docs/milestones/milestone14.md`              | 已创建   | —     | 本文件                                                                      |
 
 ## 后续方向（P2-P4）
 
