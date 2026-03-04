@@ -427,7 +427,7 @@ fn main() {
             // Chat Model Paths
             // Chat Model Paths
             let manager = ModelPathManager::new(&app_handle);
-            let chat_model_path = manager.get_model_path("Qwen3-1.7B-Q4_K_M.gguf");
+            let chat_model_path = manager.get_model_path("Qwen3.5-4B-Q4_K_M.gguf");
 
             let bin_dir_clone2 = bin_dir.clone();
             let app_handle_clone = app_handle.clone();
@@ -2019,7 +2019,7 @@ async fn check_all_models(app: tauri::AppHandle) -> Result<serde_json::Value, St
     let core_models = vec![
         "GLM-OCR-Q8_0.gguf",
         "mmproj-GLM-OCR-Q8_0.gguf",
-        "Qwen3-1.7B-Q4_K_M.gguf",
+        "Qwen3.5-4B-Q4_K_M.gguf",
         "ppocrv5/det.onnx",
         "ppocrv5/rec.onnx",
         "ppocrv5/ppocrv5_dict.txt",
@@ -2088,7 +2088,7 @@ async fn start_download_queue(
     let all_models = vec![
         "GLM-OCR-Q8_0.gguf",
         "mmproj-GLM-OCR-Q8_0.gguf",
-        "Qwen3-1.7B-Q4_K_M.gguf",
+        "Qwen3.5-4B-Q4_K_M.gguf",
         "ppocrv5/det.onnx",
         "ppocrv5/rec.onnx",
         "ppocrv5/ppocrv5_dict.txt",
@@ -2152,7 +2152,7 @@ async fn reload_models(app: tauri::AppHandle, state: State<'_, AppState>) -> Res
     if need_reload_chat {
         println!("[Reload] Chat LLM not running, trying to start...");
         let manager = ModelPathManager::new(&app);
-        let chat_model_path = manager.get_model_path("Qwen3-1.7B-Q4_K_M.gguf");
+        let chat_model_path = manager.get_model_path("Qwen3.5-4B-Q4_K_M.gguf");
 
         if chat_model_path.exists() {
             let bin_dir = get_bin_dir(&app);
