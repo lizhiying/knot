@@ -175,8 +175,37 @@ impl KnotIndexer {
         self.enrich_node(&mut root_node, &file_name, &directory_tags, &[])
             .await?;
 
+        // Build document-level summary BEFORE flatten_tree consumes the tree
+        let doc_summary = Self::build_doc_summary(&root_node);
+        let path_str = abs_path.to_string_lossy().to_string();
+
         // Flatten to records
-        Ok(self.flatten_tree(root_node, &abs_path))
+        let mut records = self.flatten_tree(root_node, &abs_path);
+
+        // Generate summary record if summary is non-empty
+        if !doc_summary.is_empty() {
+            let summary_enriched = format!(
+                "File: {} | Path: {}\n[Document Overview]\n{}",
+                file_name, directory_tags, doc_summary
+            );
+
+            if let Ok(summary_vec) = self
+                .embedding_provider
+                .generate_embedding(&summary_enriched)
+                .await
+            {
+                records.push(VectorRecord {
+                    id: format!("{}-doc-summary", path_str),
+                    text: format!("[文档概览] {}\n\n{}", file_name, doc_summary),
+                    vector: summary_vec,
+                    file_path: path_str,
+                    parent_id: None,
+                    breadcrumbs: None,
+                });
+            }
+        }
+
+        Ok(records)
     }
 
     async fn enrich_node(
@@ -217,6 +246,78 @@ impl KnotIndexer {
                 .await?;
         }
         Ok(())
+    }
+
+    /// 构建文档级摘要：包含文档标题、章节目录和各章节首句
+    fn build_doc_summary(root: &PageNode) -> String {
+        // 跳过空文档
+        if root.children.is_empty() && root.content.is_empty() {
+            return String::new();
+        }
+
+        let mut summary = String::new();
+
+        // 文档标题
+        if !root.title.is_empty() {
+            summary.push_str(&format!("# {}\n\n", root.title));
+        }
+
+        // 构建目录 + 各节摘要
+        summary.push_str("目录与摘要:\n");
+        for child in &root.children {
+            Self::collect_outline(child, &mut summary, 0);
+        }
+
+        // 如果 root 自身有内容（无 heading 的文档），取前 200 字符
+        if !root.content.is_empty() && root.children.is_empty() {
+            let snippet: String = root.content.chars().take(200).collect();
+            summary.push_str(&format!("\n{}", snippet));
+            if root.content.chars().count() > 200 {
+                summary.push_str("...");
+            }
+        }
+
+        summary
+    }
+
+    /// 递归收集章节标题和首句摘要
+    fn collect_outline(node: &PageNode, output: &mut String, depth: usize) {
+        let indent = "  ".repeat(depth);
+
+        // 标题
+        if !node.title.is_empty() {
+            output.push_str(&format!("{}- {}", indent, node.title));
+
+            // 提取首句摘要（去掉标题行后取第一段非空内容）
+            let content_after_title = node
+                .content
+                .strip_prefix(&node.title)
+                .unwrap_or(&node.content)
+                .trim_start_matches('\n');
+
+            if !content_after_title.is_empty() {
+                // 取第一个非空行，最多 100 字符
+                let first_line = content_after_title
+                    .lines()
+                    .find(|l| !l.trim().is_empty())
+                    .unwrap_or("");
+
+                if !first_line.is_empty() {
+                    let snippet: String = first_line.chars().take(100).collect();
+                    output.push_str(&format!(": {}", snippet));
+                    if first_line.chars().count() > 100 {
+                        output.push_str("...");
+                    }
+                }
+            }
+
+            output.push('\n');
+        }
+
+        // 递归子节点
+        for child in &node.children {
+            Self::collect_outline(child, output, depth + 1);
+        }
     }
 
     fn flatten_tree(&self, root: PageNode, file_path: &Path) -> Vec<VectorRecord> {
@@ -406,6 +507,117 @@ mod tests {
         assert!(
             captured.contains("监督学习的内容"),
             "Child embedding should contain its own content"
+        );
+    }
+
+    #[test]
+    fn test_build_doc_summary() {
+        let child1 = PageNode {
+            node_id: "1".to_string(),
+            title: "机器学习概述".to_string(),
+            level: 1,
+            content: "机器学习概述\n本章介绍机器学习的基本概念和发展历史。\n".to_string(),
+            summary: None,
+            embedding: None,
+            metadata: knot_parser::NodeMeta {
+                file_path: "ml.md".to_string(),
+                page_number: None,
+                line_number: None,
+                token_count: 20,
+                extra: std::collections::HashMap::new(),
+            },
+            children: vec![
+                PageNode {
+                    node_id: "1-1".to_string(),
+                    title: "监督学习".to_string(),
+                    level: 2,
+                    content: "监督学习\nSVM 和决策树是常见方法。\n".to_string(),
+                    summary: None,
+                    embedding: None,
+                    metadata: knot_parser::NodeMeta {
+                        file_path: "ml.md".to_string(),
+                        page_number: None,
+                        line_number: None,
+                        token_count: 10,
+                        extra: std::collections::HashMap::new(),
+                    },
+                    children: vec![],
+                },
+                PageNode {
+                    node_id: "1-2".to_string(),
+                    title: "无监督学习".to_string(),
+                    level: 2,
+                    content: "无监督学习\n聚类和降维技术。\n".to_string(),
+                    summary: None,
+                    embedding: None,
+                    metadata: knot_parser::NodeMeta {
+                        file_path: "ml.md".to_string(),
+                        page_number: None,
+                        line_number: None,
+                        token_count: 10,
+                        extra: std::collections::HashMap::new(),
+                    },
+                    children: vec![],
+                },
+            ],
+        };
+
+        let root = PageNode {
+            node_id: "root".to_string(),
+            title: "机器学习教程".to_string(),
+            level: 0,
+            content: String::new(),
+            summary: None,
+            embedding: None,
+            metadata: knot_parser::NodeMeta {
+                file_path: "ml.md".to_string(),
+                page_number: None,
+                line_number: None,
+                token_count: 0,
+                extra: std::collections::HashMap::new(),
+            },
+            children: vec![child1],
+        };
+
+        let summary = KnotIndexer::build_doc_summary(&root);
+
+        // 包含文档标题
+        assert!(
+            summary.contains("# 机器学习教程"),
+            "Summary should contain doc title. Got:\n{}",
+            summary
+        );
+
+        // 包含章节标题
+        assert!(
+            summary.contains("机器学习概述"),
+            "Summary should contain H1 title"
+        );
+        assert!(
+            summary.contains("监督学习"),
+            "Summary should contain H2 title"
+        );
+        assert!(
+            summary.contains("无监督学习"),
+            "Summary should contain H2 title"
+        );
+
+        // 包含章节首句摘要
+        assert!(
+            summary.contains("本章介绍机器学习的基本概念"),
+            "Summary should contain first line of H1. Got:\n{}",
+            summary
+        );
+        assert!(
+            summary.contains("SVM"),
+            "Summary should contain first line snippet of H2"
+        );
+
+        // 子节点应该有缩进
+        assert!(
+            summary.contains("  - 监督学习"),
+            "H2 should be indented under H1. Got:\n{}",
+            summary
         );
     }
 }
