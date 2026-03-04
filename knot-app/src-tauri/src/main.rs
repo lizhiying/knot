@@ -715,6 +715,7 @@ fn main() {
             set_llm_think_enabled,
             set_context_expansion_enabled,
             set_multi_hop_enabled,
+            set_graph_rag_enabled,
             get_index_status
         ])
         .build(tauri::generate_context!())
@@ -811,6 +812,9 @@ struct AppConfig {
     /// 是否启用多跳检索（两轮搜索，关键词扩展）
     #[serde(default = "default_multi_hop_enabled")]
     multi_hop_enabled: bool,
+    /// 是否启用知识图谱（实验性功能）
+    #[serde(default = "default_graph_rag_enabled")]
+    graph_rag_enabled: bool,
 }
 
 fn default_streaming_enabled() -> bool {
@@ -839,6 +843,10 @@ fn default_context_expansion_enabled() -> bool {
 
 fn default_multi_hop_enabled() -> bool {
     true // 默认开启多跳检索
+}
+
+fn default_graph_rag_enabled() -> bool {
+    false // 默认关闭，实验性功能
 }
 
 fn get_config_path(app: &tauri::AppHandle) -> PathBuf {
@@ -998,6 +1006,14 @@ async fn start_background_indexing(
             println!("[Indexer] Found {} new/modified records.", records.len());
             let _ = app.emit("indexing-status", "saving");
 
+            // GraphRAG: 提取实体（在 records 被 move 前）
+            let config = load_config(&app);
+            let entity_data = if config.graph_rag_enabled && !records.is_empty() {
+                Some(knot_core::entity::extract_from_records(&records))
+            } else {
+                None
+            };
+
             if !records.is_empty() || !deleted.is_empty() {
                 match KnotStore::new(&index_path).await {
                     Ok(store) => {
@@ -1009,6 +1025,24 @@ async fn start_background_indexing(
                                 eprintln!("[Indexer] Store Add Error: {}", e);
                             } else {
                                 let _ = store.create_fts_index().await;
+                            }
+                        }
+
+                        // GraphRAG: 写入实体图
+                        if let Some((entities, relations)) = entity_data {
+                            let graph_db = index_path.replace("knot_index.lance", "");
+                            let graph_db_path = format!("{}knot_graph.db", graph_db);
+                            match knot_core::entity::EntityGraph::new(&graph_db_path).await {
+                                Ok(graph) => {
+                                    let _ = graph.add_entities(&entities).await;
+                                    let _ = graph.add_relations(&relations).await;
+                                    println!(
+                                        "[GraphRAG] Indexed {} entities, {} relations",
+                                        entities.len(),
+                                        relations.len()
+                                    );
+                                }
+                                Err(e) => eprintln!("[GraphRAG] Init error: {}", e),
                             }
                         }
                     }
@@ -1132,14 +1166,33 @@ async fn start_background_indexing(
                                     if should_index_file(&path) {
                                          if path.exists() {
                                              // Index it
-                                             match indexer.index_file(&path).await {
+                                                             match indexer.index_file(&path).await {
                                                  Ok(records) => {
                                                      if !records.is_empty() {
                                                          total_records += records.len();
                                                          updated_cnt += 1;
+
+                                                         // GraphRAG: 提取实体（在 records 被 move 前）
+                                                         let watch_config = load_config(&app);
+                                                         let entity_data = if watch_config.graph_rag_enabled {
+                                                             Some(knot_core::entity::extract_from_records(&records))
+                                                         } else {
+                                                             None
+                                                         };
+
                                                          if let Some(store) = &store_opt {
                                                               let _ = store.delete_file(&path.to_string_lossy()).await;
                                                               let _ = store.add_records(records).await;
+                                                         }
+
+                                                         // GraphRAG: 写入实体图
+                                                         if let Some((entities, relations)) = entity_data {
+                                                             let graph_path = index_path_for_watch.replace("knot_index.lance", "knot_graph.db");
+                                                             if let Ok(graph) = knot_core::entity::EntityGraph::new(&graph_path).await {
+                                                                 let _ = graph.delete_by_file(&path.to_string_lossy()).await;
+                                                                 let _ = graph.add_entities(&entities).await;
+                                                                 let _ = graph.add_relations(&relations).await;
+                                                             }
                                                          }
                                                      }
                                                  }
@@ -1339,6 +1392,54 @@ async fn rag_search(
         );
     }
 
+    // 3.7 GraphRAG: 图查询增强 (if enabled)
+    if config.graph_rag_enabled {
+        let graph_start = Instant::now();
+        let data_dir = config.data_dir.as_deref().unwrap_or("");
+        let graph_base = get_index_base_dir(&app, data_dir);
+        let graph_db_path = graph_base.join("knot_graph.db");
+        if graph_db_path.exists() {
+            if let Ok(graph) =
+                knot_core::entity::EntityGraph::new(&graph_db_path.to_string_lossy()).await
+            {
+                // 从查询中提取实体
+                let query_entities = knot_core::entity::extract_entities_rule_based(&query, "", "");
+                let mut graph_context = String::new();
+                for entity in query_entities.iter().take(3) {
+                    if let Ok(related) = graph.get_related_entities(&entity.name).await {
+                        if !related.is_empty() {
+                            graph_context.push_str(&format!(
+                                "[知识图谱] {} 关联: {}\n",
+                                entity.name,
+                                related
+                                    .iter()
+                                    .take(5)
+                                    .map(|r| format!("{}({})", r.name, r.relation_type))
+                                    .collect::<Vec<_>>()
+                                    .join(", ")
+                            ));
+                        }
+                    }
+                }
+                // 将图谱上下文附加到第一个搜索结果
+                if !graph_context.is_empty() {
+                    if let Some(first) = search_results.first_mut() {
+                        let existing = first.expanded_context.take().unwrap_or_default();
+                        first.expanded_context = Some(
+                            format!("{}\n{}", existing, graph_context)
+                                .trim()
+                                .to_string(),
+                        );
+                    }
+                    println!(
+                        "[rag_search] GraphRAG: {:?}, found relations for {} entities",
+                        graph_start.elapsed(),
+                        query_entities.len()
+                    );
+                }
+            }
+        }
+    }
     // 4. Format Context and Display Sources
     let mut context_str = String::new();
     let mut display_sources = Vec::new();
@@ -1645,6 +1746,46 @@ async fn rag_query(
         store.expand_search_context(&mut search_results);
     }
 
+    // GraphRAG: 图查询增强 (if enabled)
+    if config.graph_rag_enabled {
+        let data_dir_str = config.data_dir.as_deref().unwrap_or("");
+        let graph_base = get_index_base_dir(&app, data_dir_str);
+        let graph_db_path = graph_base.join("knot_graph.db");
+        if graph_db_path.exists() {
+            if let Ok(graph) =
+                knot_core::entity::EntityGraph::new(&graph_db_path.to_string_lossy()).await
+            {
+                let query_entities = knot_core::entity::extract_entities_rule_based(&query, "", "");
+                let mut graph_context = String::new();
+                for entity in query_entities.iter().take(3) {
+                    if let Ok(related) = graph.get_related_entities(&entity.name).await {
+                        if !related.is_empty() {
+                            graph_context.push_str(&format!(
+                                "[知识图谱] {} 关联: {}\n",
+                                entity.name,
+                                related
+                                    .iter()
+                                    .take(5)
+                                    .map(|r| format!("{}({})", r.name, r.relation_type))
+                                    .collect::<Vec<_>>()
+                                    .join(", ")
+                            ));
+                        }
+                    }
+                }
+                if !graph_context.is_empty() {
+                    if let Some(first) = search_results.first_mut() {
+                        let existing = first.expanded_context.take().unwrap_or_default();
+                        first.expanded_context = Some(
+                            format!("{}\n{}", existing, graph_context)
+                                .trim()
+                                .to_string(),
+                        );
+                    }
+                }
+            }
+        }
+    }
     // 3. Format Context
     let mut context_str = String::new();
     let mut display_sources = Vec::new();
@@ -1994,6 +2135,18 @@ async fn set_multi_hop_enabled(app: tauri::AppHandle, enabled: bool) -> Result<(
     save_config(&app, &config)?;
     println!(
         "[Config] Multi-hop search: {}",
+        if enabled { "enabled" } else { "disabled" }
+    );
+    Ok(())
+}
+
+#[tauri::command]
+async fn set_graph_rag_enabled(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
+    let mut config = load_config(&app);
+    config.graph_rag_enabled = enabled;
+    save_config(&app, &config)?;
+    println!(
+        "[Config] Graph RAG: {}",
         if enabled { "enabled" } else { "disabled" }
     );
     Ok(())

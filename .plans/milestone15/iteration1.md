@@ -15,13 +15,13 @@ Assumptions:
 Scope:
 
 Tasks:
-- [ ] 1.1 创建 `knot-core/src/entity.rs` 模块
+- [x] 1.1 创建 `knot-core/src/entity.rs` 模块
   - 定义 `EntityRecord` 和 `RelationRecord` 数据结构
   - 实现 `extract_entities_rule_based()`: 用正则提取中英文专有名词（大写开头、引号内术语）
   - 实现 `extract_cooccurrence_relations()`: 同一段落内的实体对生成共现关系
   - 修改: 新建 `knot-core/src/entity.rs`，修改 `knot-core/src/lib.rs` 导出模块
 
-- [ ] 1.2 在 `KnotStore` 中添加 SQLite 实体图存储
+- [x] 1.2 在 `KnotStore` 中添加 SQLite 实体图存储
   - 添加 `rusqlite` 依赖（bundled 模式）
   - 初始化 SQLite 数据库，创建 entities 和 relations 表（含索引）
   - 实现 `add_entities()` 和 `add_relations()` 写入方法

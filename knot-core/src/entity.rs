@@ -180,6 +180,29 @@ pub fn extract_cooccurrence_relations(
     relations
 }
 
+/// 从 VectorRecord 列表中批量提取实体和关系
+///
+/// 返回 (entities, relations)，调用方可直接写入 EntityGraph。
+/// 会跳过 doc-summary 类型的记录。
+pub fn extract_from_records(
+    records: &[crate::store::VectorRecord],
+) -> (Vec<EntityRecord>, Vec<RelationRecord>) {
+    let mut all_entities = Vec::new();
+    for record in records {
+        // 跳过文档摘要记录
+        if record.id.ends_with("-doc-summary") {
+            continue;
+        }
+        let entities = extract_entities_rule_based(&record.text, &record.file_path, &record.id);
+        all_entities.extend(entities);
+    }
+
+    let source_file = records.first().map(|r| r.file_path.as_str()).unwrap_or("");
+    let relations = extract_cooccurrence_relations(&all_entities, source_file);
+
+    (all_entities, relations)
+}
+
 // --- 内部辅助函数 ---
 
 /// 判断一个词是否为英文专有名词
