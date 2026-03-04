@@ -681,9 +681,10 @@ fn add_entity(
         return;
     }
 
-    // 过滤：Markdown/HTML 噪音（如 "br2", "img src", "div class"）
+    // 过滤：Markdown/HTML/代码噪音
     let lower = cleaned.to_lowercase();
-    let html_noise = [
+    let noise_words = [
+        // HTML 标签
         "br",
         "img",
         "div",
@@ -699,6 +700,7 @@ fn add_entity(
         "rem",
         "auto",
         "none",
+        // JS/编程关键词
         "true",
         "false",
         "null",
@@ -712,8 +714,54 @@ fn add_entity(
         "export",
         "default",
         "module",
+        // 编译工具输出
+        "compiling",
+        "running",
+        "finished",
+        "warning",
+        "error",
+        // 文档模板/元数据字段
+        "caption",
+        "filename",
+        "preview-img no-padding",
+        "imagepreview",
+        "description",
+        "title",
+        "content",
+        "index",
+        "type",
+        "name",
+        "value",
+        "demo",
+        "example",
+        "usage",
+        // Rust 常见但低价值的类型/函数（作为实体太泛）
+        "ok",
+        "err",
+        "some",
+        "result",
+        "boxdyn",
+        "self",
+        // 常见但无意义的术语
+        "hello",
+        "world",
+        "test",
+        "todo",
+        "note",
+        "tip",
+        "click",
+        "button",
+        "table",
+        "list",
+        "item",
+        "text",
+        "message",
+        "config",
+        "data",
+        "info",
+        "debug",
     ];
-    if html_noise.contains(&lower.as_str()) {
+    if noise_words.contains(&lower.as_str()) {
         return;
     }
 
