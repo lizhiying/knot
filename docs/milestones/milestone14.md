@@ -75,7 +75,7 @@
 
 **核心代码变更**：[knot-core/src/index.rs](../../knot-core/src/index.rs)
 
-### Phase 2: 上下文窗口扩展（P0）
+### Phase 2: 上下文窗口扩展（P0）✅
 
 #### 设计方案
 
@@ -164,8 +164,8 @@ fn default_context_expansion_enabled() -> bool {
 | 2.5 `rag_search`/`rag_query` 集成上下文扩展       | ✅ 完成 | `knot-app/src-tauri/src/main.rs` | 搜索后根据配置调用 `expand_search_context()`    |
 | 2.6 `SearchResult` 新增 `expanded_context` 字段   | ✅ 完成 | `knot-core/src/store.rs`         | 存放扩展的上下文文本                            |
 | 2.7 前端 `rag_search` 透传扩展上下文              | ✅ 完成 | `knot-app/src-tauri/src/main.rs` | 扩展内容拼入 LLM 的 context 格式中              |
-| 2.8 前端设置页面增加开关                          | 🔲 待做 | `knot-app/src/`                  | UI 开关组件                                     |
-| 2.9 添加测试                                      | 🔲 待做 | `knot-core/src/store.rs`         | 验证扩展逻辑的正确性和截断行为                  |
+| 2.8 前端设置页面增加开关                          | ✅ 完成 | `knot-app/src/`                  | UI 开关组件（LLM 配置区域）                     |
+| 2.9 添加测试                                      | ✅ 完成 | `knot-core/src/store.rs`         | truncate_text + SearchResult 默认值验证         |
 
 ---
 
