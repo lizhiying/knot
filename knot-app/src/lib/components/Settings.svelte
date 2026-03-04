@@ -1,5 +1,6 @@
 <script>
     import { theme } from "$lib/stores/theme.svelte.js";
+    import KnowledgeGraph from "./KnowledgeGraph.svelte";
     import { onMount } from "svelte";
     import {
         register,
@@ -892,6 +893,13 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Knowledge Graph Visualization (only when enabled) -->
+                    {#if graphRagEnabled}
+                        <div class="mb-6">
+                            <KnowledgeGraph />
+                        </div>
+                    {/if}
 
                     <!-- Index Management Section -->
                     <div

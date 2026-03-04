@@ -64,6 +64,31 @@ pub struct RelationRecord {
     pub confidence: f32,
 }
 
+/// 图数据（用于前端可视化）
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct GraphData {
+    pub nodes: Vec<GraphNode>,
+    pub edges: Vec<GraphEdge>,
+}
+
+/// 图节点
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct GraphNode {
+    pub id: String,
+    pub label: String,
+    pub entity_type: String,
+    pub weight: f32,
+}
+
+/// 图边
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct GraphEdge {
+    pub source: String,
+    pub target: String,
+    pub relation_type: String,
+    pub weight: f32,
+}
+
 /// 基于规则的实体提取器
 ///
 /// 提取策略：
@@ -76,6 +101,19 @@ pub fn extract_entities_rule_based(
     source_file: &str,
     chunk_id: &str,
 ) -> Vec<EntityRecord> {
+    // 边界情况：空文本或纯空白
+    let text = text.trim();
+    if text.is_empty() || text.len() < 3 {
+        return Vec::new();
+    }
+
+    // 边界情况：超长文本截断（避免性能问题）
+    let text = if text.len() > 10000 {
+        &text[..10000]
+    } else {
+        text
+    };
+
     let mut entities: HashMap<String, EntityRecord> = HashMap::new();
 
     // 策略 1: 英文大写开头的专有名词（2+ 个字符，包含连字符和数字）
@@ -187,18 +225,32 @@ pub fn extract_cooccurrence_relations(
 pub fn extract_from_records(
     records: &[crate::store::VectorRecord],
 ) -> (Vec<EntityRecord>, Vec<RelationRecord>) {
+    let start = std::time::Instant::now();
     let mut all_entities = Vec::new();
+    let mut chunk_count = 0;
     for record in records {
         // 跳过文档摘要记录
         if record.id.ends_with("-doc-summary") {
             continue;
         }
+        chunk_count += 1;
         let entities = extract_entities_rule_based(&record.text, &record.file_path, &record.id);
         all_entities.extend(entities);
     }
 
     let source_file = records.first().map(|r| r.file_path.as_str()).unwrap_or("");
     let relations = extract_cooccurrence_relations(&all_entities, source_file);
+
+    let elapsed = start.elapsed();
+    if chunk_count > 0 && elapsed.as_millis() > 10 {
+        println!(
+            "[GraphRAG] Rule extraction: {} chunks, {} entities, {} relations in {:?}",
+            chunk_count,
+            all_entities.len(),
+            relations.len(),
+            elapsed
+        );
+    }
 
     (all_entities, relations)
 }
@@ -397,6 +449,10 @@ fn extract_json_from_response(response: &str) -> Option<String> {
 ///
 /// `llm_fn` 是一个异步函数，接受 prompt 并返回 LLM 的文本响应。
 /// 如果 `llm_fn` 为 None 或者 LLM 调用失败，自动降级到规则提取。
+///
+/// 性能优化：
+/// - 添加耗时统计日志
+/// - 短文本（< 200 字符）直接跳过 LLM，用规则提取（节省 LLM 调用）
 pub async fn extract_from_records_with_llm<F, Fut>(
     records: &[crate::store::VectorRecord],
     llm_fn: Option<F>,
@@ -405,6 +461,8 @@ where
     F: Fn(String) -> Fut,
     Fut: std::future::Future<Output = Option<String>>,
 {
+    let total_start = std::time::Instant::now();
+
     let llm_fn = match llm_fn {
         Some(f) => f,
         None => return extract_from_records(records),
@@ -414,13 +472,25 @@ where
     let mut all_relations = Vec::new();
     let mut llm_success = 0;
     let mut llm_fallback = 0;
+    let mut llm_skipped = 0;
 
     for record in records {
         if record.id.ends_with("-doc-summary") {
             continue;
         }
 
+        // 短文本直接用规则提取（LLM 调用开销不值得）
+        if record.text.len() < 200 {
+            llm_skipped += 1;
+            let entities = extract_entities_rule_based(&record.text, &record.file_path, &record.id);
+            let relations = extract_cooccurrence_relations(&entities, &record.file_path);
+            all_entities.extend(entities);
+            all_relations.extend(relations);
+            continue;
+        }
+
         // 尝试 LLM 提取
+        let chunk_start = std::time::Instant::now();
         let prompt = build_entity_extraction_prompt(&record.text);
         let llm_result = (llm_fn)(prompt).await;
 
@@ -429,6 +499,12 @@ where
                 parse_llm_entity_response(&response, &record.file_path, &record.id)
             {
                 llm_success += 1;
+                println!(
+                    "[GraphRAG] LLM chunk {:?}: {} entities in {:?}",
+                    record.id,
+                    entities.len(),
+                    chunk_start.elapsed()
+                );
                 all_entities.extend(entities);
                 all_relations.extend(relations);
                 continue;
@@ -444,12 +520,12 @@ where
         all_relations.extend(relations);
     }
 
-    if llm_success > 0 || llm_fallback > 0 {
-        println!(
-            "[GraphRAG] LLM extraction: {} success, {} fallback to rules",
-            llm_success, llm_fallback
-        );
-    }
+    println!(
+        "[GraphRAG] Extraction complete: {} LLM, {} fallback, {} skipped (short), {} entities, {} relations in {:?}",
+        llm_success, llm_fallback, llm_skipped,
+        all_entities.len(), all_relations.len(),
+        total_start.elapsed()
+    );
 
     (all_entities, all_relations)
 }
@@ -568,16 +644,25 @@ fn add_entity(
     source_file: &str,
     chunk_id: &str,
 ) {
-    let entity_id = name.to_lowercase();
-    // 过滤太短的（单个字母或数字）
-    if entity_id.chars().count() < 2 {
+    // 清理特殊字符（保留字母、数字、连字符、空格、中文字符）
+    let cleaned: String = name
+        .chars()
+        .filter(|c| c.is_alphanumeric() || *c == '-' || *c == ' ' || *c == '_' || *c > '\u{4E00}')
+        .collect();
+    let cleaned = cleaned.trim();
+
+    // 过滤：太短（< 2 字符）或太长（> 100 字符）
+    let char_count = cleaned.chars().count();
+    if char_count < 2 || char_count > 100 {
         return;
     }
+
+    let entity_id = cleaned.to_lowercase();
     entities
         .entry(entity_id.clone())
         .or_insert_with(|| EntityRecord {
             entity_id,
-            name: name.to_string(),
+            name: cleaned.to_string(),
             entity_type,
             source_file: source_file.to_string(),
             chunk_id: chunk_id.to_string(),
@@ -863,6 +948,99 @@ impl EntityGraph {
                 )
             })
             .collect())
+    }
+
+    /// 带 confidence 权重过滤的关系查询
+    pub async fn get_related_entities_filtered(
+        &self,
+        entity_name: &str,
+        min_confidence: f32,
+        limit: i32,
+    ) -> Result<Vec<RelatedEntity>> {
+        let entity_id = entity_name.to_lowercase();
+        let rows = sqlx::query(
+            r#"SELECT e.entity_id, e.name, e.entity_type, r.relation_type, 1 as depth
+            FROM relations r JOIN entities e ON r.to_entity = e.entity_id
+            WHERE r.from_entity = ? AND r.confidence >= ?
+            UNION
+            SELECT e.entity_id, e.name, e.entity_type, r.relation_type, 1 as depth
+            FROM relations r JOIN entities e ON r.from_entity = e.entity_id
+            WHERE r.to_entity = ? AND r.confidence >= ?
+            LIMIT ?"#,
+        )
+        .bind(&entity_id)
+        .bind(min_confidence)
+        .bind(&entity_id)
+        .bind(min_confidence)
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows
+            .into_iter()
+            .map(|r| RelatedEntity {
+                entity_id: r.get("entity_id"),
+                name: r.get("name"),
+                entity_type: r.get("entity_type"),
+                relation_type: r.get("relation_type"),
+                depth: r.get("depth"),
+            })
+            .collect())
+    }
+
+    /// 获取图数据用于可视化（Top N 实体 + 它们之间的关系）
+    pub async fn get_graph_data(&self, max_nodes: i32) -> Result<GraphData> {
+        // 获取 top N 实体
+        let entity_rows = sqlx::query(
+            r#"SELECT DISTINCT e.entity_id, e.name, e.entity_type,
+                (SELECT COUNT(*) FROM relations WHERE from_entity = e.entity_id OR to_entity = e.entity_id) as rel_count
+            FROM entities e
+            ORDER BY rel_count DESC
+            LIMIT ?"#,
+        )
+        .bind(max_nodes)
+        .fetch_all(&self.pool)
+        .await?;
+
+        let nodes: Vec<GraphNode> = entity_rows
+            .iter()
+            .map(|r| GraphNode {
+                id: r.get::<String, _>("entity_id"),
+                label: r.get::<String, _>("name"),
+                entity_type: r.get::<String, _>("entity_type"),
+                weight: r.get::<i64, _>("rel_count") as f32,
+            })
+            .collect();
+
+        // 获取这些实体之间的关系
+        let entity_ids: Vec<String> = nodes.iter().map(|n| n.id.clone()).collect();
+        let mut edges = Vec::new();
+        if !entity_ids.is_empty() {
+            let placeholders = entity_ids.iter().map(|_| "?").collect::<Vec<_>>().join(",");
+            let query = format!(
+                "SELECT from_entity, to_entity, relation_type, confidence FROM relations WHERE from_entity IN ({}) AND to_entity IN ({})",
+                placeholders, placeholders
+            );
+            let mut q = sqlx::query(&query);
+            for id in &entity_ids {
+                q = q.bind(id);
+            }
+            for id in &entity_ids {
+                q = q.bind(id);
+            }
+            let edge_rows = q.fetch_all(&self.pool).await?;
+            edges = edge_rows
+                .into_iter()
+                .map(|r| GraphEdge {
+                    source: r.get("from_entity"),
+                    target: r.get("to_entity"),
+                    relation_type: r.get("relation_type"),
+                    weight: r.get("confidence"),
+                })
+                .collect();
+        }
+
+        Ok(GraphData { nodes, edges })
     }
 }
 
@@ -1194,5 +1372,59 @@ mod tests {
         let prompt = build_entity_extraction_prompt(&long_text);
         // 原文被截断到 1500 字节
         assert!(!prompt.contains(&"a".repeat(3000)));
+    }
+
+    // --- Iteration 3 Tests: 边界情况 ---
+
+    #[test]
+    fn test_empty_text() {
+        let result = extract_entities_rule_based("", "/test.md", "chunk-1");
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_whitespace_only() {
+        let result = extract_entities_rule_based("   \n\t  ", "/test.md", "chunk-1");
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_very_short_text() {
+        let result = extract_entities_rule_based("hi", "/test.md", "chunk-1");
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_special_characters_in_entity() {
+        // SQL 注入风险字符应被清理
+        let text = "The company O'Reilly; DROP TABLE-- published a book.";
+        let result = extract_entities_rule_based(text, "/test.md", "chunk-1");
+        // 确保不会 panic
+        for entity in &result {
+            assert!(!entity.name.contains(';'));
+            assert!(!entity.name.contains('\''));
+        }
+    }
+
+    #[test]
+    fn test_long_text_truncation() {
+        // 超长文本不应 panic
+        let long_text = "OpenAI ".repeat(5000);
+        let result = extract_entities_rule_based(&long_text, "/test.md", "chunk-1");
+        assert!(
+            !result.is_empty(),
+            "Should still extract from truncated text"
+        );
+    }
+
+    #[test]
+    fn test_entity_name_length_limit() {
+        // 超长实体名应被过滤
+        let long_name = "A".repeat(200);
+        let text = format!("The {} project is important.", long_name);
+        let result = extract_entities_rule_based(&text, "/test.md", "chunk-1");
+        for entity in &result {
+            assert!(entity.name.chars().count() <= 100);
+        }
     }
 }

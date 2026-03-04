@@ -716,6 +716,7 @@ fn main() {
             set_context_expansion_enabled,
             set_multi_hop_enabled,
             set_graph_rag_enabled,
+            get_graph_data,
             get_index_status
         ])
         .build(tauri::generate_context!())
@@ -2173,4 +2174,27 @@ async fn set_graph_rag_enabled(app: tauri::AppHandle, enabled: bool) -> Result<(
         if enabled { "enabled" } else { "disabled" }
     );
     Ok(())
+}
+
+#[tauri::command]
+async fn get_graph_data(app: tauri::AppHandle) -> Result<serde_json::Value, String> {
+    let config = load_config(&app);
+    let data_dir = config.data_dir.ok_or("Data directory not set")?;
+    let base_dir = get_index_base_dir(&app, &data_dir);
+    let graph_db_path = base_dir.join("knot_graph.db");
+
+    if !graph_db_path.exists() {
+        return Ok(serde_json::json!({"nodes": [], "edges": []}));
+    }
+
+    let graph = knot_core::entity::EntityGraph::new(&graph_db_path.to_string_lossy())
+        .await
+        .map_err(|e| format!("Graph init error: {}", e))?;
+
+    let data = graph
+        .get_graph_data(50)
+        .await
+        .map_err(|e| format!("Graph query error: {}", e))?;
+
+    serde_json::to_value(&data).map_err(|e| format!("Serialize error: {}", e))
 }
