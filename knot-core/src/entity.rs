@@ -107,12 +107,8 @@ pub fn extract_entities_rule_based(
         return Vec::new();
     }
 
-    // 边界情况：超长文本截断（避免性能问题）
-    let text = if text.len() > 10000 {
-        &text[..10000]
-    } else {
-        text
-    };
+    // 边界情况：超长文本截断（避免性能问题，UTF-8 安全）
+    let text = truncate_utf8_safe(text, 10000);
 
     let mut entities: HashMap<String, EntityRecord> = HashMap::new();
 
@@ -326,12 +322,8 @@ Text:
 Output JSON only:<|im_end|>
 <|im_start|>assistant
 "#,
-        // 截断过长的文本，避免超出 LLM 上下文
-        if text.len() > 1500 {
-            &text[..1500]
-        } else {
-            text
-        }
+        // 截断过长的文本，避免超出 LLM 上下文（UTF-8 安全）
+        truncate_utf8_safe(text, 1500)
     )
 }
 
@@ -531,6 +523,21 @@ where
 }
 
 // --- 内部辅助函数 ---
+
+/// UTF-8 安全的字符串截断
+///
+/// 在 max_bytes 以内的最近 char boundary 处截断，避免在中文等多字节字符中间截断导致 panic。
+fn truncate_utf8_safe(s: &str, max_bytes: usize) -> &str {
+    if s.len() <= max_bytes {
+        return s;
+    }
+    // 从 max_bytes 往前找到最近的 char boundary
+    let mut end = max_bytes;
+    while end > 0 && !s.is_char_boundary(end) {
+        end -= 1;
+    }
+    &s[..end]
+}
 
 /// 判断一个词是否为英文专有名词
 fn is_proper_noun(word: &str) -> bool {
