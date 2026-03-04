@@ -77,37 +77,108 @@
 
 ### Phase 2: 上下文窗口扩展（P0）
 
-| 任务                           | 状态   | 说明                                            |
-| ------------------------------ | ------ | ----------------------------------------------- |
-| 2.1 实现 parent 节点查询       | 🔲 待做 | 根据 `parent_id` 从 LanceDB 查询父节点内容      |
-| 2.2 实现 sibling 节点查询      | 🔲 待做 | 根据同一 `parent_id` + `file_path` 查询兄弟节点 |
-| 2.3 搜索结果后处理：上下文组装 | 🔲 待做 | 将 parent/sibling 内容附加到搜索结果中          |
-| 2.4 控制上下文窗口大小         | 🔲 待做 | 限制扩展的 token 数，避免超过 LLM 上下文长度    |
-| 2.5 添加测试                   | 🔲 待做 | 验证上下文扩展的正确性                          |
+#### 设计方案
 
-**预期效果**：
+**问题**：天真地拉取全部 parent + siblings 会导致上下文膨胀 10 倍以上。
+
+假设一章有 10 个小节（各 350 tokens），搜索命中其中一个：
+
+| 方案               | 返回内容                       | tokens/条 | 5 条结果总 tokens |
+| ------------------ | ------------------------------ | --------- | ----------------- |
+| 当前               | 仅命中节点                     | ~400      | ~2,000            |
+| 天真扩展           | parent + 全部 siblings         | ~4,000 ⚠️  | ~20,000 ⚠️         |
+| **方案 D（推荐）** | parent 标题 + 前后各 1 sibling | ~750      | ~4,000 ✅          |
+
+**采用方案 D：有限扩展，增幅约 2 倍，完全可控。**
+
+#### 扩展规则
 
 ```
-当前搜索:
-  "实验结果" → 返回 [第3章-实验结果片段]
-
-改进后搜索:
-  "实验结果" → 命中 [第3章-实验结果片段]
-             → 查询 parent → [第3章 概述]
-             → 查询 siblings → [第3章-实验方法, 第3章-实验结论]
-             → 组装为完整上下文返回给 LLM
+搜索命中节点 X（400 tokens）
+  │
+  ├── parent title:    "第3章"（仅标题，~10 tokens）
+  ├── prev sibling:    "3.1 实验方法"（截取前 200 tokens）
+  └── next sibling:    "3.3 实验结论"（截取前 200 tokens）
+  
+  总计: 400 + 10 + 200 + 200 = 810 tokens（可控）
 ```
+
+**关键约束**：
+
+| 约束                     | 值            | 说明             |
+| ------------------------ | ------------- | ---------------- |
+| 前后 sibling 数量        | 各 1 个       | 不拉全部兄弟节点 |
+| 每个 sibling 最大 tokens | 200           | 超长截断         |
+| parent 内容              | 仅 title      | 不取完整 content |
+| 总扩展上限               | 500 tokens/条 | 超出则按比例截断 |
+
+#### 配置开关
+
+在 `AppConfig` 中新增字段，**默认开启**：
+
+```rust
+// knot-app/src-tauri/src/main.rs
+struct AppConfig {
+    // ... existing fields ...
+    /// 搜索时是否自动扩展上下文（拉取 parent/sibling 节点）
+    #[serde(default = "default_context_expansion_enabled")]
+    context_expansion_enabled: bool,
+}
+
+fn default_context_expansion_enabled() -> bool {
+    true // 默认开启
+}
+```
+
+需要配套：
+- Tauri command: `set_context_expansion_enabled`
+- 前端设置页面增加开关
+- 搜索时读取配置决定是否扩展
+
+#### 扩展效果对比
+
+```
+当前:
+  用户: "实验结果验证了什么假设？"
+  搜索 → [第3章-实验结果片段]
+  LLM 只看到: "SVM 准确率 95.2%, 决策树 91.3%..."
+  回答: "实验使用了 SVM 和决策树"（缺少假设信息 ❌）
+
+改进后:
+  搜索 → [第3章-实验结果片段]
+       + parent: "第3章 实验验证"
+       + prev: "第3章-实验方法: 本文验证假设H1(时间复杂度)和H2(准确率)..."
+       + next: "第3章-实验结论: 实验验证了H1但否定了H2..."
+  LLM 看到完整上下文
+  回答: "实验结果验证了H1（时间复杂度假设），但否定了H2（准确率假设）"（✅）
+```
+
+#### 任务分解
+
+| 任务                                             | 状态   | 文件                             | 说明                                            |
+| ------------------------------------------------ | ------ | -------------------------------- | ----------------------------------------------- |
+| 2.1 `AppConfig` 新增 `context_expansion_enabled` | 🔲 待做 | `knot-app/src-tauri/src/main.rs` | 默认 `true`，配套 Tauri command                 |
+| 2.2 `KnotStore` 添加 `get_record_by_id()`        | 🔲 待做 | `knot-core/src/store.rs`         | 根据 id 查询单条 VectorRecord                   |
+| 2.3 `KnotStore` 添加 `get_siblings()`            | 🔲 待做 | `knot-core/src/store.rs`         | 根据 parent_id + file_path 查询同级节点         |
+| 2.4 实现 `expand_context()`                      | 🔲 待做 | `knot-core/src/store.rs`         | 组装 parent title + prev/next sibling，截断控制 |
+| 2.5 修改 `search()` 集成上下文扩展               | 🔲 待做 | `knot-core/src/store.rs`         | 搜索结果后处理调用 `expand_context()`           |
+| 2.6 `SearchResult` 新增 `expanded_context` 字段  | 🔲 待做 | `knot-core/src/store.rs`         | 存放扩展的上下文文本                            |
+| 2.7 前端 `rag_search` 透传扩展上下文             | 🔲 待做 | `knot-app/src-tauri/src/main.rs` | 读取配置开关，传入搜索                          |
+| 2.8 前端设置页面增加开关                         | 🔲 待做 | `knot-app/src/`                  | UI 开关组件                                     |
+| 2.9 添加测试                                     | 🔲 待做 | `knot-core/src/store.rs`         | 验证扩展逻辑的正确性和截断行为                  |
 
 ---
 
 ## 涉及文件
 
-| 文件                               | 变更类型 | 说明                                            |
-| ---------------------------------- | -------- | ----------------------------------------------- |
-| `knot-core/src/index.rs`           | 修改     | 添加 `build_doc_summary()`, `collect_outline()` |
-| `knot-core/src/store.rs`           | 待修改   | Phase 2: 添加 parent/sibling 查询方法           |
-| `docs/rag-limitations-analysis.md` | 新增     | RAG 架构局限性分析文档                          |
-| `docs/milestones/milestone14.md`   | 新增     | 本文件                                          |
+| 文件                               | 变更类型 | Phase | 说明                                                       |
+| ---------------------------------- | -------- | ----- | ---------------------------------------------------------- |
+| `knot-core/src/index.rs`           | 已修改   | 1     | `build_doc_summary()`, `collect_outline()`                 |
+| `knot-core/src/store.rs`           | 待修改   | 2     | `get_record_by_id()`, `get_siblings()`, `expand_context()` |
+| `knot-app/src-tauri/src/main.rs`   | 待修改   | 2     | `AppConfig` + `set_context_expansion_enabled`              |
+| `knot-app/src/`                    | 待修改   | 2     | 设置页面增加上下文扩展开关                                 |
+| `docs/rag-limitations-analysis.md` | 已创建   | —     | RAG 架构局限性分析                                         |
+| `docs/milestones/milestone14.md`   | 已创建   | —     | 本文件                                                     |
 
 ## 后续方向（P2-P4）
 
@@ -118,3 +189,4 @@
 | P2 - 多跳检索   | ⭐⭐⭐    | 第一轮结果触发第二轮搜索        |
 | P3 - 文档引用图 | ⭐⭐⭐    | 解析 `[text](url)` 建立引用关系 |
 | P4 - GraphRAG   | ⭐⭐⭐⭐⭐  | 构建知识图谱，实体-关系推理     |
+
