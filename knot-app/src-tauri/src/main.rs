@@ -714,6 +714,7 @@ fn main() {
             set_llm_max_tokens,
             set_llm_think_enabled,
             set_context_expansion_enabled,
+            set_multi_hop_enabled,
             get_index_status
         ])
         .build(tauri::generate_context!())
@@ -807,6 +808,9 @@ struct AppConfig {
     /// 搜索时是否自动扩展上下文（拉取 parent/sibling 节点）
     #[serde(default = "default_context_expansion_enabled")]
     context_expansion_enabled: bool,
+    /// 是否启用多跳检索（两轮搜索，关键词扩展）
+    #[serde(default = "default_multi_hop_enabled")]
+    multi_hop_enabled: bool,
 }
 
 fn default_streaming_enabled() -> bool {
@@ -831,6 +835,10 @@ fn default_llm_think_enabled() -> bool {
 
 fn default_context_expansion_enabled() -> bool {
     true // 默认开启上下文扩展
+}
+
+fn default_multi_hop_enabled() -> bool {
+    true // 默认开启多跳检索
 }
 
 fn get_config_path(app: &tauri::AppHandle) -> PathBuf {
@@ -1290,7 +1298,38 @@ async fn rag_search(
         search_results.len()
     );
 
-    // 3.5 Context Expansion (if enabled)
+    // 3.5 Multi-Hop Search (if enabled)
+    if config.multi_hop_enabled && !search_results.is_empty() {
+        let hop_start = Instant::now();
+        let key_terms = knot_core::store::KnotStore::extract_key_terms(&search_results, &query, 5);
+        if !key_terms.is_empty() {
+            let expanded_query = format!("{} {}", query, key_terms.join(" "));
+            println!(
+                "[rag_search] Multi-hop expanded query: '{}'",
+                expanded_query
+            );
+            let hop_vec = embedding_provider
+                .generate_embedding(&expanded_query)
+                .await
+                .map_err(|e| e.to_string())?;
+            let hop_results = store
+                .search(hop_vec, &expanded_query, distance_threshold)
+                .await
+                .map_err(|e| e.to_string())?;
+            let first_count = search_results.len();
+            search_results =
+                knot_core::store::KnotStore::merge_search_results(search_results, hop_results);
+            println!(
+                "[rag_search] Multi-hop: {:?}, {} -> {} results (terms: {:?})",
+                hop_start.elapsed(),
+                first_count,
+                search_results.len(),
+                key_terms
+            );
+        }
+    }
+
+    // 3.6 Context Expansion (if enabled)
     if config.context_expansion_enabled {
         let expand_start = Instant::now();
         store.expand_search_context(&mut search_results);
@@ -1581,6 +1620,25 @@ async fn rag_query(
         "[rag_query] Search complete. Found {} results",
         search_results.len()
     );
+
+    // Multi-Hop Search (if enabled)
+    if config.multi_hop_enabled && !search_results.is_empty() {
+        let key_terms = knot_core::store::KnotStore::extract_key_terms(&search_results, &query, 5);
+        if !key_terms.is_empty() {
+            let expanded_query = format!("{} {}", query, key_terms.join(" "));
+            println!("[rag_query] Multi-hop expanded query: '{}'", expanded_query);
+            let hop_vec = embedding_provider
+                .generate_embedding(&expanded_query)
+                .await
+                .map_err(|e| e.to_string())?;
+            let hop_results = store
+                .search(hop_vec, &expanded_query, distance_threshold)
+                .await
+                .map_err(|e| e.to_string())?;
+            search_results =
+                knot_core::store::KnotStore::merge_search_results(search_results, hop_results);
+        }
+    }
 
     // Context Expansion (if enabled)
     if config.context_expansion_enabled {
@@ -1924,6 +1982,18 @@ async fn set_context_expansion_enabled(app: tauri::AppHandle, enabled: bool) -> 
     save_config(&app, &config)?;
     println!(
         "[Config] Context expansion: {}",
+        if enabled { "enabled" } else { "disabled" }
+    );
+    Ok(())
+}
+
+#[tauri::command]
+async fn set_multi_hop_enabled(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
+    let mut config = load_config(&app);
+    config.multi_hop_enabled = enabled;
+    save_config(&app, &config)?;
+    println!(
+        "[Config] Multi-hop search: {}",
         if enabled { "enabled" } else { "disabled" }
     );
     Ok(())

@@ -28,6 +28,7 @@
     let llmMaxTokens = $state(1024);
     let llmThinkEnabled = $state(false);
     let contextExpansionEnabled = $state(true);
+    let multiHopEnabled = $state(true);
     let indexingStatus = $state("ready");
     let isRecording = $state(false);
     let shortcutKey = $state("");
@@ -259,6 +260,20 @@
         }
     }
 
+    async function updateMultiHopEnabled(value) {
+        try {
+            multiHopEnabled = value;
+            await invoke("set_multi_hop_enabled", { enabled: value });
+        } catch (err) {
+            console.error("Failed to update multi-hop:", err);
+            multiHopEnabled = !value;
+            await message("Failed to update setting: " + err, {
+                title: "Error",
+                kind: "error",
+            });
+        }
+    }
+
     function handleKeyDown(e) {
         if (!isRecording) return;
         e.preventDefault();
@@ -306,6 +321,9 @@
             }
             if (config.context_expansion_enabled !== undefined) {
                 contextExpansionEnabled = config.context_expansion_enabled;
+            }
+            if (config.multi_hop_enabled !== undefined) {
+                multiHopEnabled = config.multi_hop_enabled;
             }
         } catch (e) {
             console.error("Failed to load config:", e);
@@ -776,8 +794,8 @@
                                 <p
                                     class="text-[10px] text-[var(--text-muted)] mt-0.5"
                                 >
-                                    搜索时自动拉取前后章节内容，帮助
-                                    AI 理解更完整的上下文
+                                    搜索时自动拉取前后章节内容，帮助 AI
+                                    理解更完整的上下文
                                 </p>
                             </div>
                             <button
@@ -785,10 +803,42 @@
                                     ? 'bg-[var(--accent-primary)]'
                                     : 'bg-[var(--bg-secondary)]'}"
                                 onclick={() =>
-                                    updateContextExpansionEnabled(!contextExpansionEnabled)}
+                                    updateContextExpansionEnabled(
+                                        !contextExpansionEnabled,
+                                    )}
                             >
                                 <span
                                     class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform {contextExpansionEnabled
+                                        ? 'translate-x-5'
+                                        : ''}"
+                                ></span>
+                            </button>
+                        </div>
+
+                        <!-- Multi-Hop Search Toggle -->
+                        <div
+                            class="mt-4 flex items-center justify-between p-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)]"
+                        >
+                            <div>
+                                <span
+                                    class="text-xs text-[var(--text-secondary)]"
+                                    >多跳检索</span
+                                >
+                                <p
+                                    class="text-[10px] text-[var(--text-muted)] mt-0.5"
+                                >
+                                    两轮搜索，自动从第一轮结果提取关键词进行第二轮搜索
+                                </p>
+                            </div>
+                            <button
+                                class="relative w-11 h-6 rounded-full transition-colors {multiHopEnabled
+                                    ? 'bg-[var(--accent-primary)]'
+                                    : 'bg-[var(--bg-secondary)]'}"
+                                onclick={() =>
+                                    updateMultiHopEnabled(!multiHopEnabled)}
+                            >
+                                <span
+                                    class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform {multiHopEnabled
                                         ? 'translate-x-5'
                                         : ''}"
                                 ></span>

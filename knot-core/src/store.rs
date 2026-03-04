@@ -1071,6 +1071,195 @@ impl KnotStore {
         }
     }
 
+    // --- 多跳检索 (Multi-Hop Search) ---
+
+    /// 从搜索结果中提取高频关键词，用于构建第二轮搜索查询
+    ///
+    /// 使用 Jieba 分词，过滤停用词和原始查询词，返回 top N 新词
+    pub fn extract_key_terms(
+        results: &[SearchResult],
+        original_query: &str,
+        max_terms: usize,
+    ) -> Vec<String> {
+        use crate::tokenizer::JiebaTokenizer;
+        use std::collections::{HashMap, HashSet};
+        use tantivy::tokenizer::Tokenizer;
+
+        // 将原始查询分词，用于过滤
+        let mut jieba = JiebaTokenizer::new();
+        let mut query_terms: HashSet<String> = HashSet::new();
+        {
+            let mut stream = jieba.token_stream(original_query);
+            while stream.advance() {
+                let word = stream.token().text.to_lowercase();
+                if word.chars().count() >= 2 {
+                    query_terms.insert(word);
+                }
+            }
+        }
+
+        // 中文停用词
+        let stopwords: HashSet<&str> = [
+            "的",
+            "了",
+            "在",
+            "是",
+            "我",
+            "有",
+            "和",
+            "就",
+            "不",
+            "人",
+            "都",
+            "一",
+            "一个",
+            "上",
+            "也",
+            "很",
+            "到",
+            "说",
+            "要",
+            "去",
+            "你",
+            "会",
+            "着",
+            "没有",
+            "看",
+            "好",
+            "自己",
+            "这",
+            "他",
+            "她",
+            "它",
+            "们",
+            "那",
+            "什么",
+            "如何",
+            "怎么",
+            "为什么",
+            "哪个",
+            "哪些",
+            "可以",
+            "能",
+            "the",
+            "a",
+            "an",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "may",
+            "might",
+            "can",
+            "shall",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "from",
+            "and",
+            "or",
+            "but",
+            "not",
+            "no",
+            "if",
+            "then",
+            "so",
+            "this",
+            "that",
+            "these",
+            "those",
+            "it",
+            "its",
+        ]
+        .iter()
+        .copied()
+        .collect();
+
+        // 拼接 top 3 结果的文本
+        let combined_text: String = results
+            .iter()
+            .take(3)
+            .map(|r| r.text.as_str())
+            .collect::<Vec<&str>>()
+            .join(" ");
+
+        // 分词并统计词频
+        let mut word_freq: HashMap<String, usize> = HashMap::new();
+        {
+            let mut stream = jieba.token_stream(&combined_text);
+            while stream.advance() {
+                let word = stream.token().text.to_lowercase();
+                // 过滤：长度 >= 2，不是停用词，不是原始查询词
+                if word.chars().count() >= 2
+                    && !stopwords.contains(word.as_str())
+                    && !query_terms.contains(&word)
+                {
+                    *word_freq.entry(word).or_insert(0) += 1;
+                }
+            }
+        }
+
+        // 按频次排序，取 top N
+        let mut freq_vec: Vec<(String, usize)> = word_freq.into_iter().collect();
+        freq_vec.sort_by(|a, b| b.1.cmp(&a.1));
+        freq_vec
+            .into_iter()
+            .take(max_terms)
+            .map(|(w, _)| w)
+            .collect()
+    }
+
+    /// 合并两轮搜索结果，按 id 去重，保留分数更高者
+    pub fn merge_search_results(
+        first: Vec<SearchResult>,
+        second: Vec<SearchResult>,
+    ) -> Vec<SearchResult> {
+        use std::collections::HashMap;
+
+        let mut merged: HashMap<String, SearchResult> = HashMap::new();
+
+        for r in first {
+            merged.insert(r.id.clone(), r);
+        }
+
+        for r in second {
+            merged
+                .entry(r.id.clone())
+                .and_modify(|existing| {
+                    if r.score > existing.score {
+                        *existing = r.clone();
+                        existing.source = SearchSource::Hybrid;
+                    }
+                })
+                .or_insert(r);
+        }
+
+        let mut results: Vec<SearchResult> = merged.into_values().collect();
+        results.sort_by(|a, b| {
+            b.score
+                .partial_cmp(&a.score)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        results
+    }
+
     fn get_schema(&self) -> Arc<Schema> {
         Arc::new(Schema::new(vec![
             Field::new("id", DataType::Utf8, false),
@@ -1212,5 +1401,111 @@ mod tests {
             expanded_context: None,
         };
         assert!(result.expanded_context.is_none());
+    }
+
+    #[test]
+    fn test_extract_key_terms_filters_query_and_stopwords() {
+        let results = vec![
+            SearchResult {
+                id: "1".to_string(),
+                text: "机器学习是人工智能的一个分支。支持向量机和决策树是常见的算法。".to_string(),
+                file_path: "/ml.md".to_string(),
+                score: 90.0,
+                parent_id: None,
+                breadcrumbs: None,
+                source: SearchSource::Vector,
+                expanded_context: None,
+            },
+            SearchResult {
+                id: "2".to_string(),
+                text: "深度学习使用神经网络进行特征提取。卷积神经网络适用于图像识别。".to_string(),
+                file_path: "/dl.md".to_string(),
+                score: 80.0,
+                parent_id: None,
+                breadcrumbs: None,
+                source: SearchSource::Vector,
+                expanded_context: None,
+            },
+        ];
+
+        let terms = KnotStore::extract_key_terms(&results, "机器学习", 5);
+
+        // 不应包含原始查询词
+        assert!(
+            !terms.contains(&"机器".to_string()),
+            "Should not contain query term '机器'"
+        );
+
+        // 不应包含停用词
+        assert!(
+            !terms.contains(&"的".to_string()),
+            "Should not contain stopword '的'"
+        );
+
+        // 应提取出有意义的词
+        assert!(!terms.is_empty(), "Should extract some terms");
+    }
+
+    #[test]
+    fn test_merge_search_results_dedup() {
+        let first = vec![
+            SearchResult {
+                id: "a".to_string(),
+                text: "text a".to_string(),
+                file_path: "/a.md".to_string(),
+                score: 90.0,
+                parent_id: None,
+                breadcrumbs: None,
+                source: SearchSource::Vector,
+                expanded_context: None,
+            },
+            SearchResult {
+                id: "b".to_string(),
+                text: "text b".to_string(),
+                file_path: "/b.md".to_string(),
+                score: 80.0,
+                parent_id: None,
+                breadcrumbs: None,
+                source: SearchSource::Vector,
+                expanded_context: None,
+            },
+        ];
+
+        let second = vec![
+            SearchResult {
+                id: "b".to_string(), // 重复
+                text: "text b".to_string(),
+                file_path: "/b.md".to_string(),
+                score: 85.0, // 更高分
+                parent_id: None,
+                breadcrumbs: None,
+                source: SearchSource::Keyword,
+                expanded_context: None,
+            },
+            SearchResult {
+                id: "c".to_string(), // 新结果
+                text: "text c".to_string(),
+                file_path: "/c.md".to_string(),
+                score: 70.0,
+                parent_id: None,
+                breadcrumbs: None,
+                source: SearchSource::Keyword,
+                expanded_context: None,
+            },
+        ];
+
+        let merged = KnotStore::merge_search_results(first, second);
+
+        // 应该有 3 条（a, b, c），b 被去重
+        assert_eq!(merged.len(), 3, "Should have 3 unique results");
+
+        // b 应该保留更高分的版本 (85.0)
+        let b = merged.iter().find(|r| r.id == "b").unwrap();
+        assert_eq!(b.score, 85.0, "Should keep higher score for duplicates");
+
+        // 结果应按分数降序排列
+        assert_eq!(merged[0].id, "a"); // 90.0
+        assert_eq!(merged[1].id, "b"); // 85.0
+        assert_eq!(merged[2].id, "c"); // 70.0
     }
 }
