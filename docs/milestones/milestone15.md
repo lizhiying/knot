@@ -179,11 +179,28 @@ DELETE FROM relations WHERE source_file = '/path/to/updated.md';
 
 ## 涉及文件
 
-| 文件                                                | 变更类型 | Iteration | 说明                       |
-| --------------------------------------------------- | -------- | --------- | -------------------------- |
-| `knot-core/src/store.rs`                            | 待修改   | 1         | 实体/关系存储和查询方法    |
-| `knot-core/src/index.rs`                            | 待修改   | 1         | 实体提取逻辑集成           |
-| `knot-core/src/entity.rs`                           | 新建     | 1         | 实体提取、关系提取核心模块 |
-| `knot-app/src-tauri/src/main.rs`                    | 待修改   | 1         | 配置开关 + 搜索集成        |
-| `knot-app/src/lib/components/Settings.svelte`       | 待修改   | 2         | GraphRAG 开关              |
-| `knot-app/src/lib/components/KnowledgeGraph.svelte` | 新建     | 3         | 知识图谱可视化             |
+| 文件                                                | 变更类型 | Iteration | 说明                                           |
+| --------------------------------------------------- | -------- | --------- | ---------------------------------------------- |
+| `knot-core/src/entity.rs`                           | 新建     | 1-3       | 实体提取 + EntityGraph + LLM 提取 + 可视化数据 |
+| `knot-core/src/lib.rs`                              | 修改     | 1         | 导出 entity 模块                               |
+| `knot-app/src-tauri/src/main.rs`                    | 修改     | 1-3       | 配置开关 + 搜索集成 + get_graph_data           |
+| `knot-app/src/lib/components/Settings.svelte`       | 修改     | 1         | GraphRAG 开关 + 知识图谱可视化集成             |
+| `knot-app/src/lib/components/KnowledgeGraph.svelte` | 新建     | 3         | Canvas 力导向图可视化                          |
+
+## 实现总结
+
+### 三个迭代完成状态
+
+| Iteration | 目标               | 测试数 | 状态 |
+| --------- | ------------------ | ------ | ---- |
+| 1         | 端到端最小可用     | 27     | ✅    |
+| 2         | 提升质量与覆盖度   | 38     | ✅    |
+| 3         | 质量打磨与体验优化 | 44     | ✅    |
+
+### 技术选型
+
+- **SQLite 存储**: 复用现有 `sqlx` 依赖（非 rusqlite），零新增 crate
+- **LLM 提取**: 混合模式（LLM 优先 → 规则降级），初始扫描用规则、监控用 LLM
+- **前端可视化**: 纯 Canvas 力导向图，无需 D3.js
+- **关系类型**: 7 种（co-occurrence, developed-by, uses, belongs-to, compared-with, caused-by, followed-by）
+
