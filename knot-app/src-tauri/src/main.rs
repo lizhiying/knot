@@ -1061,7 +1061,16 @@ async fn start_background_indexing(
                 let graph_db_exists = std::path::Path::new(&graph_db_path).exists();
                 let graph_empty = if graph_db_exists {
                     match knot_core::entity::EntityGraph::new(&graph_db_path).await {
-                        Ok(g) => g.entity_count().await.unwrap_or(0) == 0,
+                        Ok(g) => {
+                            let count = g.entity_count().await.unwrap_or(0);
+                            if count > 0 {
+                                println!(
+                                    "[GraphRAG] Graph already has {} entities, no backfill needed",
+                                    count
+                                );
+                            }
+                            count == 0
+                        }
                         Err(_) => true,
                     }
                 } else {
