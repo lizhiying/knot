@@ -586,7 +586,8 @@ impl KnotStore {
             .chars()
             .map(|c| match c {
                 '+' | '-' | ':' | '^' | '~' | '*' | '?' | '\\' | '/' | '!' | '(' | ')' | '['
-                | ']' | '{' | '}' | '"' => ' ',
+                | ']' | '{' | '}' | '"' | '？' | '！' | '：' | '（' | '）' | '【' | '】' | '、'
+                | '。' | '，' | '；' => ' ',
                 _ => c,
             })
             .collect::<String>()
@@ -772,12 +773,34 @@ impl KnotStore {
         };
 
         // 文件过滤: Tantivy BooleanQuery 增加 file_path 约束
-        // 在 Tantivy 搜索中清理特殊字符（仅关键词搜索，不影响向量搜索）
-        let tantivy_query_text = Self::sanitize_for_tantivy(query_text);
-        println!(
-            "[Search-Debug] Tantivy query text: '{}'",
-            tantivy_query_text
-        );
+        // 1. 先清理特殊字符
+        let sanitized = Self::sanitize_for_tantivy(query_text);
+        // 2. 用 jieba 预分词，插入空格，防止 QueryParser 生成 PhraseQuery
+        //    不预分词时："王总买了什么" → PhraseQuery("王总买","了","什么") → 要求顺序匹配，失败
+        //    预分词后："王总买 了 什么" → TermQuery("王总买") OR TermQuery("了") OR TermQuery("什么")
+        //    虽然 jieba 查询侧分出 "王总买"，但 ICU 字段单字分词能匹配到 "王" 和 "总"
+        let tantivy_query_text = {
+            let tokenizer_manager = index.tokenizers();
+            let jieba = tokenizer_manager.get("jieba");
+            if let Some(mut jieba_tokenizer) = jieba {
+                let mut stream = jieba_tokenizer.token_stream(&sanitized);
+                let mut tokens = Vec::new();
+                while let Some(token) = stream.next() {
+                    let t = token.text.trim().to_string();
+                    if !t.is_empty() {
+                        tokens.push(t);
+                    }
+                }
+                let result = tokens.join(" ");
+                println!(
+                    "[Search-Debug] Pre-tokenized query: '{}' -> '{}'",
+                    sanitized, result
+                );
+                result
+            } else {
+                sanitized.clone()
+            }
+        };
         let final_query: Box<dyn tantivy::query::Query> = if let Some(fp) = file_filter {
             let file_term_query = tantivy::query::TermQuery::new(
                 tantivy::Term::from_field_text(f_path, fp),
