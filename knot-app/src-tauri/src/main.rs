@@ -1246,6 +1246,23 @@ async fn reindex_file(
 
     let _ = app.emit("indexing-status", "ready");
     println!("[Knowledge] Reindexed file: {}", file_path);
+
+    // 6. Update FileRegistry with new hash
+    if let Ok(content) = std::fs::read(&file_path) {
+        let hash = hex::encode(blake3::hash(&content).as_bytes());
+        let modified = std::fs::metadata(&file_path)
+            .and_then(|m| m.modified())
+            .ok()
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|d| d.as_secs() as i64)
+            .unwrap_or(0);
+        let registry = knot_core::registry::FileRegistry::new(&db_url).await.ok();
+        if let Some(reg) = registry {
+            let _ = reg.update_file(&file_path, &hash, modified).await;
+            println!("[Knowledge] Registry updated for: {}", file_path);
+        }
+    }
+
     Ok(())
 }
 
