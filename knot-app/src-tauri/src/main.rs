@@ -242,7 +242,9 @@ async fn parse_file(
 
     // 1. 获取 Embedding Provider
     let embedding_provider_guard = state.thread_safe_embedding.read().await;
-    let embedding_provider = embedding_provider_guard.as_ref().map(|p| p.as_ref());
+    let embedding_provider: Option<&dyn knot_parser::EmbeddingProvider> = embedding_provider_guard
+        .as_ref()
+        .map(|p| &**p as &dyn knot_parser::EmbeddingProvider);
 
     // 2. 获取 LLM Provider (Chat Client / Qwen3)
     let llm_provider_guard = state.chat_client.read().await;
@@ -666,12 +668,10 @@ fn main() {
                         };
                         if let Some(provider) = provider_opt {
                             let mut guard = embedding_for_api_clone.write().await;
-                            *guard = Some(
-                                provider
-                                    as std::sync::Arc<
-                                        dyn knot_parser::EmbeddingProvider + Send + Sync,
-                                    >,
-                            );
+                            let dyn_provider: std::sync::Arc<
+                                dyn knot_parser::EmbeddingProvider + Send + Sync,
+                            > = provider as _;
+                            *guard = Some(dyn_provider);
                             break;
                         }
                         tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
@@ -992,7 +992,6 @@ async fn start_background_indexing(
     // 2. Init Indexer with REAL provider
     // Cast Arc<ThreadSafeEmbeddingEngine> to Arc<dyn EmbeddingProvider>
     // ThreadSafeEmbeddingEngine implements EmbeddingProvider.
-    // However, Arc<Struct> does not automatically CoerceUnsized to Arc<dyn Trait> in all contexts easily without explicit cast.
     let provider_dyn: Arc<dyn knot_parser::EmbeddingProvider + Send + Sync> = embedding_provider;
 
     let indexer = KnotIndexer::new(&db_path, Some(provider_dyn)).await;
