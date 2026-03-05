@@ -259,47 +259,6 @@
             </button>
         </div>
     {:else}
-        <!-- 统计栏 -->
-        <div class="stats-bar">
-            <div class="stat-item">
-                <span class="stat-value">{stats.total}</span>
-                <span class="stat-label">文件</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item indexed">
-                <span class="stat-dot" style="background: #28c840"></span>
-                <span class="stat-value">{stats.indexed}</span>
-                <span class="stat-label">已索引</span>
-            </div>
-            {#if stats.outdated > 0}
-                <div class="stat-item outdated">
-                    <span class="stat-dot" style="background: #febc2e"></span>
-                    <span class="stat-value">{stats.outdated}</span>
-                    <span class="stat-label">待更新</span>
-                </div>
-            {/if}
-            {#if stats.unindexed > 0}
-                <div class="stat-item">
-                    <span
-                        class="stat-dot"
-                        style="background: rgba(255,255,255,0.3)"
-                    ></span>
-                    <span class="stat-value">{stats.unindexed}</span>
-                    <span class="stat-label">未索引</span>
-                </div>
-            {/if}
-            {#if stats.unsupported > 0}
-                <div class="stat-item">
-                    <span
-                        class="stat-dot"
-                        style="background: rgba(255,255,255,0.15)"
-                    ></span>
-                    <span class="stat-value">{stats.unsupported}</span>
-                    <span class="stat-label">不支持</span>
-                </div>
-            {/if}
-        </div>
-
         <!-- 搜索 + 过滤栏 -->
         <div class="toolbar">
             <div class="search-box">
@@ -525,45 +484,6 @@
         to {
             transform: rotate(360deg);
         }
-    }
-
-    /* 统计栏 */
-    .stats-bar {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 0 20px 12px;
-        flex-shrink: 0;
-    }
-
-    .stat-item {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .stat-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        flex-shrink: 0;
-    }
-
-    .stat-value {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text-primary);
-    }
-
-    .stat-label {
-        font-size: 11px;
-        color: var(--text-muted);
-    }
-
-    .stat-divider {
-        width: 1px;
-        height: 14px;
-        background: var(--border-color);
     }
 
     /* 搜索 + 过滤 */

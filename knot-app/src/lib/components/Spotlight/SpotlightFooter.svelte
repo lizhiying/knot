@@ -25,6 +25,26 @@
     let indexedDocs = $state(0);
     let startupTimeMs = $state(null);
 
+    // Knowledge 统计数据
+    let knowledgeTotalFiles = $state(0);
+    let knowledgeIndexedFiles = $state(0);
+
+    // 当切换到 Knowledge 视图时获取文件统计
+    $effect(() => {
+        if (navigation.view === VIEW_KNOWLEDGE) {
+            invoke("list_knowledge_files")
+                .then((files) => {
+                    knowledgeTotalFiles = files.length;
+                    knowledgeIndexedFiles = files.filter(
+                        (f) => f.index_status === "Indexed",
+                    ).length;
+                })
+                .catch((e) => {
+                    console.error("Failed to get knowledge stats:", e);
+                });
+        }
+    });
+
     onMount(() => {
         // Listen for model status updates
         const unlistenModelStatus = listen("model-status", (event) => {
@@ -195,6 +215,30 @@
 
         <!-- Divider -->
         <div class="w-px h-3 bg-[var(--border-color)] mx-2"></div>
+
+        <!-- Knowledge Stats (before ESC) -->
+        {#if navigation.view === VIEW_KNOWLEDGE}
+            <div
+                class="flex items-center gap-3 text-[var(--text-secondary)] opacity-60"
+            >
+                <div class="flex items-center gap-1.5">
+                    <span
+                        class="text-[10px] font-semibold text-[var(--text-primary)]"
+                        >{knowledgeTotalFiles}</span
+                    >
+                    <span class="text-[10px]">文件</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    <span
+                        class="text-[10px] font-semibold text-[var(--text-primary)]"
+                        >{knowledgeIndexedFiles}</span
+                    >
+                    <span class="text-[10px]">已索引</span>
+                </div>
+            </div>
+            <div class="w-px h-3 bg-[var(--border-color)] mx-2"></div>
+        {/if}
 
         <!-- Common shortcuts -->
         <div class="flex items-center gap-3 opacity-60">
