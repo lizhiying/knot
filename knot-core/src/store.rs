@@ -693,6 +693,11 @@ impl KnotStore {
         let index = self.get_tantivy_index();
         let reader = index.reader()?;
         let searcher = reader.searcher();
+        println!(
+            "[Search] Tantivy: {} segments, {} docs total",
+            searcher.segment_readers().len(),
+            searcher.num_docs()
+        );
 
         let schema = index.schema();
         let f_id = schema.get_field("id").unwrap();
