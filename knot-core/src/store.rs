@@ -423,7 +423,6 @@ impl KnotStore {
         let f_pid = schema.get_field("parent_id").unwrap();
         let f_bc = schema.get_field("breadcrumbs").unwrap();
 
-        let n_added = records.len();
         for record in records {
             let mut doc = TantivyDocument::default();
             doc.add_text(f_id, &record.id);
@@ -451,17 +450,7 @@ impl KnotStore {
             index_writer.add_document(doc)?;
         }
 
-        println!("[FTS] add_records: committing {} docs to Tantivy", n_added);
         index_writer.commit()?;
-
-        // Verify: count docs after commit
-        let verify_reader = index.reader()?;
-        let verify_searcher = verify_reader.searcher();
-        println!(
-            "[FTS] add_records: after commit, {} segments, {} docs total",
-            verify_searcher.segment_readers().len(),
-            verify_searcher.num_docs()
-        );
 
         Ok(())
     }
@@ -711,25 +700,6 @@ impl KnotStore {
             searcher.num_docs()
         );
 
-        // DEBUG: Check if order-detail doc exists in Tantivy by scanning file_path
-        {
-            let schema = index.schema();
-            let collector = tantivy::collector::Count;
-            let all_query = tantivy::query::AllQuery;
-            let total = searcher.search(&all_query, &collector)?;
-            println!("[Search-Debug] All docs count via AllQuery: {}", total);
-
-            // Try to search for "王总" directly with jieba field
-            let f_text_zh_debug = schema.get_field("text_zh").unwrap();
-            let term_wz = t_schema::Term::from_field_text(f_text_zh_debug, "王总");
-            let term_query = tantivy::query::TermQuery::new(term_wz, IndexRecordOption::Basic);
-            let wz_count = searcher.search(&term_query, &collector)?;
-            println!(
-                "[Search-Debug] Direct TermQuery '王总' on text_zh: {} docs",
-                wz_count
-            );
-        }
-
         let schema = index.schema();
         let f_id = schema.get_field("id").unwrap();
         let f_path = schema.get_field("file_path").unwrap();
@@ -792,10 +762,6 @@ impl KnotStore {
                     }
                 }
                 let result = tokens.join(" ");
-                println!(
-                    "[Search-Debug] Pre-tokenized query: '{}' -> '{}'",
-                    sanitized, result
-                );
                 result
             } else {
                 sanitized.clone()
@@ -824,10 +790,7 @@ impl KnotStore {
             }
         } else {
             match query_parser.parse_query(&tantivy_query_text) {
-                Ok(q) => {
-                    println!("[Search-Debug] Parsed query: {:?}", q);
-                    q
-                }
+                Ok(q) => q,
                 Err(e) => {
                     eprintln!("[Tantivy] Query Error: {}", e);
                     // Return early with vector-only results
