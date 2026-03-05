@@ -831,7 +831,7 @@ fn default_streaming_enabled() -> bool {
 }
 
 fn default_vector_distance_threshold() -> f32 {
-    0.75 // 默认值：过滤距离>0.75的结果（随机字符串距离约0.8-0.86）
+    0.9 // 默认值：过滤距离>0.9的结果（放宽阈值以支持自然语言问句）
 }
 
 fn default_llm_context_size() -> u32 {
