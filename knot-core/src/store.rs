@@ -423,6 +423,7 @@ impl KnotStore {
         let f_pid = schema.get_field("parent_id").unwrap();
         let f_bc = schema.get_field("breadcrumbs").unwrap();
 
+        let n_added = records.len();
         for record in records {
             let mut doc = TantivyDocument::default();
             doc.add_text(f_id, &record.id);
@@ -450,7 +451,17 @@ impl KnotStore {
             index_writer.add_document(doc)?;
         }
 
+        println!("[FTS] add_records: committing {} docs to Tantivy", n_added);
         index_writer.commit()?;
+
+        // Verify: count docs after commit
+        let verify_reader = index.reader()?;
+        let verify_searcher = verify_reader.searcher();
+        println!(
+            "[FTS] add_records: after commit, {} segments, {} docs total",
+            verify_searcher.segment_readers().len(),
+            verify_searcher.num_docs()
+        );
 
         Ok(())
     }
@@ -699,6 +710,25 @@ impl KnotStore {
             searcher.num_docs()
         );
 
+        // DEBUG: Check if order-detail doc exists in Tantivy by scanning file_path
+        {
+            let schema = index.schema();
+            let collector = tantivy::collector::Count;
+            let all_query = tantivy::query::AllQuery;
+            let total = searcher.search(&all_query, &collector)?;
+            println!("[Search-Debug] All docs count via AllQuery: {}", total);
+
+            // Try to search for "王总" directly with jieba field
+            let f_text_zh_debug = schema.get_field("text_zh").unwrap();
+            let term_wz = t_schema::Term::from_field_text(f_text_zh_debug, "王总");
+            let term_query = tantivy::query::TermQuery::new(term_wz, IndexRecordOption::Basic);
+            let wz_count = searcher.search(&term_query, &collector)?;
+            println!(
+                "[Search-Debug] Direct TermQuery '王总' on text_zh: {} docs",
+                wz_count
+            );
+        }
+
         let schema = index.schema();
         let f_id = schema.get_field("id").unwrap();
         let f_path = schema.get_field("file_path").unwrap();
@@ -733,6 +763,10 @@ impl KnotStore {
             parser.set_field_boost(f_text_std, 3.0); // 英文正文 (含 Stemmer)
             parser.set_field_boost(f_path_tags, 2.0); // 路径标签
             parser.set_field_boost(f_text_icu, 1.0); // ICU 泛语言兜底
+                                                     // RAG 搜索使用 OR 模式（Tantivy 默认）：匹配到任一分词就返回文档
+                                                     // 不要调用 set_conjunction_by_default()（AND 模式），那会导致
+                                                     // "王总买了什么" 要求文档同时包含所有分词 "王总"+"买"+"什么"
+                                                     // OR 模式配合 BM25：匹配词越多分数越高，RRF 融合保证最终排序质量
 
             parser
         };
@@ -740,16 +774,23 @@ impl KnotStore {
         // 文件过滤: Tantivy BooleanQuery 增加 file_path 约束
         // 在 Tantivy 搜索中清理特殊字符（仅关键词搜索，不影响向量搜索）
         let tantivy_query_text = Self::sanitize_for_tantivy(query_text);
+        println!(
+            "[Search-Debug] Tantivy query text: '{}'",
+            tantivy_query_text
+        );
         let final_query: Box<dyn tantivy::query::Query> = if let Some(fp) = file_filter {
             let file_term_query = tantivy::query::TermQuery::new(
                 tantivy::Term::from_field_text(f_path, fp),
                 tantivy::schema::IndexRecordOption::Basic,
             );
             match query_parser.parse_query(&tantivy_query_text) {
-                Ok(q) => Box::new(tantivy::query::BooleanQuery::new(vec![
-                    (tantivy::query::Occur::Must, q),
-                    (tantivy::query::Occur::Must, Box::new(file_term_query)),
-                ])),
+                Ok(q) => {
+                    println!("[Search-Debug] Parsed query: {:?}", q);
+                    Box::new(tantivy::query::BooleanQuery::new(vec![
+                        (tantivy::query::Occur::Must, q),
+                        (tantivy::query::Occur::Must, Box::new(file_term_query)),
+                    ]))
+                }
                 Err(e) => {
                     eprintln!("[Tantivy] Query Error: {}", e);
                     Box::new(tantivy::query::BooleanQuery::new(vec![(
@@ -760,7 +801,10 @@ impl KnotStore {
             }
         } else {
             match query_parser.parse_query(&tantivy_query_text) {
-                Ok(q) => q,
+                Ok(q) => {
+                    println!("[Search-Debug] Parsed query: {:?}", q);
+                    q
+                }
                 Err(e) => {
                     eprintln!("[Tantivy] Query Error: {}", e);
                     // Return early with vector-only results

@@ -1219,6 +1219,17 @@ async fn reindex_file(
         .map_err(|e| format!("Index error: {}", e))?;
 
     // 5. Save new records
+    println!("[Knowledge] Reindex produced {} records:", records.len());
+    for (i, r) in records.iter().enumerate() {
+        let preview: String = r.text.chars().take(200).collect();
+        println!(
+            "[Knowledge]   record[{}]: id={}, text_len={}, preview={}",
+            i,
+            r.id,
+            r.text.len(),
+            preview
+        );
+    }
     if !records.is_empty() {
         // GraphRAG extraction
         let graph_config = load_config(&app);
