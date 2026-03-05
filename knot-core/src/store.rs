@@ -761,7 +761,42 @@ impl KnotStore {
                         tokens.push(t);
                     }
                 }
-                let result = tokens.join(" ");
+
+                // 过滤中文停用词（查询中的虚词不应参与搜索）
+                let stop_words: std::collections::HashSet<&str> = [
+                    "了", "的", "是", "在", "有", "和", "就", "不", "人", "都", "一", "一个", "上",
+                    "也", "很", "到", "说", "要", "去", "你", "会", "着", "没有", "看", "好",
+                    "自己", "这", "他", "她", "它", "吗", "什么", "怎么", "哪", "那", "这个",
+                    "那个", "呢", "吧", "啊", "哦", "嗯", "把", "被", "让", "给", "从", "向", "为",
+                    "与", "及", "或", "但", "而", "且", "如果", "因为", "所以", "可以", "能", "会",
+                    "将", "已", "已经", "还", "又", "再",
+                ]
+                .iter()
+                .copied()
+                .collect();
+
+                let mut final_tokens: Vec<String> = Vec::new();
+                for t in &tokens {
+                    if stop_words.contains(t.as_str()) {
+                        continue;
+                    }
+                    final_tokens.push(t.clone());
+
+                    // 对多字 token 生成 2-gram 子 token
+                    // "王总买" → 额外添加 "王总" 和 "总买"
+                    // 解决查询/索引 jieba 分词不一致的问题
+                    let chars: Vec<char> = t.chars().collect();
+                    if chars.len() > 2 {
+                        for i in 0..chars.len() - 1 {
+                            let bigram: String = chars[i..=i + 1].iter().collect();
+                            if !final_tokens.contains(&bigram) {
+                                final_tokens.push(bigram);
+                            }
+                        }
+                    }
+                }
+
+                let result = final_tokens.join(" ");
                 result
             } else {
                 sanitized.clone()
@@ -773,13 +808,10 @@ impl KnotStore {
                 tantivy::schema::IndexRecordOption::Basic,
             );
             match query_parser.parse_query(&tantivy_query_text) {
-                Ok(q) => {
-                    println!("[Search-Debug] Parsed query: {:?}", q);
-                    Box::new(tantivy::query::BooleanQuery::new(vec![
-                        (tantivy::query::Occur::Must, q),
-                        (tantivy::query::Occur::Must, Box::new(file_term_query)),
-                    ]))
-                }
+                Ok(q) => Box::new(tantivy::query::BooleanQuery::new(vec![
+                    (tantivy::query::Occur::Must, q),
+                    (tantivy::query::Occur::Must, Box::new(file_term_query)),
+                ])),
                 Err(e) => {
                     eprintln!("[Tantivy] Query Error: {}", e);
                     Box::new(tantivy::query::BooleanQuery::new(vec![(
