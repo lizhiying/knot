@@ -92,15 +92,15 @@ impl ModelSourceConfig {
         // Hardcoded mapping logic
         // GLM-OCR-Q8_0.gguf -> ggml-org/GLM-OCR-GGUF/resolve/main/GLM-OCR-Q8_0.gguf
         // mmproj-GLM-OCR-Q8_0.gguf -> ggml-org/GLM-OCR-GGUF/resolve/main/mmproj-GLM-OCR-Q8_0.gguf
-        // Qwen3-1.7B-Q4_K_M.gguf -> unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf
+        // Qwen3.5-4B-Q4_K_M.gguf -> unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf
 
         let path = match filename {
             "GLM-OCR-Q8_0.gguf" => "ggml-org/GLM-OCR-GGUF/resolve/main/GLM-OCR-Q8_0.gguf",
             "mmproj-GLM-OCR-Q8_0.gguf" => {
                 "ggml-org/GLM-OCR-GGUF/resolve/main/mmproj-GLM-OCR-Q8_0.gguf"
             }
-            "Qwen3-1.7B-Q4_K_M.gguf" => {
-                "unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf"
+            "Qwen3.5-4B-Q4_K_M.gguf" => {
+                "unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf"
             }
             // PaddleOCR PP-OCRv5 模型（knot-pdf OCR 依赖）
             // HF 仓库: bukuroo/PPOCRv5-ONNX，使用 mobile 版本（体积小、速度快）

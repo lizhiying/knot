@@ -24,9 +24,9 @@
             label: "OCR Vision Projector",
             sizeBytes: 484 * SIZE_MB,
         },
-        "Qwen3-1.7B-Q4_K_M.gguf": {
+        "Qwen3.5-4B-Q4_K_M.gguf": {
             label: "Chat Logic",
-            sizeBytes: 1.7 * SIZE_GB,
+            sizeBytes: 3.1 * SIZE_GB,
         },
         "ppocrv5/det.onnx": {
             label: "PDF OCR Detection",

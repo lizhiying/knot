@@ -448,7 +448,7 @@ impl LlmProvider for LlamaClient {
             text.len()
         );
         let prompt = format!(
-            "<|im_start|>system\nYou are a helpful summary assistant. Summarize the content concisely in the same language as the content.<|im_end|>\n<|im_start|>user\n{}\n/no_think<|im_end|>\n<|im_start|>assistant\n",
+            "<|im_start|>system\nYou are a helpful summary assistant. Summarize the content concisely in the same language as the content.<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n<think>\n</think>\n\n",
             text
         );
 

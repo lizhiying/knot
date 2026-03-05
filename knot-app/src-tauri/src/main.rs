@@ -1700,31 +1700,35 @@ async fn rag_generate(
         context
     };
 
-    // 根据 think 模式配置生成不同的 prompt
-    let think_suffix = if config.llm_think_enabled {
-        ""
+    // 构建 prompt
+    // 注意：在 assistant 回复开头预填充空 <think></think> 块
+    // 这告诉模型"思考阶段已完成"，直接输出答案
+    // /no_think 指令对 /completion 原始接口无效，只在聊天模板引擎中生效
+    let think_prefix = if config.llm_think_enabled {
+        "" // 允许模型自由思考
     } else {
-        " /no_think"
+        "<think>\n</think>\n\n" // 预填充空 think 块，跳过思考
     };
 
     let prompt = format!(
         r#"<|im_start|>system
-你是一个智能助手。请根据参考文档回答用户问题。
+你是一个智能助手。请根据参考文档直接回答用户问题。
 
 **回答原则**：
-1. **开门见山**：直接把文档中找到的关键信息（如日期、地点、结论）放在第一句。
+1. **直接回答**：开门见山，把答案放在第一句。优先从文档中提取具体的日期、时间、地点、数字等事实信息来回答问题。
 2. **去除客套**：不要使用"根据参考文档..."、"综上所述..."等前缀。
-3. **详细展开**：在核心答案之后，引用文档细节进行说明。
-4. 只有当文档完全不包含相关信息时，才说"无法找到答案"。
+3. **禁止输出思考过程**：不要写分析推理文字，直接给最终答案。
+4. **详细展开**：在核心答案之后，引用文档细节进行补充说明。
+5. 只有当文档完全不包含任何相关信息时，才说"无法找到答案"。如果文档中有任何相关内容，都要尽力回答。
 <|im_end|>
 <|im_start|>user
 参考文档：
 {}
 
-用户问题: {}{}<|im_end|>
+用户问题: {}<|im_end|>
 <|im_start|>assistant
-"#,
-        final_context, query, think_suffix
+{}"#,
+        final_context, query, think_prefix
     );
 
     println!(
@@ -1745,12 +1749,14 @@ async fn rag_generate(
         println!("[rag_generate] Stream started...");
 
         while let Some(token) = rx.recv().await {
-            // Emit token event
+            // Emit token event directly - thinking is prevented at prompt level
+            // via empty <think></think> prefix
             if let Err(e) = app.emit("llm-token", token) {
                 println!("[rag_generate] Failed to emit token: {}", e);
                 break;
             }
         }
+
         println!("[rag_generate] Stream finished.");
     } else {
         // Use synchronous generation

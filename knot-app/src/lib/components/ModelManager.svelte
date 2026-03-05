@@ -23,9 +23,9 @@
             exists: false,
         },
         {
-            name: "Qwen3-1.7B-Q4_K_M.gguf",
-            label: "Chat Logic (Qwen3)",
-            size: "1.7GB",
+            name: "Qwen3.5-4B-Q4_K_M.gguf",
+            label: "Chat Logic (Qwen3.5)",
+            size: "3.1GB",
             exists: false,
         },
         {
