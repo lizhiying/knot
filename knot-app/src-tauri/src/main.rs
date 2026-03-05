@@ -1594,6 +1594,14 @@ async fn start_background_indexing(
 
             println!("[Indexer] Initial scan complete.");
             let _ = app.emit("indexing-status", "ready");
+
+            // Invalidate cached KnotStore so next search sees new Tantivy segments
+            // The pre-warmed store's Tantivy Index doesn't see segments written
+            // by the background indexer's separate KnotStore instance
+            let app_state = app.state::<AppState>();
+            let mut guard = app_state.knot_store.write().await;
+            *guard = None;
+            println!("[Indexer] Invalidated cached KnotStore (will be re-created on next search)");
         }
         Err(e) => {
             eprintln!("[Indexer] Initial scan failed: {}", e);
@@ -1780,6 +1788,13 @@ async fn start_background_indexing(
                              }
 
                             let _ = app.emit("indexing-status", "ready");
+
+                            // Invalidate cached KnotStore after monitor indexing
+                            {
+                                let app_state = app.state::<AppState>();
+                                let mut guard = app_state.knot_store.write().await;
+                                *guard = None;
+                            }
                         }
                     }
                 }
