@@ -566,11 +566,24 @@ impl KnotStore {
         deduped.join(" ")
     }
 
+    /// 全局搜索（无文件过滤），保持向后兼容
     pub async fn search(
         &self,
         query_vector: Vec<f32>,
         query_text: &str,
         distance_threshold: f32,
+    ) -> Result<Vec<SearchResult>> {
+        self.search_with_filter(query_vector, query_text, distance_threshold, None)
+            .await
+    }
+
+    /// 搜索，支持可选的文件路径过滤
+    pub async fn search_with_filter(
+        &self,
+        query_vector: Vec<f32>,
+        query_text: &str,
+        distance_threshold: f32,
+        file_filter: Option<&str>,
     ) -> Result<Vec<SearchResult>> {
         use std::collections::HashMap;
         use std::time::Instant;
@@ -615,7 +628,11 @@ impl KnotStore {
         let vec_start = Instant::now();
         if table_names.contains(&self.table_name) {
             let table = self.conn.open_table(&self.table_name).execute().await?;
-            let vec_query = table.query().nearest_to(query_vector)?;
+            let mut vec_query = table.query().nearest_to(query_vector)?;
+            // 文件过滤: LanceDB WHERE 条件
+            if let Some(fp) = file_filter {
+                vec_query = vec_query.only_if(format!("file_path = '{}'", fp));
+            }
             let vec_results_stream = vec_query.limit(20).execute().await?;
             let vec_results_batches: Vec<RecordBatch> = vec_results_stream.try_collect().await?;
             let candidates = self.batches_to_results_with_distance(vec_results_batches);
@@ -697,71 +714,99 @@ impl KnotStore {
             parser
         };
 
-        match query_parser.parse_query(query_text) {
-            Ok(q) => {
-                let top_docs = searcher.search(&q, &TopDocs::with_limit(20))?;
+        // 文件过滤: Tantivy BooleanQuery 增加 file_path 约束
+        let final_query: Box<dyn tantivy::query::Query> = if let Some(fp) = file_filter {
+            let file_term_query = tantivy::query::TermQuery::new(
+                tantivy::Term::from_field_text(f_path, fp),
+                tantivy::schema::IndexRecordOption::Basic,
+            );
+            match query_parser.parse_query(query_text) {
+                Ok(q) => Box::new(tantivy::query::BooleanQuery::new(vec![
+                    (tantivy::query::Occur::Must, q),
+                    (tantivy::query::Occur::Must, Box::new(file_term_query)),
+                ])),
+                Err(e) => {
+                    eprintln!("[Tantivy] Query Error: {}", e);
+                    Box::new(tantivy::query::BooleanQuery::new(vec![(
+                        tantivy::query::Occur::Must,
+                        Box::new(file_term_query),
+                    )]))
+                }
+            }
+        } else {
+            match query_parser.parse_query(query_text) {
+                Ok(q) => q,
+                Err(e) => {
+                    eprintln!("[Tantivy] Query Error: {}", e);
+                    // Return early with vector-only results
+                    let final_results: Vec<SearchResult> = results_map.into_values().collect();
+                    return Ok(final_results.into_iter().take(10).collect());
+                }
+            }
+        };
 
-                // 收集 BM25 分数用于标准化
-                let bm25_scores: Vec<f32> = top_docs.iter().map(|(s, _)| *s).collect();
-                let max_bm25 = bm25_scores.iter().cloned().fold(0.0, f32::max);
-                let min_bm25 = bm25_scores.iter().cloned().fold(f32::MAX, f32::min);
-                let bm25_range = (max_bm25 - min_bm25).max(0.001); // 避免除零
+        {
+            let top_docs = searcher.search(&*final_query, &TopDocs::with_limit(20))?;
 
-                let mut rank = 1usize;
-                for (bm25_score, doc_address) in top_docs {
-                    let doc: TantivyDocument = searcher.doc(doc_address)?;
+            // 收集 BM25 分数用于标准化
+            let bm25_scores: Vec<f32> = top_docs.iter().map(|(s, _)| *s).collect();
+            let max_bm25 = bm25_scores.iter().cloned().fold(0.0, f32::max);
+            let min_bm25 = bm25_scores.iter().cloned().fold(f32::MAX, f32::min);
+            let bm25_range = (max_bm25 - min_bm25).max(0.001); // 避免除零
 
-                    let doc_id = doc
-                        .get_first(f_id)
+            let mut rank = 1usize;
+            for (bm25_score, doc_address) in top_docs {
+                let doc: TantivyDocument = searcher.doc(doc_address)?;
+
+                let doc_id = doc
+                    .get_first(f_id)
+                    .and_then(|v| v.as_str())
+                    .unwrap_or_default()
+                    .to_string();
+
+                keyword_ranks.insert(doc_id.clone(), rank);
+                rank += 1;
+
+                // BM25 标准化到 0-100
+                let normalized_bm25 = ((bm25_score - min_bm25) / bm25_range * 100.0).min(100.0);
+
+                if let Some(existing) = results_map.get_mut(&doc_id) {
+                    // 已存在向量结果，标记为混合
+                    existing.source = SearchSource::Hybrid;
+                } else {
+                    // 仅关键词结果
+                    let text = doc
+                        .get_first(f_content)
                         .and_then(|v| v.as_str())
                         .unwrap_or_default()
                         .to_string();
+                    let file_path = doc
+                        .get_first(f_path)
+                        .and_then(|v| v.as_str())
+                        .unwrap_or_default()
+                        .to_string();
+                    let parent_id = doc
+                        .get_first(f_pid)
+                        .and_then(|v| v.as_str())
+                        .map(|s| s.to_string());
+                    let breadcrumbs = doc
+                        .get_first(f_bc)
+                        .and_then(|v| v.as_str())
+                        .map(|s| s.to_string());
 
-                    keyword_ranks.insert(doc_id.clone(), rank);
-                    rank += 1;
-
-                    // BM25 标准化到 0-100
-                    let normalized_bm25 = ((bm25_score - min_bm25) / bm25_range * 100.0).min(100.0);
-
-                    if let Some(existing) = results_map.get_mut(&doc_id) {
-                        // 已存在向量结果，标记为混合
-                        existing.source = SearchSource::Hybrid;
-                    } else {
-                        // 仅关键词结果
-                        let text = doc
-                            .get_first(f_content)
-                            .and_then(|v| v.as_str())
-                            .unwrap_or_default()
-                            .to_string();
-                        let file_path = doc
-                            .get_first(f_path)
-                            .and_then(|v| v.as_str())
-                            .unwrap_or_default()
-                            .to_string();
-                        let parent_id = doc
-                            .get_first(f_pid)
-                            .and_then(|v| v.as_str())
-                            .map(|s| s.to_string());
-                        let breadcrumbs = doc
-                            .get_first(f_bc)
-                            .and_then(|v| v.as_str())
-                            .map(|s| s.to_string());
-
-                        let new_result = SearchResult {
-                            id: doc_id.clone(),
-                            text,
-                            file_path,
-                            score: normalized_bm25,
-                            parent_id,
-                            breadcrumbs,
-                            source: SearchSource::Keyword,
-                            expanded_context: None,
-                        };
-                        results_map.insert(doc_id, new_result);
-                    }
+                    let new_result = SearchResult {
+                        id: doc_id.clone(),
+                        text,
+                        file_path,
+                        score: normalized_bm25,
+                        parent_id,
+                        breadcrumbs,
+                        source: SearchSource::Keyword,
+                        expanded_context: None,
+                    };
+                    results_map.insert(doc_id, new_result);
                 }
             }
-            Err(e) => eprintln!("[Tantivy] Query Error: {}", e),
         }
         if std::env::var("KNOT_QUIET").is_err() {
             println!(
@@ -980,6 +1025,77 @@ impl KnotStore {
             return Ok(text);
         }
         Ok(None)
+    }
+
+    /// 根据 file_path 查询 Tantivy 中该文件的所有 chunk
+    ///
+    /// 返回 (id, preview, breadcrumbs) 三元组列表。
+    /// 用于 Knowledge 页面的文件详情面板。
+    pub fn get_file_chunks(
+        &self,
+        file_path: &str,
+    ) -> Result<Vec<(String, String, Option<String>)>> {
+        let index = self.get_tantivy_index();
+        let reader = index.reader()?;
+        let searcher = reader.searcher();
+        let schema = index.schema();
+
+        let f_id = schema.get_field("id")?;
+        let f_content = schema.get_field("content")?;
+        let f_file_path = schema.get_field("file_path")?;
+        let f_breadcrumbs = schema.get_field("breadcrumbs")?;
+
+        // 精确匹配 file_path
+        let path_query = tantivy::query::TermQuery::new(
+            tantivy::Term::from_field_text(f_file_path, file_path),
+            tantivy::schema::IndexRecordOption::Basic,
+        );
+
+        let top_docs =
+            searcher.search(&path_query, &tantivy::collector::TopDocs::with_limit(10000))?;
+
+        let mut results = Vec::new();
+        let mut seen_ids = std::collections::HashSet::new();
+        for (_score, doc_address) in top_docs {
+            let doc: TantivyDocument = searcher.doc(doc_address)?;
+            let id = doc
+                .get_first(f_id)
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+
+            // 跳过 doc-summary 记录
+            if id.ends_with("-doc-summary") {
+                continue;
+            }
+
+            // 去重：Tantivy 多 segment 可能返回同一文档的多个副本
+            if !id.is_empty() && !seen_ids.insert(id.clone()) {
+                continue;
+            }
+
+            let text = doc
+                .get_first(f_content)
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            let breadcrumbs = doc
+                .get_first(f_breadcrumbs)
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string())
+                .filter(|s| !s.is_empty());
+
+            // 截取前 200 字符作为预览
+            let preview = Self::truncate_text(&text, 200);
+
+            if !id.is_empty() {
+                results.push((id, preview, breadcrumbs));
+            }
+        }
+
+        // 按 id 排序以保持文档内的原始顺序
+        results.sort_by(|a, b| a.0.cmp(&b.0));
+        Ok(results)
     }
 
     /// 从 Tantivy 中读取所有文档的 (id, text, file_path)

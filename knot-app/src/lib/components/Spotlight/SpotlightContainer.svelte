@@ -17,6 +17,7 @@
     } from "$lib/stores/navigation.svelte.js";
     import DocParser from "./../DocParser.svelte";
     import Settings from "./../Settings.svelte";
+    import Knowledge from "./../Knowledge.svelte";
     import { invoke } from "@tauri-apps/api/core";
     import { listen } from "@tauri-apps/api/event";
     import { onMount } from "svelte";
@@ -140,7 +141,10 @@
         try {
             // 调用 rag_search（快速返回）
             console.log("[Spotlight] Invoking rag_search:", query);
-            const searchResponse = await invoke("rag_search", { query: query });
+            const searchResponse = await invoke("rag_search", {
+                query: query,
+                filePath: null,
+            });
 
             // 记录搜索耗时
             const durationSec = (performance.now() - searchStartTime) / 1000;
@@ -463,14 +467,7 @@
             {:else if navigation.view === VIEW_SETTINGS}
                 <Settings />
             {:else if navigation.view === VIEW_KNOWLEDGE}
-                <div
-                    class="flex-1 flex items-center justify-center flex-col gap-4"
-                >
-                    <span class="material-symbols-outlined text-2xl opacity-50"
-                        >library_books</span
-                    >
-                    <p>Knowledge View Coming Soon</p>
-                </div>
+                <Knowledge />
             {/if}
         </div>
 

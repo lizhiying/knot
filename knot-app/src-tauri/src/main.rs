@@ -717,7 +717,12 @@ fn main() {
             set_multi_hop_enabled,
             set_graph_rag_enabled,
             get_graph_data,
-            get_index_status
+            get_index_status,
+            list_knowledge_files,
+            get_file_index_detail,
+            reindex_file,
+            ignore_file,
+            unignore_file
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -816,6 +821,9 @@ struct AppConfig {
     /// 是否启用知识图谱（实验性功能）
     #[serde(default = "default_graph_rag_enabled")]
     graph_rag_enabled: bool,
+    /// 忽略文件列表：这些文件不会被索引和监控
+    #[serde(default)]
+    ignored_files: Vec<String>,
 }
 
 fn default_streaming_enabled() -> bool {
@@ -876,6 +884,400 @@ fn save_config(app: &tauri::AppHandle, config: &AppConfig) -> Result<(), String>
     }
     let content = serde_json::to_string_pretty(config).map_err(|e| e.to_string())?;
     std::fs::write(path, content).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+// --- Knowledge Page ---
+
+#[derive(serde::Serialize, Clone, Debug)]
+enum KnowledgeFileType {
+    Markdown,
+    Text,
+    Pdf,
+    Html,
+    Word,
+    PowerPoint,
+    Excel,
+    Csv,
+    Image,
+    Other,
+}
+
+#[derive(serde::Serialize, Clone, Debug)]
+enum KnowledgeIndexState {
+    Unindexed,
+    Indexed,
+    Outdated,
+    Ignored,
+    Unsupported,
+}
+
+#[derive(serde::Serialize, Clone, Debug)]
+struct KnowledgeFile {
+    path: String,
+    name: String,
+    relative_path: String,
+    size: u64,
+    modified: i64,
+    file_type: KnowledgeFileType,
+    index_status: KnowledgeIndexState,
+}
+
+fn classify_file_type(ext: &str) -> KnowledgeFileType {
+    match ext.to_lowercase().as_str() {
+        "md" => KnowledgeFileType::Markdown,
+        "txt" => KnowledgeFileType::Text,
+        "pdf" => KnowledgeFileType::Pdf,
+        "html" | "htm" => KnowledgeFileType::Html,
+        "docx" => KnowledgeFileType::Word,
+        "pptx" => KnowledgeFileType::PowerPoint,
+        "xlsx" => KnowledgeFileType::Excel,
+        "csv" => KnowledgeFileType::Csv,
+        "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp" | "svg" | "ico" => KnowledgeFileType::Image,
+        _ => KnowledgeFileType::Other,
+    }
+}
+
+fn is_indexable_type(file_type: &KnowledgeFileType) -> bool {
+    matches!(
+        file_type,
+        KnowledgeFileType::Markdown
+            | KnowledgeFileType::Text
+            | KnowledgeFileType::Pdf
+            | KnowledgeFileType::Html
+    )
+}
+
+#[tauri::command]
+async fn list_knowledge_files(app: tauri::AppHandle) -> Result<Vec<KnowledgeFile>, String> {
+    use walkdir::WalkDir;
+
+    let config = load_config(&app);
+    let data_dir = config.data_dir.ok_or("Data directory not set")?;
+    let ignored_files: std::collections::HashSet<String> =
+        config.ignored_files.into_iter().collect();
+
+    // Get index base dir for FileRegistry
+    let base_dir = get_index_base_dir(&app, &data_dir);
+    let db_path = base_dir.join("knot.db");
+    let db_url = format!("sqlite://{}?mode=rwc", db_path.to_string_lossy());
+
+    let registry = knot_core::registry::FileRegistry::new(&db_url).await.ok();
+
+    // Get all registered file hashes for batch lookup
+    let mut registered_hashes: std::collections::HashMap<String, String> =
+        std::collections::HashMap::new();
+    if let Some(reg) = &registry {
+        if let Ok(files) = reg.get_all_file_hashes().await {
+            registered_hashes = files;
+        }
+    }
+
+    let data_path = std::path::Path::new(&data_dir);
+    let mut files = Vec::new();
+
+    for entry in WalkDir::new(&data_dir).into_iter().filter_map(|e| e.ok()) {
+        if !entry.file_type().is_file() {
+            continue;
+        }
+
+        let file_path = entry.path();
+
+        // Skip hidden files
+        if file_path
+            .file_name()
+            .map(|s| s.to_string_lossy().starts_with('.'))
+            .unwrap_or(false)
+        {
+            continue;
+        }
+
+        // Skip hidden directories in path
+        let is_in_hidden_dir = file_path.ancestors().any(|ancestor| {
+            ancestor
+                .file_name()
+                .map(|s| s.to_string_lossy().starts_with('.') && s != ".")
+                .unwrap_or(false)
+        });
+        if is_in_hidden_dir {
+            continue;
+        }
+
+        let ext = file_path
+            .extension()
+            .map(|e| e.to_string_lossy().to_string())
+            .unwrap_or_default();
+
+        let file_type = classify_file_type(&ext);
+
+        // Skip Other type (unknown extensions)
+        if matches!(file_type, KnowledgeFileType::Other) {
+            continue;
+        }
+
+        let abs_path = std::fs::canonicalize(file_path)
+            .unwrap_or_else(|_| file_path.to_path_buf())
+            .to_string_lossy()
+            .to_string();
+
+        let name = file_path
+            .file_name()
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_default();
+
+        let relative_path = file_path
+            .strip_prefix(data_path)
+            .map(|p| p.to_string_lossy().to_string())
+            .unwrap_or_else(|_| abs_path.clone());
+
+        let meta = entry.metadata().ok();
+        let size = meta.as_ref().map(|m| m.len()).unwrap_or(0);
+        let modified = meta
+            .as_ref()
+            .and_then(|m| m.modified().ok())
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|d| d.as_secs() as i64)
+            .unwrap_or(0);
+
+        // Determine index status
+        let index_status = if ignored_files.contains(&abs_path) {
+            KnowledgeIndexState::Ignored
+        } else if !is_indexable_type(&file_type) {
+            KnowledgeIndexState::Unsupported
+        } else if let Some(stored_hash) = registered_hashes.get(&abs_path) {
+            // File is in registry, check if hash matches
+            if let Ok(content) = std::fs::read(file_path) {
+                let current_hash = hex::encode(blake3::hash(&content).as_bytes());
+                if &current_hash == stored_hash {
+                    KnowledgeIndexState::Indexed
+                } else {
+                    KnowledgeIndexState::Outdated
+                }
+            } else {
+                KnowledgeIndexState::Indexed // Can't read file, assume indexed
+            }
+        } else {
+            KnowledgeIndexState::Unindexed
+        };
+
+        files.push(KnowledgeFile {
+            path: abs_path,
+            name,
+            relative_path,
+            size,
+            modified,
+            file_type,
+            index_status,
+        });
+    }
+
+    // Sort by name
+    files.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+
+    Ok(files)
+}
+
+// --- Knowledge Page Detail & Actions ---
+
+#[derive(serde::Serialize, Clone, Debug)]
+struct ChunkSummary {
+    id: String,
+    preview: String,
+    breadcrumbs: Option<String>,
+}
+
+#[derive(serde::Serialize, Clone, Debug)]
+struct FileIndexDetail {
+    file_path: String,
+    chunk_count: usize,
+    chunks: Vec<ChunkSummary>,
+    indexed_at: Option<i64>,
+    content_hash: Option<String>,
+}
+
+#[tauri::command]
+async fn get_file_index_detail(
+    app: tauri::AppHandle,
+    file_path: String,
+) -> Result<FileIndexDetail, String> {
+    let config = load_config(&app);
+    let data_dir = config.data_dir.ok_or("Data directory not set")?;
+    let base_dir = get_index_base_dir(&app, &data_dir);
+
+    let index_path = base_dir
+        .join("knot_index.lance")
+        .to_string_lossy()
+        .to_string();
+    let db_path = base_dir.join("knot.db");
+    let db_url = format!("sqlite://{}?mode=rwc", db_path.to_string_lossy());
+
+    // Get chunks from Tantivy
+    let store = knot_core::store::KnotStore::new(&index_path)
+        .await
+        .map_err(|e| format!("Store error: {}", e))?;
+    let raw_chunks = store
+        .get_file_chunks(&file_path)
+        .map_err(|e| format!("Chunk query error: {}", e))?;
+
+    let chunks: Vec<ChunkSummary> = raw_chunks
+        .into_iter()
+        .map(|(id, preview, breadcrumbs)| ChunkSummary {
+            id,
+            preview,
+            breadcrumbs,
+        })
+        .collect();
+    let chunk_count = chunks.len();
+
+    // Get registry info
+    let registry = knot_core::registry::FileRegistry::new(&db_url).await.ok();
+    let (indexed_at, content_hash) = if let Some(reg) = &registry {
+        let hash = reg.get_file_hash(&file_path).await.ok().flatten();
+        let at = reg.get_indexed_at(&file_path).await.ok().flatten();
+        (at, hash)
+    } else {
+        (None, None)
+    };
+
+    Ok(FileIndexDetail {
+        file_path,
+        chunk_count,
+        chunks,
+        indexed_at,
+        content_hash,
+    })
+}
+
+#[tauri::command]
+async fn reindex_file(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    file_path: String,
+) -> Result<(), String> {
+    let config = load_config(&app);
+    let data_dir = config.data_dir.ok_or("Data directory not set")?;
+    let base_dir = get_index_base_dir(&app, &data_dir);
+
+    let index_path = base_dir
+        .join("knot_index.lance")
+        .to_string_lossy()
+        .to_string();
+    let db_path = base_dir.join("knot.db").to_string_lossy().to_string();
+    let db_url = format!("sqlite://{}?mode=rwc", db_path);
+
+    let _ = app.emit("indexing-status", format!("reindexing: {}", file_path));
+
+    // 1. Delete old index data
+    let store = knot_core::store::KnotStore::new(&index_path)
+        .await
+        .map_err(|e| format!("Store error: {}", e))?;
+    store
+        .delete_file(&file_path)
+        .await
+        .map_err(|e| format!("Delete error: {}", e))?;
+
+    // 2. Clear registry for this file
+    let registry = knot_core::registry::FileRegistry::new(&db_url)
+        .await
+        .map_err(|e| format!("Registry error: {}", e))?;
+    registry
+        .remove_file(&file_path)
+        .await
+        .map_err(|e| format!("Registry remove error: {}", e))?;
+
+    // 3. Get embedding provider
+    let embedding_provider = {
+        let guard = state.thread_safe_embedding.read().await;
+        guard.clone()
+    };
+    let embedding_provider = embedding_provider.ok_or("Embedding engine not loaded")?;
+    let provider_dyn: Arc<dyn knot_parser::EmbeddingProvider + Send + Sync> = embedding_provider;
+
+    // 4. Re-index the file
+    let indexer = knot_core::index::KnotIndexer::new(&db_path, Some(provider_dyn)).await;
+    let path = std::path::Path::new(&file_path);
+    let records = indexer
+        .index_file(path)
+        .await
+        .map_err(|e| format!("Index error: {}", e))?;
+
+    // 5. Save new records
+    if !records.is_empty() {
+        // GraphRAG extraction
+        let graph_config = load_config(&app);
+        if graph_config.graph_rag_enabled {
+            let (entities, relations) = knot_core::entity::extract_from_records(&records);
+            let deduped = knot_core::entity::dedup_entities(entities);
+            let graph_db_path = base_dir.join("knot_graph.db").to_string_lossy().to_string();
+            // Delete old entities for this file first
+            if let Ok(graph) = knot_core::entity::EntityGraph::new(&graph_db_path).await {
+                let _ = graph.delete_by_file(&file_path).await;
+                let _ = graph.add_entities(&deduped).await;
+                let _ = graph.add_relations(&relations).await;
+            }
+        }
+
+        store
+            .add_records(records)
+            .await
+            .map_err(|e| format!("Store add error: {}", e))?;
+        store
+            .create_fts_index()
+            .await
+            .map_err(|e| format!("FTS error: {}", e))?;
+    }
+
+    let _ = app.emit("indexing-status", "ready");
+    println!("[Knowledge] Reindexed file: {}", file_path);
+    Ok(())
+}
+
+#[tauri::command]
+async fn ignore_file(app: tauri::AppHandle, file_path: String) -> Result<(), String> {
+    // 1. Add to ignored list in config
+    let mut config = load_config(&app);
+    if !config.ignored_files.contains(&file_path) {
+        config.ignored_files.push(file_path.clone());
+        let _ = save_config(&app, &config);
+    }
+
+    let data_dir = config.data_dir.ok_or("Data directory not set")?;
+    let base_dir = get_index_base_dir(&app, &data_dir);
+    let index_path = base_dir
+        .join("knot_index.lance")
+        .to_string_lossy()
+        .to_string();
+    let db_path = base_dir.join("knot.db");
+    let db_url = format!("sqlite://{}?mode=rwc", db_path.to_string_lossy());
+
+    // 2. Delete from KnotStore (LanceDB + Tantivy)
+    if let Ok(store) = knot_core::store::KnotStore::new(&index_path).await {
+        let _ = store.delete_file(&file_path).await;
+    }
+
+    // 3. Delete from FileRegistry
+    if let Ok(registry) = knot_core::registry::FileRegistry::new(&db_url).await {
+        let _ = registry.remove_file(&file_path).await;
+    }
+
+    // 4. Delete from EntityGraph if GraphRAG enabled
+    if config.graph_rag_enabled {
+        let graph_db_path = base_dir.join("knot_graph.db").to_string_lossy().to_string();
+        if let Ok(graph) = knot_core::entity::EntityGraph::new(&graph_db_path).await {
+            let _ = graph.delete_by_file(&file_path).await;
+        }
+    }
+
+    println!("[Knowledge] Ignored file: {}", file_path);
+    Ok(())
+}
+
+#[tauri::command]
+async fn unignore_file(app: tauri::AppHandle, file_path: String) -> Result<(), String> {
+    let mut config = load_config(&app);
+    config.ignored_files.retain(|f| f != &file_path);
+    let _ = save_config(&app, &config);
+    println!("[Knowledge] Unignored file: {}", file_path);
     Ok(())
 }
 
@@ -1378,6 +1780,7 @@ async fn rag_search(
     app: tauri::AppHandle,
     state: State<'_, AppState>,
     query: String,
+    file_path: Option<String>,
 ) -> Result<RagSearchResponse, String> {
     use std::time::Instant;
 
@@ -1463,7 +1866,7 @@ async fn rag_search(
 
     let search_start = Instant::now();
     let mut search_results = store
-        .search(query_vec, &query, distance_threshold)
+        .search_with_filter(query_vec, &query, distance_threshold, file_path.as_deref())
         .await
         .map_err(|e| e.to_string())?;
     println!(
@@ -1487,7 +1890,12 @@ async fn rag_search(
                 .await
                 .map_err(|e| e.to_string())?;
             let hop_results = store
-                .search(hop_vec, &expanded_query, distance_threshold)
+                .search_with_filter(
+                    hop_vec,
+                    &expanded_query,
+                    distance_threshold,
+                    file_path.as_deref(),
+                )
                 .await
                 .map_err(|e| e.to_string())?;
             let first_count = search_results.len();

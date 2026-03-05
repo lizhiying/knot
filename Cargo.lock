@@ -4696,8 +4696,10 @@ dependencies = [
  "async-trait",
  "axum",
  "base64 0.21.7",
+ "blake3",
  "fs2",
  "futures-util",
+ "hex",
  "knot-core",
  "knot-parser",
  "libc",
@@ -4715,6 +4717,7 @@ dependencies = [
  "tokenizers",
  "tokio",
  "tower-http 0.5.2",
+ "walkdir",
 ]
 
 [[package]]

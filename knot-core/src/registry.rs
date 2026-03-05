@@ -76,6 +76,29 @@ impl FileRegistry {
         Ok(())
     }
 
+    /// 获取所有文件的路径和 content_hash 映射
+    /// 用于 Knowledge 页面批量判断索引状态
+    pub async fn get_all_file_hashes(&self) -> Result<std::collections::HashMap<String, String>> {
+        let rows = sqlx::query(
+            "SELECT file_path, content_hash FROM file_registry WHERE content_hash IS NOT NULL",
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(rows
+            .into_iter()
+            .map(|r| (r.get("file_path"), r.get("content_hash")))
+            .collect())
+    }
+
+    /// 获取指定文件的索引时间
+    pub async fn get_indexed_at(&self, path: &str) -> Result<Option<i64>> {
+        let row = sqlx::query("SELECT indexed_at FROM file_registry WHERE file_path = ?")
+            .bind(path)
+            .fetch_optional(&self.pool)
+            .await?;
+        Ok(row.map(|r| r.get("indexed_at")))
+    }
+
     /// 清除所有文件记录，强制下次索引时全量重新扫描
     pub async fn clear_all(&self) -> Result<()> {
         sqlx::query("DELETE FROM file_registry")
