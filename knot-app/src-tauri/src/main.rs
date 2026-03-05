@@ -1057,6 +1057,16 @@ async fn list_knowledge_files(app: tauri::AppHandle) -> Result<Vec<KnowledgeFile
                 KnowledgeIndexState::Indexed // Can't read file, assume indexed
             }
         } else {
+            // Debug: print unindexed files that should have been indexed
+            if ext == "pdf" || ext == "md" {
+                println!("[Knowledge] Unindexed file: '{}'", abs_path);
+                // Print similar keys in registry for debugging
+                for key in registered_hashes.keys() {
+                    if key.contains(&name) {
+                        println!("[Knowledge]   Registry has similar: '{}'", key);
+                    }
+                }
+            }
             KnowledgeIndexState::Unindexed
         };
 
@@ -1194,7 +1204,14 @@ async fn reindex_file(
     let provider_dyn: Arc<dyn knot_parser::EmbeddingProvider + Send + Sync> = embedding_provider;
 
     // 4. Re-index the file
-    let indexer = knot_core::index::KnotIndexer::new(&db_path, Some(provider_dyn)).await;
+    let mut indexer = knot_core::index::KnotIndexer::new(&db_path, Some(provider_dyn)).await;
+    // Configure PDF OCR/VLM
+    let manager = ModelPathManager::new(&app);
+    let ocr_model_dir = manager.get_download_target_path("ppocrv5");
+    indexer.pdf_ocr_enabled = ocr_model_dir.join("det.onnx").exists();
+    indexer.pdf_ocr_model_dir = Some(ocr_model_dir.to_string_lossy().to_string());
+    indexer.pdf_vision_api_url = Some("http://localhost:11434/v1/chat/completions".to_string());
+    indexer.pdf_vision_model = Some("glm-ocr:latest".to_string());
     let path = std::path::Path::new(&file_path);
     let records = indexer
         .index_file(path)
@@ -1396,7 +1413,14 @@ async fn start_background_indexing(
     // ThreadSafeEmbeddingEngine implements EmbeddingProvider.
     let provider_dyn: Arc<dyn knot_parser::EmbeddingProvider + Send + Sync> = embedding_provider;
 
-    let indexer = KnotIndexer::new(&db_path, Some(provider_dyn)).await;
+    let mut indexer = KnotIndexer::new(&db_path, Some(provider_dyn)).await;
+    // Configure PDF OCR/VLM for background indexing
+    let manager = ModelPathManager::new(&app);
+    let ocr_model_dir = manager.get_download_target_path("ppocrv5");
+    indexer.pdf_ocr_enabled = ocr_model_dir.join("det.onnx").exists();
+    indexer.pdf_ocr_model_dir = Some(ocr_model_dir.to_string_lossy().to_string());
+    indexer.pdf_vision_api_url = Some("http://localhost:11434/v1/chat/completions".to_string());
+    indexer.pdf_vision_model = Some("glm-ocr:latest".to_string());
     let _ = app.emit("indexing-status", "scanning");
 
     // 3. Scan & Index (Initial Pass)

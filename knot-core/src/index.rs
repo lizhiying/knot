@@ -14,6 +14,11 @@ pub struct KnotIndexer {
     dispatcher: IndexDispatcher,
     embedding_provider: Arc<dyn EmbeddingProvider + Send + Sync>,
     registry: Option<crate::registry::FileRegistry>,
+    // PDF parsing config
+    pub pdf_ocr_enabled: bool,
+    pub pdf_ocr_model_dir: Option<String>,
+    pub pdf_vision_api_url: Option<String>,
+    pub pdf_vision_model: Option<String>,
 }
 
 impl KnotIndexer {
@@ -33,6 +38,10 @@ impl KnotIndexer {
             dispatcher: IndexDispatcher::new(),
             embedding_provider,
             registry,
+            pdf_ocr_enabled: false,
+            pdf_ocr_model_dir: None,
+            pdf_vision_api_url: None,
+            pdf_vision_model: None,
         }
     }
 
@@ -157,10 +166,14 @@ impl KnotIndexer {
     }
 
     pub async fn index_file(&self, path: &Path) -> Result<Vec<VectorRecord>> {
-        // Setup config with embedding provider
+        // Setup config with embedding provider and PDF parsing options
         let mut config =
             PageIndexConfig::new().with_embedding_provider(self.embedding_provider.as_ref());
         config.min_token_threshold = 0;
+        config.pdf_ocr_enabled = self.pdf_ocr_enabled;
+        config.pdf_ocr_model_dir = self.pdf_ocr_model_dir.clone();
+        config.pdf_vision_api_url = self.pdf_vision_api_url.clone();
+        config.pdf_vision_model = self.pdf_vision_model.clone();
 
         // Ensure absolute path
         let abs_path = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
