@@ -520,6 +520,19 @@ impl KnotStore {
     ///
     /// 注意：此函数应在生成向量嵌入之前调用，确保关键词和向量搜索使用一致的查询文本。
     pub fn preprocess_query(query: &str) -> String {
+        // 第零步：清理 Tantivy 查询语法特殊字符
+        // +, -, :, ^, ~, *, ?, \, /, !, (, ), [, ], {, } 都是 Tantivy 的保留字符
+        // 用空格替换，防止用户输入 "motion+介绍" 时 + 被解析为 must-include 操作符
+        let sanitized: String = query
+            .chars()
+            .map(|c| match c {
+                '+' | '-' | ':' | '^' | '~' | '*' | '?' | '\\' | '/' | '!' | '(' | ')' | '['
+                | ']' | '{' | '}' | '"' => ' ',
+                _ => c,
+            })
+            .collect();
+        let query = sanitized.trim();
+
         // 第一步：在字符类型边界插入空格
         let mut spaced = String::with_capacity(query.len() * 2);
         let mut prev_is_ascii_alpha = false;
