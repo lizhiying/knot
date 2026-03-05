@@ -520,19 +520,6 @@ impl KnotStore {
     ///
     /// 注意：此函数应在生成向量嵌入之前调用，确保关键词和向量搜索使用一致的查询文本。
     pub fn preprocess_query(query: &str) -> String {
-        // 第零步：清理 Tantivy 查询语法特殊字符
-        // +, -, :, ^, ~, *, ?, \, /, !, (, ), [, ], {, } 都是 Tantivy 的保留字符
-        // 用空格替换，防止用户输入 "motion+介绍" 时 + 被解析为 must-include 操作符
-        let sanitized: String = query
-            .chars()
-            .map(|c| match c {
-                '+' | '-' | ':' | '^' | '~' | '*' | '?' | '\\' | '/' | '!' | '(' | ')' | '['
-                | ']' | '{' | '}' | '"' => ' ',
-                _ => c,
-            })
-            .collect();
-        let query = sanitized.trim();
-
         // 第一步：在字符类型边界插入空格
         let mut spaced = String::with_capacity(query.len() * 2);
         let mut prev_is_ascii_alpha = false;
@@ -577,6 +564,24 @@ impl KnotStore {
         }
 
         deduped.join(" ")
+    }
+
+    /// 清理 Tantivy 查询语法特殊字符（仅用于关键词搜索）
+    /// +, -, :, ^, ~, *, ?, \, /, !, (, ), [, ], {, }, " 都是 Tantivy 的保留字符
+    /// 用空格替换，防止用户输入如 "motion+介绍" 时 + 被解析为 must-include 操作符
+    /// 注意：不要在生成 embedding 之前调用此函数，否则会丢失语义信息
+    fn sanitize_for_tantivy(query: &str) -> String {
+        query
+            .chars()
+            .map(|c| match c {
+                '+' | '-' | ':' | '^' | '~' | '*' | '?' | '\\' | '/' | '!' | '(' | ')' | '['
+                | ']' | '{' | '}' | '"' => ' ',
+                _ => c,
+            })
+            .collect::<String>()
+            .split_whitespace()
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 
     /// 全局搜索（无文件过滤），保持向后兼容
@@ -728,12 +733,14 @@ impl KnotStore {
         };
 
         // 文件过滤: Tantivy BooleanQuery 增加 file_path 约束
+        // 在 Tantivy 搜索中清理特殊字符（仅关键词搜索，不影响向量搜索）
+        let tantivy_query_text = Self::sanitize_for_tantivy(query_text);
         let final_query: Box<dyn tantivy::query::Query> = if let Some(fp) = file_filter {
             let file_term_query = tantivy::query::TermQuery::new(
                 tantivy::Term::from_field_text(f_path, fp),
                 tantivy::schema::IndexRecordOption::Basic,
             );
-            match query_parser.parse_query(query_text) {
+            match query_parser.parse_query(&tantivy_query_text) {
                 Ok(q) => Box::new(tantivy::query::BooleanQuery::new(vec![
                     (tantivy::query::Occur::Must, q),
                     (tantivy::query::Occur::Must, Box::new(file_term_query)),
@@ -747,7 +754,7 @@ impl KnotStore {
                 }
             }
         } else {
-            match query_parser.parse_query(query_text) {
+            match query_parser.parse_query(&tantivy_query_text) {
                 Ok(q) => q,
                 Err(e) => {
                     eprintln!("[Tantivy] Query Error: {}", e);
