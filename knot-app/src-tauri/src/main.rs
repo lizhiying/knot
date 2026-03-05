@@ -1263,6 +1263,13 @@ async fn reindex_file(
         }
     }
 
+    // 7. Invalidate cached KnotStore so searches see updated Tantivy data
+    {
+        let mut guard = state.knot_store.write().await;
+        *guard = None;
+        println!("[Knowledge] Invalidated cached KnotStore after reindex");
+    }
+
     Ok(())
 }
 
