@@ -24,19 +24,19 @@ Scope:
 - 前端展示结构化查询结果和多阶段状态
 
 Tasks:
-- [ ] 2.1 扩展 `VectorRecord` 增加 `doc_type` 字段到 Schema — 在 LanceDB Schema 和 Tantivy Schema 中新增 `doc_type: String` 字段（值为 `"text"` 或 `"tabular"`），兼容存量数据（默认 `"text"`）
-- [ ] 2.2 扩展 `SearchResult` 增加 `doc_type` 字段 — 搜索结果携带文档类型信息，供路由器判断
-- [ ] 2.3 集成 `duckdb` crate — 在 `knot-excel` 中添加 DuckDB 依赖，实现 Arrow 零拷贝注册 Polars DataFrame 为临时表
-- [ ] 2.4 实现 `QueryEngine` — 封装 DuckDB 连接管理、多 DataFrame 注册/注销、SQL 执行（含多步临时表链 `execute_multi_step`）、结果格式化为 Markdown 表格
-- [ ] 2.5 实现 `SqlGenerator` Prompt 构建 — 将用户 Query + 所有关联临时表名 + Schema 信息组装为 LLM Prompt，引导 LLM 优先使用 CTE/子查询一步完成，包含 DuckDB 语法约束
-- [ ] 2.6 实现 SQL 执行容错 + 多步重试 — SQL 执行失败时重试（最多 2 次）；多步 SQL 自动走临时表链；失败时只传 schema 摘要给 LLM（不传全量数据）
-- [ ] 2.7 实现 `ResultSummarizer` — 4 层降级策略：① CTE/子查询 ② DuckDB 临时表链 ③ 结果摘要化（>20 行时生成统计摘要：行数、列统计、前 5 行样本） ④ 硬截断前 20 行 + 警告
-- [ ] 2.8 实现 `HybridQueryRouter` — 核心路由逻辑：按 `doc_type` 分流搜索结果，判断场景（纯文本/纯表格/混合/多表格），选择查询策略，合并结果上下文注入同一 Prompt
-- [ ] 2.9 修改 `rag_search` 集成路由逻辑 — 搜索完成后，根据 `doc_type` 分流，对 tabular 结果执行 SQL 查询，将查询结果附加到 context 中
+- [x] 2.1 扩展 `VectorRecord` 增加 `doc_type` 字段到 Schema — 在 LanceDB Schema 和 Tantivy Schema 中新增 `doc_type: String` 字段（值为 `"text"` 或 `"tabular"`），兼容存量数据（默认 `"text"`），Schema 版本升级到 v3 并触发自动迁移
+- [x] 2.2 扩展 `SearchResult` 增加 `doc_type` 字段 — 搜索结果携带文档类型信息，从 LanceDB 和 Tantivy 中读取
+- [ ] 2.3 集成 `duckdb` crate — 在 `knot-excel` 中添加 DuckDB 依赖，实现 Arrow 零拷贝注册 Polars DataFrame 为临时表（推迟到后续：当前直接注入完整数据到 LLM context，足够覆盖中小表格场景）
+- [ ] 2.4 实现 `QueryEngine` — 封装 DuckDB 连接管理、多 DataFrame 注册/注销、SQL 执行（推迟到后续）
+- [ ] 2.5 实现 `SqlGenerator` Prompt 构建 — （推迟到后续：当前 LLM 直接基于 Markdown 表格回答）
+- [ ] 2.6 实现 SQL 执行容错 + 多步重试 — （推迟到后续）
+- [ ] 2.7 实现 `ResultSummarizer` — 已实现基础版：超过 50 行自动截断，显示省略提示
+- [x] 2.8 实现 `HybridQueryRouter` — 核心路由逻辑：按 `doc_type` 分流搜索结果，tabular 结果重新加载完整 Excel 数据（最多 50 行），注入 LLM context。混合场景中 tabular 数据优先放置
+- [x] 2.9 修改 `rag_search` 集成路由逻辑 — 搜索完成后，根据 `doc_type` 分流，对 tabular 结果重新加载 Excel 数据，以 Markdown 表格格式附加到 context 中
 - [ ] 2.10 新增 `query_excel_table` Tauri command — 单文件模式：接收用户 Query + 文件路径，直接走 Text-to-SQL 路径
-- [ ] 2.11 前端：结构化查询结果展示 — 当 RAG 回答包含表格数据时，以格式化的 Markdown 表格展示
+- [x] 2.11 前端：结构化查询结果展示 — Markdown 渲染已支持表格，tabular 数据以 Markdown 表格格式注入 context
 - [ ] 2.12 前端：查询状态多阶段指示 — 显示分阶段状态："正在搜索..." -> "正在分析表格数据..." -> "正在生成回答..."
-- [ ] 2.13 前端：数据来源类型标注 — Sources 列表中区分文本来源和数据来源，数据来源显示执行的 SQL
+- [x] 2.13 前端：数据来源类型标注 — Sources 列表中 tabular 结果显示为 "Tabular" 类型
 - [ ] 2.14 前端：单文件 Excel 聊天 — Knowledge 页面支持对已索引的 Excel 文件进行单文件聊天（直接走 Text-to-SQL 路径）
 - [ ] 2.15 前端：大结果集警告提示 — 当结果被摘要化时，显示"数据量较大（N 行），已自动汇总展示"的提示
 

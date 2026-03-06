@@ -10,12 +10,17 @@
     let { file = null, onBack = () => {} } = $props();
 
     let query = $state("");
-    let phase = $state("idle"); // idle | searching | generating | done | error
+    let phase = $state("idle"); // idle | searching | analyzing | generating | done | error
     let sources = $state([]);
     let answer = $state("");
     let showCursor = $state(false);
     let errorMsg = $state("");
     let inputRef = $state(null);
+
+    // 判断是否为 Excel 文件
+    let isExcelFile = $derived(
+        file?.name?.match(/\.(xlsx|xls|xlsm|xlsb)$/i) != null,
+    );
 
     // Markdown 渲染
     let renderedAnswer = $derived(
@@ -27,6 +32,7 @@
             !query.trim() ||
             !file ||
             phase === "searching" ||
+            phase === "analyzing" ||
             phase === "generating"
         )
             return;
@@ -47,13 +53,25 @@
 
             sources = searchResponse.sources || [];
 
+            // 检查是否有 tabular 来源
+            const hasTabular = sources.some((s) => s.source === "Tabular");
+
             if (
                 !searchResponse.context ||
                 searchResponse.context.trim() === ""
             ) {
-                answer = "在该文件中未找到与问题相关的内容。";
+                answer = isExcelFile
+                    ? "在该表格中未找到与问题相关的数据。"
+                    : "在该文件中未找到与问题相关的内容。";
                 phase = "done";
                 return;
+            }
+
+            // 2. 如果有 tabular 数据，显示分析阶段
+            if (hasTabular) {
+                phase = "analyzing";
+                // 给一个短暂的视觉反馈
+                await new Promise((r) => setTimeout(r, 300));
             }
 
             // 2. 生成回答
@@ -120,9 +138,19 @@
         {#if phase === "idle" && !answer}
             <!-- 空状态引导 -->
             <div class="chat-empty">
-                <span class="material-symbols-outlined empty-icon">forum</span>
-                <h4>向这个文件提问</h4>
-                <p>AI 将仅基于该文件的内容回答你的问题</p>
+                {#if isExcelFile}
+                    <span class="material-symbols-outlined empty-icon"
+                        >table_chart</span
+                    >
+                    <h4>向这个表格提问</h4>
+                    <p>AI 将基于表格数据回答你的问题，支持数据查询和计算</p>
+                {:else}
+                    <span class="material-symbols-outlined empty-icon"
+                        >forum</span
+                    >
+                    <h4>向这个文件提问</h4>
+                    <p>AI 将仅基于该文件的内容回答你的问题</p>
+                {/if}
             </div>
         {/if}
 
@@ -131,7 +159,20 @@
                 <span class="material-symbols-outlined spinning"
                     >progress_activity</span
                 >
-                <span>正在搜索文件内容...</span>
+                <span
+                    >{isExcelFile
+                        ? "正在搜索表格数据..."
+                        : "正在搜索文件内容..."}</span
+                >
+            </div>
+        {/if}
+
+        {#if phase === "analyzing"}
+            <div class="status-bar status-analyzing">
+                <span class="material-symbols-outlined spinning"
+                    >data_check</span
+                >
+                <span>正在分析表格数据...</span>
             </div>
         {/if}
 
@@ -168,9 +209,19 @@
                     引用来源 ({sources.length})
                 </div>
                 {#each sources as source, i}
-                    <div class="source-card">
+                    <div
+                        class="source-card"
+                        class:tabular-source={source.source === "Tabular"}
+                    >
                         <div class="source-meta">
                             <span class="source-index">#{i + 1}</span>
+                            {#if source.source === "Tabular"}
+                                <span
+                                    class="material-symbols-outlined source-type-icon"
+                                    style="font-size:12px;color:#10b981"
+                                    >table_chart</span
+                                >
+                            {/if}
                             {#if source.context}
                                 <span class="source-context"
                                     >{source.context}</span
@@ -209,17 +260,22 @@
                 placeholder="输入你的问题..."
                 bind:value={query}
                 onkeydown={handleKeydown}
-                disabled={phase === "searching" || phase === "generating"}
+                disabled={phase === "searching" ||
+                    phase === "analyzing" ||
+                    phase === "generating"}
             />
             <button
                 class="send-btn"
                 onclick={handleSubmit}
                 disabled={!query.trim() ||
                     phase === "searching" ||
+                    phase === "analyzing" ||
                     phase === "generating"}
             >
                 <span class="material-symbols-outlined">
-                    {phase === "searching" || phase === "generating"
+                    {phase === "searching" ||
+                    phase === "analyzing" ||
+                    phase === "generating"
                         ? "progress_activity"
                         : "send"}
                 </span>
@@ -347,6 +403,10 @@
         color: var(--accent-primary);
     }
 
+    .status-analyzing .material-symbols-outlined {
+        color: #10b981;
+    }
+
     .spinning {
         animation: spin 1s linear infinite;
     }
@@ -358,6 +418,10 @@
         to {
             transform: rotate(360deg);
         }
+    }
+
+    .tabular-source {
+        border-left: 2px solid #10b981;
     }
 
     /* 回答 */
@@ -412,6 +476,34 @@
         border-radius: 6px;
         overflow-x: auto;
         margin: 8px 0;
+    }
+
+    .answer-content :global(table) {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 8px 0;
+        font-size: 12px;
+    }
+
+    .answer-content :global(th),
+    .answer-content :global(td) {
+        padding: 6px 10px;
+        border: 1px solid var(--border-color);
+        text-align: left;
+    }
+
+    .answer-content :global(th) {
+        background: var(--bg-card-hover, rgba(255, 255, 255, 0.05));
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .answer-content :global(tr:nth-child(even)) {
+        background: var(--bg-card-hover, rgba(255, 255, 255, 0.02));
+    }
+
+    .answer-content :global(strong) {
+        color: var(--text-primary);
     }
 
     .answer-content :global(ul),
