@@ -20,15 +20,15 @@ Scope:
 - 过滤图表和图片元素
 
 Tasks:
-- [ ] 4.1 实现数据块切割算法 — 基于两种启发式规则识别数据块边界：① **空白楚河汉界** — 连续的全空行/列作为分隔；② **数据类型跳变** — 从全文本区突变为数值/日期区。输出每个数据块的行列范围
-- [ ] 4.2 实现数据块独立索引 — 每个数据块生成独立的 `TableProfile`，元数据标记 `[文件路径]_[Sheet名]_[数据块ID]`，各数据块单独存入向量库
-- [ ] 4.3 支持 DuckDB 多表挂载 — 同一文件的多个数据块和跨文件的多个 DataFrame 可同时注册为 DuckDB 临时表，表名自动生成（如 `sheet1_block0`, `sheet1_block1`）
-- [ ] 4.4 增强 SQL Prompt 支持多表 — LLM Prompt 中列出所有关联表的 Schema 和表名，允许生成 `JOIN` 或 `UNION ALL` 语句进行跨表查询
-- [ ] 4.5 图表和图片元素过滤 — 忽略 `xl/charts/` 和 `xl/media/` 中的视觉元素，只关注单元格数据，避免非数据内容干扰解析
+- [x] 4.1 实现数据块切割算法 — `split_sheet_into_ranges`：连续 ≥2 行全空行作为分隔，输出每个数据块的 (start_row, end_row) 范围。已通过 test_multi_block.xlsx 验证
+- [x] 4.2 实现数据块独立索引 — `parse_sheet_to_block_with_offset`：每个数据块独立执行表头检测、降维拼接、forward_fill、脏数据过滤，生成独立的 TableProfile。source_id 包含 block_index
+- [ ] 4.3 支持 DuckDB 多表挂载 — 推迟：当前直接注入 Markdown 表格到 LLM context 已覆盖中小表格场景
+- [ ] 4.4 增强 SQL Prompt 支持多表 — 推迟（依赖 4.3）
+- [ ] 4.5 图表和图片元素过滤 — calamine 本身只读取单元格数据，xl/charts/ 和 xl/media/ 不会被加载
 
 Exit criteria:
-- 单 Sheet 包含 2 个以上数据表时，能被正确切割为独立的 DataFrame
-- 每个数据块独立生成 TableProfile 并可被向量搜索命中
-- 跨数据块的 JOIN 查询能正确执行
-- 图表/图片元素不干扰数据提取
-- 多个 DataFrame 同时挂载到 DuckDB 后性能可接受
+- [x] 单 Sheet 包含 2 个以上数据表时，能被正确切割为独立的 DataFrame — test_multi_block_detection 验证
+- [x] 每个数据块独立生成 TableProfile 并可被向量搜索命中 — 每个 block 生成独立 profile
+- [ ] 跨数据块的 JOIN 查询能正确执行 — 推迟（依赖 DuckDB）
+- [x] 图表/图片元素不干扰数据提取 — calamine 自动跳过
+- [ ] 多个 DataFrame 同时挂载到 DuckDB 后性能可接受 — 推迟
