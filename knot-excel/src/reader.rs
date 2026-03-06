@@ -98,14 +98,35 @@ pub fn read_excel<P: AsRef<Path>>(
             continue;
         }
 
-        match parse_sheet_to_block(&range, &file_path, sheet_name, 0, config) {
-            Ok(block) => {
-                if !block.column_names.is_empty() && block.row_count > 0 {
-                    all_blocks.push(block);
+        // 4.1 多数据块切割：检测空白楚河汉界
+        let block_ranges = split_sheet_into_ranges(&range, config);
+
+        if block_ranges.len() > 1 {
+            println!(
+                "[ExcelReader] Sheet '{}' contains {} data blocks",
+                sheet_name,
+                block_ranges.len()
+            );
+        }
+
+        for (block_idx, (start_row, end_row)) in block_ranges.iter().enumerate() {
+            // 创建子范围的虚拟 Range：通过偏移传递给 parse_sheet_to_block
+            match parse_sheet_to_block_with_offset(
+                &range, &file_path, sheet_name, block_idx, *start_row, *end_row, config,
+            ) {
+                Ok(block) => {
+                    if !block.column_names.is_empty() && block.row_count > 0 {
+                        all_blocks.push(block);
+                    }
                 }
-            }
-            Err(e) => {
-                log::warn!("Failed to parse sheet '{}': {}", sheet_name, e);
+                Err(e) => {
+                    log::warn!(
+                        "Failed to parse sheet '{}' block {}: {}",
+                        sheet_name,
+                        block_idx,
+                        e
+                    );
+                }
             }
         }
     }
@@ -123,48 +144,109 @@ pub fn read_excel<P: AsRef<Path>>(
     Ok(all_blocks)
 }
 
-/// 将一个 Sheet 的 Range 解析为 DataBlock
-fn parse_sheet_to_block(
+/// 检测 Sheet 中的数据块边界（空白楚河汉界模式）
+/// 返回 Vec<(start_row, end_row)>，每个元素代表一个数据块的行范围（包含 end_row）
+fn split_sheet_into_ranges(range: &Range<Data>, config: &ExcelConfig) -> Vec<(usize, usize)> {
+    let (height, width) = range.get_size();
+    let width = width.min(config.max_columns);
+
+    if height == 0 {
+        return vec![];
+    }
+
+    let mut blocks = Vec::new();
+    let mut block_start: Option<usize> = None;
+    let mut consecutive_empty = 0;
+    let empty_threshold = 2; // 连续 2 行以上空行才认为是分隔
+
+    for row_idx in 0..height {
+        let is_empty = (0..width).all(|col| match range.get((row_idx, col)) {
+            Some(data) => cell_to_string(data).trim().is_empty(),
+            None => true,
+        });
+
+        if is_empty {
+            consecutive_empty += 1;
+            if consecutive_empty >= empty_threshold {
+                // 结束当前数据块
+                if let Some(start) = block_start {
+                    let end = row_idx - consecutive_empty; // 回退到最后一个非空行
+                    if end >= start {
+                        blocks.push((start, end));
+                    }
+                    block_start = None;
+                }
+            }
+        } else {
+            if block_start.is_none() {
+                block_start = Some(row_idx);
+            }
+            consecutive_empty = 0;
+        }
+    }
+
+    // 处理最后一个数据块
+    if let Some(start) = block_start {
+        blocks.push((start, height - 1));
+    }
+
+    // 如果没有检测到分隔（只有一个数据块），返回整个 Sheet
+    if blocks.is_empty() {
+        blocks.push((0, height - 1));
+    }
+
+    blocks
+}
+
+/// 带行偏移的 Sheet 解析（用于多数据块场景）
+fn parse_sheet_to_block_with_offset(
     range: &Range<Data>,
     file_path: &str,
     sheet_name: &str,
     block_index: usize,
+    offset_start: usize,
+    offset_end: usize,
     config: &ExcelConfig,
 ) -> Result<DataBlock, ExcelError> {
-    let (height, width) = range.get_size();
+    let (_, total_width) = range.get_size();
+    let width = total_width.min(config.max_columns);
+    let sub_height = offset_end - offset_start + 1;
 
-    if height == 0 || width == 0 {
-        return Err(ExcelError::Parse("Empty range".to_string()));
+    if sub_height < 2 || width == 0 {
+        return Err(ExcelError::Parse("Block too small".to_string()));
     }
 
-    // 限制列数
-    let width = width.min(config.max_columns);
-
-    // === 3.5 脏数据行过滤：跳过表头前的空行/说明行 ===
-    let data_start_row = if config.enable_dirty_row_filter {
-        detect_data_start(range, width, config.max_header_rows)
+    // 在子范围内检测数据起始行（跳过说明行）
+    let local_data_start = if config.enable_dirty_row_filter {
+        detect_data_start_in_range(
+            range,
+            offset_start,
+            offset_end,
+            width,
+            config.max_header_rows,
+        )
     } else {
-        0
+        offset_start
     };
 
-    // === 3.1-3.2 多级表头检测 ===
-    let remaining_height = height - data_start_row;
-    if remaining_height < 2 {
+    let remaining = offset_end - local_data_start + 1;
+    if remaining < 2 {
         return Err(ExcelError::Parse(
-            "Not enough rows for header + data".to_string(),
+            "Not enough rows after data start".to_string(),
         ));
     }
 
-    let header_levels = detect_header_rows(range, data_start_row, width, remaining_height, config);
+    // 多级表头检测
+    let header_levels =
+        detect_header_rows_in_range(range, local_data_start, width, remaining, config);
 
-    // === 3.3 多级表头降维拼接 ===
+    // 多级表头降维拼接
     let column_names = if header_levels > 1 {
-        merge_multi_level_headers(range, data_start_row, header_levels, width)
+        merge_multi_level_headers(range, local_data_start, header_levels, width)
     } else {
-        // 标准单行表头
         let mut names = Vec::with_capacity(width);
         for col in 0..width {
-            let cell = range.get((data_start_row, col));
+            let cell = range.get((local_data_start, col));
             let name = match cell {
                 Some(data) => cell_to_string(data),
                 None => String::new(),
@@ -180,20 +262,14 @@ fn parse_sheet_to_block(
     };
 
     let mut column_names = column_names;
-    // 确保列名唯一
     deduplicate_column_names(&mut column_names);
 
-    // 2. 提取数据行（从表头后开始）
-    let data_row_start = data_start_row + header_levels;
-    let max_data_rows = (height - data_row_start).min(config.max_rows);
-    let mut rows: Vec<Vec<String>> = Vec::with_capacity(max_data_rows);
+    // 提取数据行
+    let data_row_start = local_data_start + header_levels;
+    let mut rows: Vec<Vec<String>> = Vec::new();
     let mut consecutive_empty = 0;
 
-    for row_idx in data_row_start..(data_row_start + max_data_rows) {
-        if row_idx >= height {
-            break;
-        }
-
+    for row_idx in data_row_start..=offset_end {
         let mut row_data = Vec::with_capacity(width);
         let mut is_empty = true;
 
@@ -217,21 +293,23 @@ fn parse_sheet_to_block(
             if consecutive_empty >= config.max_empty_rows {
                 break;
             }
-            // 跳过全空行
             continue;
         } else {
             consecutive_empty = 0;
         }
 
-        // === 3.5 脏数据行过滤：表尾备注/合计行 ===
         if config.enable_dirty_row_filter && is_dirty_row(&row_data, width) {
             continue;
         }
 
         rows.push(row_data);
+
+        if rows.len() >= config.max_rows {
+            break;
+        }
     }
 
-    // 3. Drop 全空列
+    // Drop 全空列
     let non_empty_cols = find_non_empty_columns(&column_names, &rows);
     if non_empty_cols.len() < column_names.len() {
         column_names = non_empty_cols
@@ -244,7 +322,7 @@ fn parse_sheet_to_block(
             .collect();
     }
 
-    // === 3.4 数据体 forward_fill ===
+    // forward_fill
     if config.enable_forward_fill && !rows.is_empty() {
         forward_fill(&mut rows, &column_names);
     }
@@ -266,13 +344,17 @@ fn parse_sheet_to_block(
     })
 }
 
-/// 检测数据起始行（跳过表头前的空行/说明行）
-/// 返回第一个"看起来像表头"的行号
-fn detect_data_start(range: &Range<Data>, width: usize, max_scan: usize) -> usize {
-    let (height, _) = range.get_size();
-    let scan_limit = height.min(max_scan + 3); // 多扫几行
+/// 带范围限制的数据起始行检测（用于多数据块场景）
+fn detect_data_start_in_range(
+    range: &Range<Data>,
+    range_start: usize,
+    range_end: usize,
+    width: usize,
+    max_scan: usize,
+) -> usize {
+    let scan_limit = (range_end + 1).min(range_start + max_scan + 3);
 
-    for row_idx in 0..scan_limit {
+    for row_idx in range_start..scan_limit {
         let mut non_empty_count = 0;
         let mut total_checked = 0;
 
@@ -286,13 +368,24 @@ fn detect_data_start(range: &Range<Data>, width: usize, max_scan: usize) -> usiz
             }
         }
 
-        // 如果这一行超过 40% 的列有值，认为是表头开始
         if total_checked > 0 && non_empty_count * 100 / total_checked >= 40 {
             return row_idx;
         }
     }
 
-    0 // 找不到则从第一行开始
+    range_start
+}
+
+/// 带范围限制的表头行数检测
+fn detect_header_rows_in_range(
+    range: &Range<Data>,
+    data_start: usize,
+    width: usize,
+    remaining: usize,
+    config: &ExcelConfig,
+) -> usize {
+    // 直接复用现有函数，因为它已经使用绝对行号
+    detect_header_rows(range, data_start, width, remaining, config)
 }
 
 /// 检测表头行数（多级表头）
