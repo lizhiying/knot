@@ -212,6 +212,12 @@ impl KnotIndexer {
                 .generate_embedding(&summary_enriched)
                 .await
             {
+                let extension = abs_path.extension().and_then(|e| e.to_str()).unwrap_or("");
+                let doc_type = if matches!(extension, "xlsx" | "xls" | "xlsm" | "xlsb") {
+                    "tabular".to_string()
+                } else {
+                    "text".to_string()
+                };
                 records.push(VectorRecord {
                     id: format!("{}-doc-summary", path_str),
                     text: format!("[文档概览] {}\n\n{}", file_name, doc_summary),
@@ -219,6 +225,7 @@ impl KnotIndexer {
                     file_path: path_str,
                     parent_id: None,
                     breadcrumbs: None,
+                    doc_type,
                 });
             }
         }
@@ -374,6 +381,13 @@ impl KnotIndexer {
 
         if let Some(embedding) = node.embedding {
             if !node.content.is_empty() {
+                // 从 PageNode metadata 中读取 doc_type（Excel parser 写入 "tabular"）
+                let doc_type = node
+                    .metadata
+                    .extra
+                    .get("doc_type")
+                    .cloned()
+                    .unwrap_or_else(|| "text".to_string());
                 records.push(VectorRecord {
                     id: current_id.clone(),
                     text: node.content, // move content
@@ -381,6 +395,7 @@ impl KnotIndexer {
                     file_path: file_path.to_string(),
                     parent_id: parent_id.clone(),
                     breadcrumbs: bc_string,
+                    doc_type,
                 });
             }
         }

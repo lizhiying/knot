@@ -69,7 +69,7 @@ impl KnotStore {
     }
 
     /// Schema 版本号：每次修改 Schema 时递增，用于自动迁移检测
-    const SCHEMA_VERSION: u32 = 2; // v1: 基础字段, v2: +text_icu +file_name_std +en_knot
+    const SCHEMA_VERSION: u32 = 3; // v1: 基础字段, v2: +text_icu +file_name_std +en_knot, v3: +doc_type
 
     /// Create and configure Tantivy Index (called once during initialization)
     fn create_tantivy_index(tantivy_path: &PathBuf) -> Result<Index> {
@@ -133,6 +133,8 @@ impl KnotStore {
         schema_builder.add_text_field("content", t_schema::STORED);
         schema_builder.add_text_field("parent_id", t_schema::STRING | t_schema::STORED);
         schema_builder.add_text_field("breadcrumbs", t_schema::STRING | t_schema::STORED);
+        // doc_type: "text" 或 "tabular"，用于混合查询路由
+        schema_builder.add_text_field("doc_type", t_schema::STRING | t_schema::STORED);
 
         let schema = schema_builder.build();
 
@@ -143,10 +145,11 @@ impl KnotStore {
                     // 检查新增字段是否存在，不存在则需要重建
                     let missing_icu = idx.schema().get_field("text_icu").is_err();
                     let missing_fn_std = idx.schema().get_field("file_name_std").is_err();
-                    if missing_icu || missing_fn_std {
+                    let missing_doc_type = idx.schema().get_field("doc_type").is_err();
+                    if missing_icu || missing_fn_std || missing_doc_type {
                         println!(
-                            "[FTS] Schema migration needed: text_icu={}, file_name_std={}",
-                            !missing_icu, !missing_fn_std
+                            "[FTS] Schema migration needed: text_icu={}, file_name_std={}, doc_type={}",
+                            !missing_icu, !missing_fn_std, !missing_doc_type
                         );
                         true
                     } else {
@@ -422,6 +425,7 @@ impl KnotStore {
         let f_path_tags = schema.get_field("path_tags").unwrap();
         let f_pid = schema.get_field("parent_id").unwrap();
         let f_bc = schema.get_field("breadcrumbs").unwrap();
+        let f_doc_type = schema.get_field("doc_type").unwrap();
 
         for record in records {
             let mut doc = TantivyDocument::default();
@@ -447,6 +451,7 @@ impl KnotStore {
             if let Some(bc) = &record.breadcrumbs {
                 doc.add_text(f_bc, bc);
             }
+            doc.add_text(f_doc_type, &record.doc_type);
             index_writer.add_document(doc)?;
         }
 
@@ -880,6 +885,11 @@ impl KnotStore {
                         .get_first(f_bc)
                         .and_then(|v| v.as_str())
                         .map(|s| s.to_string());
+                    let doc_type = doc
+                        .get_first(schema.get_field("doc_type").unwrap())
+                        .and_then(|v| v.as_str())
+                        .map(|s| s.to_string())
+                        .unwrap_or_else(|| "text".to_string());
 
                     let new_result = SearchResult {
                         id: doc_id.clone(),
@@ -888,6 +898,7 @@ impl KnotStore {
                         score: normalized_bm25,
                         parent_id,
                         breadcrumbs,
+                        doc_type,
                         source: SearchSource::Keyword,
                         expanded_context: None,
                     };
@@ -965,6 +976,9 @@ impl KnotStore {
             let breadcrumbs_col = batch
                 .column_by_name("breadcrumbs")
                 .and_then(|c| c.as_any().downcast_ref::<StringArray>());
+            let doc_types = batch
+                .column_by_name("doc_type")
+                .and_then(|c| c.as_any().downcast_ref::<StringArray>());
 
             // LanceDB 向量搜索自动添加 _distance 列
             let distances = batch
@@ -992,6 +1006,15 @@ impl KnotStore {
                         Some(a.value(i).to_string())
                     }
                 });
+                let dt = doc_types
+                    .and_then(|a| {
+                        if a.is_null(i) {
+                            None
+                        } else {
+                            Some(a.value(i).to_string())
+                        }
+                    })
+                    .unwrap_or_else(|| "text".to_string());
                 let distance = distances.map(|d| d.value(i)).unwrap_or(f32::MAX);
 
                 candidates.push(CandidateWithDistance {
@@ -1002,6 +1025,7 @@ impl KnotStore {
                         score: 0.0,
                         parent_id: pid,
                         breadcrumbs: bc,
+                        doc_type: dt,
                         source: SearchSource::Vector,
                         expanded_context: None,
                     },
@@ -1229,6 +1253,7 @@ impl KnotStore {
                     file_path,
                     parent_id: None,
                     breadcrumbs: None,
+                    doc_type: "text".to_string(),
                 });
             }
         }
@@ -1528,6 +1553,7 @@ impl KnotStore {
             Field::new("file_path", DataType::Utf8, false),
             Field::new("parent_id", DataType::Utf8, true),
             Field::new("breadcrumbs", DataType::Utf8, true),
+            Field::new("doc_type", DataType::Utf8, false),
         ]))
     }
 
@@ -1542,6 +1568,7 @@ impl KnotStore {
         let parent_ids: Vec<Option<String>> = records.iter().map(|r| r.parent_id.clone()).collect();
         let breadcrumbs: Vec<Option<String>> =
             records.iter().map(|r| r.breadcrumbs.clone()).collect();
+        let doc_types: Vec<String> = records.iter().map(|r| r.doc_type.clone()).collect();
         let vectors_flat: Vec<Option<Vec<Option<f32>>>> = records
             .iter()
             .map(|r| Some(r.vector.iter().map(|v| Some(*v)).collect()))
@@ -1552,6 +1579,7 @@ impl KnotStore {
         let path_array = StringArray::from(paths);
         let parent_id_array = StringArray::from(parent_ids);
         let breadcrumbs_array = StringArray::from(breadcrumbs);
+        let doc_type_array = StringArray::from(doc_types);
         let vector_array = FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(
             vectors_flat,
             EMBEDDING_DIM,
@@ -1566,6 +1594,7 @@ impl KnotStore {
                 Arc::new(path_array),
                 Arc::new(parent_id_array),
                 Arc::new(breadcrumbs_array),
+                Arc::new(doc_type_array),
             ],
         )?)
     }
@@ -1579,6 +1608,8 @@ pub struct VectorRecord {
     pub file_path: String,
     pub parent_id: Option<String>,
     pub breadcrumbs: Option<String>,
+    /// 文档类型："text" 或 "tabular"
+    pub doc_type: String,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -1606,6 +1637,8 @@ pub struct SearchResult {
     pub score: f32, // Reranking score
     pub parent_id: Option<String>,
     pub breadcrumbs: Option<String>,
+    /// 文档类型："text" 或 "tabular"
+    pub doc_type: String,
     pub source: SearchSource,
     /// 上下文扩展：parent 标题 + 前后 sibling 内容（可选）
     pub expanded_context: Option<String>,
@@ -1650,6 +1683,7 @@ mod tests {
             score: 0.5,
             parent_id: None,
             breadcrumbs: None,
+            doc_type: "text".to_string(),
             source: SearchSource::Vector,
             expanded_context: None,
         };
@@ -1666,6 +1700,7 @@ mod tests {
                 score: 90.0,
                 parent_id: None,
                 breadcrumbs: None,
+                doc_type: "text".to_string(),
                 source: SearchSource::Vector,
                 expanded_context: None,
             },
@@ -1676,6 +1711,7 @@ mod tests {
                 score: 80.0,
                 parent_id: None,
                 breadcrumbs: None,
+                doc_type: "text".to_string(),
                 source: SearchSource::Vector,
                 expanded_context: None,
             },
@@ -1709,6 +1745,7 @@ mod tests {
                 score: 90.0,
                 parent_id: None,
                 breadcrumbs: None,
+                doc_type: "text".to_string(),
                 source: SearchSource::Vector,
                 expanded_context: None,
             },
@@ -1719,6 +1756,7 @@ mod tests {
                 score: 80.0,
                 parent_id: None,
                 breadcrumbs: None,
+                doc_type: "text".to_string(),
                 source: SearchSource::Vector,
                 expanded_context: None,
             },
@@ -1732,6 +1770,7 @@ mod tests {
                 score: 85.0, // 更高分
                 parent_id: None,
                 breadcrumbs: None,
+                doc_type: "text".to_string(),
                 source: SearchSource::Keyword,
                 expanded_context: None,
             },
@@ -1742,6 +1781,7 @@ mod tests {
                 score: 70.0,
                 parent_id: None,
                 breadcrumbs: None,
+                doc_type: "text".to_string(),
                 source: SearchSource::Keyword,
                 expanded_context: None,
             },

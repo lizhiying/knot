@@ -4725,6 +4725,7 @@ dependencies = [
  "futures-util",
  "hex",
  "knot-core",
+ "knot-excel",
  "knot-parser",
  "libc",
  "md-5",

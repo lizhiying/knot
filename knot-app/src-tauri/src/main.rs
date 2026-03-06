@@ -2051,10 +2051,155 @@ async fn rag_search(
         }
     }
     // 4. Format Context and Display Sources
+    // HybridQueryRouter: 按 doc_type 分流，tabular 数据注入完整表格
     let mut context_str = String::new();
     let mut display_sources = Vec::new();
 
-    for (i, res) in search_results.iter().take(5).enumerate() {
+    // 4.1 分流: 分离 text 和 tabular 结果
+    let text_results: Vec<_> = search_results
+        .iter()
+        .filter(|r| r.doc_type != "tabular")
+        .collect();
+    let tabular_results: Vec<_> = search_results
+        .iter()
+        .filter(|r| r.doc_type == "tabular")
+        .collect();
+
+    let has_tabular = !tabular_results.is_empty();
+    let has_text = !text_results.is_empty();
+
+    if has_tabular {
+        println!(
+            "[rag_search] HybridRouter: {} text + {} tabular results",
+            text_results.len(),
+            tabular_results.len()
+        );
+    }
+
+    // 4.2 处理 tabular 结果: 重新加载完整数据
+    let mut tabular_context = String::new();
+    if has_tabular {
+        let mut seen_files: std::collections::HashSet<String> = std::collections::HashSet::new();
+        for res in tabular_results.iter().take(3) {
+            // 避免重复加载同一文件
+            if !seen_files.insert(res.file_path.clone()) {
+                continue;
+            }
+
+            let file_path = std::path::Path::new(&res.file_path);
+            if file_path.exists() {
+                let excel_config = knot_excel::ExcelConfig::default();
+                match knot_excel::pipeline::parse_excel_full(file_path, &excel_config) {
+                    Ok(parsed) => {
+                        for (block, profile) in parsed.blocks.iter().zip(parsed.profiles.iter()) {
+                            let file_name =
+                                file_path.file_name().unwrap_or_default().to_string_lossy();
+
+                            // 生成完整数据的 Markdown 表格（限制行数防止 context 爆炸）
+                            let max_rows = 50;
+                            let truncated = block.row_count > max_rows;
+                            let display_rows = block.row_count.min(max_rows);
+
+                            tabular_context.push_str(&format!(
+                                "[表格数据] {} / Sheet \"{}\"\n共 {} 行 {} 列\n\n",
+                                file_name,
+                                block.sheet_name,
+                                block.row_count,
+                                block.column_names.len()
+                            ));
+
+                            // 列信息
+                            tabular_context.push_str("列信息:\n");
+                            for (name, dtype) in
+                                block.column_names.iter().zip(profile.column_types.iter())
+                            {
+                                tabular_context.push_str(&format!("- {} ({})\n", name, dtype));
+                            }
+                            tabular_context.push('\n');
+
+                            // 完整数据表格
+                            tabular_context.push_str(&format!(
+                                "完整数据（共 {} 行{}）:\n",
+                                display_rows,
+                                if truncated {
+                                    format!("，已截断，原始共 {} 行", block.row_count)
+                                } else {
+                                    String::new()
+                                }
+                            ));
+                            tabular_context
+                                .push_str(&format!("| {} |\n", block.column_names.join(" | ")));
+                            let sep: Vec<&str> = block.column_names.iter().map(|_| "---").collect();
+                            tabular_context.push_str(&format!("| {} |\n", sep.join(" | ")));
+                            for row in block.rows.iter().take(max_rows) {
+                                tabular_context.push_str(&format!("| {} |\n", row.join(" | ")));
+                            }
+                            if truncated {
+                                tabular_context.push_str(&format!(
+                                    "... (省略了 {} 行)\n",
+                                    block.row_count - max_rows
+                                ));
+                            }
+                            tabular_context.push('\n');
+                        }
+                        println!("[rag_search] Loaded full Excel data from {}", res.file_path);
+                    }
+                    Err(e) => {
+                        println!(
+                            "[rag_search] Failed to reload Excel {}: {}",
+                            res.file_path, e
+                        );
+                        // Fallback: 使用搜索结果中的 profile chunk
+                        tabular_context.push_str(&res.text);
+                        tabular_context.push('\n');
+                    }
+                }
+            } else {
+                // 文件不存在，使用搜索结果中的 profile chunk
+                tabular_context.push_str(&res.text);
+                tabular_context.push('\n');
+            }
+        }
+    }
+
+    // 4.3 组装最终 context
+    // 先放 tabular 数据（精确数据优先），再放 text 数据
+    if !tabular_context.is_empty() {
+        context_str.push_str("=== 表格数据 ===\n");
+        context_str.push_str("以下是与查询相关的结构化表格数据，可直接用于数据分析和计算：\n\n");
+        context_str.push_str(&tabular_context);
+        context_str.push_str("=== 表格数据结束 ===\n\n");
+    }
+
+    // 4.4 Text 结果正常处理
+    let all_results_for_display: Vec<_> = if has_tabular && has_text {
+        // 混合场景: tabular 已单独处理，text 结果正常展示
+        text_results
+            .iter()
+            .take(4)
+            .chain(tabular_results.iter().take(1))
+            .copied()
+            .collect()
+    } else {
+        search_results.iter().take(5).collect()
+    };
+
+    for (i, res) in all_results_for_display.iter().enumerate() {
+        if res.doc_type == "tabular" && has_tabular {
+            // tabular 结果已经在上面处理过，这里只添加 source
+            display_sources.push(HybridSearchResultDisplay {
+                file_path: res.file_path.clone(),
+                score: res.score,
+                context: res.breadcrumbs.clone(),
+                text: format!(
+                    "[表格数据] {}",
+                    res.file_path.rsplit('/').next().unwrap_or(&res.file_path)
+                ),
+                source: "Tabular".to_string(),
+            });
+            continue;
+        }
+
         let context_line = res.breadcrumbs.clone().unwrap_or_default();
         // 拼入扩展上下文
         let expanded = res.expanded_context.as_deref().unwrap_or("");
