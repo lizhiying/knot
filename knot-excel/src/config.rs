@@ -24,6 +24,18 @@ pub struct ExcelConfig {
     /// 最大行数限制（超过则截断），默认 100000
     #[serde(default = "default_max_rows")]
     pub max_rows: usize,
+
+    /// 最大表头探测行数（多级表头场景），默认 5
+    #[serde(default = "default_max_header_rows")]
+    pub max_header_rows: usize,
+
+    /// 是否启用 forward_fill（垂直合并空值填充），默认 true
+    #[serde(default = "default_true")]
+    pub enable_forward_fill: bool,
+
+    /// 是否启用脏数据行过滤（表头前说明、表尾备注等），默认 true
+    #[serde(default = "default_true")]
+    pub enable_dirty_row_filter: bool,
 }
 
 fn default_sample_rows() -> usize {
@@ -46,6 +58,10 @@ fn default_max_rows() -> usize {
     100_000
 }
 
+fn default_max_header_rows() -> usize {
+    5
+}
+
 impl Default for ExcelConfig {
     fn default() -> Self {
         Self {
@@ -54,6 +70,9 @@ impl Default for ExcelConfig {
             skip_hidden_sheets: true,
             max_columns: default_max_columns(),
             max_rows: default_max_rows(),
+            max_header_rows: default_max_header_rows(),
+            enable_forward_fill: true,
+            enable_dirty_row_filter: true,
         }
     }
 }

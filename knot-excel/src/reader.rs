@@ -140,31 +140,60 @@ fn parse_sheet_to_block(
     // 限制列数
     let width = width.min(config.max_columns);
 
-    // 1. 提取表头（第一行）
-    let mut column_names = Vec::with_capacity(width);
-    for col in 0..width {
-        let cell = range.get((0, col));
-        let name = match cell {
-            Some(data) => cell_to_string(data),
-            None => String::new(),
-        };
-        let name = if name.trim().is_empty() {
-            format!("Column_{}", col + 1)
-        } else {
-            name.trim().to_string()
-        };
-        column_names.push(name);
+    // === 3.5 脏数据行过滤：跳过表头前的空行/说明行 ===
+    let data_start_row = if config.enable_dirty_row_filter {
+        detect_data_start(range, width, config.max_header_rows)
+    } else {
+        0
+    };
+
+    // === 3.1-3.2 多级表头检测 ===
+    let remaining_height = height - data_start_row;
+    if remaining_height < 2 {
+        return Err(ExcelError::Parse(
+            "Not enough rows for header + data".to_string(),
+        ));
     }
 
+    let header_levels = detect_header_rows(range, data_start_row, width, remaining_height, config);
+
+    // === 3.3 多级表头降维拼接 ===
+    let column_names = if header_levels > 1 {
+        merge_multi_level_headers(range, data_start_row, header_levels, width)
+    } else {
+        // 标准单行表头
+        let mut names = Vec::with_capacity(width);
+        for col in 0..width {
+            let cell = range.get((data_start_row, col));
+            let name = match cell {
+                Some(data) => cell_to_string(data),
+                None => String::new(),
+            };
+            let name = if name.trim().is_empty() {
+                format!("Column_{}", col + 1)
+            } else {
+                name.trim().to_string()
+            };
+            names.push(name);
+        }
+        names
+    };
+
+    let mut column_names = column_names;
     // 确保列名唯一
     deduplicate_column_names(&mut column_names);
 
-    // 2. 提取数据行（从第二行开始）
-    let max_data_rows = (height - 1).min(config.max_rows);
+    // 2. 提取数据行（从表头后开始）
+    let data_row_start = data_start_row + header_levels;
+    let max_data_rows = (height - data_row_start).min(config.max_rows);
     let mut rows: Vec<Vec<String>> = Vec::with_capacity(max_data_rows);
     let mut consecutive_empty = 0;
 
-    for row_idx in 1..=max_data_rows {
+    for row_idx in data_row_start..(data_row_start + max_data_rows) {
+        if row_idx >= height {
+            break;
+        }
+
         let mut row_data = Vec::with_capacity(width);
         let mut is_empty = true;
 
@@ -194,43 +223,34 @@ fn parse_sheet_to_block(
             consecutive_empty = 0;
         }
 
+        // === 3.5 脏数据行过滤：表尾备注/合计行 ===
+        if config.enable_dirty_row_filter && is_dirty_row(&row_data, width) {
+            continue;
+        }
+
         rows.push(row_data);
     }
 
     // 3. Drop 全空列
     let non_empty_cols = find_non_empty_columns(&column_names, &rows);
     if non_empty_cols.len() < column_names.len() {
-        let new_names: Vec<String> = non_empty_cols
+        column_names = non_empty_cols
             .iter()
             .map(|&i| column_names[i].clone())
             .collect();
-        let new_rows: Vec<Vec<String>> = rows
+        rows = rows
             .iter()
             .map(|row| non_empty_cols.iter().map(|&i| row[i].clone()).collect())
             .collect();
-        let row_count = new_rows.len();
+    }
 
-        // 4. 推断列类型
-        let column_types = infer_column_types(&new_rows, new_names.len());
-
-        let source_id = format!("{}_{}_{}", file_path, sheet_name, block_index);
-
-        return Ok(DataBlock {
-            source_id,
-            sheet_name: sheet_name.to_string(),
-            block_index,
-            column_names: new_names,
-            column_types,
-            rows: new_rows,
-            row_count,
-            header_levels: 1,
-            merged_region_count: 0,
-        });
+    // === 3.4 数据体 forward_fill ===
+    if config.enable_forward_fill && !rows.is_empty() {
+        forward_fill(&mut rows, &column_names);
     }
 
     let row_count = rows.len();
     let column_types = infer_column_types(&rows, column_names.len());
-
     let source_id = format!("{}_{}_{}", file_path, sheet_name, block_index);
 
     Ok(DataBlock {
@@ -241,9 +261,217 @@ fn parse_sheet_to_block(
         column_types,
         rows,
         row_count,
-        header_levels: 1,
+        header_levels,
         merged_region_count: 0,
     })
+}
+
+/// 检测数据起始行（跳过表头前的空行/说明行）
+/// 返回第一个"看起来像表头"的行号
+fn detect_data_start(range: &Range<Data>, width: usize, max_scan: usize) -> usize {
+    let (height, _) = range.get_size();
+    let scan_limit = height.min(max_scan + 3); // 多扫几行
+
+    for row_idx in 0..scan_limit {
+        let mut non_empty_count = 0;
+        let mut total_checked = 0;
+
+        for col in 0..width.min(20) {
+            total_checked += 1;
+            if let Some(data) = range.get((row_idx, col)) {
+                let val = cell_to_string(data);
+                if !val.trim().is_empty() {
+                    non_empty_count += 1;
+                }
+            }
+        }
+
+        // 如果这一行超过 40% 的列有值，认为是表头开始
+        if total_checked > 0 && non_empty_count * 100 / total_checked >= 40 {
+            return row_idx;
+        }
+    }
+
+    0 // 找不到则从第一行开始
+}
+
+/// 检测表头行数（多级表头）
+/// 启发式：从 data_start 开始，判断连续行是否为表头：
+/// - 全部是文本（非数值）
+/// - 且与下一行的类型模式不同（表头→数据的转换点）
+fn detect_header_rows(
+    range: &Range<Data>,
+    data_start: usize,
+    width: usize,
+    remaining: usize,
+    config: &ExcelConfig,
+) -> usize {
+    let max_check = config.max_header_rows.min(remaining - 1);
+
+    if max_check <= 1 {
+        return 1;
+    }
+
+    // 先收集前 max_check+1 行的类型统计
+    let mut row_stats: Vec<(usize, usize, usize)> = Vec::new(); // (text_count, numeric_count, empty_count)
+
+    for offset in 0..=max_check {
+        let row_idx = data_start + offset;
+        let mut text_count = 0;
+        let mut numeric_count = 0;
+        let mut empty_count = 0;
+
+        for col in 0..width {
+            if let Some(data) = range.get((row_idx, col)) {
+                match data {
+                    Data::Empty => empty_count += 1,
+                    Data::Int(_) | Data::Float(_) => numeric_count += 1,
+                    Data::DateTime(_) => numeric_count += 1,
+                    Data::Bool(_) => numeric_count += 1,
+                    Data::String(s) => {
+                        if s.parse::<f64>().is_ok() {
+                            numeric_count += 1;
+                        } else {
+                            text_count += 1;
+                        }
+                    }
+                    _ => text_count += 1,
+                }
+            } else {
+                empty_count += 1;
+            }
+        }
+
+        row_stats.push((text_count, numeric_count, empty_count));
+    }
+
+    // 找表头→数据的转换点：
+    // 表头行特征：text 比例高，numeric 少
+    // 数据行特征：numeric 比例增加
+    for level in 1..=max_check {
+        let (_, prev_numeric, _) = row_stats[level - 1]; // 上一行（候选表头）
+        let (_, curr_numeric, _) = row_stats[level]; // 当前行（候选数据）
+
+        // 如果当前行数值列明显增多（>= 2 个），且上一行数值很少，
+        // 说明在这里发生了 表头→数据 转换
+        if curr_numeric >= 2 && prev_numeric < curr_numeric {
+            return level;
+        }
+    }
+
+    1 // 默认单行表头
+}
+
+/// 多级表头降维拼接
+/// 将 N 行同一列的表头文本自上而下拼接（如 ["2025", "上半年", "收入"] -> "2025_上半年_收入"）
+fn merge_multi_level_headers(
+    range: &Range<Data>,
+    start_row: usize,
+    levels: usize,
+    width: usize,
+) -> Vec<String> {
+    let mut result = Vec::with_capacity(width);
+
+    for col in 0..width {
+        let mut parts: Vec<String> = Vec::new();
+        let mut last_nonempty = String::new();
+
+        for level in 0..levels {
+            let row_idx = start_row + level;
+            let val = range
+                .get((row_idx, col))
+                .map(|d| cell_to_string(d))
+                .unwrap_or_default()
+                .trim()
+                .to_string();
+
+            if val.is_empty() {
+                // 合并单元格场景：空值继承左侧或上方值
+                // 这里使用上一级的值（对于水平合并的表头）
+                // 不重复添加
+            } else if val != last_nonempty {
+                parts.push(val.clone());
+                last_nonempty = val;
+            }
+        }
+
+        let name = if parts.is_empty() {
+            format!("Column_{}", col + 1)
+        } else {
+            parts.join("_")
+        };
+
+        result.push(name);
+    }
+
+    result
+}
+
+/// 数据体 forward_fill：对维度列（String 类型）进行空值前向填充
+/// 只填充 String 类型的列（通常是类别/维度列，如"部门"、"地区"）
+fn forward_fill(rows: &mut [Vec<String>], column_names: &[String]) {
+    if rows.is_empty() {
+        return;
+    }
+
+    let num_cols = column_names.len();
+
+    // 只对前几列做 forward_fill（通常维度列在左侧）
+    // 启发式：只填充前 3 列或 30% 的列（取较小者）
+    let fill_limit = (num_cols * 30 / 100).max(1).min(3);
+
+    for col in 0..fill_limit.min(num_cols) {
+        let mut last_value = String::new();
+
+        for row in rows.iter_mut() {
+            if col >= row.len() {
+                continue;
+            }
+
+            if row[col].trim().is_empty() {
+                if !last_value.is_empty() {
+                    row[col] = last_value.clone();
+                }
+            } else {
+                last_value = row[col].clone();
+            }
+        }
+    }
+}
+
+/// 判断是否为脏数据行（表尾备注/说明行）
+/// 启发式规则：
+/// - 只有 1-2 列有值，且大部分列为空（说明是备注行）
+/// - 第一列是典型的脏数据标识词
+fn is_dirty_row(row: &[String], expected_width: usize) -> bool {
+    let non_empty: Vec<&String> = row.iter().filter(|v| !v.trim().is_empty()).collect();
+
+    // 如果非空列数 <= 1 且总列宽 >= 5，可能是备注行
+    if non_empty.len() <= 1 && expected_width >= 5 {
+        if let Some(first) = non_empty.first() {
+            let s = first.trim();
+            // 典型的表尾标识
+            let dirty_patterns = [
+                "备注",
+                "注：",
+                "注:",
+                "说明",
+                "数据来源",
+                "制表人",
+                "审核人",
+                "合计",
+                "总计",
+                "小计",
+                "※",
+                "*注",
+            ];
+            return dirty_patterns
+                .iter()
+                .any(|p| s.starts_with(p) || s.contains(p));
+        }
+    }
+
+    false
 }
 
 /// 将 calamine Data 转换为字符串
