@@ -945,6 +945,7 @@ fn is_indexable_type(file_type: &KnowledgeFileType) -> bool {
             | KnowledgeFileType::Text
             | KnowledgeFileType::Pdf
             | KnowledgeFileType::Html
+            | KnowledgeFileType::Excel
     )
 }
 

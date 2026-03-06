@@ -15,6 +15,7 @@ impl IndexDispatcher {
         parsers.push(Box::new(crate::formats::docx::DocxParser::new()));
 
         parsers.push(Box::new(crate::formats::pdf::PdfParser::new()));
+        parsers.push(Box::new(crate::formats::excel::ExcelParser::new()));
 
         Self { parsers }
     }

@@ -67,7 +67,12 @@ impl KnotIndexer {
                     if entry.file_type().is_file() {
                         let file_path = entry.path();
                         if let Some(ext) = file_path.extension() {
-                            if ext == "md" || ext == "txt" || ext == "pdf" {
+                            if ext == "md"
+                                || ext == "txt"
+                                || ext == "pdf"
+                                || ext == "xlsx"
+                                || ext == "xls"
+                            {
                                 let path_str = file_path.to_string_lossy().to_string();
                                 files_seen.push(path_str.clone());
 

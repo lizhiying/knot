@@ -5,6 +5,7 @@ members = [
     "knot-pdf",
     "knot-markdown",
     "knot-parser",
+    "knot-excel",
 ]
 resolver = "2"
 
