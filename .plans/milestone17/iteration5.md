@@ -23,11 +23,11 @@ Scope:
 - 前端展示 SQL 查询结果和多阶段状态
 
 Tasks:
-- [ ] 5.1 集成 `duckdb` crate — 在 `knot-excel` 的 Cargo.toml 中添加 `duckdb = { version = "1.4", features = ["bundled"] }`，确保编译通过。创建 `src/query/mod.rs` 模块
-- [ ] 5.2 实现 `QueryEngine` 核心 — 封装 DuckDB 内存连接（`:memory:`），实现：① `register_datablock(block: &DataBlock) -> table_name` 将 DataBlock 数据通过 INSERT 语句注册为临时表，② `execute_sql(sql: &str) -> QueryResult` 执行 SQL 并返回结果，③ `unregister_all()` 清理所有临时表
-- [ ] 5.3 实现 `SqlGenerator` — Prompt 构建模块：① 接收用户 Query + 所有已注册表的 Schema（表名、列名、列类型、数据示例），② 组装 System Prompt（引导 CTE 优先、DuckDB 语法、中文列名双引号），③ 返回完整 Prompt 字符串供 LLM 调用
-- [ ] 5.4 实现多步 SQL 执行 — `execute_multi_step(sql_text: &str)`：① 按分号拆分多条 SQL，② 前 N-1 条自动包装为 `CREATE TEMP TABLE step_N AS (...)` 注册为中间临时表，③ 最后一条执行并返回结果
-- [ ] 5.5 实现 `ResultSummarizer` — 结果膨胀控制：① ≤20 行直接返回全量 Markdown 表格，② >20 行生成统计摘要（行数、各列 min/max/avg/distinct_count、前 5 行样本），③ 摘要格式化为 LLM 可理解的文本
+- [x] 5.1 集成 `duckdb` crate — `duckdb = { version = "1.4", features = ["bundled"] }`，编译通过，创建 `src/query/` 模块（mod.rs + engine.rs + sql.rs + result.rs）
+- [x] 5.2 实现 `QueryEngine` 核心 — DuckDB 内存连接，`register_datablock` 按列类型建表 + 参数化 INSERT，`execute_sql` 通过 Rows 迭代读取多类型（String/i64/f64/bool），`unregister_all` 清理临时表。3 个单测覆盖
+- [x] 5.3 实现 `SqlGenerator` — System Prompt（CTE 优先、DuckDB 语法、中文列名双引号），User Prompt（Schema + 数据示例 + 用户问题），Fix Prompt（错误修复）。3 个单测覆盖
+- [x] 5.4 实现多步 SQL 执行 — `execute_multi_step`：分号拆分，前 N-1 条包装为 `CREATE TEMP TABLE step_N AS (...)`，最后一条返回结果。单测验证中间表链
+- [x] 5.5 实现 `ResultSummarizer` — ≤20 行全量 Markdown，>20 行统计摘要（数值列 min/max/avg，文本列 distinct count，前 5 行样本）。2 个单测覆盖
 - [ ] 5.6 实现 SQL 执行容错 + 重试 — 当 SQL 执行失败时：① 解析 DuckDB 错误信息，② 将错误信息 + 原 SQL + 表 Schema 重新发送给 LLM 要求修复，③ 最多重试 2 次
 - [ ] 5.7 修改 `HybridQueryRouter` — 将当前的"直接注入 Markdown 表格"升级为可选的 Text-to-SQL 路径：① 小表格（≤50 行）保持直接注入方式，② 大表格（>50 行）走 DuckDB SQL 查询路径
 - [ ] 5.8 新增 `query_excel_table` Tauri command — 单文件 Excel 聊天接口：① 接收 (file_path, query) 参数，② 加载文件所有 DataBlock → 注册到 DuckDB，③ 生成 SQL Prompt → LLM 生成 SQL → 执行 → 返回结果
