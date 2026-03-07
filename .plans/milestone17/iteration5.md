@@ -28,9 +28,9 @@ Tasks:
 - [x] 5.3 实现 `SqlGenerator` — System Prompt（CTE 优先、DuckDB 语法、中文列名双引号），User Prompt（Schema + 数据示例 + 用户问题），Fix Prompt（错误修复）。3 个单测覆盖
 - [x] 5.4 实现多步 SQL 执行 — `execute_multi_step`：分号拆分，前 N-1 条包装为 `CREATE TEMP TABLE step_N AS (...)`，最后一条返回结果。单测验证中间表链
 - [x] 5.5 实现 `ResultSummarizer` — ≤20 行全量 Markdown，>20 行统计摘要（数值列 min/max/avg，文本列 distinct count，前 5 行样本）。2 个单测覆盖
-- [ ] 5.6 实现 SQL 执行容错 + 重试 — 当 SQL 执行失败时：① 解析 DuckDB 错误信息，② 将错误信息 + 原 SQL + 表 Schema 重新发送给 LLM 要求修复，③ 最多重试 2 次
-- [ ] 5.7 修改 `HybridQueryRouter` — 将当前的"直接注入 Markdown 表格"升级为可选的 Text-to-SQL 路径：① 小表格（≤50 行）保持直接注入方式，② 大表格（>50 行）走 DuckDB SQL 查询路径
-- [ ] 5.8 新增 `query_excel_table` Tauri command — 单文件 Excel 聊天接口：① 接收 (file_path, query) 参数，② 加载文件所有 DataBlock → 注册到 DuckDB，③ 生成 SQL Prompt → LLM 生成 SQL → 执行 → 返回结果
+- [x] 5.6 实现 SQL 执行容错 + 重试 — SQL 执行失败时：① 解析错误信息，② 调用 LLM build_fix_prompt 修复 SQL，③ 最多重试 2 次。已集成到 rag_search 和 query_excel_table 中
+- [x] 5.7 修改 `HybridQueryRouter` — ① 小表格（≤50行）保持直接 Markdown 注入，② 大表格（>50行）走 DuckDB Text-to-SQL 路径（注册→LLM 生成 SQL→执行→ResultSummarizer 处理），③ 任何环节失败时 fallback 到 Markdown。提取了 `inject_block_as_markdown` 辅助函数
+- [x] 5.8 新增 `query_excel_table` Tauri command — 单文件 Excel 聊天接口：加载文件→注册 DuckDB→LLM 生成 SQL→执行（带重试）→返回 ExcelQueryResponse（含 SQL、列名、行数据、摘要）
 - [ ] 5.9 前端：查询状态多阶段指示 — 完善 FileChat 的 phase 状态机显示："正在搜索..." → "正在生成 SQL..." → "正在执行查询..." → "正在生成回答..."
 - [ ] 5.10 前端：SQL 查询结果展示 — 在回答中展示执行的 SQL 语句（可折叠）和查询结果表格，大结果集显示"数据量较大（N 行），已自动汇总展示"提示
 

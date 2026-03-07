@@ -2,6 +2,7 @@
     /**
      * FileChat - 单文件 RAG 聊天组件
      * 基于指定文件内容回答问题
+     * 支持 Excel 文件的 Text-to-SQL 查询
      */
     import { invoke } from "@tauri-apps/api/core";
     import { listen } from "@tauri-apps/api/event";
@@ -10,12 +11,18 @@
     let { file = null, onBack = () => {} } = $props();
 
     let query = $state("");
-    let phase = $state("idle"); // idle | searching | analyzing | generating | done | error
+    // Phase: idle | searching | querying_sql | analyzing | generating | done | error
+    let phase = $state("idle");
     let sources = $state([]);
     let answer = $state("");
     let showCursor = $state(false);
     let errorMsg = $state("");
     let inputRef = $state(null);
+
+    // SQL 查询结果
+    let sqlResult = $state(null);
+    let sqlExpanded = $state(false);
+    let sqlPhaseText = $state("");
 
     // 判断是否为 Excel 文件
     let isExcelFile = $derived(
@@ -32,6 +39,7 @@
             !query.trim() ||
             !file ||
             phase === "searching" ||
+            phase === "querying_sql" ||
             phase === "analyzing" ||
             phase === "generating"
         )
@@ -41,8 +49,10 @@
         answer = "";
         sources = [];
         errorMsg = "";
-        phase = "searching";
+        sqlResult = null;
+        sqlExpanded = false;
         showCursor = false;
+        phase = "searching";
 
         try {
             // 1. 搜索（限定在单文件）
@@ -67,14 +77,49 @@
                 return;
             }
 
-            // 2. 如果有 tabular 数据，显示分析阶段
-            if (hasTabular) {
+            // 2. Excel 文件 → 尝试 Text-to-SQL 查询
+            let contextForGeneration = searchResponse.context;
+
+            if (isExcelFile && hasTabular) {
+                phase = "querying_sql";
+                sqlPhaseText = "正在生成 SQL 查询...";
+
+                try {
+                    const sqlResponse = await invoke("query_excel_table", {
+                        filePath: file.path,
+                        query: q,
+                    });
+
+                    sqlResult = sqlResponse;
+                    sqlPhaseText = "正在执行查询...";
+
+                    // 将 SQL 结果作为 context 补充
+                    let sqlContext = `\n[SQL 查询结果]\n执行的 SQL: ${sqlResponse.sql}\n`;
+                    if (sqlResponse.summary_text) {
+                        sqlContext += sqlResponse.summary_text;
+                    } else {
+                        // 小结果集，构建 Markdown 表格
+                        sqlContext += `| ${sqlResponse.columns.join(" | ")} |\n`;
+                        sqlContext += `| ${sqlResponse.columns.map(() => "---").join(" | ")} |\n`;
+                        for (const row of sqlResponse.rows) {
+                            sqlContext += `| ${row.join(" | ")} |\n`;
+                        }
+                    }
+                    contextForGeneration =
+                        sqlContext + "\n" + searchResponse.context;
+                } catch (sqlErr) {
+                    // SQL 失败不阻塞，fallback 到普通 RAG
+                    console.warn(
+                        "[FileChat] SQL query failed, falling back:",
+                        sqlErr,
+                    );
+                }
+            } else if (hasTabular) {
                 phase = "analyzing";
-                // 给一个短暂的视觉反馈
                 await new Promise((r) => setTimeout(r, 300));
             }
 
-            // 2. 生成回答
+            // 3. 生成回答
             phase = "generating";
 
             let isFirstToken = true;
@@ -89,7 +134,7 @@
             try {
                 await invoke("rag_generate", {
                     query: q,
-                    context: searchResponse.context,
+                    context: contextForGeneration,
                 });
             } finally {
                 unlisten();
@@ -117,6 +162,8 @@
         sources = [];
         phase = "idle";
         errorMsg = "";
+        sqlResult = null;
+        sqlExpanded = false;
     }
 </script>
 
@@ -167,6 +214,13 @@
             </div>
         {/if}
 
+        {#if phase === "querying_sql"}
+            <div class="status-bar status-sql">
+                <span class="material-symbols-outlined spinning">database</span>
+                <span>{sqlPhaseText}</span>
+            </div>
+        {/if}
+
         {#if phase === "analyzing"}
             <div class="status-bar status-analyzing">
                 <span class="material-symbols-outlined spinning"
@@ -182,6 +236,77 @@
                     >progress_activity</span
                 >
                 <span>正在生成回答...</span>
+            </div>
+        {/if}
+
+        <!-- SQL 查询结果展示 -->
+        {#if sqlResult}
+            <div class="sql-result-section">
+                <div class="sql-result-header">
+                    <span
+                        class="material-symbols-outlined"
+                        style="font-size:14px;color:#8b5cf6">database</span
+                    >
+                    <span class="sql-result-title">SQL 查询结果</span>
+                    <span class="sql-result-meta"
+                        >{sqlResult.row_count} 行{sqlResult.retried
+                            ? " · 已重试"
+                            : ""}</span
+                    >
+                </div>
+
+                <!-- 可折叠 SQL 语句 -->
+                <button
+                    class="sql-toggle"
+                    onclick={() => (sqlExpanded = !sqlExpanded)}
+                >
+                    <span
+                        class="material-symbols-outlined"
+                        style="font-size:12px"
+                    >
+                        {sqlExpanded ? "expand_less" : "expand_more"}
+                    </span>
+                    <code class="sql-preview"
+                        >{sqlExpanded ? "收起 SQL" : "查看 SQL"}</code
+                    >
+                </button>
+                {#if sqlExpanded}
+                    <pre class="sql-code"><code>{sqlResult.sql}</code></pre>
+                {/if}
+
+                <!-- 数据表格 -->
+                {#if sqlResult.is_summarized}
+                    <div class="sql-summary-notice">
+                        <span
+                            class="material-symbols-outlined"
+                            style="font-size:13px">info</span
+                        >
+                        数据量较大（{sqlResult.row_count} 行），已自动汇总展示
+                    </div>
+                {/if}
+
+                {#if !sqlResult.is_summarized && sqlResult.rows.length > 0}
+                    <div class="sql-table-wrapper">
+                        <table class="sql-table">
+                            <thead>
+                                <tr>
+                                    {#each sqlResult.columns as col}
+                                        <th>{col}</th>
+                                    {/each}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {#each sqlResult.rows as row}
+                                    <tr>
+                                        {#each row as cell}
+                                            <td>{cell}</td>
+                                        {/each}
+                                    </tr>
+                                {/each}
+                            </tbody>
+                        </table>
+                    </div>
+                {/if}
             </div>
         {/if}
 
@@ -261,6 +386,7 @@
                 bind:value={query}
                 onkeydown={handleKeydown}
                 disabled={phase === "searching" ||
+                    phase === "querying_sql" ||
                     phase === "analyzing" ||
                     phase === "generating"}
             />
@@ -269,11 +395,13 @@
                 onclick={handleSubmit}
                 disabled={!query.trim() ||
                     phase === "searching" ||
+                    phase === "querying_sql" ||
                     phase === "analyzing" ||
                     phase === "generating"}
             >
                 <span class="material-symbols-outlined">
                     {phase === "searching" ||
+                    phase === "querying_sql" ||
                     phase === "analyzing" ||
                     phase === "generating"
                         ? "progress_activity"
@@ -405,6 +533,126 @@
 
     .status-analyzing .material-symbols-outlined {
         color: #10b981;
+    }
+
+    .status-sql .material-symbols-outlined {
+        color: #8b5cf6;
+    }
+
+    /* SQL 查询结果 */
+    .sql-result-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-left: 3px solid #8b5cf6;
+        border-radius: 8px;
+        padding: 10px 12px;
+    }
+
+    .sql-result-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+    }
+
+    .sql-result-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .sql-result-meta {
+        font-size: 10px;
+        color: var(--text-muted);
+        margin-left: auto;
+    }
+
+    .sql-toggle {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 2px 0;
+        font-family: inherit;
+        font-size: 11px;
+        transition: color 0.15s ease;
+    }
+
+    .sql-toggle:hover {
+        color: #8b5cf6;
+    }
+
+    .sql-preview {
+        font-size: 11px;
+        background: none;
+        padding: 0;
+    }
+
+    .sql-code {
+        background: rgba(139, 92, 246, 0.06);
+        border: 1px solid rgba(139, 92, 246, 0.15);
+        border-radius: 6px;
+        padding: 8px 10px;
+        margin: 6px 0;
+        overflow-x: auto;
+        font-size: 11px;
+        line-height: 1.5;
+        color: var(--text-primary);
+    }
+
+    .sql-code code {
+        font-family: "SF Mono", "Fira Code", monospace;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+
+    .sql-summary-notice {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 8px;
+        margin-top: 6px;
+        background: rgba(139, 92, 246, 0.06);
+        border-radius: 4px;
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .sql-table-wrapper {
+        margin-top: 8px;
+        overflow-x: auto;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+    }
+
+    .sql-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+    }
+
+    .sql-table th,
+    .sql-table td {
+        padding: 5px 8px;
+        border: 1px solid var(--border-color);
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .sql-table th {
+        background: rgba(139, 92, 246, 0.08);
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .sql-table tr:nth-child(even) {
+        background: var(--bg-card-hover, rgba(255, 255, 255, 0.02));
     }
 
     .spinning {
