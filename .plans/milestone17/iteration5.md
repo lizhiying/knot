@@ -31,8 +31,8 @@ Tasks:
 - [x] 5.6 实现 SQL 执行容错 + 重试 — SQL 执行失败时：① 解析错误信息，② 调用 LLM build_fix_prompt 修复 SQL，③ 最多重试 2 次。已集成到 rag_search 和 query_excel_table 中
 - [x] 5.7 修改 `HybridQueryRouter` — ① 小表格（≤50行）保持直接 Markdown 注入，② 大表格（>50行）走 DuckDB Text-to-SQL 路径（注册→LLM 生成 SQL→执行→ResultSummarizer 处理），③ 任何环节失败时 fallback 到 Markdown。提取了 `inject_block_as_markdown` 辅助函数
 - [x] 5.8 新增 `query_excel_table` Tauri command — 单文件 Excel 聊天接口：加载文件→注册 DuckDB→LLM 生成 SQL→执行（带重试）→返回 ExcelQueryResponse（含 SQL、列名、行数据、摘要）
-- [ ] 5.9 前端：查询状态多阶段指示 — 完善 FileChat 的 phase 状态机显示："正在搜索..." → "正在生成 SQL..." → "正在执行查询..." → "正在生成回答..."
-- [ ] 5.10 前端：SQL 查询结果展示 — 在回答中展示执行的 SQL 语句（可折叠）和查询结果表格，大结果集显示"数据量较大（N 行），已自动汇总展示"提示
+- [x] 5.9 前端：查询状态多阶段指示 — 新增 `querying_sql` phase，显示紫色 database 图标。Excel 文件查询流程：「搜索表格数据」→「正在生成 SQL 查询」→「正在执行查询」→「正在生成回答」。SQL 结果作为增强 context 注入生成阶段
+- [x] 5.10 前端：SQL 查询结果展示 — 可折叠 SQL 代码块（紫色高亮），小结果集（≤20行）直接渲染数据表格，大结果集显示「数据量较大（N 行），已自动汇总展示」提示。重试标记（「已重试」）。所有样式使用紫色 accent 与数据库操作视觉关联
 
 Exit criteria:
 - `QueryEngine` 能将 DataBlock 注册为 DuckDB 临时表，并成功执行 SQL 查询
