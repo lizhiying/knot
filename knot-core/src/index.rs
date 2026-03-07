@@ -72,6 +72,8 @@ impl KnotIndexer {
                                 || ext == "pdf"
                                 || ext == "xlsx"
                                 || ext == "xls"
+                                || ext == "xlsm"
+                                || ext == "xlsb"
                             {
                                 let path_str = file_path.to_string_lossy().to_string();
                                 files_seen.push(path_str.clone());

@@ -62,7 +62,7 @@ pub fn should_index_file(path: &Path) -> bool {
         let ext_str = ext.to_string_lossy();
         let should = matches!(
             ext_str.as_ref(),
-            "md" | "txt" | "pdf" | "docx" | "pptx" | "xlsx" | "html"
+            "md" | "txt" | "pdf" | "docx" | "pptx" | "xlsx" | "xls" | "xlsm" | "xlsb" | "html"
         );
         if !should {
             // println!(

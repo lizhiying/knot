@@ -932,7 +932,7 @@ fn classify_file_type(ext: &str) -> KnowledgeFileType {
         "html" | "htm" => KnowledgeFileType::Html,
         "docx" => KnowledgeFileType::Word,
         "pptx" => KnowledgeFileType::PowerPoint,
-        "xlsx" => KnowledgeFileType::Excel,
+        "xlsx" | "xls" | "xlsm" | "xlsb" => KnowledgeFileType::Excel,
         "csv" => KnowledgeFileType::Csv,
         "png" | "jpg" | "jpeg" | "gif" | "bmp" | "webp" | "svg" | "ico" => KnowledgeFileType::Image,
         _ => KnowledgeFileType::Other,
