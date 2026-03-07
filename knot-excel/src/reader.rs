@@ -202,7 +202,7 @@ fn split_sheet_into_ranges(range: &Range<Data>, config: &ExcelConfig) -> Vec<(us
     // --- 第二遍：综合检测分割点 ---
     let mut split_points: Vec<usize> = Vec::new(); // 每个分割点是新数据块的起始行
 
-    let empty_threshold = 4; // 连续 ≥4 行空行才算空白分隔
+    // let empty_threshold = 4; // 策略一已禁用
     let mut consecutive_empty = 0;
     let mut consecutive_data_rows = 0usize; // 连续非空行数
     let mut in_data_region = false; // 是否已进入数据区域
@@ -218,15 +218,16 @@ fn split_sheet_into_ranges(range: &Range<Data>, config: &ExcelConfig) -> Vec<(us
         }
 
         // 非空行
-        if consecutive_empty >= empty_threshold && in_data_region {
-            // === 策略一：空白楚河汉界 ===
-            // ≥4 行空行分隔 → 无条件切割
-            split_points.push(row_idx);
-            in_data_region = false;
-            consecutive_data_rows = 0;
-            last_data_numeric_cols = 0;
-        } else if in_data_region && consecutive_empty >= 1 && consecutive_empty < empty_threshold {
-            // 有少量空行（1-3行），只有满足「类型跳变」条件才切割
+        // === 策略一：空白楚河汉界（已禁用）===
+        // 单纯靠空行数量判断不够准确，数据间经常有空行
+        // if consecutive_empty >= empty_threshold && in_data_region {
+        //     split_points.push(row_idx);
+        //     in_data_region = false;
+        //     consecutive_data_rows = 0;
+        //     last_data_numeric_cols = 0;
+        // } else
+        if in_data_region && consecutive_empty >= 1 {
+            // 有空行间隔，检查是否发生了类型跳变
             // === 策略二：数据类型跳变 ===
             // 条件：之前有数值列，现在这一行是"全文本"（可能是新表头）
             // 且后续几行有数值列（确认是新数据区而非偶发的文本行）
