@@ -7,7 +7,7 @@ edition = "2021"
 # 核心：通过路径引用本地库，开启所有特性
 knot-parser = { path = "../../knot-parser", features = ["office", "vision"] }
 knot-core = { path = "../../knot-core" }
-knot-excel = { path = "../../knot-excel" }
+knot-excel = { path = "../../knot-excel", features = ["query"] }
 
 # 应用层特有的推理引擎依赖
 ort = { version = "2.0.0-rc.9", features = ["load-dynamic"] }

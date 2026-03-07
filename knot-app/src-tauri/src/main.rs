@@ -722,7 +722,8 @@ fn main() {
             get_file_index_detail,
             reindex_file,
             ignore_file,
-            unignore_file
+            unignore_file,
+            query_excel_table
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -1839,6 +1840,57 @@ struct RagSearchResponse {
     context: String, // 预构建的上下文，供 rag_generate 使用
 }
 
+/// 将 DataBlock 注入为 Markdown 表格到 context（最多 50 行）
+fn inject_block_as_markdown(
+    block: &knot_excel::DataBlock,
+    profiles: &[knot_excel::TableProfile],
+    file_path: &std::path::Path,
+    tabular_context: &mut String,
+) {
+    let file_name = file_path.file_name().unwrap_or_default().to_string_lossy();
+    let max_rows = 50;
+    let truncated = block.row_count > max_rows;
+    let display_rows = block.row_count.min(max_rows);
+
+    tabular_context.push_str(&format!(
+        "[表格数据] {} / Sheet \"{}\"\n共 {} 行 {} 列\n\n",
+        file_name,
+        block.sheet_name,
+        block.row_count,
+        block.column_names.len()
+    ));
+
+    // 列信息
+    if let Some(profile) = profiles.iter().find(|p| p.source_id == block.source_id) {
+        tabular_context.push_str("列信息:\n");
+        for (name, dtype) in block.column_names.iter().zip(profile.column_types.iter()) {
+            tabular_context.push_str(&format!("- {} ({})\n", name, dtype));
+        }
+        tabular_context.push('\n');
+    }
+
+    // Markdown 表格
+    tabular_context.push_str(&format!(
+        "完整数据（共 {} 行{}）:\n",
+        display_rows,
+        if truncated {
+            format!("，已截断，原始共 {} 行", block.row_count)
+        } else {
+            String::new()
+        }
+    ));
+    tabular_context.push_str(&format!("| {} |\n", block.column_names.join(" | ")));
+    let sep: Vec<&str> = block.column_names.iter().map(|_| "---").collect();
+    tabular_context.push_str(&format!("| {} |\n", sep.join(" | ")));
+    for row in block.rows.iter().take(max_rows) {
+        tabular_context.push_str(&format!("| {} |\n", row.join(" | ")));
+    }
+    if truncated {
+        tabular_context.push_str(&format!("... (省略了 {} 行)\n", block.row_count - max_rows));
+    }
+    tabular_context.push('\n');
+}
+
 /// 仅执行搜索，快速返回结果
 #[tauri::command]
 async fn rag_search(
@@ -2076,7 +2128,7 @@ async fn rag_search(
         );
     }
 
-    // 4.2 处理 tabular 结果: 重新加载完整数据
+    // 4.2 处理 tabular 结果: 小表格直接注入 Markdown，大表格走 DuckDB Text-to-SQL
     let mut tabular_context = String::new();
     if has_tabular {
         let mut seen_files: std::collections::HashSet<String> = std::collections::HashSet::new();
@@ -2091,56 +2143,222 @@ async fn rag_search(
                 let excel_config = knot_excel::ExcelConfig::default();
                 match knot_excel::pipeline::parse_excel_full(file_path, &excel_config) {
                     Ok(parsed) => {
-                        for (block, profile) in parsed.blocks.iter().zip(parsed.profiles.iter()) {
-                            let file_name =
-                                file_path.file_name().unwrap_or_default().to_string_lossy();
+                        // 判断是否存在大表格（>50行），决定使用哪种策略
+                        let has_large_table = parsed.blocks.iter().any(|b| b.row_count > 50);
 
-                            // 生成完整数据的 Markdown 表格（限制行数防止 context 爆炸）
-                            let max_rows = 50;
-                            let truncated = block.row_count > max_rows;
-                            let display_rows = block.row_count.min(max_rows);
+                        if has_large_table {
+                            // === 大表格策略：DuckDB Text-to-SQL ===
+                            println!(
+                                "[rag_search] Large table detected in {}, using DuckDB Text-to-SQL",
+                                res.file_path
+                            );
 
-                            tabular_context.push_str(&format!(
-                                "[表格数据] {} / Sheet \"{}\"\n共 {} 行 {} 列\n\n",
-                                file_name,
-                                block.sheet_name,
-                                block.row_count,
-                                block.column_names.len()
-                            ));
+                            match knot_excel::QueryEngine::new() {
+                                Ok(mut engine) => {
+                                    // 注册所有数据块到 DuckDB
+                                    for block in &parsed.blocks {
+                                        if let Err(e) = engine.register_datablock(block) {
+                                            println!(
+                                                "[rag_search] Failed to register block {}: {}",
+                                                block.source_id, e
+                                            );
+                                        }
+                                    }
 
-                            // 列信息
-                            tabular_context.push_str("列信息:\n");
-                            for (name, dtype) in
-                                block.column_names.iter().zip(profile.column_types.iter())
-                            {
-                                tabular_context.push_str(&format!("- {} ({})\n", name, dtype));
-                            }
-                            tabular_context.push('\n');
+                                    // 获取 Schema 信息
+                                    let schemas = engine.get_registered_schemas();
+                                    if !schemas.is_empty() {
+                                        // 用 SqlGenerator 构建 Prompt
+                                        let sql_system =
+                                            knot_excel::SqlGenerator::build_system_prompt();
+                                        let sql_user = knot_excel::SqlGenerator::build_user_prompt(
+                                            &schemas,
+                                            &parsed.blocks,
+                                            &query,
+                                        );
+                                        let sql_prompt = format!(
+                                            "<|im_start|>system\n{}<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n",
+                                            sql_system, sql_user
+                                        );
 
-                            // 完整数据表格
-                            tabular_context.push_str(&format!(
-                                "完整数据（共 {} 行{}）:\n",
-                                display_rows,
-                                if truncated {
-                                    format!("，已截断，原始共 {} 行", block.row_count)
-                                } else {
-                                    String::new()
+                                        // 调用 LLM 生成 SQL
+                                        let llm_for_sql = {
+                                            let guard = state.chat_client.read().await;
+                                            guard.clone()
+                                        };
+
+                                        if let Some(llm_client) = llm_for_sql {
+                                            use knot_parser::LlmProvider;
+                                            match llm_client.generate_content(&sql_prompt).await {
+                                                Ok(generated_sql) => {
+                                                    let sql = generated_sql
+                                                        .trim()
+                                                        .trim_start_matches("```sql")
+                                                        .trim_start_matches("```")
+                                                        .trim_end_matches("```")
+                                                        .trim()
+                                                        .to_string();
+
+                                                    println!("[rag_search] Generated SQL: {}", sql);
+
+                                                    // 执行 SQL（带重试）
+                                                    let mut final_result =
+                                                        engine.execute_multi_step(&sql);
+                                                    let mut retried = false;
+
+                                                    // 5.6: SQL 容错重试（最多 2 次）
+                                                    if final_result.is_err() {
+                                                        for retry in 0..2 {
+                                                            let err_msg = final_result
+                                                                .as_ref()
+                                                                .unwrap_err()
+                                                                .to_string();
+                                                            println!(
+                                                                "[rag_search] SQL failed (retry {}): {}",
+                                                                retry + 1,
+                                                                err_msg
+                                                            );
+
+                                                            let fix_prompt_text = knot_excel::SqlGenerator::build_fix_prompt(
+                                                                &sql,
+                                                                &err_msg,
+                                                                &schemas,
+                                                            );
+                                                            let fix_prompt = format!(
+                                                                "<|im_start|>system\n{}<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n",
+                                                                sql_system, fix_prompt_text
+                                                            );
+
+                                                            match llm_client
+                                                                .generate_content(&fix_prompt)
+                                                                .await
+                                                            {
+                                                                Ok(fixed_sql) => {
+                                                                    let fixed = fixed_sql
+                                                                        .trim()
+                                                                        .trim_start_matches(
+                                                                            "```sql",
+                                                                        )
+                                                                        .trim_start_matches("```")
+                                                                        .trim_end_matches("```")
+                                                                        .trim()
+                                                                        .to_string();
+                                                                    println!("[rag_search] Fixed SQL: {}", fixed);
+                                                                    final_result = engine
+                                                                        .execute_multi_step(&fixed);
+                                                                    if final_result.is_ok() {
+                                                                        retried = true;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                Err(e) => {
+                                                                    println!(
+                                                                        "[rag_search] LLM fix failed: {}",
+                                                                        e
+                                                                    );
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    // 处理 SQL 结果
+                                                    match final_result {
+                                                        Ok(mut result) => {
+                                                            result.retried = retried;
+                                                            let ctx = knot_excel::ResultSummarizer::process(&result);
+                                                            let file_name = file_path
+                                                                .file_name()
+                                                                .unwrap_or_default()
+                                                                .to_string_lossy();
+
+                                                            tabular_context.push_str(&format!(
+                                                                "[表格数据查询] {}\n",
+                                                                file_name
+                                                            ));
+                                                            tabular_context.push_str(&format!(
+                                                                "执行的 SQL: {}\n\n",
+                                                                result.sql
+                                                            ));
+                                                            tabular_context
+                                                                .push_str(&ctx.to_prompt_text());
+                                                            tabular_context.push('\n');
+                                                            println!(
+                                                                "[rag_search] SQL query success: {} rows{}",
+                                                                result.row_count,
+                                                                if retried { " (retried)" } else { "" }
+                                                            );
+                                                        }
+                                                        Err(e) => {
+                                                            println!(
+                                                                "[rag_search] SQL execution failed after retries: {}",
+                                                                e
+                                                            );
+                                                            // Fallback: 使用 Markdown 注入前 50 行
+                                                            for block in &parsed.blocks {
+                                                                inject_block_as_markdown(
+                                                                    block,
+                                                                    &parsed.profiles,
+                                                                    file_path,
+                                                                    &mut tabular_context,
+                                                                );
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                Err(e) => {
+                                                    println!(
+                                                        "[rag_search] LLM SQL generation failed: {}, falling back to markdown",
+                                                        e
+                                                    );
+                                                    for block in &parsed.blocks {
+                                                        inject_block_as_markdown(
+                                                            block,
+                                                            &parsed.profiles,
+                                                            file_path,
+                                                            &mut tabular_context,
+                                                        );
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            // LLM 不可用，fallback 到 Markdown
+                                            for block in &parsed.blocks {
+                                                inject_block_as_markdown(
+                                                    block,
+                                                    &parsed.profiles,
+                                                    file_path,
+                                                    &mut tabular_context,
+                                                );
+                                            }
+                                        }
+                                    }
                                 }
-                            ));
-                            tabular_context
-                                .push_str(&format!("| {} |\n", block.column_names.join(" | ")));
-                            let sep: Vec<&str> = block.column_names.iter().map(|_| "---").collect();
-                            tabular_context.push_str(&format!("| {} |\n", sep.join(" | ")));
-                            for row in block.rows.iter().take(max_rows) {
-                                tabular_context.push_str(&format!("| {} |\n", row.join(" | ")));
+                                Err(e) => {
+                                    println!(
+                                        "[rag_search] DuckDB init failed: {}, falling back to markdown",
+                                        e
+                                    );
+                                    for block in &parsed.blocks {
+                                        inject_block_as_markdown(
+                                            block,
+                                            &parsed.profiles,
+                                            file_path,
+                                            &mut tabular_context,
+                                        );
+                                    }
+                                }
                             }
-                            if truncated {
-                                tabular_context.push_str(&format!(
-                                    "... (省略了 {} 行)\n",
-                                    block.row_count - max_rows
-                                ));
+                        } else {
+                            // === 小表格策略：直接注入 Markdown 表格 ===
+                            for block in &parsed.blocks {
+                                inject_block_as_markdown(
+                                    block,
+                                    &parsed.profiles,
+                                    file_path,
+                                    &mut tabular_context,
+                                );
                             }
-                            tabular_context.push('\n');
                         }
                         println!("[rag_search] Loaded full Excel data from {}", res.file_path);
                     }
@@ -2232,6 +2450,160 @@ async fn rag_search(
         sources: display_sources,
         context: context_str,
     })
+}
+
+/// 单文件 Excel Text-to-SQL 查询
+#[tauri::command]
+async fn query_excel_table(
+    state: State<'_, AppState>,
+    file_path: String,
+    query: String,
+) -> Result<ExcelQueryResponse, String> {
+    use knot_parser::LlmProvider;
+
+    println!("[query_excel_table] file={}, query={}", file_path, query);
+
+    // 1. 加载 Excel 文件
+    let path = std::path::Path::new(&file_path);
+    if !path.exists() {
+        return Err(format!("File not found: {}", file_path));
+    }
+
+    let excel_config = knot_excel::ExcelConfig::default();
+    let parsed = knot_excel::pipeline::parse_excel_full(path, &excel_config)
+        .map_err(|e| format!("Failed to parse Excel: {}", e))?;
+
+    if parsed.blocks.is_empty() {
+        return Err("No data blocks found in file".to_string());
+    }
+
+    // 2. 注册到 DuckDB
+    let mut engine =
+        knot_excel::QueryEngine::new().map_err(|e| format!("DuckDB init failed: {}", e))?;
+
+    for block in &parsed.blocks {
+        engine
+            .register_datablock(block)
+            .map_err(|e| format!("Register block failed: {}", e))?;
+    }
+
+    let schemas = engine.get_registered_schemas();
+    if schemas.is_empty() {
+        return Err("No tables registered".to_string());
+    }
+
+    // 3. 生成 SQL Prompt
+    let sql_system = knot_excel::SqlGenerator::build_system_prompt();
+    let sql_user = knot_excel::SqlGenerator::build_user_prompt(&schemas, &parsed.blocks, &query);
+    let sql_prompt = format!(
+        "<|im_start|>system\n{}<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n",
+        sql_system, sql_user
+    );
+
+    // 4. LLM 生成 SQL
+    let llm_client = {
+        let guard = state.chat_client.read().await;
+        guard.clone()
+    }
+    .ok_or("Chat LLM not ready")?;
+
+    let generated_sql = llm_client
+        .generate_content(&sql_prompt)
+        .await
+        .map_err(|e| format!("LLM generation failed: {}", e))?;
+
+    let sql = generated_sql
+        .trim()
+        .trim_start_matches("```sql")
+        .trim_start_matches("```")
+        .trim_end_matches("```")
+        .trim()
+        .to_string();
+
+    println!("[query_excel_table] Generated SQL: {}", sql);
+
+    // 5. 执行 SQL（带重试）
+    let mut final_result = engine.execute_multi_step(&sql);
+    let mut final_sql = sql.clone();
+    let mut retried = false;
+
+    if final_result.is_err() {
+        for retry in 0..2 {
+            let err_msg = final_result.as_ref().unwrap_err().to_string();
+            println!(
+                "[query_excel_table] SQL failed (retry {}): {}",
+                retry + 1,
+                err_msg
+            );
+
+            let fix_prompt_text =
+                knot_excel::SqlGenerator::build_fix_prompt(&final_sql, &err_msg, &schemas);
+            let fix_prompt = format!(
+                "<|im_start|>system\n{}<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n",
+                sql_system, fix_prompt_text
+            );
+
+            match llm_client.generate_content(&fix_prompt).await {
+                Ok(fixed_sql) => {
+                    let fixed = fixed_sql
+                        .trim()
+                        .trim_start_matches("```sql")
+                        .trim_start_matches("```")
+                        .trim_end_matches("```")
+                        .trim()
+                        .to_string();
+                    println!("[query_excel_table] Fixed SQL: {}", fixed);
+                    final_result = engine.execute_multi_step(&fixed);
+                    final_sql = fixed;
+                    if final_result.is_ok() {
+                        retried = true;
+                        break;
+                    }
+                }
+                Err(e) => {
+                    println!("[query_excel_table] LLM fix failed: {}", e);
+                    break;
+                }
+            }
+        }
+    }
+
+    // 6. 处理结果
+    let mut result = final_result.map_err(|e| format!("SQL execution failed: {}", e))?;
+    result.retried = retried;
+
+    let ctx = knot_excel::ResultSummarizer::process(&result);
+
+    println!(
+        "[query_excel_table] Success: {} rows, summarized={}",
+        result.row_count,
+        ctx.is_summarized()
+    );
+
+    Ok(ExcelQueryResponse {
+        sql: final_sql,
+        columns: result.columns,
+        rows: result.rows,
+        row_count: result.row_count,
+        is_summarized: ctx.is_summarized(),
+        summary_text: if ctx.is_summarized() {
+            Some(ctx.to_prompt_text())
+        } else {
+            None
+        },
+        retried,
+    })
+}
+
+#[derive(serde::Serialize)]
+struct ExcelQueryResponse {
+    sql: String,
+    columns: Vec<String>,
+    rows: Vec<Vec<String>>,
+    row_count: usize,
+    is_summarized: bool,
+    summary_text: Option<String>,
+    retried: bool,
 }
 
 /// 根据搜索上下文生成 LLM 回答 (Streaming Version)
