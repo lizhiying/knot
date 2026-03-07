@@ -406,12 +406,41 @@ impl KnotStore {
         let batch = self.create_record_batch(records.clone(), schema.clone())?;
         let table_names = self.conn.table_names().execute().await?;
         let table_exists = table_names.contains(&self.table_name);
-        let reader = RecordBatchIterator::new(vec![Ok(batch)].into_iter(), schema.clone());
 
         if table_exists {
             let table = self.conn.open_table(&self.table_name).execute().await?;
-            table.add(Box::new(reader)).execute().await?;
+
+            // Schema 迁移检测：比较已有表的字段和新 schema 的字段
+            let existing_schema = table.schema().await?;
+            let new_fields: Vec<&str> = schema.fields().iter().map(|f| f.name().as_str()).collect();
+            let existing_fields: Vec<&str> = existing_schema
+                .fields()
+                .iter()
+                .map(|f| f.name().as_str())
+                .collect();
+            let missing: Vec<&&str> = new_fields
+                .iter()
+                .filter(|f| !existing_fields.contains(f))
+                .collect();
+
+            if !missing.is_empty() {
+                println!(
+                    "[Store] LanceDB schema migration: adding missing fields {:?}. Recreating table...",
+                    missing
+                );
+                // 删除旧表，用新 schema 重建
+                self.conn.drop_table(&self.table_name).await?;
+                let reader = RecordBatchIterator::new(vec![Ok(batch)].into_iter(), schema.clone());
+                self.conn
+                    .create_table(&self.table_name, Box::new(reader))
+                    .execute()
+                    .await?;
+            } else {
+                let reader = RecordBatchIterator::new(vec![Ok(batch)].into_iter(), schema.clone());
+                table.add(Box::new(reader)).execute().await?;
+            }
         } else {
+            let reader = RecordBatchIterator::new(vec![Ok(batch)].into_iter(), schema.clone());
             self.conn
                 .create_table(&self.table_name, Box::new(reader))
                 .execute()
