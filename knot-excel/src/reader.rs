@@ -459,6 +459,13 @@ fn parse_sheet_to_block_with_offset(
 }
 
 /// 带范围限制的数据起始行检测（用于多数据块场景）
+///
+/// 改进策略：不简单取第一个非空率高的行，而是给前 N 行打分评估"表头可能性"。
+/// 真正的表头行特征：
+/// - 大部分列有值（非空率高）
+/// - 值是短文本（列名通常较短）
+/// - 后续行有数值列（确认是表头→数据转换点）
+/// - 不含"编制单位"/"单位："等典型标题行关键词
 fn detect_data_start_in_range(
     range: &Range<Data>,
     range_start: usize,
@@ -466,28 +473,133 @@ fn detect_data_start_in_range(
     width: usize,
     max_scan: usize,
 ) -> usize {
-    let scan_limit = (range_end + 1).min(range_start + max_scan + 3);
+    let scan_limit = (range_end + 1).min(range_start + max_scan + 5);
+    let check_width = width.min(20);
+
+    if scan_limit <= range_start {
+        return range_start;
+    }
+
+    // 收集前 N 行的特征
+    struct RowFeature {
+        non_empty: usize,
+        has_long_text: bool, // 是否含有 >20 字符的单元格
+        is_title_row: bool,  // 是否含有"编制单位"等标题关键词
+        all_text: bool,      // 是否全是文本（无数值）
+        max_cell_len: usize, // 最长单元格字符数
+    }
+
+    let mut features: Vec<RowFeature> = Vec::new();
 
     for row_idx in range_start..scan_limit {
-        let mut non_empty_count = 0;
-        let mut total_checked = 0;
+        let mut non_empty = 0;
+        let mut numeric = 0;
+        let mut has_long_text = false;
+        let mut is_title_row = false;
+        let mut max_cell_len = 0;
 
-        for col in 0..width.min(20) {
-            total_checked += 1;
+        for col in 0..check_width {
             if let Some(data) = range.get((row_idx, col)) {
                 let val = cell_to_string(data);
-                if !val.trim().is_empty() {
-                    non_empty_count += 1;
+                let trimmed = val.trim();
+                if !trimmed.is_empty() {
+                    non_empty += 1;
+                    let len = trimmed.chars().count();
+                    if len > max_cell_len {
+                        max_cell_len = len;
+                    }
+                    if len > 20 {
+                        has_long_text = true;
+                    }
+                    // 检测典型标题行关键词
+                    let title_keywords = [
+                        "编制单位",
+                        "单位：",
+                        "单位:",
+                        "报表名称",
+                        "会计期间",
+                        "审计",
+                        "填报",
+                        "制表日期",
+                        "币种",
+                    ];
+                    if title_keywords.iter().any(|k| trimmed.contains(k)) {
+                        is_title_row = true;
+                    }
+                    // 检测数值
+                    if matches!(
+                        data,
+                        Data::Int(_) | Data::Float(_) | Data::DateTime(_) | Data::Bool(_)
+                    ) {
+                        numeric += 1;
+                    } else if trimmed.parse::<f64>().is_ok() {
+                        numeric += 1;
+                    }
                 }
             }
         }
 
-        if total_checked > 0 && non_empty_count * 100 / total_checked >= 40 {
-            return row_idx;
+        features.push(RowFeature {
+            non_empty,
+            has_long_text,
+            is_title_row,
+            all_text: numeric == 0,
+            max_cell_len,
+        });
+    }
+
+    // 给每行打分：越高越可能是真正的表头
+    let mut best_row = range_start;
+    let mut best_score: i32 = -1;
+
+    for (idx, feat) in features.iter().enumerate() {
+        let row_idx = range_start + idx;
+        // 基本要求：至少 40% 非空
+        if check_width > 0 && feat.non_empty * 100 / check_width < 40 {
+            continue;
+        }
+
+        let mut score: i32 = 0;
+
+        // 非空率越高越好（满分 40）
+        score += (feat.non_empty as i32 * 40) / check_width.max(1) as i32;
+
+        // 后续行有数值 → 强力确认是表头（+30）
+        let following_has_numeric = (1..=3).any(|offset| {
+            let fi = idx + offset;
+            fi < features.len() && !features[fi].all_text && features[fi].non_empty > 0
+        });
+        if following_has_numeric {
+            score += 30;
+        }
+
+        // 惩罚：含有标题关键词（-50）
+        if feat.is_title_row {
+            score -= 50;
+        }
+
+        // 惩罚：有过长文本（>20 字符）通常是标题/描述行（-20）
+        if feat.has_long_text {
+            score -= 20;
+        }
+
+        // 惩罚：最长单元格太长（标题行特征）
+        if feat.max_cell_len > 30 {
+            score -= 10;
+        }
+
+        // 全文本 + 后续有数值 = 好表头（+10）
+        if feat.all_text && following_has_numeric {
+            score += 10;
+        }
+
+        if score > best_score {
+            best_score = score;
+            best_row = row_idx;
         }
     }
 
-    range_start
+    best_row
 }
 
 /// 带范围限制的表头行数检测
