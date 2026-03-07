@@ -35,6 +35,7 @@ pub struct KnotStore {
     table_name: String,
     // tantivy_path: PathBuf,
     tantivy_index: Index, // Cached Index to avoid repeated initialization
+    schema_rebuilt: bool, // true if Tantivy schema was upgraded on this init
 }
 
 impl KnotStore {
@@ -56,13 +57,14 @@ impl KnotStore {
         let conn = connect(&path_str).execute().await?;
 
         // Pre-initialize Tantivy Index (expensive, do once)
-        let tantivy_index = Self::create_tantivy_index(&tantivy_path)?;
+        let (tantivy_index, schema_rebuilt) = Self::create_tantivy_index(&tantivy_path)?;
 
         let store = Self {
             conn,
             table_name: "vectors".to_string(),
             // tantivy_path,
             tantivy_index,
+            schema_rebuilt,
         };
 
         Ok(store)
@@ -72,7 +74,8 @@ impl KnotStore {
     const SCHEMA_VERSION: u32 = 3; // v1: 基础字段, v2: +text_icu +file_name_std +en_knot, v3: +doc_type
 
     /// Create and configure Tantivy Index (called once during initialization)
-    fn create_tantivy_index(tantivy_path: &PathBuf) -> Result<Index> {
+    /// Returns (Index, was_rebuilt) — was_rebuilt is true if schema migration occurred.
+    fn create_tantivy_index(tantivy_path: &PathBuf) -> Result<(Index, bool)> {
         use tantivy::directory::MmapDirectory;
 
         let mut schema_builder = t_schema::Schema::builder();
@@ -167,7 +170,7 @@ impl KnotStore {
 
         if reset_needed {
             println!(
-                "[FTS] Rebuilding Tantivy index for schema v{}...",
+                "[FTS] Rebuilding Tantivy index for schema v{}. File registry must be cleared for full re-index.",
                 Self::SCHEMA_VERSION
             );
             let _ = std::fs::remove_dir_all(tantivy_path);
@@ -339,7 +342,13 @@ impl KnotStore {
             Self::SCHEMA_VERSION
         );
 
-        Ok(index)
+        Ok((index, reset_needed))
+    }
+
+    /// 是否在本次初始化时发生了 Tantivy schema 升级重建。
+    /// 如果为 true，调用者应清空 file_registry 以触发全量重建索引。
+    pub fn schema_was_rebuilt(&self) -> bool {
+        self.schema_rebuilt
     }
 
     /// Get cached Tantivy Index for search operations

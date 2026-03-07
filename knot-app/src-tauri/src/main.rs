@@ -1450,24 +1450,22 @@ async fn start_background_indexing(
     indexer.pdf_vision_model = Some("glm-ocr:latest".to_string());
     let _ = app.emit("indexing-status", "scanning");
 
-    // 3. Tantivy 空索引检测：如果 Tantivy 为空但 file_registry 有记录，
-    // 说明之前 schema 升级重建了 Tantivy 但没有清空 file_registry，
-    // 导致所有文件被认为"已索引" → Tantivy 永远为空。
-    // 此时需要清空 file_registry 强制全量重建。
+    // 3. Tantivy 一致性检查：
+    // - 如果 Tantivy schema 刚被升级重建 → 清空 file_registry 强制全量重建
+    // - 如果 Tantivy 为空（可能之前升级没清 registry 遗留）→ 同样强制重建
     {
-        let tantivy_dir = std::path::Path::new(&index_path)
-            .parent()
-            .map(|p| p.join("tantivy"));
-        if let Some(ref tp) = tantivy_dir {
-            if tp.exists() {
-                let tantivy_empty = match KnotStore::new(&index_path).await {
-                    Ok(store) => store.get_doc_count().unwrap_or(0) == 0,
-                    Err(_) => false,
-                };
-                if tantivy_empty {
+        match KnotStore::new(&index_path).await {
+            Ok(store) => {
+                if store.schema_was_rebuilt() {
+                    println!("[Indexer] Tantivy schema was upgraded. Clearing file_registry for full rebuild...");
+                    indexer.clear_registry().await;
+                } else if store.get_doc_count().unwrap_or(0) == 0 {
                     println!("[Indexer] Tantivy is empty. Forcing full rebuild...");
                     indexer.clear_registry().await;
                 }
+            }
+            Err(e) => {
+                eprintln!("[Indexer] Warning: could not check Tantivy state: {}", e);
             }
         }
     }
