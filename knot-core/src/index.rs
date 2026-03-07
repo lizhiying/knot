@@ -45,6 +45,14 @@ impl KnotIndexer {
         }
     }
 
+    /// 清空 file_registry，强制下次 index_directory 全量重建。
+    /// 用于 Tantivy schema 升级后索引被重建但 file_registry 没同步的场景。
+    pub async fn clear_registry(&self) {
+        if let Some(ref reg) = self.registry {
+            let _ = reg.clear_all().await;
+        }
+    }
+
     pub async fn index_directory(&self, path: &Path) -> Result<(Vec<VectorRecord>, Vec<String>)> {
         let entries: Vec<_> = WalkDir::new(path)
             .into_iter()
