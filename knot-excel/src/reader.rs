@@ -101,12 +101,14 @@ pub fn read_excel<P: AsRef<Path>>(
         // 4.1 多数据块切割：检测空白楚河汉界 + 类型跳变
         let block_ranges = split_sheet_into_ranges(&range, config);
 
-        println!(
-            "[ExcelReader] Sheet '{}': {} block(s), ranges={:?}",
-            sheet_name,
-            block_ranges.len(),
-            block_ranges
-        );
+        if block_ranges.len() > 1 {
+            log::info!(
+                "Sheet '{}': {} block(s), ranges={:?}",
+                sheet_name,
+                block_ranges.len(),
+                block_ranges
+            );
+        }
 
         for (block_idx, (start_row, end_row)) in block_ranges.iter().enumerate() {
             // 创建子范围的虚拟 Range：通过偏移传递给 parse_sheet_to_block
@@ -119,9 +121,13 @@ pub fn read_excel<P: AsRef<Path>>(
                     }
                 }
                 Err(e) => {
-                    println!(
-                        "[ExcelReader] Failed to parse sheet '{}' block {} (rows {}..{}): {}",
-                        sheet_name, block_idx, start_row, end_row, e
+                    log::warn!(
+                        "Failed to parse sheet '{}' block {} (rows {}..{}): {}",
+                        sheet_name,
+                        block_idx,
+                        start_row,
+                        end_row,
+                        e
                     );
                 }
             }
