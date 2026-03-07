@@ -1261,7 +1261,14 @@ async fn reindex_file(
             .unwrap_or(0);
         let registry = knot_core::registry::FileRegistry::new(&db_url).await.ok();
         if let Some(reg) = registry {
-            let _ = reg.update_file(&file_path, &hash, modified).await;
+            let _ = reg
+                .update_file(
+                    &file_path,
+                    &hash,
+                    modified,
+                    knot_core::index::KnotIndexer::PARSER_VERSION,
+                )
+                .await;
             println!("[Knowledge] Registry updated for: {}", file_path);
         }
     }

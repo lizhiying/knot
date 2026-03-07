@@ -22,6 +22,14 @@ pub struct KnotIndexer {
 }
 
 impl KnotIndexer {
+    /// Parser 版本号。每次修改 parser 解析逻辑时递增此值，
+    /// 会触发已索引文件的全量重新解析（即使文件内容没变）。
+    ///
+    /// 变更记录：
+    /// v1: 初始版本
+    /// v2: Excel 智能表头检测（跳过标题行），改进财务报表解析
+    pub const PARSER_VERSION: &'static str = "2";
+
     pub async fn new(
         db_path: &str,
         provider: Option<Arc<dyn EmbeddingProvider + Send + Sync>>,
@@ -66,8 +74,13 @@ impl KnotIndexer {
                                         // We need to pass references or clone needed data.
                                         // self.index_file is async and takes &self.
                                         // But self needs to be static or Arc?
-                                        // self is &KnotIndexer. If index_directory takes &self, the lifetime of &self outlives the future?
-                                        // Yes, because we await the stream.
+                                        // Let's see.
+                                        // In fact the problem is stream::iter().map() creates
+                                        // a closure that must be 'static if .buffer_unordered().
+                                        // But we're calling .await on self methods inside.
+                                        // The key is that the returned future borrows self.
+                                        // And buffer_unordered requires 'static futures.
+
                 async move {
                     let mut records = Vec::new();
                     let mut files_seen = Vec::new();
@@ -102,15 +115,27 @@ impl KnotIndexer {
                                     }
 
                                     if let Some(reg) = &registry {
-                                        if let Ok(Some(stored_hash)) =
-                                            reg.get_file_hash(&path_str).await
+                                        if let Ok(Some((stored_hash, stored_version))) =
+                                            reg.get_file_info(&path_str).await
                                         {
-                                            if stored_hash == hash {
+                                            let version_match = stored_version.as_deref()
+                                                == Some(Self::PARSER_VERSION);
+                                            if stored_hash == hash && version_match {
                                                 should_index = false;
-                                                // println!("Skipping unchanged: {:?}", file_path);
                                             } else {
                                                 if std::env::var("KNOT_QUIET").is_err() {
-                                                    println!("Start Indexing: {:?}", file_path);
+                                                    if !version_match {
+                                                        println!(
+                                                            "Re-indexing (parser v{} -> v{}): {:?}",
+                                                            stored_version
+                                                                .as_deref()
+                                                                .unwrap_or("?"),
+                                                            Self::PARSER_VERSION,
+                                                            file_path
+                                                        );
+                                                    } else {
+                                                        println!("Start Indexing: {:?}", file_path);
+                                                    }
                                                 }
                                             }
                                         } else {
@@ -138,8 +163,14 @@ impl KnotIndexer {
                                     {
                                         records.extend(file_records);
                                         if let Some(reg) = &registry {
-                                            let _ =
-                                                reg.update_file(&path_str, &hash, modified).await;
+                                            let _ = reg
+                                                .update_file(
+                                                    &path_str,
+                                                    &hash,
+                                                    modified,
+                                                    Self::PARSER_VERSION,
+                                                )
+                                                .await;
                                         }
                                     }
                                 }

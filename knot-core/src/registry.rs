@@ -40,21 +40,45 @@ impl FileRegistry {
         Ok(row.map(|r| r.get("content_hash")))
     }
 
-    pub async fn update_file(&self, path: &str, hash: &str, modified: i64) -> Result<()> {
+    /// 获取文件的 content_hash 和 index_version
+    pub async fn get_file_info(&self, path: &str) -> Result<Option<(String, Option<String>)>> {
+        let row = sqlx::query(
+            "SELECT content_hash, index_version FROM file_registry WHERE file_path = ?",
+        )
+        .bind(path)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(row.map(|r| {
+            let hash: String = r.get("content_hash");
+            let version: Option<String> = r.get("index_version");
+            (hash, version)
+        }))
+    }
+
+    pub async fn update_file(
+        &self,
+        path: &str,
+        hash: &str,
+        modified: i64,
+        index_version: &str,
+    ) -> Result<()> {
         let now = chrono::Utc::now().timestamp();
         sqlx::query(
             r#"
-            INSERT INTO file_registry (file_path, content_hash, last_modified, indexed_at)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO file_registry (file_path, content_hash, last_modified, index_version, indexed_at)
+            VALUES (?, ?, ?, ?, ?)
             ON CONFLICT(file_path) DO UPDATE SET
                 content_hash = excluded.content_hash,
                 last_modified = excluded.last_modified,
+                index_version = excluded.index_version,
                 indexed_at = excluded.indexed_at
             "#,
         )
         .bind(path)
         .bind(hash)
         .bind(modified)
+        .bind(index_version)
         .bind(now)
         .execute(&self.pool)
         .await?;
