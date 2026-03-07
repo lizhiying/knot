@@ -98,16 +98,15 @@ pub fn read_excel<P: AsRef<Path>>(
             continue;
         }
 
-        // 4.1 多数据块切割：检测空白楚河汉界
+        // 4.1 多数据块切割：检测空白楚河汉界 + 类型跳变
         let block_ranges = split_sheet_into_ranges(&range, config);
 
-        if block_ranges.len() > 1 {
-            println!(
-                "[ExcelReader] Sheet '{}' contains {} data blocks",
-                sheet_name,
-                block_ranges.len()
-            );
-        }
+        println!(
+            "[ExcelReader] Sheet '{}': {} block(s), ranges={:?}",
+            sheet_name,
+            block_ranges.len(),
+            block_ranges
+        );
 
         for (block_idx, (start_row, end_row)) in block_ranges.iter().enumerate() {
             // 创建子范围的虚拟 Range：通过偏移传递给 parse_sheet_to_block
@@ -120,11 +119,9 @@ pub fn read_excel<P: AsRef<Path>>(
                     }
                 }
                 Err(e) => {
-                    log::warn!(
-                        "Failed to parse sheet '{}' block {}: {}",
-                        sheet_name,
-                        block_idx,
-                        e
+                    println!(
+                        "[ExcelReader] Failed to parse sheet '{}' block {} (rows {}..{}): {}",
+                        sheet_name, block_idx, start_row, end_row, e
                     );
                 }
             }
@@ -144,7 +141,10 @@ pub fn read_excel<P: AsRef<Path>>(
     Ok(all_blocks)
 }
 
-/// 检测 Sheet 中的数据块边界（空白楚河汉界模式）
+/// 检测 Sheet 中的数据块边界
+/// 策略一：空白楚河汉界（连续 ≥4 行全空行作为分隔——避免数据中正常的 1-2 行空行误触发）
+/// 策略二：数据类型跳变（某区域从"有数值列"突然变成"全文本行"＝新表头 → 新数据块）
+///
 /// 返回 Vec<(start_row, end_row)>，每个元素代表一个数据块的行范围（包含 end_row）
 fn split_sheet_into_ranges(range: &Range<Data>, config: &ExcelConfig) -> Vec<(usize, usize)> {
     let (height, width) = range.get_size();
@@ -154,48 +154,155 @@ fn split_sheet_into_ranges(range: &Range<Data>, config: &ExcelConfig) -> Vec<(us
         return vec![];
     }
 
-    let mut blocks = Vec::new();
-    let mut block_start: Option<usize> = None;
-    let mut consecutive_empty = 0;
-    let empty_threshold = 2; // 连续 2 行以上空行才认为是分隔
+    // --- 第一遍扫描：收集每行的特征 ---
+    // (non_empty_count, numeric_count, text_count, is_all_empty)
+    let mut row_features: Vec<(usize, usize, usize, bool)> = Vec::with_capacity(height);
 
     for row_idx in 0..height {
-        let is_empty = (0..width).all(|col| match range.get((row_idx, col)) {
-            Some(data) => cell_to_string(data).trim().is_empty(),
-            None => true,
-        });
+        let mut non_empty = 0;
+        let mut numeric = 0;
+        let mut text = 0;
 
-        if is_empty {
-            consecutive_empty += 1;
-            if consecutive_empty >= empty_threshold {
-                // 结束当前数据块
-                if let Some(start) = block_start {
-                    let end = row_idx - consecutive_empty; // 回退到最后一个非空行
-                    if end >= start {
-                        blocks.push((start, end));
+        for col in 0..width {
+            if let Some(data) = range.get((row_idx, col)) {
+                match data {
+                    Data::Empty => {}
+                    Data::Int(_) | Data::Float(_) | Data::DateTime(_) | Data::Bool(_) => {
+                        non_empty += 1;
+                        numeric += 1;
                     }
-                    block_start = None;
+                    Data::String(s) => {
+                        if !s.trim().is_empty() {
+                            non_empty += 1;
+                            if s.parse::<f64>().is_ok() {
+                                numeric += 1;
+                            } else {
+                                text += 1;
+                            }
+                        }
+                    }
+                    _ => {
+                        non_empty += 1;
+                        text += 1;
+                    }
                 }
             }
-        } else {
-            if block_start.is_none() {
-                block_start = Some(row_idx);
+        }
+
+        let is_all_empty = non_empty == 0;
+        row_features.push((non_empty, numeric, text, is_all_empty));
+    }
+
+    // --- 第二遍：综合检测分割点 ---
+    let mut split_points: Vec<usize> = Vec::new(); // 每个分割点是新数据块的起始行
+
+    let empty_threshold = 4; // 连续 ≥4 行空行才算空白分隔
+    let mut consecutive_empty = 0;
+    let mut consecutive_data_rows = 0usize; // 连续非空行数
+    let mut in_data_region = false; // 是否已进入数据区域
+    let mut last_data_numeric_cols = 0usize; // 上一个数据区域的数值列数
+
+    for row_idx in 0..height {
+        let (non_empty, numeric, _text, is_all_empty) = row_features[row_idx];
+
+        if is_all_empty {
+            consecutive_empty += 1;
+            consecutive_data_rows = 0;
+            continue;
+        }
+
+        // 非空行
+        if consecutive_empty >= empty_threshold && in_data_region {
+            // === 策略一：空白楚河汉界 ===
+            // ≥4 行空行分隔 → 无条件切割
+            split_points.push(row_idx);
+            in_data_region = false;
+            consecutive_data_rows = 0;
+            last_data_numeric_cols = 0;
+        } else if in_data_region && consecutive_empty >= 1 && consecutive_empty < empty_threshold {
+            // 有少量空行（1-3行），只有满足「类型跳变」条件才切割
+            // === 策略二：数据类型跳变 ===
+            // 条件：之前有数值列，现在这一行是"全文本"（可能是新表头）
+            // 且后续几行有数值列（确认是新数据区而非偶发的文本行）
+            if numeric == 0 && non_empty >= 2 && last_data_numeric_cols >= 2 {
+                // 当前行看起来像新表头（全文本、≥2列有值）
+                // 验证：检查后面 1-3 行内是否有数值列（确认是新数据块的开始）
+                let has_following_data = (1..=3).any(|offset| {
+                    let check_row = row_idx + offset;
+                    if check_row < height {
+                        let (ne, n, _, _) = row_features[check_row];
+                        // 后续行有数值列（≥1个） → 确认是数据行
+                        // 或后续行的非空列数与表头相近 → 确认是同结构数据
+                        n >= 1 || ne >= non_empty
+                    } else {
+                        false
+                    }
+                });
+
+                if has_following_data {
+                    split_points.push(row_idx);
+                    in_data_region = false;
+                    consecutive_data_rows = 0;
+                    last_data_numeric_cols = 0;
+                }
             }
-            consecutive_empty = 0;
+        }
+
+        consecutive_empty = 0;
+        consecutive_data_rows += 1;
+
+        // 跟踪数据区域状态：连续 ≥2 行非空数据即进入数据区
+        if consecutive_data_rows >= 2 {
+            in_data_region = true;
+        }
+        // 记录数值列数（用于类型跳变检测）
+        if numeric >= 2 {
+            last_data_numeric_cols = numeric;
         }
     }
 
-    // 处理最后一个数据块
-    if let Some(start) = block_start {
-        blocks.push((start, height - 1));
+    // --- 根据分割点构建块范围 ---
+    if split_points.is_empty() {
+        // 没有分割点 → 整个 Sheet 是一个数据块
+        return vec![(0, height - 1)];
     }
 
-    // 如果没有检测到分隔（只有一个数据块），返回整个 Sheet
+    let mut blocks = Vec::new();
+    let mut prev_start = 0usize;
+
+    for &split_row in &split_points {
+        // 前一个块：从 prev_start 到 split_row - 1（去掉尾部空行）
+        let end = trim_trailing_empty_rows(&row_features, prev_start, split_row.saturating_sub(1));
+        if end >= prev_start {
+            blocks.push((prev_start, end));
+        }
+        prev_start = split_row;
+    }
+
+    // 最后一个块
+    let end = trim_trailing_empty_rows(&row_features, prev_start, height - 1);
+    if end >= prev_start {
+        blocks.push((prev_start, end));
+    }
+
     if blocks.is_empty() {
         blocks.push((0, height - 1));
     }
 
     blocks
+}
+
+/// 去掉块尾部的连续空行
+fn trim_trailing_empty_rows(
+    features: &[(usize, usize, usize, bool)],
+    start: usize,
+    mut end: usize,
+) -> usize {
+    while end > start && features[end].3 {
+        // .3 = is_all_empty
+        end -= 1;
+    }
+    end
 }
 
 /// 带行偏移的 Sheet 解析（用于多数据块场景）
@@ -763,7 +870,7 @@ fn looks_like_date(s: &str) -> bool {
     // YYYY-MM-DD 或 YYYY/MM/DD
     if s.len() >= 10 {
         let chars: Vec<char> = s.chars().collect();
-        if chars.len() >= 10 && chars[4] == '-' || chars[4] == '/' {
+        if chars.len() >= 10 && (chars[4] == '-' || chars[4] == '/') {
             let year_part = &s[..4];
             let month_part = &s[5..7];
             let day_part = &s[8..10];
