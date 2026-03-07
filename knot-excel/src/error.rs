@@ -21,4 +21,10 @@ pub enum ExcelError {
 
     #[error("Calamine error: {0}")]
     Calamine(String),
+
+    #[error("DuckDB error: {0}")]
+    Query(String),
+
+    #[error("SQL generation error: {0}")]
+    Sql(String),
 }
