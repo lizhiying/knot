@@ -20,7 +20,7 @@ Scope:
 - 过滤图表和图片元素
 
 Tasks:
-- [x] 4.1 实现数据块切割算法 — `split_sheet_into_ranges`：连续 ≥2 行全空行作为分隔，输出每个数据块的 (start_row, end_row) 范围。已通过 test_multi_block.xlsx 验证
+- [x] 4.1 实现数据块切割算法 — `split_sheet_into_ranges` 双策略：① **空白楚河汉界**：连续 ≥4 行全空行作为分隔（避免数据间 1-2 行正常空行误触发），② **数据类型跳变**：当前数据区有数值列 → 1-3 行空行 → 全文本行（疑似新表头） → 后续有数值列 → 确认切割。两策略互补，测试覆盖 3 个场景（分割/跳变/不分割）
 - [x] 4.2 实现数据块独立索引 — `parse_sheet_to_block_with_offset`：每个数据块独立执行表头检测、降维拼接、forward_fill、脏数据过滤，生成独立的 TableProfile。source_id 包含 block_index
 - [ ] 4.3 支持 DuckDB 多表挂载 — 推迟：当前直接注入 Markdown 表格到 LLM context 已覆盖中小表格场景
 - [ ] 4.4 增强 SQL Prompt 支持多表 — 推迟（依赖 4.3）
