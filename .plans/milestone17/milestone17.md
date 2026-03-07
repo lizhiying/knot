@@ -16,26 +16,27 @@
 
 ## 核心技术栈
 
-| 组件       | Crate      | 用途                             |
-| ---------- | ---------- | -------------------------------- |
-| 读取与解析 | `calamine` | 高速读取 `.xlsx`/`.xls`          |
-| 清洗与降维 | `polars`   | Arrow 格式 DataFrame 操作        |
-| 查询与计算 | `duckdb`   | 嵌入式 OLAP，执行 LLM 生成的 SQL |
-| LLM 交互   | 现有 LLM   | 理解 Schema 并生成 SQL           |
+| 组件       | Crate      | 用途                               |
+| ---------- | ---------- | ---------------------------------- |
+| 读取与解析 | `calamine` | 高速读取 `.xlsx`/`.xls`            |
+| 清洗与降维 | 手动实现   | 类型推断、forward_fill、脏数据过滤 |
+| 查询与计算 | `duckdb`   | 嵌入式 OLAP，执行 LLM 生成的 SQL   |
+| LLM 交互   | 现有 LLM   | 理解 Schema 并生成 SQL             |
 
 ## 迭代概览
 
-| 迭代        | 名称                                       | 核心价值                                                        |
-| ----------- | ------------------------------------------ | --------------------------------------------------------------- |
-| Iteration 1 | 最小可用 — 标准表读取 + Table Profile 索引 | 端到端 vertical slice: 读取 -> 构建 Profile -> 索引 -> 搜索命中 |
-| Iteration 2 | 混合查询路由 + Text-to-SQL 引擎            | HybridQueryRouter + DuckDB 查询 + 结果膨胀控制                  |
-| Iteration 3 | 复杂报表处理 — 合并单元格 + 多级表头降维   | 处理"中国式复杂报表"                                            |
-| Iteration 4 | 智能数据区探测 — 多数据块切割与跨表查询    | 单 Sheet 多数据块切割 + 跨表 JOIN                               |
+| 迭代        | 名称                                       | 状态       | 核心价值                                                        |
+| ----------- | ------------------------------------------ | ---------- | --------------------------------------------------------------- |
+| Iteration 1 | 最小可用 — 标准表读取 + Table Profile 索引 | ✅ 完成     | 端到端 vertical slice: 读取 -> 构建 Profile -> 索引 -> 搜索命中 |
+| Iteration 2 | 混合查询路由                               | ✅ 核心完成 | HybridQueryRouter + doc_type 分流 + Markdown 表格注入           |
+| Iteration 3 | 复杂报表处理 — 合并单元格 + 多级表头降维   | ✅ 完成     | 多级表头降维、forward_fill、脏数据过滤                          |
+| Iteration 4 | 智能数据区探测 — 多数据块切割              | ✅ 核心完成 | 数据类型跳变检测 + 独立索引                                     |
+| Iteration 5 | DuckDB 集成 — Text-to-SQL 查询引擎         | 🔲 进行中   | DuckDB 查询引擎 + SQL 生成 + 结果膨胀控制 + 单文件聊天          |
 
 ## 关键风险
 
-- Polars 编译体积大 → 按需引入 feature flags
-- DuckDB Rust binding 成熟度 → 评估 `duckdb-rs` 稳定性
+- DuckDB bundled 编译体积大 → 仅在 knot-excel 中引入，按需启用
+- DuckDB Rust binding 成熟度 → 评估 `duckdb-rs` v1.4 稳定性
 - 本地 LLM 生成 SQL 质量不稳定 → 2 次自动重试 + 错误反馈
 - 本地 LLM 上下文窗口有限 (8192 tokens) → 4 层降级策略
 - 复杂报表启发式算法不能覆盖所有格式 → 降级为纯文本输出
@@ -47,3 +48,4 @@
 - Iteration 2: [iteration2.md](file:///Users/lizhiying/Projects/knot/source/knot-workspaces/.plans/milestone17/iteration2.md)
 - Iteration 3: [iteration3.md](file:///Users/lizhiying/Projects/knot/source/knot-workspaces/.plans/milestone17/iteration3.md)
 - Iteration 4: [iteration4.md](file:///Users/lizhiying/Projects/knot/source/knot-workspaces/.plans/milestone17/iteration4.md)
+- Iteration 5: [iteration5.md](file:///Users/lizhiying/Projects/knot/source/knot-workspaces/.plans/milestone17/iteration5.md)
