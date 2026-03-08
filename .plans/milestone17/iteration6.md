@@ -32,9 +32,9 @@ Scope:
   - 长表格（>10行）在 AI Insight 区域可折叠展示
 
 Tasks:
-- [ ] 6.1 修改 RAG System Prompt 引导表格输出 — 在 `rag_generate` 的 System Prompt 中添加规则：当回答包含多条结构化数据时，使用 Markdown 表格格式 (`| 列1 | 列2 |`) 展现。给出 few-shot 示例。测试验证 LLM 对"列出最后5条血压"类查询输出表格
-- [ ] 6.2 AI Insight Markdown 表格 CSS 样式 — 在 AiInsight.svelte 或全局 markdown-content CSS 中添加 table 样式：深色背景、细边框、紧凑 padding、斑马纹（odd-even 交替色）、表头加粗高亮、容器 overflow-x:auto（宽表格横向可滚动而非溢出）
-- [ ] 6.3 FileChat Markdown 表格 CSS 样式 — FileChat.svelte 中复用或继承 6.2 的表格样式。确保 LLM 回答区域和 SQL 结果区域样式一致
+- [x] 6.1 修改 RAG System Prompt 引导表格输出 — 在 `rag_generate` 的 System Prompt 中添加规则：当回答包含多条结构化数据时，使用 Markdown 表格格式 (`| 列1 | 列2 |`) 展现。给出 few-shot 示例。测试验证 LLM 对"列出最后5条血压"类查询输出表格
+- [x] 6.2 AI Insight Markdown 表格 CSS 样式 — 在 spotlight.css markdown-content CSS 中增强 table 样式：圆角边框、深色背景、斑马纹（odd-even 交替色）、表头加粗高亮 sticky、行悬停高亮、容器 overflow-x:auto（宽表格横向可滚动）
+- [x] 6.3 FileChat Markdown 表格 CSS 样式 — FileChat.svelte 中 answer-content 的 :global(table) 样式增强，与 6.2 保持一致
 - [ ] 6.4 后端分页支持 — 修改 `query_excel_table` Tauri command：① 新增 `page`（默认 1）和 `page_size`（默认 20）参数，② DuckDB 执行 SQL 后，先用 `SELECT COUNT(*) FROM (original_sql)` 获取总行数，③ 再用 `SELECT * FROM (original_sql) LIMIT {page_size} OFFSET {(page-1)*page_size}` 获取当前页，④ ExcelQueryResponse 新增 `total_count` 和 `current_page` 字段
 - [ ] 6.5 后端 DuckDB 会话复用 — 当前 `query_excel_table` 每次调用都重新解析 Excel + 注册 DuckDB。分页翻页时应复用已注册的表。方案：① 在 AppState 中缓存 `QueryEngine`（按 file_path 键），② 翻页请求直接用缓存的 engine 执行分页 SQL，③ 添加过期清理（如 5 分钟无访问自动释放）
 - [ ] 6.6 前端分页控件 — FileChat.svelte SQL 结果区域底部添加分页 UI：① 上一页/下一页按钮（Material Icons），② 当前页/总页数显示，③ page_size 切换（20/50/100 下拉选择），④ 翻页时调用 `query_excel_page` command（不重新生成 SQL），⑤ 加载中状态指示

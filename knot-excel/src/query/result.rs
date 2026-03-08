@@ -65,6 +65,21 @@ impl ResultSummarizer {
         }
     }
 
+    /// 仅根据总行数判断是否摘要化（用于分页场景，不需要完整数据）
+    pub fn process_with_count(total_count: usize) -> ResultContext {
+        if total_count <= Self::MAX_FULL_ROWS {
+            ResultContext::Full {
+                markdown: String::new(),
+                row_count: total_count,
+            }
+        } else {
+            ResultContext::Summary {
+                summary_text: format!("查询结果共 {} 行，已分页展示。", total_count),
+                row_count: total_count,
+            }
+        }
+    }
+
     /// 生成统计摘要文本
     fn generate_summary(result: &QueryResult) -> String {
         let mut text = String::new();

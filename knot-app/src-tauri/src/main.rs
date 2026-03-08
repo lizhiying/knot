@@ -309,6 +309,16 @@ pub struct AppState {
     /// rag_generate 在发射 token 前检查此值是否与启动时一致，
     /// 不一致则说明有新生成取代了当前生成，立即停止发射。
     pub generation_id: Arc<std::sync::atomic::AtomicU64>,
+    /// DuckDB 查询引擎缓存（供分页翻页复用）
+    /// Key: file_path, Value: (QueryEngine, last_sql, last_access_time)
+    pub excel_engine_cache: Arc<
+        tokio::sync::Mutex<
+            std::collections::HashMap<
+                String,
+                (knot_excel::QueryEngine, String, std::time::Instant),
+            >,
+        >,
+    >,
 }
 
 fn main() {
@@ -377,6 +387,9 @@ fn main() {
                 knot_store: knot_store.clone(),
                 model_status: model_status.clone(),
                 generation_id: Arc::new(std::sync::atomic::AtomicU64::new(0)),
+                excel_engine_cache: Arc::new(tokio::sync::Mutex::new(
+                    std::collections::HashMap::new(),
+                )),
             });
 
             // 保留旧的 EngineManager
@@ -729,7 +742,8 @@ fn main() {
             reindex_file,
             ignore_file,
             unignore_file,
-            query_excel_table
+            query_excel_table,
+            query_excel_page
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -2510,10 +2524,16 @@ async fn query_excel_table(
     state: State<'_, AppState>,
     file_path: String,
     query: String,
+    page: Option<usize>,
+    page_size: Option<usize>,
 ) -> Result<ExcelQueryResponse, String> {
-    use knot_parser::LlmProvider;
+    let page = page.unwrap_or(1).max(1);
+    let page_size = page_size.unwrap_or(20).min(200);
 
-    println!("[query_excel_table] file={}, query={}", file_path, query);
+    println!(
+        "[query_excel_table] file={}, query={}, page={}, page_size={}",
+        file_path, query, page, page_size
+    );
 
     // 1. 加载 Excel 文件
     let path = std::path::Path::new(&file_path);
@@ -2646,19 +2666,59 @@ async fn query_excel_table(
     let mut result = final_result.map_err(|e| format!("SQL execution failed: {}", e))?;
     result.retried = retried;
 
-    let ctx = knot_excel::ResultSummarizer::process(&result);
+    let total_count = result.row_count;
+
+    // 7. 分页处理
+    let (paged_rows, paged_count) = if total_count > page_size {
+        // 大结果集：分页
+        let paged_sql = format!(
+            "SELECT * FROM ({}) AS _paged LIMIT {} OFFSET {}",
+            final_sql,
+            page_size,
+            (page - 1) * page_size
+        );
+        match engine.execute_multi_step(&paged_sql) {
+            Ok(paged_result) => (paged_result.rows, paged_result.row_count),
+            Err(_) => {
+                // 分页失败，fallback 到截断
+                let start = ((page - 1) * page_size).min(result.rows.len());
+                let end = (start + page_size).min(result.rows.len());
+                let rows = result.rows[start..end].to_vec();
+                let count = rows.len();
+                (rows, count)
+            }
+        }
+    } else {
+        (result.rows, result.row_count)
+    };
+
+    let ctx = knot_excel::ResultSummarizer::process_with_count(total_count);
 
     println!(
-        "[query_excel_table] Success: {} rows, summarized={}",
-        result.row_count,
-        ctx.is_summarized()
+        "[query_excel_table] Success: {} total rows, page {}/{}, showing {}",
+        total_count,
+        page,
+        (total_count + page_size - 1) / page_size,
+        paged_count
     );
+
+    // 8. 缓存 engine 到 AppState（供翻页复用）
+    {
+        let mut cache = state.excel_engine_cache.lock().await;
+        cache.insert(
+            file_path.clone(),
+            (engine, final_sql.clone(), std::time::Instant::now()),
+        );
+    }
 
     Ok(ExcelQueryResponse {
         sql: final_sql,
         columns: result.columns,
-        rows: result.rows,
-        row_count: result.row_count,
+        rows: paged_rows,
+        row_count: paged_count,
+        total_count,
+        current_page: page,
+        page_size,
         is_summarized: ctx.is_summarized(),
         summary_text: if ctx.is_summarized() {
             Some(ctx.to_prompt_text())
@@ -2675,9 +2735,83 @@ struct ExcelQueryResponse {
     columns: Vec<String>,
     rows: Vec<Vec<String>>,
     row_count: usize,
+    total_count: usize,  // 总行数（分页前）
+    current_page: usize, // 当前页（1-based）
+    page_size: usize,    // 每页行数
     is_summarized: bool,
     summary_text: Option<String>,
     retried: bool,
+}
+
+/// 翻页查询：复用缓存的 DuckDB 会话，不重新生成 SQL
+#[tauri::command]
+async fn query_excel_page(
+    state: State<'_, AppState>,
+    file_path: String,
+    page: usize,
+    page_size: Option<usize>,
+) -> Result<ExcelQueryResponse, String> {
+    let page = page.max(1);
+    let page_size = page_size.unwrap_or(20).min(200);
+
+    println!(
+        "[query_excel_page] file={}, page={}, page_size={}",
+        file_path, page, page_size
+    );
+
+    // 从缓存获取 engine，执行分页查询
+    let mut cache = state.excel_engine_cache.lock().await;
+    let (engine, sql, last_access) = cache.get_mut(&file_path).ok_or("缓存已过期，请重新查询")?;
+    *last_access = std::time::Instant::now();
+    let sql = sql.clone();
+
+    // 先获取总行数
+    let count_sql = format!("SELECT COUNT(*) FROM ({}) AS _cnt", sql);
+    let total_count = match engine.execute_multi_step(&count_sql) {
+        Ok(r) => {
+            if let Some(row) = r.rows.first() {
+                row.first()
+                    .and_then(|v| v.parse::<usize>().ok())
+                    .unwrap_or(0)
+            } else {
+                0
+            }
+        }
+        Err(_) => 0,
+    };
+
+    // 执行分页查询
+    let paged_sql = format!(
+        "SELECT * FROM ({}) AS _paged LIMIT {} OFFSET {}",
+        sql,
+        page_size,
+        (page - 1) * page_size
+    );
+
+    let result = engine
+        .execute_multi_step(&paged_sql)
+        .map_err(|e| format!("分页查询失败: {}", e))?;
+
+    println!(
+        "[query_excel_page] Success: {} total, page {}/{}, showing {}",
+        total_count,
+        page,
+        (total_count + page_size - 1) / page_size.max(1),
+        result.row_count
+    );
+
+    Ok(ExcelQueryResponse {
+        sql,
+        columns: result.columns,
+        rows: result.rows,
+        row_count: result.row_count,
+        total_count,
+        current_page: page,
+        page_size,
+        is_summarized: false,
+        summary_text: None,
+        retried: false,
+    })
 }
 
 /// 根据搜索上下文生成 LLM 回答 (Streaming Version)
