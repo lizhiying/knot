@@ -318,8 +318,8 @@ impl LlamaClient {
                                                                 .await
                                                                 .is_err()
                                                             {
-                                                                debug_println!("[LlamaClient] Receiver dropped.");
-                                                                break; // Receiver dropped
+                                                                debug_println!("[LlamaClient] Receiver dropped, aborting stream.");
+                                                                return; // 直接终止 task，关闭 HTTP 连接
                                                             }
                                                         }
                                                     }
