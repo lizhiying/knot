@@ -982,21 +982,18 @@ fn infer_column_types(rows: &[Vec<String>], num_cols: usize) -> Vec<ColumnType> 
 fn looks_like_date(s: &str) -> bool {
     // 匹配 YYYY-MM-DD, YYYY/MM/DD, YYYY-MM-DD HH:MM:SS 等
     let s = s.trim();
-    if s.len() < 8 {
+    let chars: Vec<char> = s.chars().take(11).collect();
+    if chars.len() < 10 {
         return false;
     }
 
     // YYYY-MM-DD 或 YYYY/MM/DD
-    if s.len() >= 10 {
-        let chars: Vec<char> = s.chars().collect();
-        if chars.len() >= 10 && (chars[4] == '-' || chars[4] == '/') {
-            let year_part = &s[..4];
-            let month_part = &s[5..7];
-            let day_part = &s[8..10];
-            return year_part.parse::<u16>().is_ok()
-                && month_part.parse::<u8>().is_ok()
-                && day_part.parse::<u8>().is_ok();
-        }
+    // 安全检查：前4个字符必须是 ASCII 数字，第5个是分隔符
+    if (chars[4] == '-' || chars[4] == '/') && chars[7] == chars[4] {
+        let year_ok = chars[0..4].iter().all(|c| c.is_ascii_digit());
+        let month_ok = chars[5..7].iter().all(|c| c.is_ascii_digit());
+        let day_ok = chars[8..10].iter().all(|c| c.is_ascii_digit());
+        return year_ok && month_ok && day_ok;
     }
 
     false
