@@ -197,13 +197,13 @@ impl VisionDescriber for OpenAiVisionDescriber {
                         println!(
                             "[VisionAPI] ERROR: status {} - {}",
                             code,
-                            &body[..body.len().min(300)]
+                            body.chars().take(150).collect::<String>()
                         );
                         format!(
                             "{}: status code {} - {}",
                             self.api_url,
                             code,
-                            &body[..body.len().min(500)]
+                            body.chars().take(250).collect::<String>()
                         )
                     }
                     other => {

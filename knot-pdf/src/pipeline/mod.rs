@@ -1984,7 +1984,7 @@ impl Pipeline {
                                     println!(
                                         "[VLM-Fallback] Raw VLM response: {} chars, preview={:?}",
                                         vlm_text.len(),
-                                        &vlm_text[..vlm_text.len().min(200)]
+                                        vlm_text.chars().take(100).collect::<String>()
                                     );
                                     // 清洗 VLM 输出：移除模型控制 token 和空代码块
                                     let vlm_text = vlm_text
