@@ -21,7 +21,7 @@
     let dataDir = $state(null);
     let searchQuery = $state("");
     let selectedFile = $state(navigation.knowledgeSelectedFile);
-    let activeTypeFilter = $state("all");
+    let activeTypeFilter = $state(navigation.knowledgeTypeFilter);
     let activeStatusFilter = $state("all");
     let chatFile = $state(navigation.knowledgeChatFile); // 当前聊天的文件，非null时显示聊天面板
 
@@ -31,6 +31,9 @@
     });
     $effect(() => {
         navigation.knowledgeChatFile = chatFile;
+    });
+    $effect(() => {
+        navigation.knowledgeTypeFilter = activeTypeFilter;
     });
 
     // 统计数据
