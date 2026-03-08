@@ -305,8 +305,10 @@ pub struct AppState {
     pub queue_manager: Arc<QueueManager>,
     pub knot_store: Arc<RwLock<Option<Arc<knot_core::store::KnotStore>>>>,
     pub model_status: Arc<RwLock<String>>,
-    /// 用于中断正在进行的 LLM 生成。新搜索时设为 true，rag_generate 启动时重置为 false。
-    pub generation_cancelled: Arc<std::sync::atomic::AtomicBool>,
+    /// LLM 生成版本号。每次 rag_generate 启动时递增。
+    /// rag_generate 在发射 token 前检查此值是否与启动时一致，
+    /// 不一致则说明有新生成取代了当前生成，立即停止发射。
+    pub generation_id: Arc<std::sync::atomic::AtomicU64>,
 }
 
 fn main() {
@@ -374,7 +376,7 @@ fn main() {
                 queue_manager: queue_manager.clone(),
                 knot_store: knot_store.clone(),
                 model_status: model_status.clone(),
-                generation_cancelled: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+                generation_id: Arc::new(std::sync::atomic::AtomicU64::new(0)),
             });
 
             // 保留旧的 EngineManager
@@ -2787,18 +2789,23 @@ async fn rag_generate(
 
         println!("[rag_generate] Stream started...");
 
-        // 重置取消标志
-        state
-            .generation_cancelled
-            .store(false, std::sync::atomic::Ordering::Relaxed);
+        // 递增 generation_id，记住自己的 ID
+        let my_gen_id = state
+            .generation_id
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+            + 1;
+        println!("[rag_generate] Generation ID: {}", my_gen_id);
 
         while let Some(token) = rx.recv().await {
-            // 检查是否被新搜索取消
-            if state
-                .generation_cancelled
-                .load(std::sync::atomic::Ordering::Relaxed)
-            {
-                println!("[rag_generate] Generation cancelled by new search.");
+            // 检查是否被新搜索取消（全局 ID 不再匹配自己）
+            let current_id = state
+                .generation_id
+                .load(std::sync::atomic::Ordering::Relaxed);
+            if current_id != my_gen_id {
+                println!(
+                    "[rag_generate] Generation {} superseded by {}, stopping.",
+                    my_gen_id, current_id
+                );
                 break;
             }
             // Emit token event directly - thinking is prevented at prompt level
@@ -3387,9 +3394,14 @@ async fn get_graph_data(app: tauri::AppHandle) -> Result<serde_json::Value, Stri
 /// 前端在发起新搜索前调用此命令，rag_generate 的流式循环检测到 flag 后立即停止。
 #[tauri::command]
 async fn cancel_generation(state: State<'_, AppState>) -> Result<(), String> {
-    state
-        .generation_cancelled
-        .store(true, std::sync::atomic::Ordering::Relaxed);
-    println!("[cancel_generation] Generation cancel requested.");
+    // 递增 generation_id，使当前正在运行的 rag_generate 检测到 ID 不匹配并停止
+    let new_id = state
+        .generation_id
+        .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+        + 1;
+    println!(
+        "[cancel_generation] Generation cancel requested. New ID: {}",
+        new_id
+    );
     Ok(())
 }

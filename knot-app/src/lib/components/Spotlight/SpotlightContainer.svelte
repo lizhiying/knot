@@ -113,12 +113,10 @@
     async function handleSearch(query) {
         if (!query.trim()) return;
 
-        // 如果正在流式生成，先取消旧的生成
-        if (isStreaming) {
-            console.log("[Spotlight] Cancelling previous generation...");
-            await invoke("cancel_generation");
-            isStreaming = false;
-        }
+        // 无条件取消旧的生成（后端用 generation_id 确保幂等安全）
+        console.log("[Spotlight] Cancelling any previous generation...");
+        await invoke("cancel_generation");
+        isStreaming = false;
 
         // 递增 generationId，旧生成的 token 将被忽略
         currentGenerationId += 1;
