@@ -1,6 +1,16 @@
 use jieba_rs::{Jieba, Token as JiebaToken, TokenizeMode};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use tantivy::tokenizer::{BoxTokenStream, Token, TokenStream, Tokenizer};
+
+/// 全局 Jieba 字典单例。Jieba::new() 加载字典约需 500-800ms，
+/// 通过 OnceLock 确保只加载一次，后续创建 JiebaTokenizer 零开销。
+static JIEBA_INSTANCE: OnceLock<Arc<Jieba>> = OnceLock::new();
+
+fn get_jieba() -> Arc<Jieba> {
+    JIEBA_INSTANCE
+        .get_or_init(|| Arc::new(Jieba::new()))
+        .clone()
+}
 
 #[derive(Clone)]
 pub struct JiebaTokenizer {
@@ -9,9 +19,7 @@ pub struct JiebaTokenizer {
 
 impl JiebaTokenizer {
     pub fn new() -> Self {
-        JiebaTokenizer {
-            jieba: Arc::new(Jieba::new()),
-        }
+        JiebaTokenizer { jieba: get_jieba() }
     }
 }
 
