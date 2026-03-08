@@ -214,22 +214,66 @@
 }
 
 .markdown-content table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: 100%;
   margin: 1rem 0;
-  font-size: 0.9em;
+  font-size: 0.85em;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+/* 表格容器横向可滚动（宽表格不溢出） */
+.markdown-content table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.markdown-content thead,
+.markdown-content tbody,
+.markdown-content tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
 }
 
 .markdown-content th,
 .markdown-content td {
-  border: 1px solid var(--border-color);
-  padding: 0.5rem 0.75rem;
+  padding: 6px 12px;
   text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
 }
 
 .markdown-content th {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.08);
   font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9em;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  position: sticky;
+  top: 0;
+}
+
+/* 斑马纹 */
+.markdown-content tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.markdown-content tbody tr:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* 行悬停高亮 */
+.markdown-content tbody tr:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.markdown-content td {
+  color: var(--text-secondary);
 }
 
 .markdown-content img {

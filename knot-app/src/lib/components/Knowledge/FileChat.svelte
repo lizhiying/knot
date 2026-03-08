@@ -728,26 +728,54 @@
 
     .answer-content :global(table) {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         margin: 8px 0;
         font-size: 12px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        display: block;
+        overflow-x: auto;
+    }
+
+    .answer-content :global(thead),
+    .answer-content :global(tbody),
+    .answer-content :global(tr) {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
     }
 
     .answer-content :global(th),
     .answer-content :global(td) {
-        padding: 6px 10px;
-        border: 1px solid var(--border-color);
+        padding: 6px 12px;
         text-align: left;
-    }
-
-    .answer-content :global(th) {
-        background: var(--bg-card-hover, rgba(255, 255, 255, 0.05));
-        font-weight: 600;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         white-space: nowrap;
     }
 
-    .answer-content :global(tr:nth-child(even)) {
-        background: var(--bg-card-hover, rgba(255, 255, 255, 0.02));
+    .answer-content :global(th) {
+        background: rgba(255, 255, 255, 0.08);
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9em;
+    }
+
+    .answer-content :global(td) {
+        color: var(--text-secondary);
+    }
+
+    .answer-content :global(tbody tr:nth-child(even)) {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .answer-content :global(tbody tr:nth-child(odd)) {
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .answer-content :global(tbody tr:hover) {
+        background: rgba(255, 255, 255, 0.08);
     }
 
     .answer-content :global(strong) {
