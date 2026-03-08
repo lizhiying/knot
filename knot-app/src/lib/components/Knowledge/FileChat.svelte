@@ -7,7 +7,10 @@
     import { invoke } from "@tauri-apps/api/core";
     import { listen } from "@tauri-apps/api/event";
     import { marked } from "marked";
-    import { completeStreamingTable } from "$lib/utils/markdown.js";
+    import {
+        completeStreamingTable,
+        wrapTablesForScroll,
+    } from "$lib/utils/markdown.js";
 
     let { file = null, onBack = () => {} } = $props();
 
@@ -81,7 +84,11 @@
     // Markdown 渲染（流式输出时补全不完整的表格）
     let renderedAnswer = $derived(
         answer
-            ? marked.parse(completeStreamingTable(answer), { breaks: true })
+            ? wrapTablesForScroll(
+                  marked.parse(completeStreamingTable(answer), {
+                      breaks: true,
+                  }),
+              )
             : "",
     );
 
@@ -921,14 +928,28 @@
         margin: 8px 0;
     }
 
+    .answer-content :global(.table-scroll-wrapper) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 8px 0;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .answer-content :global(.table-scroll-wrapper table) {
+        margin: 0;
+        border: none;
+        border-radius: 0;
+    }
+
     .answer-content :global(table) {
-        width: 100%;
+        width: max-content;
+        min-width: 100%;
         border-collapse: separate;
         border-spacing: 0;
         margin: 8px 0;
         font-size: 12px;
         border-radius: 8px;
-        overflow-x: auto;
         border: 1px solid var(--border-color);
     }
 

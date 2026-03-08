@@ -1,7 +1,10 @@
 <script>
     import { marked } from "marked";
     import { open } from "@tauri-apps/plugin-shell";
-    import { completeStreamingTable } from "$lib/utils/markdown.js";
+    import {
+        completeStreamingTable,
+        wrapTablesForScroll,
+    } from "$lib/utils/markdown.js";
 
     /**
      * AI 洞察区域组件
@@ -46,10 +49,9 @@
 
     $effect(() => {
         if (content) {
-            // 流式输出时补全不完整的 Markdown 表格
             const completed = completeStreamingTable(content);
             Promise.resolve(marked.parse(completed)).then((res) => {
-                htmlContent = res;
+                htmlContent = wrapTablesForScroll(res);
             });
         } else {
             htmlContent = "";

@@ -96,3 +96,20 @@ export function completeStreamingTable(content) {
     result.splice(tableStart + 1, 0, correctSeparator);
     return result.join('\n');
 }
+
+/**
+ * 将 HTML 中的 <table> 包裹在可横向滚动的容器中
+ * 用于 marked.parse() 输出后的后处理
+ * @param {string} html - marked.parse 生成的 HTML
+ * @returns {string} 包裹后的 HTML
+ */
+export function wrapTablesForScroll(html) {
+    if (!html) return html;
+    return html.replace(
+        /<table>/g,
+        '<div class="table-scroll-wrapper"><table>'
+    ).replace(
+        /<\/table>/g,
+        '</table></div>'
+    );
+}
