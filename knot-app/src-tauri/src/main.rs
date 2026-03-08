@@ -2559,10 +2559,22 @@ async fn query_excel_table(
     }
     .ok_or("Chat LLM not ready")?;
 
-    let generated_sql = llm_client
-        .generate_content(&sql_prompt)
+    // SQL 只需短输出（~200 tokens），使用流式 API 收集结果，避免阻塞过久
+    let mut rx = llm_client
+        .generate_content_stream(&sql_prompt, 256)
         .await
         .map_err(|e| format!("LLM generation failed: {}", e))?;
+
+    let mut generated_sql = String::new();
+    while let Some(token) = rx.recv().await {
+        generated_sql.push_str(&token);
+    }
+    // 过滤掉 <think>...</think> 内容
+    let generated_sql = if let Some(end_idx) = generated_sql.find("</think>") {
+        generated_sql[end_idx + 8..].trim().to_string()
+    } else {
+        generated_sql.trim().to_string()
+    };
 
     let sql = generated_sql
         .trim()
@@ -2595,9 +2607,19 @@ async fn query_excel_table(
                 sql_system, fix_prompt_text
             );
 
-            match llm_client.generate_content(&fix_prompt).await {
-                Ok(fixed_sql) => {
-                    let fixed = fixed_sql
+            match llm_client.generate_content_stream(&fix_prompt, 256).await {
+                Ok(mut fix_rx) => {
+                    let mut fixed_raw = String::new();
+                    while let Some(token) = fix_rx.recv().await {
+                        fixed_raw.push_str(&token);
+                    }
+                    // 过滤 <think>...</think>
+                    let fixed_raw = if let Some(end_idx) = fixed_raw.find("</think>") {
+                        fixed_raw[end_idx + 8..].trim().to_string()
+                    } else {
+                        fixed_raw.trim().to_string()
+                    };
+                    let fixed = fixed_raw
                         .trim()
                         .trim_start_matches("```sql")
                         .trim_start_matches("```")
