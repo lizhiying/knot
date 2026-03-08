@@ -31,7 +31,8 @@
 | Iteration 2 | 混合查询路由                               | ✅ 核心完成 | HybridQueryRouter + doc_type 分流 + Markdown 表格注入           |
 | Iteration 3 | 复杂报表处理 — 合并单元格 + 多级表头降维   | ✅ 完成     | 多级表头降维、forward_fill、脏数据过滤                          |
 | Iteration 4 | 智能数据区探测 — 多数据块切割              | ✅ 核心完成 | 数据类型跳变检测 + 独立索引                                     |
-| Iteration 5 | DuckDB 集成 — Text-to-SQL 查询引擎         | 🔲 进行中   | DuckDB 查询引擎 + SQL 生成 + 结果膨胀控制 + 单文件聊天          |
+| Iteration 5 | DuckDB 集成 — Text-to-SQL 查询引擎         | ✅ 完成     | DuckDB 查询引擎 + SQL 生成 + 结果膨胀控制 + 单文件聊天          |
+| Iteration 6 | 表格数据展示优化 — 渲染增强 + 分页查询     | 🔲 待开始   | LLM 表格格式输出 + Markdown 表格样式 + SQL 结果分页展示         |
 
 ## 关键风险
 
@@ -49,3 +50,4 @@
 - Iteration 3: [iteration3.md](file:///Users/lizhiying/Projects/knot/source/knot-workspaces/.plans/milestone17/iteration3.md)
 - Iteration 4: [iteration4.md](file:///Users/lizhiying/Projects/knot/source/knot-workspaces/.plans/milestone17/iteration4.md)
 - Iteration 5: [iteration5.md](file:///Users/lizhiying/Projects/knot/source/knot-workspaces/.plans/milestone17/iteration5.md)
+- Iteration 6: [iteration6.md](file:///Users/lizhiying/Projects/knot/source/knot-workspaces/.plans/milestone17/iteration6.md)
