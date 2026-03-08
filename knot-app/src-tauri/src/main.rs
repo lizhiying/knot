@@ -1632,13 +1632,24 @@ async fn start_background_indexing(
             println!("[Indexer] Initial scan complete.");
             let _ = app.emit("indexing-status", "ready");
 
-            // Invalidate cached KnotStore so next search sees new Tantivy segments
-            // The pre-warmed store's Tantivy Index doesn't see segments written
-            // by the background indexer's separate KnotStore instance
+            // 重新创建 KnotStore 并缓存（而不是仅 invalidate）
+            // 这样第一次搜索就能命中缓存，避免冷启动 Jieba 字典加载（约 800ms）
             let app_state = app.state::<AppState>();
-            let mut guard = app_state.knot_store.write().await;
-            *guard = None;
-            println!("[Indexer] Invalidated cached KnotStore (will be re-created on next search)");
+            match KnotStore::new(&index_path).await {
+                Ok(new_store) => {
+                    let mut guard = app_state.knot_store.write().await;
+                    *guard = Some(Arc::new(new_store));
+                    println!("[Indexer] KnotStore re-warmed after indexing");
+                }
+                Err(e) => {
+                    eprintln!(
+                        "[Indexer] Failed to re-warm store: {}, invalidating cache",
+                        e
+                    );
+                    let mut guard = app_state.knot_store.write().await;
+                    *guard = None;
+                }
+            }
         }
         Err(e) => {
             eprintln!("[Indexer] Initial scan failed: {}", e);
@@ -1826,11 +1837,19 @@ async fn start_background_indexing(
 
                             let _ = app.emit("indexing-status", "ready");
 
-                            // Invalidate cached KnotStore after monitor indexing
+                            // 文件监控索引后重新预热 KnotStore
                             {
                                 let app_state = app.state::<AppState>();
-                                let mut guard = app_state.knot_store.write().await;
-                                *guard = None;
+                                match KnotStore::new(&index_path_for_watch).await {
+                                    Ok(new_store) => {
+                                        let mut guard = app_state.knot_store.write().await;
+                                        *guard = Some(Arc::new(new_store));
+                                    }
+                                    Err(_) => {
+                                        let mut guard = app_state.knot_store.write().await;
+                                        *guard = None;
+                                    }
+                                }
                             }
                         }
                     }
