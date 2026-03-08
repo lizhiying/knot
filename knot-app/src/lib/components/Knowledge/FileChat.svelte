@@ -928,18 +928,8 @@
         margin: 8px 0;
         font-size: 12px;
         border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-        display: block;
         overflow-x: auto;
-    }
-
-    .answer-content :global(thead),
-    .answer-content :global(tbody),
-    .answer-content :global(tr) {
-        display: table;
-        width: 100%;
-        table-layout: fixed;
+        border: 1px solid var(--border-color);
     }
 
     .answer-content :global(th),
@@ -947,7 +937,6 @@
         padding: 6px 12px;
         text-align: left;
         border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        white-space: nowrap;
     }
 
     .answer-content :global(th) {
@@ -955,6 +944,7 @@
         font-weight: 600;
         color: var(--text-primary);
         font-size: 0.9em;
+        white-space: nowrap;
     }
 
     .answer-content :global(td) {
