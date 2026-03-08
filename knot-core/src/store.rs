@@ -707,13 +707,37 @@ impl KnotStore {
             let vec_results_batches: Vec<RecordBatch> = vec_results_stream.try_collect().await?;
             let candidates = self.batches_to_results_with_distance(vec_results_batches);
 
-            let mut rank = 1usize;
-            for c in candidates {
-                // 过滤距离过大的结果（不相关）
-                if c.distance > effective_threshold {
-                    continue;
-                }
+            // 第一步：收集通过绝对阈值的候选结果
+            let mut filtered_candidates: Vec<_> = candidates
+                .into_iter()
+                .filter(|c| c.distance <= effective_threshold)
+                .collect();
 
+            // 第二步：相对距离过滤（防止短查询的向量假阳性）
+            // 如果最佳距离远好于其他结果，过滤噪音
+            if filtered_candidates.len() >= 3 {
+                let min_dist = filtered_candidates
+                    .iter()
+                    .map(|c| c.distance)
+                    .fold(f32::MAX, f32::min);
+                // 距离超过最佳距离 1.5 倍的结果视为噪音
+                let relative_threshold = (min_dist * 1.5).min(effective_threshold);
+                let before_count = filtered_candidates.len();
+                filtered_candidates.retain(|c| c.distance <= relative_threshold);
+                if filtered_candidates.len() < before_count && std::env::var("KNOT_QUIET").is_err()
+                {
+                    println!(
+                        "[Search] Vector relative filter: {} -> {} results (min_dist={:.3}, threshold={:.3})",
+                        before_count,
+                        filtered_candidates.len(),
+                        min_dist,
+                        relative_threshold
+                    );
+                }
+            }
+
+            let mut rank = 1usize;
+            for c in filtered_candidates {
                 let id = c.result.id.clone();
                 vector_ranks.insert(id.clone(), rank);
                 rank += 1;
