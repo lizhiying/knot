@@ -2527,8 +2527,8 @@ async fn rag_search(
     }
 
     // 4.4 Text 结果正常处理
-    let all_results_for_display: Vec<_> = if has_tabular && has_text {
-        // 混合场景: tabular 已单独处理，text 结果正常展示
+    let mut all_results_for_display: Vec<_> = if has_tabular && has_text {
+        // 混合场景: 合并 text 和 tabular 结果，按分数排序
         text_results
             .iter()
             .take(4)
@@ -2538,6 +2538,12 @@ async fn rag_search(
     } else {
         search_results.iter().take(5).collect()
     };
+    // 按分数降序排列（高分靠前）
+    all_results_for_display.sort_by(|a, b| {
+        b.score
+            .partial_cmp(&a.score)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
 
     // 4.4 Text 结果正常处理（预算感知截取）
     let text_budget = if has_tabular {
