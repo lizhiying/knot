@@ -19,6 +19,7 @@ class NavigationState {
     // Knowledge 视图持久化状态（在视图切换间保持）
     knowledgeSelectedFile = $state(null);
     knowledgeChatFile = $state(null);
+    knowledgeFiles = $state(null); // 文件列表缓存，null 表示尚未加载
 
     get page() {
         return this.current;

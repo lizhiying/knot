@@ -14,9 +14,9 @@
     } from "$lib/stores/navigation.svelte.js";
 
     // 状态
-    let files = $state([]);
+    let files = $state(navigation.knowledgeFiles || []);
     let filteredFiles = $state([]);
-    let isLoading = $state(true);
+    let isLoading = $state(navigation.knowledgeFiles === null); // 首次加载时才显示 loading
     let error = $state(null);
     let dataDir = $state(null);
     let searchQuery = $state("");
@@ -151,8 +151,17 @@
         }
     }
 
-    onMount(() => {
-        loadFiles();
+    onMount(async () => {
+        // 只有首次加载时才网络请求，否则用缓存
+        if (navigation.knowledgeFiles === null) {
+            loadFiles();
+        } else {
+            // 从缓存恢复时仍需获取 dataDir（用于空状态判断）
+            try {
+                const config = await invoke("get_app_config");
+                dataDir = config.data_dir;
+            } catch (_) {}
+        }
         window.addEventListener("keydown", handleKeydown);
     });
 
@@ -176,6 +185,7 @@
 
             // 获取文件列表
             files = await invoke("list_knowledge_files");
+            navigation.knowledgeFiles = files; // 缓存到 store
             console.log(`[Knowledge] Loaded ${files.length} files`);
         } catch (err) {
             console.error("[Knowledge] Error loading files:", err);
