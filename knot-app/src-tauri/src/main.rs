@@ -908,6 +908,48 @@ fn save_config(app: &tauri::AppHandle, config: &AppConfig) -> Result<(), String>
     Ok(())
 }
 
+/// 计算上下文字符预算
+/// 公式：(context_size / parallel - max_tokens - prompt_overhead) * chars_per_token
+/// parallel=2（2个slot），prompt_overhead=300（system prompt等），chars_per_token≈2（中文）
+fn compute_context_budget(config: &AppConfig) -> usize {
+    let tokens_for_context = (config.llm_context_size / 2)
+        .saturating_sub(config.llm_max_tokens)
+        .saturating_sub(300);
+    (tokens_for_context as usize) * 2
+}
+
+/// 预估 DataBlock 注入为 Markdown 表格后的字符数
+/// 包含：表头行 + 分隔行 + 数据行 + 元数据开销
+fn estimate_markdown_chars(block: &knot_excel::DataBlock) -> usize {
+    let n_cols = block.column_names.len();
+    let n_rows = block.row_count;
+
+    // 估算平均 cell 宽度（采样前10行中最长的 cell）
+    let avg_cell_width = if !block.rows.is_empty() {
+        let sample_rows = block.rows.iter().take(10);
+        let total_chars: usize = sample_rows
+            .flat_map(|row| row.iter())
+            .map(|cell| cell.len())
+            .sum();
+        let sample_cells = block.rows.len().min(10) * n_cols;
+        if sample_cells > 0 {
+            (total_chars / sample_cells).max(4) // 最少4字符
+        } else {
+            8
+        }
+    } else {
+        8 // 默认 cell 宽度
+    };
+
+    // 每行字符数：| cell | cell | ... | + 换行
+    let row_chars = n_cols * (avg_cell_width + 3) + 2; // +3 = " | ", +2 = "| " + " |"
+
+    // 元数据开销（文件名、sheet名、列信息等）
+    let metadata_overhead = 200 + n_cols * 30; // 列名+类型信息
+
+    metadata_overhead + row_chars * (2 + n_rows) // +2 = header + separator
+}
+
 // --- Knowledge Page ---
 
 #[derive(serde::Serialize, Clone, Debug)]
@@ -2194,9 +2236,24 @@ async fn rag_search(
         );
     }
 
-    // 4.2 处理 tabular 结果: 小表格直接注入 Markdown，大表格走 DuckDB Text-to-SQL
+    // 4.2 处理 tabular 结果: 根据上下文预算动态选择策略
     let mut tabular_context = String::new();
     if has_tabular {
+        // === 计算上下文预算 ===
+        let config = load_config(&app);
+        let budget = compute_context_budget(&config);
+
+        // 估算 text 切片总字符数
+        let text_chars_estimate: usize = text_results
+            .iter()
+            .take(5)
+            .map(|r| {
+                let base = r.text.len();
+                let expanded = r.expanded_context.as_ref().map_or(0, |e| e.len());
+                base + expanded + 120 // 格式化开销: [序号] 文件: ... 内容: ...
+            })
+            .sum();
+
         let mut seen_files: std::collections::HashSet<String> = std::collections::HashSet::new();
         for res in tabular_results.iter().take(3) {
             // 避免重复加载同一文件
@@ -2209,10 +2266,24 @@ async fn rag_search(
                 let excel_config = knot_excel::ExcelConfig::default();
                 match knot_excel::pipeline::parse_excel_full(file_path, &excel_config) {
                     Ok(parsed) => {
-                        // 判断是否存在大表格（>50行），决定使用哪种策略
-                        let has_large_table = parsed.blocks.iter().any(|b| b.row_count > 50);
+                        // === 动态预算判断（替代硬编码 row_count > 50）===
+                        let tabular_chars_estimate: usize = parsed
+                            .blocks
+                            .iter()
+                            .map(|b| estimate_markdown_chars(b))
+                            .sum();
+                        let total_estimate = tabular_chars_estimate + text_chars_estimate;
+                        // 预留 10% headroom
+                        let budget_with_margin = (budget as f64 * 0.9) as usize;
+                        let use_sql = total_estimate > budget_with_margin;
 
-                        if has_large_table {
+                        println!(
+                            "[rag_search] Budget: {} chars | Text: ~{} chars | Tabular: ~{} chars | Total: ~{} | Strategy: {}",
+                            budget, text_chars_estimate, tabular_chars_estimate, total_estimate,
+                            if use_sql { "SQL (exceeds budget)" } else { "Direct inject (fits)" }
+                        );
+
+                        if use_sql {
                             // === 大表格策略：DuckDB Text-to-SQL ===
                             println!(
                                 "[rag_search] Large table detected in {}, using DuckDB Text-to-SQL",
@@ -2468,6 +2539,17 @@ async fn rag_search(
         search_results.iter().take(5).collect()
     };
 
+    // 4.4 Text 结果正常处理（预算感知截取）
+    let text_budget = if has_tabular {
+        let config = load_config(&app);
+        let total_budget = compute_context_budget(&config);
+        // text 预算 = 总预算 - 已用的 tabular 上下文字符数
+        total_budget.saturating_sub(context_str.len())
+    } else {
+        usize::MAX // 无 tabular 时不限制
+    };
+    let mut text_chars_used: usize = 0;
+
     for (i, res) in all_results_for_display.iter().enumerate() {
         if res.doc_type == "tabular" && has_tabular {
             // tabular 结果已经在上面处理过，这里只添加 source
@@ -2492,14 +2574,36 @@ async fn rag_search(
         } else {
             format!("{}\n---\n{}", res.text, expanded)
         };
-        context_str.push_str(&format!(
+        let entry = format!(
             "[{}] (匹配度: {:.0}%) 文件: {} - 章节: {}\n内容: {}\n\n",
             i + 1,
             res.score,
             res.file_path,
             context_line,
             content_with_context
-        ));
+        );
+
+        // 预算检查：超出预算的低分切片不注入
+        if text_chars_used + entry.len() > text_budget {
+            println!(
+                "[rag_search] Text budget exhausted ({}/{} chars), skipping remaining {} slices",
+                text_chars_used,
+                text_budget,
+                all_results_for_display.len() - i
+            );
+            // 但仍添加到 display_sources 以便前端展示
+            display_sources.push(HybridSearchResultDisplay {
+                file_path: res.file_path.clone(),
+                score: res.score,
+                context: res.breadcrumbs.clone(),
+                text: res.text.clone(),
+                source: res.source.to_string(),
+            });
+            continue;
+        }
+
+        text_chars_used += entry.len();
+        context_str.push_str(&entry);
 
         display_sources.push(HybridSearchResultDisplay {
             file_path: res.file_path.clone(),
@@ -2835,19 +2939,12 @@ async fn rag_generate(
 
     // 加载配置
     let config = load_config(&app);
-    let llm_context_size = config.llm_context_size;
-    let llm_max_tokens = config.llm_max_tokens;
 
-    // 动态计算最大上下文字符数
-    // 公式：(context_size / parallel - max_tokens - prompt_overhead) * chars_per_token
-    // parallel=2, prompt_overhead=300, chars_per_token≈2
-    let tokens_for_context = (llm_context_size / 2)
-        .saturating_sub(llm_max_tokens)
-        .saturating_sub(300);
-    let max_context_chars = (tokens_for_context as usize) * 2;
+    // 使用共享预算计算函数（兜底：rag_search 已保证大多数情况不超限）
+    let max_context_chars = compute_context_budget(&config);
     println!(
         "[rag_generate] Config: context_size={}, max_tokens={}, max_context_chars={}",
-        llm_context_size, llm_max_tokens, max_context_chars
+        config.llm_context_size, config.llm_max_tokens, max_context_chars
     );
 
     let context_len = context.chars().count();
@@ -2943,7 +3040,7 @@ async fn rag_generate(
         // Use streaming
         println!("[rag_generate] Streaming enabled. Starting stream...");
         let mut rx = llm_client
-            .generate_content_stream(&prompt, llm_max_tokens)
+            .generate_content_stream(&prompt, config.llm_max_tokens)
             .await
             .map_err(|e| e.to_string())?;
 

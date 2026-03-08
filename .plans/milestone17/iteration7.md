@@ -38,47 +38,19 @@ Scope:
 
 Tasks:
 
-- [ ] 7.1 提取上下文预算计算 — 将 `rag_generate` 中的 `max_context_chars` 计算逻辑提取为
-  独立函数 `compute_context_budget(config) -> usize`，在 `rag_search` 和 `rag_generate` 中复用。
-  公式：`(context_size / 2 - max_tokens - prompt_overhead) * chars_per_token`
+- [x] 7.1 提取上下文预算计算 — `compute_context_budget(config)` 共享函数，在 `rag_search` 和 `rag_generate` 中复用
 
-- [ ] 7.2 Tabular 字符数预估 — 添加函数 `estimate_markdown_chars(block: &DataBlock) -> usize`，
-  根据列数、行数、样本 cell 宽度估算注入为 Markdown 表格后的字符数。
-  公式：`(header_line + sep_line + row_count * avg_row_width) + metadata_overhead`
+- [x] 7.2 Tabular 字符数预估 — `estimate_markdown_chars(block)` 函数，采样前 10 行计算平均 cell 宽度，预估全量注入字符数
 
-- [ ] 7.3 Text 切片字符数统计 — 在 `rag_search` 中，收集所有 text 切片的字符总数
-  `text_chars_total`，包括格式化开销（`[序号] 文件: ... 内容: ...`）
+- [x] 7.3 Text 切片字符数统计 — 在 rag_search 中计算 text_chars_estimate（含扩展上下文 + 格式化开销）
 
-- [ ] 7.4 动态策略选择器 — 在 `rag_search` 中 tabular 处理入口替换硬编码 `row_count > 50` 判断：
-  ```
-  let budget = compute_context_budget(&config);
-  let tabular_chars = blocks.iter().map(|b| estimate_markdown_chars(b)).sum();
-  let text_chars = text_results.iter().map(|r| estimate_text_entry_chars(r)).sum();
-  
-  if tabular_chars + text_chars <= budget * 90% {
-      // 策略 1: 全量 Markdown 注入
-      inject_all_blocks_as_markdown(...)
-  } else {
-      // 策略 2: DuckDB Text-to-SQL
-      run_text_to_sql(...)
-  }
-  ```
+- [x] 7.4 动态策略选择器 — 替换硬编码 `row_count > 50`：计算 tabular + text 总字符数，与 budget×0.9 对比，动态决定直接注入或走 SQL
 
-- [ ] 7.5 预算感知的 Text 切片截取 — Text 切片注入时，累计字符数不超过
-  `budget - tabular_used_chars`。超出预算的低分 text 切片不注入，
-  避免 `rag_generate` 中的截断丢失有用信息。
+- [x] 7.5 预算感知的 Text 切片截取 — Text 注入时累计字符数，超出 text_budget 后停止注入低分切片
 
-- [ ] 7.6 rag_generate 简化 — `rag_search` 已保证上下文不超限后，`rag_generate` 中的
-  两阶段压缩逻辑理论上不再触发（作为兜底保留），但移除不必要的 `max_context_chars` 重复计算。
+- [x] 7.6 rag_generate 简化 — 替换重复预算计算为 compute_context_budget 调用
 
-- [ ] 7.7 日志增强 — 添加预算分配日志，方便调试和验证：
-  ```
-  [rag_search] Budget: 13736 chars
-  [rag_search] Text slices: 3 items, 4200 chars
-  [rag_search] Tabular estimate: 2 blocks, 8500 chars -> FITS (direct inject)
-  或
-  [rag_search] Tabular estimate: 2 blocks, 18000 chars -> EXCEEDS (using SQL)
-  ```
+- [x] 7.7 日志增强 — Budget/Text/Tabular/Total/Strategy 日志 + Text budget exhausted 警告
 
 Exit criteria:
 - 硬编码的 `row_count > 50` 判断被移除，改为动态预算判断
