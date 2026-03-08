@@ -320,7 +320,7 @@ impl QueryEngine {
 
     /// 将字符串值转换为适合 DuckDB 的类型
     fn convert_value(val: &str, col_type: &ColumnType) -> Box<dyn duckdb::ToSql> {
-        if val.is_empty() {
+        if val.trim().is_empty() {
             return Box::new(None::<String>);
         }
 
@@ -329,14 +329,16 @@ impl QueryEngine {
                 if let Ok(n) = val.parse::<i64>() {
                     Box::new(n)
                 } else {
-                    Box::new(val.to_string())
+                    // 无法解析为整数 → NULL（避免将字符串插入数值列）
+                    Box::new(None::<i64>)
                 }
             }
             ColumnType::Float => {
                 if let Ok(f) = val.parse::<f64>() {
                     Box::new(f)
                 } else {
-                    Box::new(val.to_string())
+                    // 无法解析为浮点数 → NULL
+                    Box::new(None::<f64>)
                 }
             }
             ColumnType::Bool => {
