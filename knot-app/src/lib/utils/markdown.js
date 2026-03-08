@@ -172,8 +172,10 @@ export function sortableTables(node) {
                 rows.sort((a, b) => {
                     const cellA = a.children[i]?.textContent?.trim() || '';
                     const cellB = b.children[i]?.textContent?.trim() || '';
-                    const na = parseFloat(cellA);
-                    const nb = parseFloat(cellB);
+                    // Number() 比 parseFloat() 更严格：
+                    // Number("2024-05-18") = NaN, parseFloat("2024-05-18") = 2024
+                    const na = Number(cellA);
+                    const nb = Number(cellB);
                     if (!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
                     return cellA.localeCompare(cellB, 'zh') * dir;
                 });

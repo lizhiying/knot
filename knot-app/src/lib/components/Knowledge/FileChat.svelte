@@ -43,9 +43,9 @@
         rows.sort((a, b) => {
             const va = a[colIdx] || "";
             const vb = b[colIdx] || "";
-            // 尝试数值比较
-            const na = parseFloat(va);
-            const nb = parseFloat(vb);
+            // Number() 比 parseFloat() 更严格（不会把日期 "2024-05-18" 解析为 2024）
+            const na = Number(va);
+            const nb = Number(vb);
             if (!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
             return va.localeCompare(vb, "zh") * dir;
         });
