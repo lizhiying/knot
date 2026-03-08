@@ -34,7 +34,7 @@
     let sortDirection = $state("asc"); // 'asc' | 'desc'
 
     // 排序后的行（客户端排序当前页）
-    let sortedRows = $derived(() => {
+    let sortedRows = $derived.by(() => {
         if (!sqlResult || sortColumn < 0) return sqlResult?.rows || [];
         const rows = [...sqlResult.rows];
         const colIdx = sortColumn;
@@ -389,7 +389,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {#each sortedRows() as row}
+                                {#each sortedRows as row}
                                     <tr>
                                         {#each row as cell}
                                             <td>{cell}</td>
