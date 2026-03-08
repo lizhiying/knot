@@ -16,6 +16,10 @@ class NavigationState {
     activeView = $state(VIEW_SEARCH);
     settingsTab = $state('general');
 
+    // Knowledge 视图持久化状态（在视图切换间保持）
+    knowledgeSelectedFile = $state(null);
+    knowledgeChatFile = $state(null);
+
     get page() {
         return this.current;
     }

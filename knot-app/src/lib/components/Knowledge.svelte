@@ -20,10 +20,18 @@
     let error = $state(null);
     let dataDir = $state(null);
     let searchQuery = $state("");
-    let selectedFile = $state(null);
+    let selectedFile = $state(navigation.knowledgeSelectedFile);
     let activeTypeFilter = $state("all");
     let activeStatusFilter = $state("all");
-    let chatFile = $state(null); // 当前聊天的文件，非null时显示聊天面板
+    let chatFile = $state(navigation.knowledgeChatFile); // 当前聊天的文件，非null时显示聊天面板
+
+    // 将 selectedFile 和 chatFile 同步到 navigation store（视图切换间持久化）
+    $effect(() => {
+        navigation.knowledgeSelectedFile = selectedFile;
+    });
+    $effect(() => {
+        navigation.knowledgeChatFile = chatFile;
+    });
 
     // 统计数据
     let stats = $derived({
