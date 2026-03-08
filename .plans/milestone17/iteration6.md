@@ -35,10 +35,10 @@ Tasks:
 - [x] 6.1 修改 RAG System Prompt 引导表格输出 — 在 `rag_generate` 的 System Prompt 中添加规则：当回答包含多条结构化数据时，使用 Markdown 表格格式 (`| 列1 | 列2 |`) 展现。给出 few-shot 示例。测试验证 LLM 对"列出最后5条血压"类查询输出表格
 - [x] 6.2 AI Insight Markdown 表格 CSS 样式 — 在 spotlight.css markdown-content CSS 中增强 table 样式：圆角边框、深色背景、斑马纹（odd-even 交替色）、表头加粗高亮 sticky、行悬停高亮、容器 overflow-x:auto（宽表格横向可滚动）
 - [x] 6.3 FileChat Markdown 表格 CSS 样式 — FileChat.svelte 中 answer-content 的 :global(table) 样式增强，与 6.2 保持一致
-- [ ] 6.4 后端分页支持 — 修改 `query_excel_table` Tauri command：① 新增 `page`（默认 1）和 `page_size`（默认 20）参数，② DuckDB 执行 SQL 后，先用 `SELECT COUNT(*) FROM (original_sql)` 获取总行数，③ 再用 `SELECT * FROM (original_sql) LIMIT {page_size} OFFSET {(page-1)*page_size}` 获取当前页，④ ExcelQueryResponse 新增 `total_count` 和 `current_page` 字段
-- [ ] 6.5 后端 DuckDB 会话复用 — 当前 `query_excel_table` 每次调用都重新解析 Excel + 注册 DuckDB。分页翻页时应复用已注册的表。方案：① 在 AppState 中缓存 `QueryEngine`（按 file_path 键），② 翻页请求直接用缓存的 engine 执行分页 SQL，③ 添加过期清理（如 5 分钟无访问自动释放）
-- [ ] 6.6 前端分页控件 — FileChat.svelte SQL 结果区域底部添加分页 UI：① 上一页/下一页按钮（Material Icons），② 当前页/总页数显示，③ page_size 切换（20/50/100 下拉选择），④ 翻页时调用 `query_excel_page` command（不重新生成 SQL），⑤ 加载中状态指示
-- [ ] 6.7 新增 `query_excel_page` Tauri command — 分页翻页专用接口：① 接收 file_path、sql、page、page_size 参数，② 从 AppState 缓存获取 QueryEngine（不重新解析文件），③ 执行分页 SQL 返回结果，④ 如缓存失效则自动重建
+- [x] 6.4 后端分页支持 — 修改 `query_excel_table` Tauri command：① 新增 `page`（默认 1）和 `page_size`（默认 20）参数，② DuckDB 执行 SQL 后，先获取总行数，③ 再用 LIMIT/OFFSET 获取当前页，④ ExcelQueryResponse 新增 `total_count`、`current_page`、`page_size` 字段
+- [x] 6.5 后端 DuckDB 会话复用 — AppState 中缓存 `QueryEngine`（按 file_path 键），翻页请求复用缓存的 engine，不重新解析文件
+- [x] 6.6 前端分页控件 — FileChat.svelte SQL 结果区域底部添加分页 UI：上一页/下一页按钮、当前页/总页数显示、加载中状态指示、紫色 accent 样式
+- [x] 6.7 新增 `query_excel_page` Tauri command — 翻页专用接口：从 AppState 缓存获取 QueryEngine，执行 LIMIT/OFFSET SQL 返回结果
 - [ ] 6.8 AI Insight 长表格折叠 — Spotlight 搜索中 LLM 回答如包含 >10 行的 Markdown 表格：① 默认只显示前 5 行 + "展开全部 (N 行)" 按钮，② 点击后展开完整表格，③ 需要在 htmlContent 渲染后做 DOM 后处理（检测 <table> 行数）
 
 Exit criteria:
