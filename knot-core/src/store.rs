@@ -684,12 +684,20 @@ impl KnotStore {
         let mut vector_ranks: HashMap<String, usize> = HashMap::new();
         let mut keyword_ranks: HashMap<String, usize> = HashMap::new();
 
+        let tn_start = Instant::now();
         let table_names = self.conn.table_names().execute().await?;
 
         // 1. LanceDB Vector Search
         let vec_start = Instant::now();
         if table_names.contains(&self.table_name) {
             let table = self.conn.open_table(&self.table_name).execute().await?;
+            if std::env::var("KNOT_QUIET").is_err() {
+                println!(
+                    "[Search] table_names: {:?}, open_table: {:?}",
+                    tn_start.elapsed(),
+                    vec_start.elapsed()
+                );
+            }
             let mut vec_query = table.query().nearest_to(query_vector)?;
             // 文件过滤: LanceDB WHERE 条件
             if let Some(fp) = file_filter {
