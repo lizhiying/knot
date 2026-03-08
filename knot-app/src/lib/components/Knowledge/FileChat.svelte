@@ -26,6 +26,43 @@
     let sqlPhaseText = $state("");
     let isPaging = $state(false); // 翻页加载中
 
+    // 表格排序
+    let sortColumn = $state(-1); // -1 = 无排序
+    let sortDirection = $state("asc"); // 'asc' | 'desc'
+
+    // 排序后的行（客户端排序当前页）
+    let sortedRows = $derived(() => {
+        if (!sqlResult || sortColumn < 0) return sqlResult?.rows || [];
+        const rows = [...sqlResult.rows];
+        const colIdx = sortColumn;
+        const dir = sortDirection === "asc" ? 1 : -1;
+        rows.sort((a, b) => {
+            const va = a[colIdx] || "";
+            const vb = b[colIdx] || "";
+            // 尝试数值比较
+            const na = parseFloat(va);
+            const nb = parseFloat(vb);
+            if (!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
+            return va.localeCompare(vb, "zh") * dir;
+        });
+        return rows;
+    });
+
+    function handleSort(colIdx) {
+        if (sortColumn === colIdx) {
+            if (sortDirection === "asc") {
+                sortDirection = "desc";
+            } else {
+                // 取消排序
+                sortColumn = -1;
+                sortDirection = "asc";
+            }
+        } else {
+            sortColumn = colIdx;
+            sortDirection = "asc";
+        }
+    }
+
     // 分页计算
     let totalPages = $derived(
         sqlResult
@@ -173,6 +210,8 @@
                 pageSize: sqlResult.page_size,
             });
             sqlResult = response;
+            sortColumn = -1;
+            sortDirection = "asc";
         } catch (err) {
             console.error("[FileChat] Page change failed:", err);
         } finally {
@@ -324,13 +363,26 @@
                         <table class="sql-table">
                             <thead>
                                 <tr>
-                                    {#each sqlResult.columns as col}
-                                        <th>{col}</th>
+                                    {#each sqlResult.columns as col, i}
+                                        <th
+                                            class="sortable-th"
+                                            onclick={() => handleSort(i)}
+                                            title="点击排序"
+                                        >
+                                            <span>{col}</span>
+                                            {#if sortColumn === i}
+                                                <span class="sort-arrow"
+                                                    >{sortDirection === "asc"
+                                                        ? "↑"
+                                                        : "↓"}</span
+                                                >
+                                            {/if}
+                                        </th>
                                     {/each}
                                 </tr>
                             </thead>
                             <tbody>
-                                {#each sqlResult.rows as row}
+                                {#each sortedRows() as row}
                                     <tr>
                                         {#each row as cell}
                                             <td>{cell}</td>
@@ -718,6 +770,23 @@
         font-size: 10px;
         text-transform: uppercase;
         letter-spacing: 0.3px;
+    }
+
+    .sortable-th {
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.15s;
+    }
+
+    .sortable-th:hover {
+        background: rgba(139, 92, 246, 0.15);
+        color: #8b5cf6;
+    }
+
+    .sort-arrow {
+        margin-left: 3px;
+        font-size: 9px;
+        color: #8b5cf6;
     }
 
     .sql-table tr:nth-child(even) {
