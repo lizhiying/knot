@@ -9,6 +9,8 @@
  * 使得表格在流式输出过程中也能正确渲染。
  */
 
+import { attachChartToggle } from './table-chart.js';
+
 /**
  * 检测并补全不完整的 Markdown 表格
  * @param {string} content - 流式输出的 Markdown 内容
@@ -202,6 +204,12 @@ export function sortableTables(node) {
             th.addEventListener('click', handler);
             cleanups.push(() => th.removeEventListener('click', handler));
         });
+
+        // 添加图表切换按钮（只对含数值列的表格）
+        const chartCleanup = attachChartToggle(table);
+        if (chartCleanup) {
+            cleanups.push(chartCleanup);
+        }
     }
 
     function scanTables() {
