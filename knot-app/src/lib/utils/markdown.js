@@ -38,33 +38,61 @@ export function completeStreamingTable(content) {
     // 没有找到表格行
     if (tableStart === -1 || tableEnd === -1) return content;
 
-    // 提取表格行
-    const tableLines = lines.slice(tableStart, tableEnd + 1).filter(l => l.trim() !== '');
+    // 提取表格行（带行号）
+    const tableLines = [];
+    for (let i = tableStart; i <= tableEnd; i++) {
+        if (lines[i].trim() !== '') {
+            tableLines.push({ index: i, text: lines[i].trim() });
+        }
+    }
 
     if (tableLines.length === 0) return content;
 
-    // 检查是否已有分隔行（|---|---|）
-    const hasSeparator = tableLines.some(line => {
-        const trimmed = line.trim();
-        // 分隔行：只包含 |, -, :, 空格
-        return trimmed.startsWith('|') && /^\|[\s\-:| ]+\|$/.test(trimmed) && trimmed.includes('-');
-    });
-
-    // 已有分隔行，表格完整，无需补全
-    if (hasSeparator) return content;
-
-    // 需要补全：取第一行作为表头，计算列数
-    const headerLine = tableLines[0].trim();
+    // 计算表头列数
+    const headerLine = tableLines[0].text;
     const cols = headerLine.split('|').filter(c => c.trim() !== '').length;
-
     if (cols === 0) return content;
 
-    // 生成分隔行
-    const separator = '| ' + Array(cols).fill('---').join(' | ') + ' |';
+    // 生成正确列数的分隔行
+    const correctSeparator = '| ' + Array(cols).fill('---').join(' | ') + ' |';
 
-    // 在表头行后插入分隔行
+    // 判断一行是否为完整且列数正确的分隔行
+    const isValidSeparator = (line) => {
+        if (!/^\|[\s\-:| ]+\|$/.test(line)) return false;
+        if (!line.includes('-')) return false;
+        const sepCols = line.split('|').filter(c => c.trim() !== '').length;
+        return sepCols === cols;
+    };
+
+    // 判断一行是否为正在输出中的不完整分隔行（只包含 |、-、:、空格）
+    const isPartialSeparator = (line) => {
+        // 去掉开头的 |，剩余部分只包含 -、:、|、空格
+        return line.startsWith('|') && /^[\s\-:| ]*$/.test(line.substring(1)) && line.includes('-');
+    };
+
     const result = [...lines];
-    result.splice(tableStart + 1, 0, separator);
 
+    if (tableLines.length === 1) {
+        // 只有表头，没有分隔行 → 插入分隔行
+        result.splice(tableStart + 1, 0, correctSeparator);
+        return result.join('\n');
+    }
+
+    // 检查第二行（应该是分隔行的位置）
+    const secondLine = tableLines[1];
+
+    if (isValidSeparator(secondLine.text)) {
+        // 分隔行完整且列数正确，无需处理
+        return content;
+    }
+
+    if (isPartialSeparator(secondLine.text)) {
+        // 分隔行正在流式输出中（如 |--- 或 |---|），替换为完整的
+        result[secondLine.index] = correctSeparator;
+        return result.join('\n');
+    }
+
+    // 第二行不是分隔行（可能是数据行），在表头后插入分隔行
+    result.splice(tableStart + 1, 0, correctSeparator);
     return result.join('\n');
 }
