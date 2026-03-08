@@ -2318,7 +2318,7 @@ async fn rag_search(
                                             sql_system, sql_user
                                         );
 
-                                        // 调用 LLM 生成 SQL
+                                        // 调用 LLM 生成 SQL（带超时保护，避免 GPU 竞争时无限等待）
                                         let llm_for_sql = {
                                             let guard = state.chat_client.read().await;
                                             guard.clone()
@@ -2326,8 +2326,14 @@ async fn rag_search(
 
                                         if let Some(llm_client) = llm_for_sql {
                                             use knot_parser::LlmProvider;
-                                            match llm_client.generate_content(&sql_prompt).await {
-                                                Ok(generated_sql) => {
+                                            let sql_gen_result = tokio::time::timeout(
+                                                std::time::Duration::from_secs(30),
+                                                llm_client.generate_content(&sql_prompt),
+                                            )
+                                            .await;
+
+                                            match sql_gen_result {
+                                                Ok(Ok(generated_sql)) => {
                                                     let sql = generated_sql
                                                         .trim()
                                                         .trim_start_matches("```sql")
@@ -2443,9 +2449,22 @@ async fn rag_search(
                                                         }
                                                     }
                                                 }
-                                                Err(e) => {
+                                                Err(_) => {
                                                     println!(
-                                                        "[rag_search] LLM SQL generation failed: {}, falling back to markdown",
+                                                        "[rag_search] LLM SQL generation timed out (30s), falling back to markdown"
+                                                    );
+                                                    for block in &parsed.blocks {
+                                                        inject_block_as_markdown(
+                                                            block,
+                                                            &parsed.profiles,
+                                                            file_path,
+                                                            &mut tabular_context,
+                                                        );
+                                                    }
+                                                }
+                                                Ok(Err(e)) => {
+                                                    println!(
+                                                        "[rag_search] LLM SQL generation error: {}, falling back to markdown",
                                                         e
                                                     );
                                                     for block in &parsed.blocks {
