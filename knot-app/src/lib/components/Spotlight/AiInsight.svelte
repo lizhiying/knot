@@ -4,6 +4,7 @@
     import {
         completeStreamingTable,
         wrapTablesForScroll,
+        sortableTables,
     } from "$lib/utils/markdown.js";
 
     /**
@@ -86,6 +87,7 @@
                 style="overflow-wrap: break-word; word-break: break-word;"
                 onclick={handleLinkClick}
                 role="presentation"
+                use:sortableTables
             >
                 {@html htmlContent}
             </div>

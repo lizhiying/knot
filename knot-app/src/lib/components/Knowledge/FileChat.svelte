@@ -10,6 +10,7 @@
     import {
         completeStreamingTable,
         wrapTablesForScroll,
+        sortableTables,
     } from "$lib/utils/markdown.js";
 
     let { file = null, onBack = () => {} } = $props();
@@ -445,7 +446,11 @@
                     <span class="material-symbols-outlined">smart_toy</span>
                     AI 回答
                 </div>
-                <div class="answer-content" class:streaming={showCursor}>
+                <div
+                    class="answer-content"
+                    class:streaming={showCursor}
+                    use:sortableTables
+                >
                     {@html renderedAnswer}
                     {#if showCursor}
                         <span class="cursor-blink">▊</span>

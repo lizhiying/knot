@@ -113,3 +113,115 @@ export function wrapTablesForScroll(html) {
         '</table></div>'
     );
 }
+
+/**
+ * Svelte action: 给容器内的 HTML 表格添加点击表头排序功能
+ * 用法: <div use:sortableTables>{@html htmlContent}</div>
+ */
+export function sortableTables(node) {
+    let cleanups = [];
+
+    function setupTable(table) {
+        // 避免重复处理
+        if (table.dataset.sortable) return;
+        table.dataset.sortable = 'true';
+
+        const thead = table.querySelector('thead');
+        const tbody = table.querySelector('tbody');
+        if (!thead || !tbody) return null;
+
+        const ths = [...thead.querySelectorAll('th')];
+        if (ths.length === 0) return null;
+
+        // 保存原始行顺序
+        const originalRows = [...tbody.querySelectorAll('tr')];
+        let sortCol = -1;
+        let sortDir = 'asc';
+
+        // 添加样式
+        ths.forEach((th, i) => {
+            th.style.cursor = 'pointer';
+            th.style.userSelect = 'none';
+            th.style.transition = 'background 0.15s';
+            th.title = '点击排序';
+
+            const handler = () => {
+                if (sortCol === i) {
+                    if (sortDir === 'asc') {
+                        sortDir = 'desc';
+                    } else {
+                        // 取消排序，恢复原始顺序
+                        sortCol = -1;
+                        sortDir = 'asc';
+                        tbody.innerHTML = '';
+                        originalRows.forEach(r => tbody.appendChild(r));
+                        ths.forEach(t => {
+                            const arrow = t.querySelector('.sort-indicator');
+                            if (arrow) arrow.remove();
+                        });
+                        return;
+                    }
+                } else {
+                    sortCol = i;
+                    sortDir = 'asc';
+                }
+
+                // 排序
+                const rows = [...tbody.querySelectorAll('tr')];
+                const dir = sortDir === 'asc' ? 1 : -1;
+                rows.sort((a, b) => {
+                    const cellA = a.children[i]?.textContent?.trim() || '';
+                    const cellB = b.children[i]?.textContent?.trim() || '';
+                    const na = parseFloat(cellA);
+                    const nb = parseFloat(cellB);
+                    if (!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
+                    return cellA.localeCompare(cellB, 'zh') * dir;
+                });
+
+                tbody.innerHTML = '';
+                rows.forEach(r => tbody.appendChild(r));
+
+                // 更新箭头指示
+                ths.forEach((t, idx) => {
+                    const existing = t.querySelector('.sort-indicator');
+                    if (existing) existing.remove();
+                    if (idx === i) {
+                        const arrow = document.createElement('span');
+                        arrow.className = 'sort-indicator';
+                        arrow.style.marginLeft = '3px';
+                        arrow.style.fontSize = '9px';
+                        arrow.style.color = '#8b5cf6';
+                        arrow.textContent = sortDir === 'asc' ? '↑' : '↓';
+                        t.appendChild(arrow);
+                    }
+                });
+            };
+
+            th.addEventListener('click', handler);
+            cleanups.push(() => th.removeEventListener('click', handler));
+        });
+    }
+
+    function scanTables() {
+        // 只处理新出现的表格（已有 data-sortable 的跳过）
+        node.querySelectorAll('table:not([data-sortable])').forEach(setupTable);
+    }
+
+    // 初始扫描
+    scanTables();
+
+    // 监听内容变化（流式输出时新表格出现）
+    let debounceTimer;
+    const observer = new MutationObserver(() => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(scanTables, 100);
+    });
+    observer.observe(node, { childList: true, subtree: true });
+
+    return {
+        destroy() {
+            cleanups.forEach(fn => fn());
+            observer.disconnect();
+        }
+    };
+}
