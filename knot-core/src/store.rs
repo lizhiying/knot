@@ -884,8 +884,22 @@ impl KnotStore {
             let min_bm25 = bm25_scores.iter().cloned().fold(f32::MAX, f32::min);
             let bm25_range = (max_bm25 - min_bm25).max(0.001); // 避免除零
 
+            // BM25 最低分阈值：过滤掉分数低于最高分 30% 的结果
+            // 这解决了 OR 模式 + ICU 单字分词导致的低相关性噪音问题
+            // 例如搜索 "净利润" 时 ICU 会匹配含 "利" 字的不相关文档
+            let bm25_threshold = if top_docs.len() >= 3 && max_bm25 > 0.0 {
+                max_bm25 * 0.3
+            } else {
+                0.0 // 结果太少时不过滤
+            };
+
             let mut rank = 1usize;
             for (bm25_score, doc_address) in top_docs {
+                // 过滤低相关性噪音
+                if bm25_score < bm25_threshold {
+                    continue;
+                }
+
                 let doc: TantivyDocument = searcher.doc(doc_address)?;
 
                 let doc_id = doc
