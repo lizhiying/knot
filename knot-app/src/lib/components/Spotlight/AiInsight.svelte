@@ -54,8 +54,8 @@
     });
 </script>
 
-<div class="w-[62%] flex flex-col h-full min-h-0">
-    <div class="p-6 overflow-y-auto scroll-hide flex-1">
+<div class="w-[62%] flex flex-col h-full min-h-0 overflow-x-hidden">
+    <div class="p-6 overflow-y-auto overflow-x-hidden scroll-hide flex-1">
         <!-- 状态指示 -->
         <div
             class="flex items-center gap-2 text-[10px] font-bold mb-6 uppercase tracking-widest"
@@ -78,6 +78,7 @@
         {#if !isThinking && content}
             <div
                 class="markdown-content text-[14px] prose prose-sm dark:prose-invert max-w-none"
+                style="overflow-wrap: break-word; word-break: break-word;"
                 onclick={handleLinkClick}
                 role="presentation"
             >
