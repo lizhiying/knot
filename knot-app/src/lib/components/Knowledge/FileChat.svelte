@@ -7,6 +7,7 @@
     import { invoke } from "@tauri-apps/api/core";
     import { listen } from "@tauri-apps/api/event";
     import { marked } from "marked";
+    import { completeStreamingTable } from "$lib/utils/markdown.js";
 
     let { file = null, onBack = () => {} } = $props();
 
@@ -40,9 +41,11 @@
         file?.name?.match(/\.(xlsx|xls|xlsm|xlsb)$/i) != null,
     );
 
-    // Markdown 渲染
+    // Markdown 渲染（流式输出时补全不完整的表格）
     let renderedAnswer = $derived(
-        answer ? marked.parse(answer, { breaks: true }) : "",
+        answer
+            ? marked.parse(completeStreamingTable(answer), { breaks: true })
+            : "",
     );
 
     async function handleSubmit() {
