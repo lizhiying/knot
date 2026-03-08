@@ -868,6 +868,10 @@ impl KnotStore {
                     if stop_words.contains(t.as_str()) {
                         continue;
                     }
+                    // 过滤纯数字 token（"5"、"10"、"2024" 等），匹配太多不相关文档
+                    if t.chars().all(|c| c.is_ascii_digit()) {
+                        continue;
+                    }
                     final_tokens.push(t.clone());
 
                     // 对多字 token 生成 2-gram 子 token
