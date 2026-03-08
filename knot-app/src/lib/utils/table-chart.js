@@ -86,9 +86,10 @@ function buildChartConfig(headers, rows) {
         }),
         borderColor: CHART_COLORS[i % CHART_COLORS.length],
         backgroundColor: CHART_BG[i % CHART_BG.length],
-        borderWidth: 2,
-        pointRadius: 3,
-        pointHoverRadius: 5,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: CHART_COLORS[i % CHART_COLORS.length],
         tension: 0.3,
         fill: numericCols.length === 1, // 单列时填充
     }));
@@ -107,31 +108,36 @@ function buildChartConfig(headers, rows) {
             plugins: {
                 legend: {
                     position: 'top',
+                    align: 'start',
                     labels: {
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        font: { size: 11 },
-                        boxWidth: 12,
-                        padding: 10,
+                        color: '#e0e0e0',
+                        font: { size: 12, weight: '500' },
+                        boxWidth: 14,
+                        boxHeight: 3,
+                        padding: 16,
+                        usePointStyle: false,
                     }
                 },
                 tooltip: {
                     backgroundColor: 'rgba(30, 30, 40, 0.95)',
                     titleColor: '#fff',
-                    bodyColor: 'rgba(255, 255, 255, 0.8)',
+                    bodyColor: 'rgba(255, 255, 255, 0.9)',
                     borderColor: 'rgba(139, 92, 246, 0.3)',
                     borderWidth: 1,
                     cornerRadius: 6,
-                    padding: 8,
+                    padding: 10,
+                    titleFont: { size: 12 },
+                    bodyFont: { size: 12 },
                 }
             },
             scales: {
                 x: {
-                    ticks: { color: 'rgba(255, 255, 255, 0.6)', font: { size: 10 } },
+                    ticks: { color: 'rgba(255, 255, 255, 0.7)', font: { size: 11 } },
                     grid: { color: 'rgba(255, 255, 255, 0.06)' },
                 },
                 y: {
-                    ticks: { color: 'rgba(255, 255, 255, 0.6)', font: { size: 10 } },
-                    grid: { color: 'rgba(255, 255, 255, 0.06)' },
+                    ticks: { color: 'rgba(255, 255, 255, 0.7)', font: { size: 11 } },
+                    grid: { color: 'rgba(255, 255, 255, 0.08)' },
                 }
             },
             interaction: {
