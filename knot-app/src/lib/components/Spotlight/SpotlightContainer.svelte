@@ -108,9 +108,21 @@
     let isSearching = $state(false); // 左侧骨架屏状态
     let searchDuration = $state(0); // 搜索耗时
 
+    let currentGenerationId = 0; // 用于追踪当前生成轮次
+
     async function handleSearch(query) {
-        if (isStreaming) return;
         if (!query.trim()) return;
+
+        // 如果正在流式生成，先取消旧的生成
+        if (isStreaming) {
+            console.log("[Spotlight] Cancelling previous generation...");
+            await invoke("cancel_generation");
+            isStreaming = false;
+        }
+
+        // 递增 generationId，旧生成的 token 将被忽略
+        currentGenerationId += 1;
+        const thisGenerationId = currentGenerationId;
 
         // 切换到加载状态
         isLoading = true;
@@ -145,6 +157,9 @@
                 query: query,
                 filePath: null,
             });
+
+            // 如果在搜索期间用户又发起了新搜索，丢弃本次结果
+            if (thisGenerationId !== currentGenerationId) return;
 
             // 记录搜索耗时
             const durationSec = (performance.now() - searchStartTime) / 1000;
@@ -202,6 +217,9 @@
 
             let isFirstToken = true;
             const unlisten = await listen("llm-token", (event) => {
+                // 如果已经不是当前生成轮次，忽略 token
+                if (thisGenerationId !== currentGenerationId) return;
+
                 if (isFirstToken) {
                     // 收到第一个 token，关闭骨架屏，显示光标
                     insightState = {
@@ -222,8 +240,14 @@
                 });
             } finally {
                 unlisten(); // 停止监听
-                isStreaming = false;
+                // 只有当前生成轮次才重置 isStreaming
+                if (thisGenerationId === currentGenerationId) {
+                    isStreaming = false;
+                }
             }
+
+            // 如果已经被新搜索取代，不更新完成状态
+            if (thisGenerationId !== currentGenerationId) return;
 
             const generateDuration = (
                 (performance.now() - generateStartTime) /

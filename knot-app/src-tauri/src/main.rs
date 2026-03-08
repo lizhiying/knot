@@ -305,6 +305,8 @@ pub struct AppState {
     pub queue_manager: Arc<QueueManager>,
     pub knot_store: Arc<RwLock<Option<Arc<knot_core::store::KnotStore>>>>,
     pub model_status: Arc<RwLock<String>>,
+    /// 用于中断正在进行的 LLM 生成。新搜索时设为 true，rag_generate 启动时重置为 false。
+    pub generation_cancelled: Arc<std::sync::atomic::AtomicBool>,
 }
 
 fn main() {
@@ -372,6 +374,7 @@ fn main() {
                 queue_manager: queue_manager.clone(),
                 knot_store: knot_store.clone(),
                 model_status: model_status.clone(),
+                generation_cancelled: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             });
 
             // 保留旧的 EngineManager
@@ -698,6 +701,7 @@ fn main() {
             rag_query,
             rag_search,
             rag_generate,
+            cancel_generation,
             check_model_status,
             check_all_models,
             get_model_status,
@@ -2783,7 +2787,20 @@ async fn rag_generate(
 
         println!("[rag_generate] Stream started...");
 
+        // 重置取消标志
+        state
+            .generation_cancelled
+            .store(false, std::sync::atomic::Ordering::Relaxed);
+
         while let Some(token) = rx.recv().await {
+            // 检查是否被新搜索取消
+            if state
+                .generation_cancelled
+                .load(std::sync::atomic::Ordering::Relaxed)
+            {
+                println!("[rag_generate] Generation cancelled by new search.");
+                break;
+            }
             // Emit token event directly - thinking is prevented at prompt level
             // via empty <think></think> prefix
             if let Err(e) = app.emit("llm-token", token) {
@@ -3364,4 +3381,15 @@ async fn get_graph_data(app: tauri::AppHandle) -> Result<serde_json::Value, Stri
         .map_err(|e| format!("Graph query error: {}", e))?;
 
     serde_json::to_value(&data).map_err(|e| format!("Serialize error: {}", e))
+}
+
+/// 取消正在进行的 LLM 生成。
+/// 前端在发起新搜索前调用此命令，rag_generate 的流式循环检测到 flag 后立即停止。
+#[tauri::command]
+async fn cancel_generation(state: State<'_, AppState>) -> Result<(), String> {
+    state
+        .generation_cancelled
+        .store(true, std::sync::atomic::Ordering::Relaxed);
+    println!("[cancel_generation] Generation cancel requested.");
+    Ok(())
 }
