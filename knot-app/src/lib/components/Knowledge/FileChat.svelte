@@ -23,6 +23,17 @@
     let sqlResult = $state(null);
     let sqlExpanded = $state(false);
     let sqlPhaseText = $state("");
+    let isPaging = $state(false); // 翻页加载中
+
+    // 分页计算
+    let totalPages = $derived(
+        sqlResult
+            ? Math.ceil(
+                  (sqlResult.total_count || sqlResult.row_count) /
+                      (sqlResult.page_size || 20),
+              )
+            : 0,
+    );
 
     // 判断是否为 Excel 文件
     let isExcelFile = $derived(
@@ -149,6 +160,23 @@
         }
     }
 
+    async function handlePageChange(newPage) {
+        if (!sqlResult || isPaging) return;
+        isPaging = true;
+        try {
+            const response = await invoke("query_excel_page", {
+                filePath: file.path,
+                page: newPage,
+                pageSize: sqlResult.page_size,
+            });
+            sqlResult = response;
+        } catch (err) {
+            console.error("[FileChat] Page change failed:", err);
+        } finally {
+            isPaging = false;
+        }
+    }
+
     function handleKeydown(e) {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -248,11 +276,14 @@
                         style="font-size:14px;color:#8b5cf6">database</span
                     >
                     <span class="sql-result-title">SQL 查询结果</span>
-                    <span class="sql-result-meta"
-                        >{sqlResult.row_count} 行{sqlResult.retried
-                            ? " · 已重试"
-                            : ""}</span
-                    >
+                    <span class="sql-result-meta">
+                        {#if sqlResult.total_count > sqlResult.page_size}
+                            {sqlResult.row_count} / {sqlResult.total_count} 行
+                        {:else}
+                            {sqlResult.row_count} 行
+                        {/if}
+                        {sqlResult.retried ? " · 已重试" : ""}
+                    </span>
                 </div>
 
                 <!-- 可折叠 SQL 语句 -->
@@ -305,6 +336,41 @@
                                 {/each}
                             </tbody>
                         </table>
+                    </div>
+                {/if}
+
+                <!-- 分页控件 -->
+                {#if totalPages > 1}
+                    <div class="sql-pagination">
+                        <button
+                            class="page-btn"
+                            disabled={sqlResult.current_page <= 1 || isPaging}
+                            onclick={() =>
+                                handlePageChange(sqlResult.current_page - 1)}
+                        >
+                            <span
+                                class="material-symbols-outlined"
+                                style="font-size:16px">chevron_left</span
+                            >
+                        </button>
+                        <span class="page-info">
+                            {sqlResult.current_page} / {totalPages}
+                        </span>
+                        <button
+                            class="page-btn"
+                            disabled={sqlResult.current_page >= totalPages ||
+                                isPaging}
+                            onclick={() =>
+                                handlePageChange(sqlResult.current_page + 1)}
+                        >
+                            <span
+                                class="material-symbols-outlined"
+                                style="font-size:16px">chevron_right</span
+                            >
+                        </button>
+                        {#if isPaging}
+                            <span class="page-loading">...</span>
+                        {/if}
                     </div>
                 {/if}
             </div>
@@ -653,6 +719,63 @@
 
     .sql-table tr:nth-child(even) {
         background: var(--bg-card-hover, rgba(255, 255, 255, 0.02));
+    }
+
+    /* 分页控件 */
+    .sql-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px 0 4px;
+    }
+
+    .page-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+        background: rgba(139, 92, 246, 0.1);
+        border-color: rgba(139, 92, 246, 0.3);
+        color: #8b5cf6;
+    }
+
+    .page-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .page-info {
+        font-size: 11px;
+        color: var(--text-muted);
+        min-width: 40px;
+        text-align: center;
+    }
+
+    .page-loading {
+        font-size: 11px;
+        color: #8b5cf6;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.4;
+        }
     }
 
     .spinning {
