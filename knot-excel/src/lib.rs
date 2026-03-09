@@ -33,5 +33,8 @@ pub use error::ExcelError;
 pub use pipeline::parse_excel;
 pub use profile::TableProfile;
 #[cfg(feature = "query")]
-pub use query::{QueryEngine, QueryResult, ResultContext, ResultSummarizer, SqlGenerator};
+pub use query::{
+    CachedQueryEngine, ExcelCache, QueryEngine, QueryResult, ResultContext, ResultSummarizer,
+    SqlGenerator, TableSchema,
+};
 pub use reader::{ColumnType, DataBlock};

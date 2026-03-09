@@ -1712,6 +1712,77 @@ async fn start_background_indexing(
                     *guard = None;
                 }
             }
+
+            // Excel DuckDB 持久化缓存预热
+            // 遍历数据目录中所有 Excel 文件，解析后写入 DuckDB 缓存文件
+            {
+                let cache_db_path =
+                    index_path.replace("knot_index.lance", "knot_excel_cache.duckdb");
+                match knot_excel::ExcelCache::new(&cache_db_path) {
+                    Ok(cache) => {
+                        let excel_config = knot_excel::ExcelConfig::default();
+                        let mut cached_count = 0;
+                        let mut skipped_count = 0;
+
+                        // 递归收集 Excel 文件
+                        fn collect_excel_files(dir: &std::path::Path, files: &mut Vec<PathBuf>) {
+                            if let Ok(entries) = std::fs::read_dir(dir) {
+                                for entry in entries.flatten() {
+                                    let path = entry.path();
+                                    if path.is_dir() {
+                                        collect_excel_files(&path, files);
+                                    } else if let Some(ext) = path.extension() {
+                                        let ext = ext.to_string_lossy().to_lowercase();
+                                        if matches!(ext.as_str(), "xlsx" | "xls" | "xlsm" | "xlsb")
+                                        {
+                                            files.push(path);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        let mut excel_files = Vec::new();
+                        collect_excel_files(input_path, &mut excel_files);
+
+                        for file_path in &excel_files {
+                            let path_str = file_path.to_string_lossy().to_string();
+
+                            // 跳过已缓存且未变更的文件
+                            if cache.is_cache_valid(&path_str) {
+                                skipped_count += 1;
+                                continue;
+                            }
+
+                            match knot_excel::pipeline::parse_excel_full(file_path, &excel_config) {
+                                Ok(parsed) => {
+                                    if let Err(e) = cache.upsert_file(&path_str, &parsed.blocks) {
+                                        eprintln!(
+                                            "[ExcelCache] Failed to cache {}: {}",
+                                            path_str, e
+                                        );
+                                    } else {
+                                        cached_count += 1;
+                                    }
+                                }
+                                Err(e) => {
+                                    eprintln!("[ExcelCache] Failed to parse {}: {}", path_str, e);
+                                }
+                            }
+                        }
+
+                        if cached_count > 0 || skipped_count > 0 {
+                            println!(
+                                "[ExcelCache] Warm-up complete: {} cached, {} skipped (unchanged), {} total Excel files",
+                                cached_count, skipped_count, excel_files.len()
+                            );
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("[ExcelCache] Failed to init cache: {}", e);
+                    }
+                }
+            }
         }
         Err(e) => {
             eprintln!("[Indexer] Initial scan failed: {}", e);
@@ -1794,11 +1865,26 @@ async fn start_background_indexing(
                             // Process Removals First
                             if !pending_removals.is_empty() {
                                 if let Ok(store) = KnotStore::new(&index_path_for_watch).await {
+                                    // Excel 缓存清理
+                                    let cache_db_path = index_path_for_watch.replace("knot_index.lance", "knot_excel_cache.duckdb");
+                                    let excel_cache = knot_excel::ExcelCache::new(&cache_db_path).ok();
+
                                     for path in pending_removals.drain() {
                                         println!("[Monitor] Removal detected: {:?}", path);
                                         let path_str = path.to_string_lossy();
                                         let _ = store.delete_file(&path_str).await;
                                         let _ = store.delete_folder(&path_str).await;
+
+                                        // 清除 Excel 缓存
+                                        if let Some(ref cache) = excel_cache {
+                                            if let Some(ext) = path.extension() {
+                                                let ext = ext.to_string_lossy().to_lowercase();
+                                                if matches!(ext.as_str(), "xlsx" | "xls" | "xlsm" | "xlsb") {
+                                                    let _ = cache.remove_file(&path_str);
+                                                    println!("[ExcelCache] Removed cache for {}", path_str);
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -1823,60 +1909,70 @@ async fn start_background_indexing(
 
                                 let store_opt = KnotStore::new(&index_path_for_watch).await.ok();
 
+                                let mut updated_excel_paths: Vec<PathBuf> = Vec::new();
+
                                 for path in paths {
                                     if should_index_file(&path) {
                                          if path.exists() {
+                                             // 记录 Excel 文件用于缓存更新
+                                             if let Some(ext) = path.extension() {
+                                                 let ext = ext.to_string_lossy().to_lowercase();
+                                                 if matches!(ext.as_str(), "xlsx" | "xls" | "xlsm" | "xlsb") {
+                                                     updated_excel_paths.push(path.clone());
+                                                 }
+                                             }
+
                                              // Index it
                                                              match indexer.index_file(&path).await {
                                                  Ok(records) => {
-                                                     if !records.is_empty() {
-                                                         total_records += records.len();
-                                                         updated_cnt += 1;
+                                                      if !records.is_empty() {
+                                                          total_records += records.len();
+                                                          updated_cnt += 1;
 
-                                                         // GraphRAG: 混合提取（LLM + 规则降级）
-                                                         let watch_config = load_config(&app);
-                                                         let entity_data = if watch_config.graph_rag_enabled {
-                                                             // 尝试获取 parsing LLM client
-                                                             let parsing_client = {
-                                                                 let state = app.state::<AppState>();
-                                                                 let guard = state.parsing_client.read().await;
-                                                                 guard.clone()
-                                                             };
+                                                          // GraphRAG: 混合提取（LLM + 规则降级）
+                                                          let watch_config = load_config(&app);
+                                                          let entity_data = if watch_config.graph_rag_enabled {
+                                                              // 尝试获取 parsing LLM client
+                                                              let parsing_client = {
+                                                                  let state = app.state::<AppState>();
+                                                                  let guard = state.parsing_client.read().await;
+                                                                  guard.clone()
+                                                              };
 
-                                                             let (entities, relations) = if let Some(client) = parsing_client {
-                                                                 let client_clone = client.clone();
-                                                                 let llm_fn = |prompt: String| {
-                                                                     let c = client_clone.clone();
-                                                                     async move {
-                                                                         use knot_parser::LlmProvider;
-                                                                         c.generate_content(&prompt).await.ok()
-                                                                     }
-                                                                 };
-                                                                 knot_core::entity::extract_from_records_with_llm(&records, Some(llm_fn)).await
-                                                             } else {
-                                                                 knot_core::entity::extract_from_records(&records)
-                                                             };
-                                                             Some((entities, relations))
-                                                         } else {
-                                                             None
-                                                         };
+                                                              let (entities, relations) = if let Some(client) = parsing_client {
+                                                                  let client_clone = client.clone();
+                                                                  let llm_fn = |prompt: String| {
+                                                                      let c = client_clone.clone();
+                                                                      async move {
+                                                                          use knot_parser::LlmProvider;
+                                                                          c.generate_content(&prompt).await.ok()
+                                                                      }
+                                                                  };
+                                                                  knot_core::entity::extract_from_records_with_llm(&records, Some(llm_fn)).await
+                                                              } else {
+                                                                  knot_core::entity::extract_from_records(&records)
+                                                              };
+                                                              Some((entities, relations))
+                                                          } else {
+                                                              None
+                                                          };
 
-                                                         if let Some(store) = &store_opt {
-                                                              let _ = store.delete_file(&path.to_string_lossy()).await;
-                                                              let _ = store.add_records(records).await;
-                                                         }
+                                                      if let Some(store) = &store_opt {
+                                                           let _ = store.delete_file(&path.to_string_lossy()).await;
+                                                           let _ = store.add_records(records).await;
+                                                      }
 
-                                                         // GraphRAG: 写入实体图（去重后写入）
-                                                         if let Some((entities, relations)) = entity_data {
-                                                             let deduped = knot_core::entity::dedup_entities(entities);
-                                                             let graph_path = index_path_for_watch.replace("knot_index.lance", "knot_graph.db");
-                                                             if let Ok(graph) = knot_core::entity::EntityGraph::new(&graph_path).await {
-                                                                 let _ = graph.delete_by_file(&path.to_string_lossy()).await;
-                                                                 let _ = graph.add_entities(&deduped).await;
-                                                                 let _ = graph.add_relations(&relations).await;
-                                                             }
-                                                         }
-                                                     }
+                                                      // GraphRAG: 写入实体图（去重后写入）
+                                                      if let Some((entities, relations)) = entity_data {
+                                                          let deduped = knot_core::entity::dedup_entities(entities);
+                                                          let graph_path = index_path_for_watch.replace("knot_index.lance", "knot_graph.db");
+                                                          if let Ok(graph) = knot_core::entity::EntityGraph::new(&graph_path).await {
+                                                              let _ = graph.delete_by_file(&path.to_string_lossy()).await;
+                                                              let _ = graph.add_entities(&deduped).await;
+                                                              let _ = graph.add_relations(&relations).await;
+                                                          }
+                                                      }
+                                                  }
                                                  }
                                                  Err(e) => eprintln!("[Monitor] Failed to index {:?}: {}", path, e),
                                              }
@@ -1894,6 +1990,29 @@ async fn start_background_indexing(
 
                                 if updated_cnt > 0 {
                                     println!("[Monitor] Updated {} files with {} records.", updated_cnt, total_records);
+                                }
+
+                                // Excel DuckDB 缓存更新
+                                if !updated_excel_paths.is_empty() {
+                                    let cache_db_path = index_path_for_watch.replace("knot_index.lance", "knot_excel_cache.duckdb");
+                                    if let Ok(cache) = knot_excel::ExcelCache::new(&cache_db_path) {
+                                        let excel_config = knot_excel::ExcelConfig::default();
+                                        for excel_path in &updated_excel_paths {
+                                            let path_str = excel_path.to_string_lossy().to_string();
+                                            match knot_excel::pipeline::parse_excel_full(excel_path, &excel_config) {
+                                                Ok(parsed) => {
+                                                    if let Err(e) = cache.upsert_file(&path_str, &parsed.blocks) {
+                                                        eprintln!("[ExcelCache] Monitor update failed for {}: {}", path_str, e);
+                                                    } else {
+                                                        println!("[ExcelCache] Updated cache for {}", path_str);
+                                                    }
+                                                }
+                                                Err(e) => {
+                                                    eprintln!("[ExcelCache] Monitor parse failed for {}: {}", path_str, e);
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                              }
 
@@ -2284,160 +2403,228 @@ async fn rag_search(
                         );
 
                         if use_sql {
-                            // === 大表格策略：DuckDB Text-to-SQL ===
+                            // === 大表格策略：DuckDB Text-to-SQL（使用持久化缓存）===
                             println!(
                                 "[rag_search] Large table detected in {}, using DuckDB Text-to-SQL",
                                 res.file_path
                             );
 
-                            match knot_excel::QueryEngine::new() {
-                                Ok(mut engine) => {
-                                    // 注册所有数据块到 DuckDB
-                                    for block in &parsed.blocks {
-                                        if let Err(e) = engine.register_datablock(block) {
-                                            println!(
-                                                "[rag_search] Failed to register block {}: {}",
-                                                block.source_id, e
-                                            );
+                            // 获取或更新 DuckDB 缓存
+                            let config = load_config(&app);
+                            let data_dir = config.data_dir.ok_or("Data directory not set")?;
+                            let base_dir = get_index_base_dir(&app, &data_dir);
+                            let index_path_str = base_dir
+                                .join("knot_index.lance")
+                                .to_string_lossy()
+                                .to_string();
+                            let cache_db_path = index_path_str
+                                .replace("knot_index.lance", "knot_excel_cache.duckdb");
+
+                            match knot_excel::ExcelCache::new(&cache_db_path) {
+                                Ok(cache) => {
+                                    // 查询时校验：如果缓存过期则懒更新
+                                    if !cache.is_cache_valid(&res.file_path) {
+                                        println!(
+                                            "[rag_search] Cache stale for {}, updating...",
+                                            res.file_path
+                                        );
+                                        if let Err(e) =
+                                            cache.upsert_file(&res.file_path, &parsed.blocks)
+                                        {
+                                            println!("[rag_search] Cache update failed: {}, falling back to in-memory", e);
                                         }
+                                    } else {
+                                        println!(
+                                            "[rag_search] Using cached DuckDB data for {}",
+                                            res.file_path
+                                        );
                                     }
 
-                                    // 获取 Schema 信息
-                                    let schemas = engine.get_registered_schemas();
-                                    if !schemas.is_empty() {
-                                        // 用 SqlGenerator 构建 Prompt
-                                        let sql_system =
-                                            knot_excel::SqlGenerator::build_system_prompt();
-                                        let sql_user = knot_excel::SqlGenerator::build_user_prompt(
-                                            &schemas,
-                                            &parsed.blocks,
-                                            &query,
-                                        );
-                                        let sql_prompt = format!(
+                                    // 从缓存获取查询引擎
+                                    match cache.get_query_engine(&res.file_path) {
+                                        Ok(engine) => {
+                                            let schemas = engine.get_schemas();
+                                            if !schemas.is_empty() {
+                                                // 用 SqlGenerator 构建 Prompt
+                                                let sql_system =
+                                                    knot_excel::SqlGenerator::build_system_prompt();
+                                                let sql_user =
+                                                    knot_excel::SqlGenerator::build_user_prompt(
+                                                        &schemas,
+                                                        &parsed.blocks,
+                                                        &query,
+                                                    );
+                                                let sql_prompt = format!(
                                             "<|im_start|>system\n{}<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n",
                                             sql_system, sql_user
                                         );
 
-                                        // 调用 LLM 生成 SQL（带超时保护，避免 GPU 竞争时无限等待）
-                                        let llm_for_sql = {
-                                            let guard = state.chat_client.read().await;
-                                            guard.clone()
-                                        };
+                                                // 调用 LLM 生成 SQL（带超时保护，避免 GPU 竞争时无限等待）
+                                                let llm_for_sql = {
+                                                    let guard = state.chat_client.read().await;
+                                                    guard.clone()
+                                                };
 
-                                        if let Some(llm_client) = llm_for_sql {
-                                            use knot_parser::LlmProvider;
-                                            let sql_gen_result = tokio::time::timeout(
-                                                std::time::Duration::from_secs(30),
-                                                llm_client.generate_content(&sql_prompt),
-                                            )
-                                            .await;
+                                                if let Some(llm_client) = llm_for_sql {
+                                                    use knot_parser::LlmProvider;
+                                                    let sql_gen_result = tokio::time::timeout(
+                                                        std::time::Duration::from_secs(30),
+                                                        llm_client.generate_content(&sql_prompt),
+                                                    )
+                                                    .await;
 
-                                            match sql_gen_result {
-                                                Ok(Ok(generated_sql)) => {
-                                                    let sql = generated_sql
-                                                        .trim()
-                                                        .trim_start_matches("```sql")
-                                                        .trim_start_matches("```")
-                                                        .trim_end_matches("```")
-                                                        .trim()
-                                                        .to_string();
-
-                                                    println!("[rag_search] Generated SQL: {}", sql);
-
-                                                    // 执行 SQL（带重试）
-                                                    let mut final_result =
-                                                        engine.execute_multi_step(&sql);
-                                                    let mut retried = false;
-
-                                                    // 5.6: SQL 容错重试（最多 2 次）
-                                                    if final_result.is_err() {
-                                                        for retry in 0..2 {
-                                                            let err_msg = final_result
-                                                                .as_ref()
-                                                                .unwrap_err()
+                                                    match sql_gen_result {
+                                                        Ok(Ok(generated_sql)) => {
+                                                            let sql = generated_sql
+                                                                .trim()
+                                                                .trim_start_matches("```sql")
+                                                                .trim_start_matches("```")
+                                                                .trim_end_matches("```")
+                                                                .trim()
                                                                 .to_string();
+
                                                             println!(
+                                                                "[rag_search] Generated SQL: {}",
+                                                                sql
+                                                            );
+
+                                                            // 执行 SQL（带重试）
+                                                            let mut final_result =
+                                                                engine.execute_multi_step(&sql);
+                                                            let mut retried = false;
+
+                                                            // 5.6: SQL 容错重试（最多 2 次）
+                                                            if final_result.is_err() {
+                                                                for retry in 0..2 {
+                                                                    let err_msg = final_result
+                                                                        .as_ref()
+                                                                        .unwrap_err()
+                                                                        .to_string();
+                                                                    println!(
                                                                 "[rag_search] SQL failed (retry {}): {}",
                                                                 retry + 1,
                                                                 err_msg
                                                             );
 
-                                                            let fix_prompt_text = knot_excel::SqlGenerator::build_fix_prompt(
+                                                                    let fix_prompt_text = knot_excel::SqlGenerator::build_fix_prompt(
                                                                 &sql,
                                                                 &err_msg,
                                                                 &schemas,
                                                             );
-                                                            let fix_prompt = format!(
+                                                                    let fix_prompt = format!(
                                                                 "<|im_start|>system\n{}<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n",
                                                                 sql_system, fix_prompt_text
                                                             );
 
-                                                            match llm_client
-                                                                .generate_content(&fix_prompt)
-                                                                .await
-                                                            {
-                                                                Ok(fixed_sql) => {
-                                                                    let fixed = fixed_sql
-                                                                        .trim()
-                                                                        .trim_start_matches(
-                                                                            "```sql",
+                                                                    match llm_client
+                                                                        .generate_content(
+                                                                            &fix_prompt,
                                                                         )
-                                                                        .trim_start_matches("```")
-                                                                        .trim_end_matches("```")
-                                                                        .trim()
-                                                                        .to_string();
-                                                                    println!("[rag_search] Fixed SQL: {}", fixed);
-                                                                    final_result = engine
-                                                                        .execute_multi_step(&fixed);
-                                                                    if final_result.is_ok() {
-                                                                        retried = true;
-                                                                        break;
-                                                                    }
-                                                                }
-                                                                Err(e) => {
-                                                                    println!(
+                                                                        .await
+                                                                    {
+                                                                        Ok(fixed_sql) => {
+                                                                            let fixed = fixed_sql
+                                                                                .trim()
+                                                                                .trim_start_matches(
+                                                                                    "```sql",
+                                                                                )
+                                                                                .trim_start_matches(
+                                                                                    "```",
+                                                                                )
+                                                                                .trim_end_matches(
+                                                                                    "```",
+                                                                                )
+                                                                                .trim()
+                                                                                .to_string();
+                                                                            println!("[rag_search] Fixed SQL: {}", fixed);
+                                                                            final_result = engine
+                                                                                .execute_multi_step(
+                                                                                    &fixed,
+                                                                                );
+                                                                            if final_result.is_ok()
+                                                                            {
+                                                                                retried = true;
+                                                                                break;
+                                                                            }
+                                                                        }
+                                                                        Err(e) => {
+                                                                            println!(
                                                                         "[rag_search] LLM fix failed: {}",
                                                                         e
                                                                     );
-                                                                    break;
+                                                                            break;
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
-                                                        }
-                                                    }
 
-                                                    // 处理 SQL 结果
-                                                    match final_result {
-                                                        Ok(mut result) => {
-                                                            result.retried = retried;
-                                                            let ctx = knot_excel::ResultSummarizer::process(&result);
-                                                            let file_name = file_path
-                                                                .file_name()
-                                                                .unwrap_or_default()
-                                                                .to_string_lossy();
+                                                            // 处理 SQL 结果
+                                                            match final_result {
+                                                                Ok(mut result) => {
+                                                                    result.retried = retried;
+                                                                    let ctx = knot_excel::ResultSummarizer::process(&result);
+                                                                    let file_name = file_path
+                                                                        .file_name()
+                                                                        .unwrap_or_default()
+                                                                        .to_string_lossy();
 
-                                                            tabular_context.push_str(&format!(
-                                                                "[表格数据查询] {}\n",
-                                                                file_name
-                                                            ));
-                                                            tabular_context.push_str(&format!(
-                                                                "执行的 SQL: {}\n\n",
-                                                                result.sql
-                                                            ));
-                                                            tabular_context
-                                                                .push_str(&ctx.to_prompt_text());
-                                                            tabular_context.push('\n');
-                                                            println!(
+                                                                    tabular_context.push_str(
+                                                                        &format!(
+                                                                            "[表格数据查询] {}\n",
+                                                                            file_name
+                                                                        ),
+                                                                    );
+                                                                    tabular_context.push_str(
+                                                                        &format!(
+                                                                            "执行的 SQL: {}\n\n",
+                                                                            result.sql
+                                                                        ),
+                                                                    );
+                                                                    tabular_context.push_str(
+                                                                        &ctx.to_prompt_text(),
+                                                                    );
+                                                                    tabular_context.push('\n');
+                                                                    println!(
                                                                 "[rag_search] SQL query success: {} rows{}",
                                                                 result.row_count,
                                                                 if retried { " (retried)" } else { "" }
                                                             );
-                                                        }
-                                                        Err(e) => {
-                                                            println!(
+                                                                }
+                                                                Err(e) => {
+                                                                    println!(
                                                                 "[rag_search] SQL execution failed after retries: {}",
                                                                 e
                                                             );
-                                                            // Fallback: 使用 Markdown 注入前 50 行
+                                                                    // Fallback: 使用 Markdown 注入前 50 行
+                                                                    for block in &parsed.blocks {
+                                                                        inject_block_as_markdown(
+                                                                            block,
+                                                                            &parsed.profiles,
+                                                                            file_path,
+                                                                            &mut tabular_context,
+                                                                        );
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        Err(_) => {
+                                                            println!(
+                                                        "[rag_search] LLM SQL generation timed out (30s), falling back to markdown"
+                                                    );
+                                                            for block in &parsed.blocks {
+                                                                inject_block_as_markdown(
+                                                                    block,
+                                                                    &parsed.profiles,
+                                                                    file_path,
+                                                                    &mut tabular_context,
+                                                                );
+                                                            }
+                                                        }
+                                                        Ok(Err(e)) => {
+                                                            println!(
+                                                        "[rag_search] LLM SQL generation error: {}, falling back to markdown",
+                                                        e
+                                                    );
                                                             for block in &parsed.blocks {
                                                                 inject_block_as_markdown(
                                                                     block,
@@ -2448,25 +2635,8 @@ async fn rag_search(
                                                             }
                                                         }
                                                     }
-                                                }
-                                                Err(_) => {
-                                                    println!(
-                                                        "[rag_search] LLM SQL generation timed out (30s), falling back to markdown"
-                                                    );
-                                                    for block in &parsed.blocks {
-                                                        inject_block_as_markdown(
-                                                            block,
-                                                            &parsed.profiles,
-                                                            file_path,
-                                                            &mut tabular_context,
-                                                        );
-                                                    }
-                                                }
-                                                Ok(Err(e)) => {
-                                                    println!(
-                                                        "[rag_search] LLM SQL generation error: {}, falling back to markdown",
-                                                        e
-                                                    );
+                                                } else {
+                                                    // LLM 不可用，fallback 到 Markdown
                                                     for block in &parsed.blocks {
                                                         inject_block_as_markdown(
                                                             block,
@@ -2477,8 +2647,12 @@ async fn rag_search(
                                                     }
                                                 }
                                             }
-                                        } else {
-                                            // LLM 不可用，fallback 到 Markdown
+                                        }
+                                        Err(e) => {
+                                            println!(
+                                                "[rag_search] Cache query engine failed: {}, falling back to markdown",
+                                                e
+                                            );
                                             for block in &parsed.blocks {
                                                 inject_block_as_markdown(
                                                     block,
@@ -2492,7 +2666,7 @@ async fn rag_search(
                                 }
                                 Err(e) => {
                                     println!(
-                                        "[rag_search] DuckDB init failed: {}, falling back to markdown",
+                                        "[rag_search] ExcelCache init failed: {}, falling back to markdown",
                                         e
                                     );
                                     for block in &parsed.blocks {
