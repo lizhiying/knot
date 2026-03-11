@@ -1048,10 +1048,21 @@ async fn list_knowledge_files(app: tauri::AppHandle) -> Result<Vec<KnowledgeFile
         let file_path = entry.path();
 
         // Skip hidden files
-        if file_path
+        let file_name_str = file_path
             .file_name()
-            .map(|s| s.to_string_lossy().starts_with('.'))
-            .unwrap_or(false)
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_default();
+
+        if file_name_str.starts_with('.') {
+            continue;
+        }
+
+        // Skip temp/lock files (Office ~$, editor backups, etc.)
+        if file_name_str.starts_with("~$")
+            || file_name_str.starts_with('~')
+            || file_name_str.ends_with('~')
+            || file_name_str == "Thumbs.db"
+            || file_name_str == "desktop.ini"
         {
             continue;
         }

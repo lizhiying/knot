@@ -71,6 +71,14 @@
         },
     ];
 
+    // 索引状态过滤选项
+    const statusFilters = [
+        { key: "all", label: "全部", icon: "checklist" },
+        { key: "Indexed", label: "已索引", icon: "check_circle" },
+        { key: "Unindexed", label: "未索引", icon: "radio_button_unchecked" },
+        { key: "Outdated", label: "索引中", icon: "sync" },
+    ];
+
     // 过滤逻辑
     $effect(() => {
         let result = files;
@@ -307,6 +315,21 @@
                         class="filter-chip"
                         class:active={activeTypeFilter === filter.key}
                         onclick={() => (activeTypeFilter = filter.key)}
+                    >
+                        <span class="material-symbols-outlined"
+                            >{filter.icon}</span
+                        >
+                        {filter.label}
+                    </button>
+                {/each}
+
+                <span class="filter-separator"></span>
+
+                {#each statusFilters as filter}
+                    <button
+                        class="filter-chip"
+                        class:active={activeStatusFilter === filter.key}
+                        onclick={() => (activeStatusFilter = filter.key)}
                     >
                         <span class="material-symbols-outlined"
                             >{filter.icon}</span
@@ -575,6 +598,15 @@
     .filter-group {
         display: flex;
         gap: 4px;
+        align-items: center;
+    }
+
+    .filter-separator {
+        width: 1px;
+        height: 16px;
+        background: var(--border-color);
+        margin: 0 4px;
+        flex-shrink: 0;
     }
 
     .filter-chip {
