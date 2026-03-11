@@ -116,13 +116,15 @@ impl LlamaSidecar {
             cmd.arg("--mmproj").arg(mmproj);
         }
 
-        // In quiet mode, suppress stderr output
+        // Suppress llama-server's verbose model loading logs
+        cmd.arg("--log-disable");
+
+        // In quiet mode, suppress all output; otherwise suppress stderr (model load logs)
+        // but keep stdout piped for potential output capture
         let child = if quiet {
             cmd.stdout(Stdio::null()).stderr(Stdio::null()).spawn()?
         } else {
-            cmd.stdout(Stdio::piped())
-                .stderr(Stdio::inherit())
-                .spawn()?
+            cmd.stdout(Stdio::null()).stderr(Stdio::null()).spawn()?
         };
 
         Ok(Self {
