@@ -203,6 +203,11 @@ impl DocumentParser for PdfParser {
             });
         }
 
+        // 将暂停标志注入 Pipeline（搜索时暂停索引以释放 GPU）
+        if let Some(flag) = config.pause_flag.clone() {
+            pipeline.set_pause_flag(flag);
+        }
+
         // 2. 使用 Pipeline 解析 PDF → DocumentIR
         let doc = pipeline
             .parse(path)

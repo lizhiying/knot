@@ -238,6 +238,7 @@ async fn parse_file(
         pdf_vision_api_url: Some("http://localhost:11434/v1/chat/completions".to_string()),
         pdf_vision_model: Some("glm-ocr:latest".to_string()),
         pdf_page_indices: None,
+        pause_flag: None,
     };
 
     // 1. 获取 Embedding Provider
@@ -319,6 +320,8 @@ pub struct AppState {
             >,
         >,
     >,
+    /// 索引暂停标志：当用户搜索/查询时设为 true，索引 Pipeline 会在页面间暂停等待
+    pub indexing_paused: Arc<std::sync::atomic::AtomicBool>,
 }
 
 fn main() {
@@ -390,6 +393,7 @@ fn main() {
                 excel_engine_cache: Arc::new(tokio::sync::Mutex::new(
                     std::collections::HashMap::new(),
                 )),
+                indexing_paused: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             });
 
             // 保留旧的 EngineManager
@@ -1528,6 +1532,9 @@ async fn start_background_indexing(
     indexer.pdf_ocr_model_dir = Some(ocr_model_dir.to_string_lossy().to_string());
     indexer.pdf_vision_api_url = Some("http://localhost:11434/v1/chat/completions".to_string());
     indexer.pdf_vision_model = Some("glm-ocr:latest".to_string());
+    // 注入暂停标志（搜索时暂停索引以释放 GPU）
+    let app_state = app.state::<AppState>();
+    indexer.pause_flag = Some(app_state.indexing_paused.clone());
     let _ = app.emit("indexing-status", "scanning");
 
     // 3. Tantivy 一致性检查：
@@ -2190,6 +2197,20 @@ async fn rag_search(
     file_path: Option<String>,
 ) -> Result<RagSearchResponse, String> {
     use std::time::Instant;
+
+    // 暂停索引以释放 GPU 资源
+    state
+        .indexing_paused
+        .store(true, std::sync::atomic::Ordering::Relaxed);
+    // RAII guard：确保函数结束时（包括错误路径）恢复索引
+    let pause_flag = state.indexing_paused.clone();
+    struct PauseGuard(std::sync::Arc<std::sync::atomic::AtomicBool>);
+    impl Drop for PauseGuard {
+        fn drop(&mut self) {
+            self.0.store(false, std::sync::atomic::Ordering::Relaxed);
+        }
+    }
+    let _pause_guard = PauseGuard(pause_flag);
 
     // 边缘情况：空查询直接返回空结果
     let query = query.trim().to_string();

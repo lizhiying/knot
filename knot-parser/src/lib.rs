@@ -149,6 +149,10 @@ pub struct PageIndexConfig<'a> {
 
     /// PDF 页码过滤（仅解析指定页面，0-indexed）
     pub pdf_page_indices: Option<Vec<usize>>,
+
+    /// 暂停标志：当为 true 时，Pipeline 在页面间暂停等待
+    /// 用于搜索/查询时暂停索引以释放 GPU 资源
+    pub pause_flag: Option<std::sync::Arc<std::sync::atomic::AtomicBool>>,
 }
 
 impl<'a> PageIndexConfig<'a> {
@@ -173,6 +177,7 @@ impl<'a> PageIndexConfig<'a> {
             pdf_vision_api_url: None,
             pdf_vision_model: None,
             pdf_page_indices: None,
+            pause_flag: None,
         }
     }
 

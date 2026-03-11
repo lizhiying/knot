@@ -29,6 +29,8 @@ pub struct KnotIndexer {
     pub pdf_ocr_model_dir: Option<String>,
     pub pdf_vision_api_url: Option<String>,
     pub pdf_vision_model: Option<String>,
+    /// 暂停标志：搜索时暂停索引
+    pub pause_flag: Option<std::sync::Arc<std::sync::atomic::AtomicBool>>,
 }
 
 impl KnotIndexer {
@@ -61,6 +63,7 @@ impl KnotIndexer {
             pdf_ocr_model_dir: None,
             pdf_vision_api_url: None,
             pdf_vision_model: None,
+            pause_flag: None,
         }
     }
 
@@ -224,6 +227,7 @@ impl KnotIndexer {
         config.pdf_ocr_model_dir = self.pdf_ocr_model_dir.clone();
         config.pdf_vision_api_url = self.pdf_vision_api_url.clone();
         config.pdf_vision_model = self.pdf_vision_model.clone();
+        config.pause_flag = self.pause_flag.clone();
 
         // Ensure absolute path
         let abs_path = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());

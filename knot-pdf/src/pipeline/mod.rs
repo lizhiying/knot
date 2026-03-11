@@ -43,6 +43,8 @@ pub struct Pipeline {
     max_ocr_workers: usize,
     /// 每页处理完成后的进度回调：(page_index, total_pages)
     page_progress_callback: Option<Box<dyn Fn(usize, usize) + Send + Sync>>,
+    /// 暂停标志：搜索时设为 true，Pipeline 在页面间暂停等待以释放 GPU
+    pause_flag: Option<std::sync::Arc<std::sync::atomic::AtomicBool>>,
 }
 
 impl Pipeline {
@@ -352,6 +354,7 @@ impl Pipeline {
             postprocess_pipeline,
             max_ocr_workers,
             page_progress_callback: None,
+            pause_flag: None,
         }
     }
 
@@ -361,6 +364,11 @@ impl Pipeline {
         F: Fn(usize, usize) + Send + Sync + 'static,
     {
         self.page_progress_callback = Some(Box::new(callback));
+    }
+
+    /// 设置暂停标志（搜索时暂停索引）
+    pub fn set_pause_flag(&mut self, flag: std::sync::Arc<std::sync::atomic::AtomicBool>) {
+        self.pause_flag = Some(flag);
     }
 
     /// 解析 PDF 文件（泛型路径版本）
@@ -473,6 +481,18 @@ impl Pipeline {
                     continue;
                 }
             }
+
+            // 检查暂停标志：搜索/查询时暂停索引以释放 GPU
+            if let Some(ref flag) = self.pause_flag {
+                if flag.load(std::sync::atomic::Ordering::Relaxed) {
+                    println!("[索引中] {} 暂停（搜索中）...", file_name);
+                    while flag.load(std::sync::atomic::Ordering::Relaxed) {
+                        std::thread::sleep(std::time::Duration::from_millis(200));
+                    }
+                    println!("[索引中] {} 恢复", file_name);
+                }
+            }
+
             // 设置状态为 InProgress
             if let Some(s) = &self.store {
                 s.update_status(&doc_id, page_idx, PageStatus::InProgress)?;
