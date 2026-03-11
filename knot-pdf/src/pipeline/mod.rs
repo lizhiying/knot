@@ -459,6 +459,13 @@ impl Pipeline {
             ocr_r.set_pdf_path(path);
         }
 
+        // 文件名用于进度日志
+        let file_name = path
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string();
+
         for page_idx in start_page..page_count {
             // 如果指定了页码过滤，跳过不在列表中的页面
             if let Some(ref indices) = self.config.page_indices {
@@ -527,6 +534,9 @@ impl Pipeline {
                     }
                 }
             }
+
+            // 简洁进度日志
+            println!("[索引中] {} [{}/{}]", file_name, page_idx + 1, page_count);
 
             // 通知调用者：当前页面处理完成
             if let Some(ref cb) = self.page_progress_callback {
@@ -1816,7 +1826,7 @@ impl Pipeline {
                     );
                 }
 
-                println!(
+                log::debug!(
                     "[VLM-Fallback] page {}: total_chars={}, is_complex={}, is_sparse={}, is_nearly_empty={}, is_garbled={}",
                     page_index, total_chars, is_complex, is_sparse_text_rich_image, is_nearly_empty, is_garbled_text
                 );
@@ -1831,7 +1841,7 @@ impl Pipeline {
                         .sum();
 
                     if img_desc_chars >= 100 {
-                        println!(
+                        log::debug!(
                             "[VLM-Fallback] Skipped: image descriptions already have {} chars, promoting to text blocks",
                             img_desc_chars
                         );
@@ -1865,7 +1875,7 @@ impl Pipeline {
                             normalized_text: desc_text,
                         });
                         page_ir.images.clear();
-                        println!(
+                        log::debug!(
                             "[VLM-Fallback] After promotion: blocks={}, text_len={}",
                             page_ir.blocks.len(),
                             page_ir
@@ -1875,7 +1885,7 @@ impl Pipeline {
                                 .sum::<usize>()
                         );
                     } else {
-                        println!("[VLM-Fallback] TRIGGERED for page {}", page_index);
+                        log::debug!("[VLM-Fallback] TRIGGERED for page {}", page_index);
                         log::info!(
                         "Complex PPT layout detected on page {} ({} blocks), using Vision LLM fallback",
                         page_index,
@@ -1981,7 +1991,7 @@ impl Pipeline {
 
                             match vision.describe_image(&full_png, Some(&prompt)) {
                                 Ok(vlm_text) if !vlm_text.is_empty() => {
-                                    println!(
+                                    log::debug!(
                                         "[VLM-Fallback] Raw VLM response: {} chars, preview={:?}",
                                         vlm_text.len(),
                                         vlm_text.chars().take(100).collect::<String>()
@@ -1996,7 +2006,7 @@ impl Pipeline {
                                         .replace("```", "")
                                         .trim()
                                         .to_string();
-                                    println!(
+                                    log::debug!(
                                         "[VLM-Fallback] Cleaned VLM text: {} chars",
                                         vlm_text.len()
                                     );
@@ -2021,13 +2031,13 @@ impl Pipeline {
                                         }
                                         result.trim().len()
                                     };
-                                    println!(
+                                    log::debug!(
                                         "[VLM-Fallback] Text-only length: {} chars (raw: {})",
                                         text_only_len,
                                         vlm_text.len()
                                     );
                                     if text_only_len < 5 {
-                                        println!(
+                                        log::debug!(
                                         "[VLM-Fallback] VLM output too short ({} text chars) for page {}, trying OCR fallback",
                                         text_only_len, page_index
                                     );
@@ -2202,7 +2212,7 @@ impl Pipeline {
                 || b.block_id.starts_with("ocr_fallback_")
         });
         if skip_garbled_check {
-            println!("[Pipeline] Skipping garbled text check (blocks from VisionAPI/OCR)");
+            log::debug!("[Pipeline] Skipping garbled text check (blocks from VisionAPI/OCR)");
         }
         if !skip_garbled_check {
             let total_chars: usize = page_ir
@@ -2425,23 +2435,15 @@ impl Pipeline {
             PageSource::Mixed => "Mixed",
         };
 
-        println!(
-            "┌─ [Page {}] ──────────────────────────────────────",
-            page_index
-        );
-        println!(
-            "│  Backend: {} | Source: {} | {:.2}s",
-            backend_short, source_label, elapsed
-        );
-        println!(
-            "│  Blocks: {} | Text: {} chars | Images: {} (VLM描述: {})",
+        log::debug!(
+            "[Page {}] {} | {} | {:.2}s | {} blocks, {} chars",
+            page_index,
+            backend_short,
+            source_label,
+            elapsed,
             page_ir.blocks.len(),
-            total_text,
-            page_ir.images.len(),
-            vlm_img_desc_count
+            total_text
         );
-        println!("│  Modules: [{}]", modules.join(" → "));
-        println!("└──────────────────────────────────────────────────");
 
         Ok(page_ir)
     }

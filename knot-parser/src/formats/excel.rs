@@ -38,12 +38,6 @@ impl DocumentParser for ExcelParser {
             ));
         }
 
-        println!(
-            "[ExcelParser] Parsed {} data blocks from {}",
-            parsed.blocks.len(),
-            path.display()
-        );
-
         // 2. 将所有 DataBlock 的信息合并为单个摘要 chunk
         //    详细数据已存入 DuckDB 持久缓存，这里只需保留搜索发现所需的关键信息
         let mut summary_text = String::new();
@@ -212,12 +206,6 @@ impl DocumentParser for ExcelParser {
             },
             children: sheet_nodes,
         };
-
-        println!(
-            "[ExcelParser] Built PageNode tree with {} sheet nodes (elapsed: {:.1}s)",
-            parsed.blocks.len(),
-            duration.as_secs_f64()
-        );
 
         Ok(root)
     }

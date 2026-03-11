@@ -88,7 +88,7 @@ impl VisionDescriber for OpenAiVisionDescriber {
     ) -> Result<String, PdfError> {
         // 记录图片大小
         let img_size_kb = image_png.len() / 1024;
-        println!(
+        log::debug!(
             "[VisionAPI] describe_image called: image={} KB, model={}",
             img_size_kb, self.model
         );
@@ -178,7 +178,7 @@ impl VisionDescriber for OpenAiVisionDescriber {
         );
 
         // 发送请求
-        println!(
+        log::debug!(
             "[VisionAPI] Sending request to {} (model={}, image={} KB)",
             self.api_url, self.model, img_size_kb
         );
@@ -194,7 +194,7 @@ impl VisionDescriber for OpenAiVisionDescriber {
                 let detail = match e {
                     ureq::Error::Status(code, resp) => {
                         let body = resp.into_string().unwrap_or_default();
-                        println!(
+                        log::debug!(
                             "[VisionAPI] ERROR: status {} - {}",
                             code,
                             body.chars().take(150).collect::<String>()
@@ -207,13 +207,13 @@ impl VisionDescriber for OpenAiVisionDescriber {
                         )
                     }
                     other => {
-                        println!("[VisionAPI] ERROR: {}", other);
+                        log::debug!("[VisionAPI] ERROR: {}", other);
                         format!("{}: {}", self.api_url, other)
                     }
                 };
                 PdfError::Backend(format!("Vision API request failed: {}", detail))
             })?;
-        println!(
+        log::debug!(
             "[VisionAPI] Response received in {:.1}s",
             request_start.elapsed().as_secs_f64()
         );
@@ -234,7 +234,7 @@ impl VisionDescriber for OpenAiVisionDescriber {
             })?
             .to_string();
 
-        println!("[VisionAPI] Got {} chars description", description.len());
+        log::debug!("[VisionAPI] Got {} chars description", description.len());
 
         Ok(description)
     }
