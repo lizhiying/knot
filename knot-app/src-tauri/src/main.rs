@@ -2472,6 +2472,160 @@ async fn rag_search(
 
             let file_path = std::path::Path::new(&res.file_path);
             if file_path.exists() {
+                // === 快速路径：检查 DuckDB 缓存，有效则跳过 parse_excel_full ===
+                let tab_config = load_config(&app);
+                let tab_cache_path = tab_config.data_dir.as_ref().map(|d| {
+                    get_index_base_dir(&app, d)
+                        .join("knot_excel_cache.duckdb")
+                        .to_string_lossy()
+                        .to_string()
+                });
+                let cache_valid = tab_cache_path.as_ref().map_or(false, |p| {
+                    knot_excel::ExcelCache::new(p)
+                        .map(|c| c.is_cache_valid(&res.file_path))
+                        .unwrap_or(false)
+                });
+
+                if cache_valid {
+                    // DuckDB 缓存有效 → 直接走 SQL（跳过 parse_excel_full，省数秒）
+                    println!(
+                        "[rag_search] DuckDB cache hit for {}, skipping parse",
+                        res.file_path
+                    );
+                    let cache =
+                        knot_excel::ExcelCache::new(tab_cache_path.as_ref().unwrap()).unwrap();
+                    if let Ok(engine) = cache.get_query_engine(&res.file_path) {
+                        let schemas = engine.get_schemas();
+                        if !schemas.is_empty() {
+                            // 从 DuckDB 取样本构建 SQL prompt（不需要解析整个文件）
+                            let sql_system = knot_excel::SqlGenerator::build_system_prompt();
+                            let mut sql_user_prompt = String::from("## 可用表\n\n");
+                            for schema in &schemas {
+                                sql_user_prompt.push_str(&format!(
+                                    "### 表名: `{}`\n列信息:\n",
+                                    schema.table_name
+                                ));
+                                for (col_name, col_type) in &schema.columns {
+                                    sql_user_prompt.push_str(&format!(
+                                        "  - \"{}\" ({})\n",
+                                        col_name, col_type
+                                    ));
+                                }
+                                // 从 DuckDB 取 3 行样本（毫秒级，vs 解析整个 Excel 数秒）
+                                if let Ok(sample) = engine.execute_sql(&format!(
+                                    "SELECT * FROM \"{}\" LIMIT 3",
+                                    schema.table_name
+                                )) {
+                                    if !sample.rows.is_empty() {
+                                        let total = engine
+                                            .execute_sql(&format!(
+                                                "SELECT COUNT(*) FROM \"{}\"",
+                                                schema.table_name
+                                            ))
+                                            .ok()
+                                            .and_then(|r| {
+                                                r.rows.first().and_then(|row| {
+                                                    row.first()
+                                                        .and_then(|v| v.parse::<usize>().ok())
+                                                })
+                                            })
+                                            .unwrap_or(0);
+                                        sql_user_prompt.push_str(&format!(
+                                            "\n数据示例（前 {} 行，共 {} 行）:\n",
+                                            sample.rows.len(),
+                                            total
+                                        ));
+                                        sql_user_prompt.push_str(&format!(
+                                            "| {} |\n",
+                                            sample.columns.join(" | ")
+                                        ));
+                                        sql_user_prompt.push_str(&format!(
+                                            "| {} |\n",
+                                            sample
+                                                .columns
+                                                .iter()
+                                                .map(|_| "---")
+                                                .collect::<Vec<_>>()
+                                                .join(" | ")
+                                        ));
+                                        for row in &sample.rows {
+                                            sql_user_prompt
+                                                .push_str(&format!("| {} |\n", row.join(" | ")));
+                                        }
+                                    }
+                                }
+                                sql_user_prompt.push('\n');
+                            }
+                            sql_user_prompt.push_str(&format!("## 用户问题\n{}\n", query));
+
+                            let sql_prompt = format!(
+                                "<|im_start|>system\n{}<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n",
+                                sql_system, sql_user_prompt
+                            );
+
+                            let llm_for_sql = {
+                                let guard = state.chat_client.read().await;
+                                guard.clone()
+                            };
+
+                            if let Some(llm_client) = llm_for_sql {
+                                use knot_parser::LlmProvider;
+                                let sql_gen_result = tokio::time::timeout(
+                                    std::time::Duration::from_secs(10),
+                                    llm_client.generate_content(&sql_prompt),
+                                )
+                                .await;
+
+                                match sql_gen_result {
+                                    Ok(Ok(generated_sql)) => {
+                                        let sql = generated_sql
+                                            .trim()
+                                            .trim_start_matches("```sql")
+                                            .trim_start_matches("```")
+                                            .trim_end_matches("```")
+                                            .trim()
+                                            .to_string();
+                                        println!("[rag_search] Generated SQL (cached): {}", sql);
+
+                                        match engine.execute_multi_step(&sql) {
+                                            Ok(result) => {
+                                                let ctx =
+                                                    knot_excel::ResultSummarizer::process(&result);
+                                                let fname = file_path
+                                                    .file_name()
+                                                    .unwrap_or_default()
+                                                    .to_string_lossy();
+                                                tabular_context.push_str(&format!(
+                                                    "[表格数据查询] {}\n执行的 SQL: {}\n\n",
+                                                    fname, result.sql
+                                                ));
+                                                tabular_context.push_str(&ctx.to_prompt_text());
+                                                tabular_context.push('\n');
+                                                println!(
+                                                    "[rag_search] SQL success (cached): {} rows",
+                                                    result.row_count
+                                                );
+                                            }
+                                            Err(e) => {
+                                                println!("[rag_search] SQL failed (cached): {}", e);
+                                                tabular_context.push_str(&res.text);
+                                                tabular_context.push('\n');
+                                            }
+                                        }
+                                    }
+                                    _ => {
+                                        println!("[rag_search] SQL gen failed/timed out (cached), using profile");
+                                        tabular_context.push_str(&res.text);
+                                        tabular_context.push('\n');
+                                    }
+                                }
+                            }
+                            continue; // 已处理完毕，跳过下面的 parse_excel_full 路径
+                        }
+                    }
+                }
+
+                // === 慢路径：缓存未命中或无效，需要 parse_excel_full ===
                 let excel_config = knot_excel::ExcelConfig::default();
                 match knot_excel::pipeline::parse_excel_full(file_path, &excel_config) {
                     Ok(parsed) => {
