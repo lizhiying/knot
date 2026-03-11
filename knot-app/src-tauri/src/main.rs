@@ -2099,18 +2099,34 @@ struct RagSearchResponse {
 }
 
 /// 将 DataBlock 注入为 Markdown 表格到 context（最多 50 行）
+/// 将 DataBlock 作为 Markdown 表格注入上下文
+/// remaining_budget: 剩余可用字符数，注入后会更新
+/// 返回实际写入的字符数
 fn inject_block_as_markdown(
     block: &knot_excel::DataBlock,
     profiles: &[knot_excel::TableProfile],
     file_path: &std::path::Path,
     tabular_context: &mut String,
-) {
+    remaining_budget: &mut usize,
+) -> usize {
+    if *remaining_budget == 0 {
+        return 0;
+    }
+
     let file_name = file_path.file_name().unwrap_or_default().to_string_lossy();
-    let max_rows = 50;
+    // 根据 budget 动态计算最大行数（每行约 100-300 字符）
+    let estimated_row_size: usize = block.column_names.len() * 15 + 20;
+    let max_rows_by_budget = if estimated_row_size > 0 {
+        (*remaining_budget / estimated_row_size).max(3).min(30)
+    } else {
+        30
+    };
+    let max_rows = max_rows_by_budget;
     let truncated = block.row_count > max_rows;
     let display_rows = block.row_count.min(max_rows);
 
-    tabular_context.push_str(&format!(
+    let mut chunk = String::new();
+    chunk.push_str(&format!(
         "[表格数据] {} / Sheet \"{}\"\n共 {} 行 {} 列\n\n",
         file_name,
         block.sheet_name,
@@ -2120,16 +2136,16 @@ fn inject_block_as_markdown(
 
     // 列信息
     if let Some(profile) = profiles.iter().find(|p| p.source_id == block.source_id) {
-        tabular_context.push_str("列信息:\n");
+        chunk.push_str("列信息:\n");
         for (name, dtype) in block.column_names.iter().zip(profile.column_types.iter()) {
-            tabular_context.push_str(&format!("- {} ({})\n", name, dtype));
+            chunk.push_str(&format!("- {} ({})\n", name, dtype));
         }
-        tabular_context.push('\n');
+        chunk.push('\n');
     }
 
     // Markdown 表格
-    tabular_context.push_str(&format!(
-        "完整数据（共 {} 行{}）:\n",
+    chunk.push_str(&format!(
+        "数据（共 {} 行{}）:\n",
         display_rows,
         if truncated {
             format!("，已截断，原始共 {} 行", block.row_count)
@@ -2137,16 +2153,32 @@ fn inject_block_as_markdown(
             String::new()
         }
     ));
-    tabular_context.push_str(&format!("| {} |\n", block.column_names.join(" | ")));
+    chunk.push_str(&format!("| {} |\n", block.column_names.join(" | ")));
     let sep: Vec<&str> = block.column_names.iter().map(|_| "---").collect();
-    tabular_context.push_str(&format!("| {} |\n", sep.join(" | ")));
+    chunk.push_str(&format!("| {} |\n", sep.join(" | ")));
     for row in block.rows.iter().take(max_rows) {
-        tabular_context.push_str(&format!("| {} |\n", row.join(" | ")));
+        chunk.push_str(&format!("| {} |\n", row.join(" | ")));
     }
     if truncated {
-        tabular_context.push_str(&format!("... (省略了 {} 行)\n", block.row_count - max_rows));
+        chunk.push_str(&format!("... (省略了 {} 行)\n", block.row_count - max_rows));
     }
-    tabular_context.push('\n');
+    chunk.push('\n');
+
+    // 检查 budget
+    let written = chunk.len();
+    if written > *remaining_budget {
+        // 即使超 budget 也至少注入表头和列信息（截断数据行）
+        let header_end = chunk.find("数据（").unwrap_or(chunk.len());
+        let header_part = &chunk[..header_end.min(*remaining_budget)];
+        tabular_context.push_str(header_part);
+        tabular_context.push_str("... (预算不足，数据已省略)\n\n");
+        *remaining_budget = 0;
+        return header_part.len();
+    }
+
+    tabular_context.push_str(&chunk);
+    *remaining_budget = remaining_budget.saturating_sub(written);
+    written
 }
 
 /// 仅执行搜索，快速返回结果
@@ -2388,6 +2420,12 @@ async fn rag_search(
 
     // 4.2 处理 tabular 结果: 根据上下文预算动态选择策略
     let mut tabular_context = String::new();
+    // tabular markdown fallback 的预算上限（占总 budget 的 70%，留 30% 给 text）
+    let mut tabular_budget: usize = {
+        let config = load_config(&app);
+        let budget = compute_context_budget(&config);
+        (budget as f64 * 0.7) as usize
+    };
     if has_tabular {
         // === 计算上下文预算 ===
         let config = load_config(&app);
@@ -2499,7 +2537,7 @@ async fn rag_search(
                                                 if let Some(llm_client) = llm_for_sql {
                                                     use knot_parser::LlmProvider;
                                                     let sql_gen_result = tokio::time::timeout(
-                                                        std::time::Duration::from_secs(30),
+                                                        std::time::Duration::from_secs(10),
                                                         llm_client.generate_content(&sql_prompt),
                                                     )
                                                     .await;
@@ -2633,6 +2671,7 @@ async fn rag_search(
                                                                             &parsed.profiles,
                                                                             file_path,
                                                                             &mut tabular_context,
+                                                                            &mut tabular_budget,
                                                                         );
                                                                     }
                                                                 }
@@ -2640,7 +2679,7 @@ async fn rag_search(
                                                         }
                                                         Err(_) => {
                                                             println!(
-                                                        "[rag_search] LLM SQL generation timed out (30s), falling back to markdown"
+                                                        "[rag_search] LLM SQL generation timed out (10s), falling back to markdown"
                                                     );
                                                             for block in &parsed.blocks {
                                                                 inject_block_as_markdown(
@@ -2648,6 +2687,7 @@ async fn rag_search(
                                                                     &parsed.profiles,
                                                                     file_path,
                                                                     &mut tabular_context,
+                                                                    &mut tabular_budget,
                                                                 );
                                                             }
                                                         }
@@ -2662,6 +2702,7 @@ async fn rag_search(
                                                                     &parsed.profiles,
                                                                     file_path,
                                                                     &mut tabular_context,
+                                                                    &mut tabular_budget,
                                                                 );
                                                             }
                                                         }
@@ -2674,6 +2715,7 @@ async fn rag_search(
                                                             &parsed.profiles,
                                                             file_path,
                                                             &mut tabular_context,
+                                                            &mut tabular_budget,
                                                         );
                                                     }
                                                 }
@@ -2690,6 +2732,7 @@ async fn rag_search(
                                                     &parsed.profiles,
                                                     file_path,
                                                     &mut tabular_context,
+                                                    &mut tabular_budget,
                                                 );
                                             }
                                         }
@@ -2706,6 +2749,7 @@ async fn rag_search(
                                             &parsed.profiles,
                                             file_path,
                                             &mut tabular_context,
+                                            &mut tabular_budget,
                                         );
                                     }
                                 }
@@ -2718,6 +2762,7 @@ async fn rag_search(
                                     &parsed.profiles,
                                     file_path,
                                     &mut tabular_context,
+                                    &mut tabular_budget,
                                 );
                             }
                         }
