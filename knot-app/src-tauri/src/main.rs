@@ -1731,11 +1731,20 @@ async fn start_background_indexing(
                                     let path = entry.path();
                                     if path.is_dir() {
                                         collect_excel_files(&path, files);
-                                    } else if let Some(ext) = path.extension() {
-                                        let ext = ext.to_string_lossy().to_lowercase();
-                                        if matches!(ext.as_str(), "xlsx" | "xls" | "xlsm" | "xlsb")
-                                        {
-                                            files.push(path);
+                                    } else if let Some(name) = path.file_name() {
+                                        let name_str = name.to_string_lossy();
+                                        // 跳过 ~$ 临时锁文件和隐藏文件
+                                        if name_str.starts_with("~$") || name_str.starts_with('.') {
+                                            continue;
+                                        }
+                                        if let Some(ext) = path.extension() {
+                                            let ext = ext.to_string_lossy().to_lowercase();
+                                            if matches!(
+                                                ext.as_str(),
+                                                "xlsx" | "xls" | "xlsm" | "xlsb"
+                                            ) {
+                                                files.push(path);
+                                            }
                                         }
                                     }
                                 }
