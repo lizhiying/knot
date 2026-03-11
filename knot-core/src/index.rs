@@ -10,6 +10,16 @@ use walkdir::WalkDir;
 use knot_parser::EmbeddingProvider;
 use std::sync::Arc;
 
+/// 已索引文件的待确认信息
+/// 调用者在 LanceDB 写入成功后调用 confirm_indexed 确认
+#[derive(Debug, Clone)]
+pub struct IndexedFileInfo {
+    pub path: String,
+    pub hash: String,
+    pub modified: i64,
+    pub parser_version: String,
+}
+
 pub struct KnotIndexer {
     dispatcher: IndexDispatcher,
     embedding_provider: Arc<dyn EmbeddingProvider + Send + Sync>,
@@ -62,7 +72,21 @@ impl KnotIndexer {
         }
     }
 
-    pub async fn index_directory(&self, path: &Path) -> Result<(Vec<VectorRecord>, Vec<String>)> {
+    /// 在 LanceDB 写入成功后调用，确认文件已完成索引
+    pub async fn confirm_indexed(&self, files: &[IndexedFileInfo]) {
+        if let Some(ref reg) = self.registry {
+            for f in files {
+                let _ = reg
+                    .update_file(&f.path, &f.hash, f.modified, &f.parser_version)
+                    .await;
+            }
+        }
+    }
+
+    pub async fn index_directory(
+        &self,
+        path: &Path,
+    ) -> Result<(Vec<VectorRecord>, Vec<String>, Vec<IndexedFileInfo>)> {
         let entries: Vec<_> = WalkDir::new(path)
             .into_iter()
             .filter_map(|e| e.ok())
@@ -71,20 +95,12 @@ impl KnotIndexer {
         let mut results = stream::iter(entries)
             .map(|entry| {
                 let registry = self.registry.clone();
-                let indexer_ref = self; // Since &self is Copy? No. &self is shared ref.
-                                        // We need to pass references or clone needed data.
-                                        // self.index_file is async and takes &self.
-                                        // But self needs to be static or Arc?
-                                        // Let's see.
-                                        // In fact the problem is stream::iter().map() creates
-                                        // a closure that must be 'static if .buffer_unordered().
-                                        // But we're calling .await on self methods inside.
-                                        // The key is that the returned future borrows self.
-                                        // And buffer_unordered requires 'static futures.
+                let indexer_ref = self;
 
                 async move {
                     let mut records = Vec::new();
                     let mut files_seen = Vec::new();
+                    let mut pending_files = Vec::new();
 
                     if entry.file_type().is_file() {
                         let file_path = entry.path();
@@ -104,7 +120,6 @@ impl KnotIndexer {
                                 let mut hash = String::new();
                                 let mut modified = 0;
 
-                                // content read might block, but it's file io.
                                 if let Ok(content) = std::fs::read(file_path) {
                                     hash = hex::encode(blake3::hash(&content).as_bytes());
                                     if let Ok(meta) = entry.metadata() {
@@ -148,53 +163,41 @@ impl KnotIndexer {
                                 }
 
                                 if should_index {
-                                    // index_file is on self.
-                                    // rust async closure capture issue.
-                                    // self must be valid.
-                                    // Since we are in &self method, and we await stream, it should be fine?
-                                    // Compiler might complain self not 'static.
-                                    // But indexer_ref has lifetime 'a.
-                                    // We need to verify if this compiles.
-                                    // If not, KnotIndexer usually wrapped in Arc in main.
-                                    // But here it's &self.
-
-                                    // Let's try.
                                     if let Ok(file_records) =
                                         indexer_ref.index_file(file_path).await
                                     {
                                         records.extend(file_records);
-                                        if let Some(reg) = &registry {
-                                            let _ = reg
-                                                .update_file(
-                                                    &path_str,
-                                                    &hash,
-                                                    modified,
-                                                    Self::PARSER_VERSION,
-                                                )
-                                                .await;
-                                        }
+                                        // 不在这里更新 registry，而是将信息传出去
+                                        // 由调用者在 LanceDB 写入成功后调用 confirm_indexed
+                                        pending_files.push(IndexedFileInfo {
+                                            path: path_str,
+                                            hash,
+                                            modified,
+                                            parser_version: Self::PARSER_VERSION.to_string(),
+                                        });
                                     }
                                 }
                             }
                         }
                     }
-                    (records, files_seen)
+                    (records, files_seen, pending_files)
                 }
             })
-            .buffer_unordered(8); // Concurrency
+            .buffer_unordered(8);
 
         let mut final_records = Vec::new();
         let mut seen_files = std::collections::HashSet::new();
+        let mut all_pending = Vec::new();
 
-        while let Some((recs, files)) = results.next().await {
+        while let Some((recs, files, pending)) = results.next().await {
             final_records.extend(recs);
             for f in files {
                 seen_files.insert(f);
             }
+            all_pending.extend(pending);
         }
 
         let mut deleted_files = Vec::new();
-        // Prune logic
         if let Some(reg) = &self.registry {
             if let Ok(all_files) = reg.get_all_files().await {
                 let path_prefix = path.to_string_lossy().to_string();
@@ -209,7 +212,7 @@ impl KnotIndexer {
             }
         }
 
-        Ok((final_records, deleted_files))
+        Ok((final_records, deleted_files, all_pending))
     }
 
     pub async fn index_file(&self, path: &Path) -> Result<Vec<VectorRecord>> {

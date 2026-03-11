@@ -1555,7 +1555,7 @@ async fn start_background_indexing(
 
     // Initial Scan
     match indexer.index_directory(&input_path).await {
-        Ok((records, deleted)) => {
+        Ok((records, deleted, pending_files)) => {
             println!("[Indexer] Found {} new/modified records.", records.len());
             let _ = app.emit("indexing-status", "saving");
 
@@ -1571,14 +1571,20 @@ async fn start_background_indexing(
             if !records.is_empty() || !deleted.is_empty() {
                 match KnotStore::new(&index_path).await {
                     Ok(store) => {
-                        for del in deleted {
-                            let _ = store.delete_file(&del).await;
+                        for del in &deleted {
+                            let _ = store.delete_file(del).await;
                         }
                         if !records.is_empty() {
                             if let Err(e) = store.add_records(records).await {
                                 eprintln!("[Indexer] Store Add Error: {}", e);
                             } else {
                                 let _ = store.create_fts_index().await;
+                                // LanceDB 写入成功，确认 file_registry
+                                indexer.confirm_indexed(&pending_files).await;
+                                println!(
+                                    "[Indexer] Confirmed {} files in registry",
+                                    pending_files.len()
+                                );
                             }
                         }
 
@@ -1604,6 +1610,9 @@ async fn start_background_indexing(
                     }
                     Err(e) => eprintln!("[Indexer] Store Init Error: {}", e),
                 }
+            } else if !pending_files.is_empty() {
+                // records 为空但有 pending files（不应该发生，但保险起见）
+                indexer.confirm_indexed(&pending_files).await;
             }
 
             // GraphRAG: 当 records 为空但图谱为空时，尝试回填
@@ -1655,15 +1664,17 @@ async fn start_background_indexing(
                         }
                         // 用 indexer 重新扫描
                         match indexer.index_directory(&input_path).await {
-                            Ok((new_records, _)) if !new_records.is_empty() => {
+                            Ok((new_records, _, pending_files)) if !new_records.is_empty() => {
                                 println!("[GraphRAG] Re-scan found {} records", new_records.len());
                                 let (entities, relations) =
                                     knot_core::entity::extract_from_records(&new_records);
                                 let deduped = knot_core::entity::dedup_entities(entities);
                                 // 保存 records 到 store
                                 if let Ok(store) = KnotStore::new(&index_path).await {
-                                    let _ = store.add_records(new_records).await;
-                                    let _ = store.create_fts_index().await;
+                                    if let Ok(()) = store.add_records(new_records).await {
+                                        let _ = store.create_fts_index().await;
+                                        indexer.confirm_indexed(&pending_files).await;
+                                    }
                                 }
                                 // 写入图谱
                                 if let Ok(graph) =
