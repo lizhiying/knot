@@ -44,54 +44,73 @@ impl DocumentParser for ExcelParser {
             path.display()
         );
 
-        // 2. 将每个 DataBlock 的 TableProfile 转换为 PageNode
-        let mut sheet_nodes: Vec<PageNode> = Vec::new();
+        // 2. 将所有 DataBlock 的信息合并为单个摘要 chunk
+        //    详细数据已存入 DuckDB 持久缓存，这里只需保留搜索发现所需的关键信息
+        let mut summary_text = String::new();
+        let file_name = path.file_name().unwrap_or_default().to_string_lossy();
 
         for (profile, block) in parsed.profiles.iter().zip(parsed.blocks.iter()) {
-            let chunk_text = profile.to_chunk_text();
-            let token_count = chunk_text.split_whitespace().count();
+            summary_text.push_str(&format!(
+                "[表格数据] {} / Sheet \"{}\"\n共 {} 行 {} 列\n\n",
+                file_name,
+                block.sheet_name,
+                block.row_count,
+                block.column_names.len()
+            ));
 
-            let mut extra = HashMap::new();
-            extra.insert("sheet_name".to_string(), block.sheet_name.clone());
-            extra.insert("block_index".to_string(), block.block_index.to_string());
-            extra.insert("row_count".to_string(), block.row_count.to_string());
-            extra.insert(
-                "col_count".to_string(),
-                block.column_names.len().to_string(),
-            );
-            extra.insert("header_levels".to_string(), block.header_levels.to_string());
-            extra.insert("doc_type".to_string(), "tabular".to_string());
-            extra.insert("source_id".to_string(), block.source_id.clone());
-
-            // 保存 schema 信息（JSON），供后续 Text-to-SQL 使用
-            if let Ok(schema_json) = serde_json::to_string(&profile) {
-                extra.insert("table_profile".to_string(), schema_json);
+            // 列信息（用于关键词匹配）
+            summary_text.push_str("列信息:\n");
+            for (name, dtype) in block.column_names.iter().zip(profile.column_types.iter()) {
+                summary_text.push_str(&format!("- {} ({})\n", name, dtype));
             }
 
-            let node = PageNode {
-                node_id: format!("excel-{}-{}", block.sheet_name, block.block_index),
-                title: format!(
-                    "Sheet \"{}\" ({}行×{}列)",
-                    block.sheet_name,
-                    block.row_count,
-                    block.column_names.len()
-                ),
-                level: 1,
-                content: chunk_text,
-                summary: None,
-                embedding: None,
-                metadata: NodeMeta {
-                    file_path: file_path.clone(),
-                    page_number: None,
-                    line_number: None,
-                    token_count,
-                    extra,
-                },
-                children: Vec::new(),
-            };
-
-            sheet_nodes.push(node);
+            // 数据示例（前 3 行，用于关键词匹配）
+            if !profile.sample_rows.is_empty() {
+                summary_text.push_str(&format!(
+                    "\n数据示例（前 {} 行）:\n",
+                    profile.sample_rows.len().min(3)
+                ));
+                summary_text.push_str(&format!("| {} |\n", block.column_names.join(" | ")));
+                let sep: Vec<&str> = block.column_names.iter().map(|_| "---").collect();
+                summary_text.push_str(&format!("| {} |\n", sep.join(" | ")));
+                for row in profile.sample_rows.iter().take(3) {
+                    summary_text.push_str(&format!("| {} |\n", row.join(" | ")));
+                }
+            }
+            summary_text.push('\n');
         }
+
+        let token_count = summary_text.split_whitespace().count();
+
+        let mut extra = HashMap::new();
+        extra.insert("doc_type".to_string(), "tabular".to_string());
+        extra.insert("total_blocks".to_string(), parsed.blocks.len().to_string());
+
+        // 保存第一个 profile 的 schema（供 doc-summary 使用）
+        if let Some(first_profile) = parsed.profiles.first() {
+            if let Ok(schema_json) = serde_json::to_string(first_profile) {
+                extra.insert("table_profile".to_string(), schema_json);
+            }
+        }
+
+        let summary_node = PageNode {
+            node_id: "excel-summary".to_string(),
+            title: format!("{} ({}个表格)", file_name, parsed.blocks.len()),
+            level: 1,
+            content: summary_text,
+            summary: None,
+            embedding: None,
+            metadata: NodeMeta {
+                file_path: file_path.clone(),
+                page_number: None,
+                line_number: None,
+                token_count,
+                extra,
+            },
+            children: Vec::new(),
+        };
+
+        let sheet_nodes = vec![summary_node];
 
         // 3. 构建根节点
         let title = path

@@ -28,7 +28,8 @@ impl KnotIndexer {
     /// 变更记录：
     /// v1: 初始版本
     /// v2: Excel 智能表头检测（跳过标题行），改进财务报表解析
-    pub const PARSER_VERSION: &'static str = "2";
+    /// v3: Excel 索引改为单 chunk 摘要（详细数据存 DuckDB）
+    pub const PARSER_VERSION: &'static str = "3";
 
     pub async fn new(
         db_path: &str,
