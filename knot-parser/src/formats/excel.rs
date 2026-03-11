@@ -110,7 +110,69 @@ impl DocumentParser for ExcelParser {
             children: Vec::new(),
         };
 
-        let sheet_nodes = vec![summary_node];
+        // 3. 构建关键词索引 chunk（从所有单元格提取去重文本值）
+        //    确保搜索任意单元格值都能命中该 Excel 文件
+        let mut unique_values = std::collections::HashSet::new();
+        for block in &parsed.blocks {
+            // 列名也加入关键词
+            for col in &block.column_names {
+                unique_values.insert(col.clone());
+            }
+            // 所有行的单元格值
+            for row in &block.rows {
+                for cell in row {
+                    let trimmed = cell.trim();
+                    // 跳过空值和纯数字（数字查询交给 DuckDB SQL）
+                    if trimmed.is_empty() {
+                        continue;
+                    }
+                    if trimmed.parse::<f64>().is_ok() {
+                        continue;
+                    }
+                    unique_values.insert(trimmed.to_string());
+                }
+            }
+        }
+
+        let mut keywords: Vec<String> = unique_values.into_iter().collect();
+        keywords.sort(); // 排序保证确定性
+
+        // 截断保护：关键词文本最大 32KB
+        let max_keyword_bytes = 32 * 1024;
+        let mut keyword_text = String::new();
+        keyword_text.push_str(&format!("[关键词索引] {}\n", file_name));
+        for kw in &keywords {
+            if keyword_text.len() + kw.len() + 1 > max_keyword_bytes {
+                keyword_text.push_str("...(已截断)");
+                break;
+            }
+            keyword_text.push_str(kw);
+            keyword_text.push(' ');
+        }
+
+        let kw_token_count = keyword_text.split_whitespace().count();
+        let mut kw_extra = HashMap::new();
+        kw_extra.insert("doc_type".to_string(), "tabular".to_string());
+        kw_extra.insert("chunk_type".to_string(), "keyword_index".to_string());
+
+        let keyword_node = PageNode {
+            node_id: "excel-keywords".to_string(),
+            title: format!("{} 关键词索引", file_name),
+            level: 1,
+            content: keyword_text,
+            summary: None,
+            embedding: None,
+            metadata: NodeMeta {
+                file_path: file_path.clone(),
+                page_number: None,
+                line_number: None,
+                token_count: kw_token_count,
+                extra: kw_extra,
+            },
+            children: Vec::new(),
+        };
+
+        let sheet_nodes = vec![summary_node, keyword_node];
 
         // 3. 构建根节点
         let title = path
