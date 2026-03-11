@@ -478,6 +478,9 @@ impl Pipeline {
                 s.update_status(&doc_id, page_idx, PageStatus::InProgress)?;
             }
 
+            // 计时单页处理
+            let page_start = Instant::now();
+
             // 带超时的单页处理
             let page_result = if self.config.page_timeout_secs > 0 {
                 self.process_page_with_timeout(backend.as_ref(), page_idx)
@@ -536,7 +539,14 @@ impl Pipeline {
             }
 
             // 简洁进度日志
-            println!("[索引中] {} [{}/{}]", file_name, page_idx + 1, page_count);
+            let page_elapsed = page_start.elapsed().as_secs_f64();
+            println!(
+                "[索引中] {} [{}/{}] {:.1}s",
+                file_name,
+                page_idx + 1,
+                page_count,
+                page_elapsed
+            );
 
             // 通知调用者：当前页面处理完成
             if let Some(ref cb) = self.page_progress_callback {
