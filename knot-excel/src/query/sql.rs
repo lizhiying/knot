@@ -111,6 +111,122 @@ impl SqlGenerator {
 
         prompt
     }
+
+    /// 规则引擎：尝试自动生成 SQL（无需 LLM）
+    ///
+    /// 对于简单查询（如"列出所有的销售单号"），直接匹配列名生成 SQL。
+    /// 返回 Some(sql) 表示成功，None 表示无法自动生成（需要 LLM）。
+    pub fn try_auto_sql(
+        query: &str,
+        schemas: &[TableSchema],
+        table_row_counts: &[(usize, usize)], // (schema_index, row_count)
+    ) -> Option<String> {
+        // 提取 query 中的关键词（去掉常见的动词/助词）
+        let stop_words = [
+            "列出", "显示", "查看", "查询", "所有", "全部", "的", "了", "吗", "把", "给", "我",
+            "一下", "下", "有", "哪些", "什么", "多少", "是", "在", "请", "帮", "看看", "找",
+            "搜索", "出来",
+        ];
+
+        let query_keywords: Vec<&str> = query
+            .split(|c: char| c.is_whitespace() || c == '，' || c == '、' || c == '？')
+            .filter(|w| !w.is_empty() && !stop_words.contains(w))
+            .collect();
+
+        if query_keywords.is_empty() {
+            return None;
+        }
+
+        // 在所有非空表中查找匹配的列
+        let mut matches: Vec<(usize, String, String)> = Vec::new(); // (schema_idx, table_name, col_name)
+
+        for &(schema_idx, row_count) in table_row_counts {
+            if row_count == 0 {
+                continue;
+            }
+            let schema = &schemas[schema_idx];
+            for (col_name, _col_type) in &schema.columns {
+                // 检查 query 关键词是否匹配列名
+                let col_lower = col_name.to_lowercase();
+                for keyword in &query_keywords {
+                    let kw_lower = keyword.to_lowercase();
+                    if col_lower.contains(&kw_lower) || kw_lower.contains(&col_lower) {
+                        matches.push((schema_idx, schema.table_name.clone(), col_name.clone()));
+                        break;
+                    }
+                }
+            }
+        }
+
+        if matches.is_empty() {
+            return None;
+        }
+
+        // 去重：同表同列只保留一次
+        matches.sort_by(|a, b| (&a.1, &a.2).cmp(&(&b.1, &b.2)));
+        matches.dedup_by(|a, b| a.1 == b.1 && a.2 == b.2);
+
+        // 检测是否是"列出/显示"类型的查询（只需 SELECT DISTINCT）
+        let is_list_query = query.contains("列出")
+            || query.contains("显示")
+            || query.contains("所有")
+            || query.contains("全部")
+            || query.contains("哪些")
+            || query.contains("查看");
+
+        if !is_list_query {
+            // 非列表查询（如聚合、条件过滤等），交给 LLM
+            return None;
+        }
+
+        // 按表分组
+        let mut table_cols: Vec<(String, Vec<String>)> = Vec::new();
+        for (_, table_name, col_name) in &matches {
+            if let Some(entry) = table_cols.iter_mut().find(|(t, _)| t == table_name) {
+                if !entry.1.contains(col_name) {
+                    entry.1.push(col_name.clone());
+                }
+            } else {
+                table_cols.push((table_name.clone(), vec![col_name.clone()]));
+            }
+        }
+
+        if table_cols.len() == 1 {
+            // 单表：简单 SELECT DISTINCT
+            let (table_name, cols) = &table_cols[0];
+            let col_list: Vec<String> = cols.iter().map(|c| format!("\"{}\"", c)).collect();
+            Some(format!(
+                "SELECT DISTINCT {} FROM \"{}\"",
+                col_list.join(", "),
+                table_name
+            ))
+        } else {
+            // 多表：UNION ALL（只取第一个匹配列名，确保列数一致）
+            // 找出所有表共有的列名
+            let first_cols = &table_cols[0].1;
+            let common_col = first_cols.first()?;
+
+            let parts: Vec<String> = table_cols
+                .iter()
+                .filter(|(table_name, cols)| {
+                    cols.contains(common_col) && {
+                        // 确保这个表有足够的行数（> 0）
+                        let _idx = schemas.iter().position(|s| &s.table_name == table_name);
+                        true
+                    }
+                })
+                .map(|(table_name, _)| {
+                    format!("SELECT DISTINCT \"{}\" FROM \"{}\"", common_col, table_name)
+                })
+                .collect();
+
+            if parts.len() == 1 {
+                Some(parts[0].clone())
+            } else {
+                Some(parts.join(" UNION ALL "))
+            }
+        }
+    }
 }
 
 #[cfg(test)]

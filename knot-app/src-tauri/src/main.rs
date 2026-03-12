@@ -2502,14 +2502,8 @@ async fn rag_search(
                     if let Ok(engine) = cache.get_query_engine(&res.file_path) {
                         let schemas = engine.get_schemas();
                         if !schemas.is_empty() {
-                            // 从 DuckDB 取样本构建 SQL prompt（不需要解析整个文件）
-                            // 策略：紧凑列出所有表的列名，只对行数最多的表展示样本
-                            let sql_system = knot_excel::SqlGenerator::build_system_prompt();
-                            let mut sql_user_prompt = String::from("## 可用表\n\n");
-                            let max_sample_cols = 8;
-
-                            // 先收集所有表的行数，找出最大表
-                            let mut table_row_counts: Vec<(usize, usize)> = Vec::new(); // (index, row_count)
+                            // 先收集所有表的行数
+                            let mut table_row_counts: Vec<(usize, usize)> = Vec::new();
                             for (idx, schema) in schemas.iter().enumerate() {
                                 let count = engine
                                     .execute_sql(&format!(
@@ -2525,8 +2519,47 @@ async fn rag_search(
                                     .unwrap_or(0);
                                 table_row_counts.push((idx, count));
                             }
-                            // 按行数降序排，最大的表放在前面
                             table_row_counts.sort_by(|a, b| b.1.cmp(&a.1));
+
+                            // === 优先：规则引擎自动生成 SQL（毫秒级，无需 LLM） ===
+                            if let Some(auto_sql) = knot_excel::SqlGenerator::try_auto_sql(
+                                &query,
+                                &schemas,
+                                &table_row_counts,
+                            ) {
+                                println!("[rag_search] Auto-SQL (no LLM): {}", auto_sql);
+                                match engine.execute_multi_step(&auto_sql) {
+                                    Ok(result) => {
+                                        let ctx = knot_excel::ResultSummarizer::process(&result);
+                                        let fname = file_path
+                                            .file_name()
+                                            .unwrap_or_default()
+                                            .to_string_lossy();
+                                        let mut answer = format!(
+                                            "**{}** 查询结果（{} 行）\n\n",
+                                            fname, result.row_count
+                                        );
+                                        answer.push_str(&ctx.to_prompt_text());
+                                        sql_direct_answer = Some(answer);
+                                        println!(
+                                            "[rag_search] Auto-SQL success: {} rows",
+                                            result.row_count
+                                        );
+                                        continue;
+                                    }
+                                    Err(e) => {
+                                        println!(
+                                            "[rag_search] Auto-SQL failed: {}, falling back to LLM",
+                                            e
+                                        );
+                                    }
+                                }
+                            }
+
+                            // === Fallback：LLM 生成 SQL ===
+                            let sql_system = knot_excel::SqlGenerator::build_system_prompt();
+                            let mut sql_user_prompt = String::from("## 可用表\n\n");
+                            let max_sample_cols = 8;
                             let biggest_table_idx =
                                 table_row_counts.first().map(|t| t.0).unwrap_or(0);
 
