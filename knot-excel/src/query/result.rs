@@ -45,15 +45,23 @@ pub struct ResultSummarizer;
 
 impl ResultSummarizer {
     /// 全量返回的最大行数阈值
-    const MAX_FULL_ROWS: usize = 20;
+    const MAX_FULL_ROWS: usize = 100;
+    /// 全量返回时的最大列数（超过则截断）
+    const MAX_FULL_COLS: usize = 8;
     /// 摘要中的样本行数
-    const SAMPLE_ROWS: usize = 5;
+    const SAMPLE_ROWS: usize = 10;
 
     /// 处理查询结果，返回全量或摘要
     pub fn process(result: &QueryResult) -> ResultContext {
         if result.row_count <= Self::MAX_FULL_ROWS {
+            // 列数过多时截断
+            let markdown = if result.columns.len() > Self::MAX_FULL_COLS {
+                Self::to_markdown_truncated_cols(result, Self::MAX_FULL_COLS)
+            } else {
+                result.to_markdown()
+            };
             ResultContext::Full {
-                markdown: result.to_markdown(),
+                markdown,
                 row_count: result.row_count,
             }
         } else {
@@ -85,42 +93,109 @@ impl ResultSummarizer {
         let mut text = String::new();
 
         text.push_str(&format!(
-            "查询结果摘要（共 {} 行，因数据量大仅展示统计信息）：\n\n",
-            result.row_count
+            "查询结果（共 {} 行，展示前 {} 行样本）：\n\n",
+            result.row_count,
+            result.rows.len().min(Self::SAMPLE_ROWS)
         ));
 
+        // 列数过多时限制显示列
+        let max_summary_cols = Self::MAX_FULL_COLS;
+        let display_cols = result.columns.len().min(max_summary_cols);
+        let truncated_cols = result.columns.len() > max_summary_cols;
+
         // 各列统计
-        for (col_idx, col_name) in result.columns.iter().enumerate() {
+        for col_idx in 0..display_cols {
+            let col_name = &result.columns[col_idx];
             let col_values: Vec<&str> = result.rows.iter().map(|r| r[col_idx].as_str()).collect();
             let stats = Self::compute_column_stats(&col_values);
             text.push_str(&format!("- 列 \"{}\"：{}\n", col_name, stats));
         }
+        if truncated_cols {
+            text.push_str(&format!(
+                "  ... 还有 {} 列未显示\n",
+                result.columns.len() - display_cols
+            ));
+        }
 
-        // 前 N 行样本
+        // 样本行
         let sample_count = result.rows.len().min(Self::SAMPLE_ROWS);
         if sample_count > 0 {
             text.push_str(&format!("\n前 {} 行样本：\n", sample_count));
             text.push_str("| ");
-            text.push_str(&result.columns.join(" | "));
+            text.push_str(&result.columns[..display_cols].join(" | "));
+            if truncated_cols {
+                text.push_str(" | ...");
+            }
             text.push_str(" |\n| ");
             text.push_str(
-                &result
-                    .columns
-                    .iter()
+                &(0..display_cols)
                     .map(|_| "---")
                     .collect::<Vec<_>>()
                     .join(" | "),
             );
+            if truncated_cols {
+                text.push_str(" | ---");
+            }
             text.push_str(" |\n");
 
             for row in result.rows.iter().take(sample_count) {
                 text.push_str("| ");
-                text.push_str(&row.join(" | "));
+                text.push_str(&row[..display_cols].join(" | "));
+                if truncated_cols {
+                    text.push_str(" | ...");
+                }
                 text.push_str(" |\n");
+            }
+
+            if result.row_count > sample_count {
+                text.push_str(&format!(
+                    "\n... 还有 {} 行未显示\n",
+                    result.row_count - sample_count
+                ));
             }
         }
 
         text
+    }
+
+    /// 列数过多时截断列数的 Markdown 生成
+    fn to_markdown_truncated_cols(result: &QueryResult, max_cols: usize) -> String {
+        let display_cols = result.columns.len().min(max_cols);
+        let truncated = result.columns.len() > max_cols;
+
+        let mut md = String::new();
+        // 表头
+        md.push_str("| ");
+        md.push_str(&result.columns[..display_cols].join(" | "));
+        if truncated {
+            md.push_str(&format!(
+                " | ...({} 列省略)",
+                result.columns.len() - display_cols
+            ));
+        }
+        md.push_str(" |\n| ");
+        md.push_str(
+            &(0..display_cols)
+                .map(|_| "---")
+                .collect::<Vec<_>>()
+                .join(" | "),
+        );
+        if truncated {
+            md.push_str(" | ---");
+        }
+        md.push_str(" |\n");
+
+        // 数据行
+        for row in &result.rows {
+            md.push_str("| ");
+            md.push_str(&row[..display_cols.min(row.len())].join(" | "));
+            if truncated {
+                md.push_str(" | ...");
+            }
+            md.push_str(" |\n");
+        }
+
+        md
     }
 
     /// 计算单列的统计信息
@@ -194,7 +269,7 @@ mod tests {
 
     #[test]
     fn test_large_result_summarized() {
-        let rows: Vec<Vec<String>> = (0..50)
+        let rows: Vec<Vec<String>> = (0..150)
             .map(|i| vec![format!("item_{}", i), format!("{}", i * 10)])
             .collect();
 
@@ -202,17 +277,17 @@ mod tests {
             sql: "SELECT * FROM big_table".to_string(),
             columns: vec!["name".to_string(), "value".to_string()],
             rows,
-            row_count: 50,
+            row_count: 150,
             retried: false,
             intermediate_steps: 0,
         };
 
         let ctx = ResultSummarizer::process(&result);
         assert!(ctx.is_summarized());
-        assert_eq!(ctx.row_count(), 50);
+        assert_eq!(ctx.row_count(), 150);
         let text = ctx.to_prompt_text();
-        assert!(text.contains("共 50 行"));
-        assert!(text.contains("前 5 行样本"));
+        assert!(text.contains("共 150 行"));
+        assert!(text.contains("前 10 行样本"));
         println!("{}", text);
     }
 }

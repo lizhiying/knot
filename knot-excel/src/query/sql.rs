@@ -17,10 +17,12 @@ impl SqlGenerator {
 1. 仅返回 SQL 语句本身，不要任何解释、注释或 markdown 标记
 2. 使用 DuckDB 兼容语法
 3. 列名需用双引号包裹（尤其是中文列名）
-4. 优先使用 WITH (CTE) 或子查询实现多步逻辑，避免拆分为多条 SQL
-5. DuckDB 完整支持 CTE、窗口函数（ROW_NUMBER, LAG, LEAD）、QUALIFY 子句
-6. 如果需要聚合，使用恰当的 GROUP BY
-7. 结果列名应有意义（使用 AS 别名）"#
+4. **只 SELECT 用户问题涉及的列，禁止使用 SELECT ***
+5. 优先使用 WITH (CTE) 或子查询实现多步逻辑，避免拆分为多条 SQL
+6. DuckDB 完整支持 CTE、窗口函数（ROW_NUMBER, LAG, LEAD）、QUALIFY 子句
+7. 如果需要聚合，使用恰当的 GROUP BY
+8. 结果列名应有意义（使用 AS 别名）
+9. 不要加 LIMIT 限制，除非用户明确要求"只看几条""#
             .to_string()
     }
 
