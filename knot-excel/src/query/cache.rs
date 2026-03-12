@@ -405,11 +405,12 @@ fn make_file_prefix(file_path: &str) -> String {
 }
 
 /// 生成安全的表名
+/// 保留中文等 Unicode 字母/数字，只替换 SQL 不安全的特殊字符
 fn make_safe_table_name(sheet_name: &str, block_index: usize) -> String {
     let safe: String = sheet_name
         .chars()
         .map(|c| {
-            if c.is_ascii_alphanumeric() || c == '_' {
+            if c.is_alphanumeric() || c == '_' {
                 c
             } else {
                 '_'
@@ -417,10 +418,30 @@ fn make_safe_table_name(sheet_name: &str, block_index: usize) -> String {
         })
         .collect();
 
+    // 去除首尾和连续的下划线
+    let trimmed = safe.trim_matches('_');
+    let mut result = String::new();
+    let mut prev_underscore = false;
+    for c in trimmed.chars() {
+        if c == '_' {
+            if !prev_underscore {
+                result.push(c);
+            }
+            prev_underscore = true;
+        } else {
+            result.push(c);
+            prev_underscore = false;
+        }
+    }
+
+    if result.is_empty() {
+        result = format!("sheet_{}", block_index);
+    }
+
     if block_index == 0 {
-        safe
+        result
     } else {
-        format!("{}_b{}", safe, block_index)
+        format!("{}_b{}", result, block_index)
     }
 }
 
