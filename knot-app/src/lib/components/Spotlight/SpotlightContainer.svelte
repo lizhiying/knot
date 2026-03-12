@@ -194,7 +194,26 @@
                 return;
             }
 
-            // 阶段2：LLM 生成
+            // === SQL 直接回答路径：跳过 LLM，直接展示结果 ===
+            if (searchResponse.direct_answer) {
+                console.log(
+                    "[Spotlight] SQL direct answer available, skipping LLM",
+                );
+                const totalDuration = (
+                    (performance.now() - searchStartTime) /
+                    1000
+                ).toFixed(1);
+                insightState = {
+                    status: `SQL Query (${totalDuration}s)`,
+                    statusType: "complete",
+                    isThinking: false,
+                    content: searchResponse.direct_answer,
+                    showCursor: false,
+                };
+                return;
+            }
+
+            // 阶段2：LLM 生成（非 SQL 路径）
             const generateStartTime = performance.now();
             insightState = {
                 status: `Generating Insight...`,

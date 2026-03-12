@@ -126,12 +126,20 @@
             const hasTabular = sources.some((s) => s.source === "Tabular");
 
             if (
-                !searchResponse.context ||
-                searchResponse.context.trim() === ""
+                !searchResponse.context &&
+                !searchResponse.direct_answer &&
+                searchResponse.context?.trim() === ""
             ) {
                 answer = isExcelFile
                     ? "在该表格中未找到与问题相关的数据。"
                     : "在该文件中未找到与问题相关的内容。";
+                phase = "done";
+                return;
+            }
+
+            // SQL 直接回答（跳过 LLM）
+            if (searchResponse.direct_answer) {
+                answer = searchResponse.direct_answer;
                 phase = "done";
                 return;
             }

@@ -2103,6 +2103,8 @@ struct HybridSearchResultDisplay {
 struct RagSearchResponse {
     sources: Vec<HybridSearchResultDisplay>,
     context: String, // 预构建的上下文，供 rag_generate 使用
+    /// SQL 查询成功时直接返回格式化好的结果，前端无需调用 LLM
+    direct_answer: Option<String>,
 }
 
 /// 将 DataBlock 注入为 Markdown 表格到 context（最多 50 行）
@@ -2218,6 +2220,7 @@ async fn rag_search(
         return Ok(RagSearchResponse {
             sources: vec![],
             context: String::new(),
+            direct_answer: None,
         });
     }
 
@@ -2441,6 +2444,7 @@ async fn rag_search(
 
     // 4.2 处理 tabular 结果: 根据上下文预算动态选择策略
     let mut tabular_context = String::new();
+    let mut sql_direct_answer: Option<String> = None;
     // tabular markdown fallback 的预算上限（占总 budget 的 70%，留 30% 给 text）
     let mut tabular_budget: usize = {
         let config = load_config(&app);
@@ -2498,22 +2502,43 @@ async fn rag_search(
                         let schemas = engine.get_schemas();
                         if !schemas.is_empty() {
                             // 从 DuckDB 取样本构建 SQL prompt（不需要解析整个文件）
+                            // 限制：最多 3 个表 × 8 列 × 2 行样本，防止 prompt 超出上下文窗口
                             let sql_system = knot_excel::SqlGenerator::build_system_prompt();
                             let mut sql_user_prompt = String::from("## 可用表\n\n");
-                            for schema in &schemas {
+                            let max_tables = 3;
+                            let max_sample_cols = 8;
+                            for schema in schemas.iter().take(max_tables) {
+                                let display_cols = schema.columns.len().min(max_sample_cols);
                                 sql_user_prompt.push_str(&format!(
-                                    "### 表名: `{}`\n列信息:\n",
-                                    schema.table_name
+                                    "### 表名: `{}`\n列信息（共 {} 列）:\n",
+                                    schema.table_name,
+                                    schema.columns.len()
                                 ));
-                                for (col_name, col_type) in &schema.columns {
+                                for (col_name, col_type) in schema.columns.iter().take(display_cols)
+                                {
                                     sql_user_prompt.push_str(&format!(
                                         "  - \"{}\" ({})\n",
                                         col_name, col_type
                                     ));
                                 }
-                                // 从 DuckDB 取 3 行样本（毫秒级，vs 解析整个 Excel 数秒）
+                                if schema.columns.len() > display_cols {
+                                    sql_user_prompt.push_str(&format!(
+                                        "  ... 还有 {} 列\n",
+                                        schema.columns.len() - display_cols
+                                    ));
+                                    // 列出剩余列名（不含类型，节省空间）
+                                    let remaining_names: Vec<&str> = schema.columns[display_cols..]
+                                        .iter()
+                                        .map(|(n, _)| n.as_str())
+                                        .collect();
+                                    sql_user_prompt.push_str(&format!(
+                                        "  其他列名: {}\n",
+                                        remaining_names.join(", ")
+                                    ));
+                                }
+                                // 2 行样本数据
                                 if let Ok(sample) = engine.execute_sql(&format!(
-                                    "SELECT * FROM \"{}\" LIMIT 3",
+                                    "SELECT * FROM \"{}\" LIMIT 2",
                                     schema.table_name
                                 )) {
                                     if !sample.rows.is_empty() {
@@ -2530,33 +2555,40 @@ async fn rag_search(
                                                 })
                                             })
                                             .unwrap_or(0);
+                                        sql_user_prompt
+                                            .push_str(&format!("\n样本（共 {} 行）:\n", total));
+                                        // 只显示前 max_sample_cols 列的样本
+                                        let sc = sample.columns.len().min(max_sample_cols);
                                         sql_user_prompt.push_str(&format!(
-                                            "\n数据示例（前 {} 行，共 {} 行）:\n",
-                                            sample.rows.len(),
-                                            total
+                                            "| {} |\n",
+                                            sample.columns[..sc].join(" | ")
                                         ));
                                         sql_user_prompt.push_str(&format!(
                                             "| {} |\n",
-                                            sample.columns.join(" | ")
-                                        ));
-                                        sql_user_prompt.push_str(&format!(
-                                            "| {} |\n",
-                                            sample
-                                                .columns
-                                                .iter()
-                                                .map(|_| "---")
-                                                .collect::<Vec<_>>()
-                                                .join(" | ")
+                                            (0..sc).map(|_| "---").collect::<Vec<_>>().join(" | ")
                                         ));
                                         for row in &sample.rows {
-                                            sql_user_prompt
-                                                .push_str(&format!("| {} |\n", row.join(" | ")));
+                                            sql_user_prompt.push_str(&format!(
+                                                "| {} |\n",
+                                                row[..sc.min(row.len())].join(" | ")
+                                            ));
                                         }
                                     }
                                 }
                                 sql_user_prompt.push('\n');
                             }
+                            if schemas.len() > max_tables {
+                                sql_user_prompt.push_str(&format!(
+                                    "（还有 {} 个表未展示）\n\n",
+                                    schemas.len() - max_tables
+                                ));
+                            }
                             sql_user_prompt.push_str(&format!("## 用户问题\n{}\n", query));
+
+                            println!(
+                                "[rag_search] SQL prompt size: {} chars",
+                                sql_user_prompt.len()
+                            );
 
                             let sql_prompt = format!(
                                 "<|im_start|>system\n{}<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n",
@@ -2595,14 +2627,15 @@ async fn rag_search(
                                                     .file_name()
                                                     .unwrap_or_default()
                                                     .to_string_lossy();
-                                                tabular_context.push_str(&format!(
-                                                    "[表格数据查询] {}\n执行的 SQL: {}\n\n",
-                                                    fname, result.sql
-                                                ));
-                                                tabular_context.push_str(&ctx.to_prompt_text());
-                                                tabular_context.push('\n');
+                                                // SQL 结果直接返回前端，不走 LLM
+                                                let mut answer = format!(
+                                                    "**{}** 查询结果（{} 行）\n\n**SQL:** `{}`\n\n",
+                                                    fname, result.row_count, result.sql
+                                                );
+                                                answer.push_str(&ctx.to_prompt_text());
+                                                sql_direct_answer = Some(answer);
                                                 println!(
-                                                    "[rag_search] SQL success (cached): {} rows",
+                                                    "[rag_search] SQL success (cached, direct): {} rows",
                                                     result.row_count
                                                 );
                                             }
@@ -3069,6 +3102,7 @@ async fn rag_search(
     Ok(RagSearchResponse {
         sources: display_sources,
         context: context_str,
+        direct_answer: sql_direct_answer,
     })
 }
 
