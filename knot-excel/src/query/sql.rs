@@ -22,7 +22,9 @@ impl SqlGenerator {
 6. DuckDB 完整支持 CTE、窗口函数（ROW_NUMBER, LAG, LEAD）、QUALIFY 子句
 7. 如果需要聚合，使用恰当的 GROUP BY
 8. 结果列名应有意义（使用 AS 别名）
-9. 不要加 LIMIT 限制，除非用户明确要求"只看几条""#
+9. 不要加 LIMIT 限制，除非用户明确要求"只看几条"
+10. **重要：如果多个表都包含用户问题所需的列，必须使用 UNION ALL 合并所有表的数据，确保不遗漏**
+11. 优先查询行数最多的表（行数已在表名后标注）"#
             .to_string()
     }
 

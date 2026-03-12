@@ -2503,86 +2503,74 @@ async fn rag_search(
                         let schemas = engine.get_schemas();
                         if !schemas.is_empty() {
                             // 从 DuckDB 取样本构建 SQL prompt（不需要解析整个文件）
-                            // 限制：最多 3 个表 × 8 列 × 2 行样本，防止 prompt 超出上下文窗口
+                            // 策略：紧凑列出所有表的列名，只对行数最多的表展示样本
                             let sql_system = knot_excel::SqlGenerator::build_system_prompt();
                             let mut sql_user_prompt = String::from("## 可用表\n\n");
-                            let max_tables = 3;
                             let max_sample_cols = 8;
-                            for schema in schemas.iter().take(max_tables) {
-                                let display_cols = schema.columns.len().min(max_sample_cols);
+
+                            // 先收集所有表的行数，找出最大表
+                            let mut table_row_counts: Vec<(usize, usize)> = Vec::new(); // (index, row_count)
+                            for (idx, schema) in schemas.iter().enumerate() {
+                                let count = engine
+                                    .execute_sql(&format!(
+                                        "SELECT COUNT(*) FROM \"{}\"",
+                                        schema.table_name
+                                    ))
+                                    .ok()
+                                    .and_then(|r| {
+                                        r.rows.first().and_then(|row| {
+                                            row.first().and_then(|v| v.parse::<usize>().ok())
+                                        })
+                                    })
+                                    .unwrap_or(0);
+                                table_row_counts.push((idx, count));
+                            }
+                            // 按行数降序排，最大的表放在前面
+                            table_row_counts.sort_by(|a, b| b.1.cmp(&a.1));
+                            let biggest_table_idx =
+                                table_row_counts.first().map(|t| t.0).unwrap_or(0);
+
+                            for &(idx, row_count) in &table_row_counts {
+                                let schema = &schemas[idx];
+                                // 跳过空表
+                                if row_count == 0 {
+                                    continue;
+                                }
+
                                 sql_user_prompt.push_str(&format!(
-                                    "### 表名: `{}`\n列信息（共 {} 列）:\n",
+                                    "### `{}` ({} 行, {} 列)\n",
                                     schema.table_name,
+                                    row_count,
                                     schema.columns.len()
                                 ));
-                                for (col_name, col_type) in schema.columns.iter().take(display_cols)
-                                {
-                                    sql_user_prompt.push_str(&format!(
-                                        "  - \"{}\" ({})\n",
-                                        col_name, col_type
-                                    ));
-                                }
-                                if schema.columns.len() > display_cols {
-                                    sql_user_prompt.push_str(&format!(
-                                        "  ... 还有 {} 列\n",
-                                        schema.columns.len() - display_cols
-                                    ));
-                                    // 列出剩余列名（不含类型，节省空间）
-                                    let remaining_names: Vec<&str> = schema.columns[display_cols..]
-                                        .iter()
-                                        .map(|(n, _)| n.as_str())
-                                        .collect();
-                                    sql_user_prompt.push_str(&format!(
-                                        "  其他列名: {}\n",
-                                        remaining_names.join(", ")
-                                    ));
-                                }
-                                // 2 行样本数据
-                                if let Ok(sample) = engine.execute_sql(&format!(
-                                    "SELECT * FROM \"{}\" LIMIT 2",
-                                    schema.table_name
-                                )) {
-                                    if !sample.rows.is_empty() {
-                                        let total = engine
-                                            .execute_sql(&format!(
-                                                "SELECT COUNT(*) FROM \"{}\"",
-                                                schema.table_name
-                                            ))
-                                            .ok()
-                                            .and_then(|r| {
-                                                r.rows.first().and_then(|row| {
-                                                    row.first()
-                                                        .and_then(|v| v.parse::<usize>().ok())
-                                                })
-                                            })
-                                            .unwrap_or(0);
-                                        sql_user_prompt
-                                            .push_str(&format!("\n样本（共 {} 行）:\n", total));
-                                        // 只显示前 max_sample_cols 列的样本
-                                        let sc = sample.columns.len().min(max_sample_cols);
-                                        sql_user_prompt.push_str(&format!(
-                                            "| {} |\n",
-                                            sample.columns[..sc].join(" | ")
-                                        ));
-                                        sql_user_prompt.push_str(&format!(
-                                            "| {} |\n",
-                                            (0..sc).map(|_| "---").collect::<Vec<_>>().join(" | ")
-                                        ));
-                                        for row in &sample.rows {
+
+                                // 列名：紧凑格式（逗号分隔，不展示类型）
+                                let col_names: Vec<&str> =
+                                    schema.columns.iter().map(|(n, _)| n.as_str()).collect();
+                                sql_user_prompt
+                                    .push_str(&format!("列: {}\n", col_names.join(", ")));
+
+                                // 只对最大表展示 1 行样本
+                                if idx == biggest_table_idx {
+                                    if let Ok(sample) = engine.execute_sql(&format!(
+                                        "SELECT * FROM \"{}\" LIMIT 1",
+                                        schema.table_name
+                                    )) {
+                                        if !sample.rows.is_empty() {
+                                            let sc = sample.columns.len().min(max_sample_cols);
                                             sql_user_prompt.push_str(&format!(
-                                                "| {} |\n",
-                                                row[..sc.min(row.len())].join(" | ")
+                                                "样本: | {} |\n",
+                                                sample.columns[..sc].join(" | ")
+                                            ));
+                                            sql_user_prompt.push_str(&format!(
+                                                "       | {} |\n",
+                                                sample.rows[0][..sc.min(sample.rows[0].len())]
+                                                    .join(" | ")
                                             ));
                                         }
                                     }
                                 }
                                 sql_user_prompt.push('\n');
-                            }
-                            if schemas.len() > max_tables {
-                                sql_user_prompt.push_str(&format!(
-                                    "（还有 {} 个表未展示）\n\n",
-                                    schemas.len() - max_tables
-                                ));
                             }
                             sql_user_prompt.push_str(&format!("## 用户问题\n{}\n", query));
 
