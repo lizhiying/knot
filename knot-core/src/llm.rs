@@ -108,7 +108,7 @@ impl LlamaSidecar {
             .arg("-c")
             .arg(ctx_size.to_string())
             .arg("--parallel")
-            .arg("2")
+            .arg("1")
             .arg("-fa")
             .arg("on");
 

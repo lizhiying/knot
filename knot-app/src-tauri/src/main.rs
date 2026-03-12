@@ -860,7 +860,7 @@ fn default_vector_distance_threshold() -> f32 {
 }
 
 fn default_llm_context_size() -> u32 {
-    16384 // 默认上下文窗口大小 (parallel=2, 每 slot 8192)
+    16384 // 默认上下文窗口大小 (parallel=1, 单 slot 16384)
 }
 
 fn default_llm_max_tokens() -> u32 {
@@ -913,10 +913,11 @@ fn save_config(app: &tauri::AppHandle, config: &AppConfig) -> Result<(), String>
 }
 
 /// 计算上下文字符预算
-/// 公式：(context_size / parallel - max_tokens - prompt_overhead) * chars_per_token
-/// parallel=2（2个slot），prompt_overhead=300（system prompt等），chars_per_token≈2（中文）
+/// 公式：(context_size - max_tokens - prompt_overhead) * chars_per_token
+/// parallel=1（单slot），prompt_overhead=300（system prompt等），chars_per_token≈2（中文）
 fn compute_context_budget(config: &AppConfig) -> usize {
-    let tokens_for_context = (config.llm_context_size / 2)
+    let tokens_for_context = config
+        .llm_context_size
         .saturating_sub(config.llm_max_tokens)
         .saturating_sub(300);
     (tokens_for_context as usize) * 2
