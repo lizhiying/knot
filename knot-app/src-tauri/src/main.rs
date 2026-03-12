@@ -2591,14 +2591,19 @@ async fn rag_search(
 
                             if let Some(llm_client) = llm_for_sql {
                                 use knot_parser::LlmProvider;
+                                let sql_start = std::time::Instant::now();
                                 let sql_gen_result = tokio::time::timeout(
-                                    std::time::Duration::from_secs(10),
+                                    std::time::Duration::from_secs(30),
                                     llm_client.generate_content(&sql_prompt),
                                 )
                                 .await;
 
                                 match sql_gen_result {
                                     Ok(Ok(generated_sql)) => {
+                                        println!(
+                                            "[rag_search] SQL generated in {:.1}s",
+                                            sql_start.elapsed().as_secs_f64()
+                                        );
                                         let sql = generated_sql
                                             .trim()
                                             .trim_start_matches("```sql")
@@ -2635,8 +2640,20 @@ async fn rag_search(
                                             }
                                         }
                                     }
-                                    _ => {
-                                        println!("[rag_search] SQL gen failed/timed out (cached), using profile");
+                                    Ok(Err(e)) => {
+                                        println!(
+                                            "[rag_search] SQL gen error in {:.1}s: {}",
+                                            sql_start.elapsed().as_secs_f64(),
+                                            e
+                                        );
+                                        tabular_context.push_str(&res.text);
+                                        tabular_context.push('\n');
+                                    }
+                                    Err(_) => {
+                                        println!(
+                                            "[rag_search] SQL gen TIMED OUT after {:.1}s",
+                                            sql_start.elapsed().as_secs_f64()
+                                        );
                                         tabular_context.push_str(&res.text);
                                         tabular_context.push('\n');
                                     }
