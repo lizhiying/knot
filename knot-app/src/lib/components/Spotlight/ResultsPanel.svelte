@@ -14,6 +14,8 @@
         highlightedCardId = null,
         onHighlightCard = () => {},
         onUnhighlightCard = () => {},
+        sqlPagination = null,
+        onGoToPage = () => {},
     } = $props();
 
     let matchText = $derived(
@@ -37,6 +39,8 @@
             isThinking={insightState.isThinking}
             content={insightState.content}
             showCursor={insightState.showCursor}
+            {sqlPagination}
+            {onGoToPage}
         />
     </div>
 {:else}

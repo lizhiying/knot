@@ -16,6 +16,8 @@
         isThinking = false,
         content = "",
         showCursor = false,
+        sqlPagination = null,
+        onGoToPage = () => {},
     } = $props();
 
     // 状态点颜色
@@ -90,6 +92,39 @@
                 use:sortableTables
             >
                 {@html htmlContent}
+            </div>
+        {/if}
+
+        <!-- SQL 分页控件 -->
+        {#if sqlPagination && sqlPagination.totalPages > 1}
+            <div
+                class="flex items-center justify-center gap-3 mt-4 py-3 border-t border-[var(--border-color)]"
+            >
+                <button
+                    class="px-2 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-hover)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-[var(--text-secondary)]"
+                    disabled={sqlPagination.currentPage <= 1}
+                    onclick={() => onGoToPage(sqlPagination.currentPage - 1)}
+                >
+                    <span class="material-symbols-outlined text-[16px]"
+                        >chevron_left</span
+                    >
+                </button>
+                <span class="text-xs text-[var(--text-secondary)]">
+                    第 {sqlPagination.currentPage} / {sqlPagination.totalPages} 页
+                    <span class="opacity-60"
+                        >（共 {sqlPagination.totalRows} 行）</span
+                    >
+                </span>
+                <button
+                    class="px-2 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-hover)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-[var(--text-secondary)]"
+                    disabled={sqlPagination.currentPage >=
+                        sqlPagination.totalPages}
+                    onclick={() => onGoToPage(sqlPagination.currentPage + 1)}
+                >
+                    <span class="material-symbols-outlined text-[16px]"
+                        >chevron_right</span
+                    >
+                </button>
             </div>
         {/if}
 

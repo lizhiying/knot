@@ -747,7 +747,8 @@ fn main() {
             ignore_file,
             unignore_file,
             query_excel_table,
-            query_excel_page
+            query_excel_page,
+            sql_page_query
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -2106,6 +2107,12 @@ struct RagSearchResponse {
     context: String, // 预构建的上下文，供 rag_generate 使用
     /// SQL 查询成功时直接返回格式化好的结果，前端无需调用 LLM
     direct_answer: Option<String>,
+    /// 分页元数据：总行数
+    total_rows: Option<usize>,
+    /// 分页元数据：当前 SQL 语句（用于翻页重查询）
+    sql_query: Option<String>,
+    /// 分页元数据：文件路径（用于翻页时定位 DuckDB）
+    sql_file_path: Option<String>,
 }
 
 /// 将 DataBlock 注入为 Markdown 表格到 context（最多 50 行）
@@ -2222,6 +2229,9 @@ async fn rag_search(
             sources: vec![],
             context: String::new(),
             direct_answer: None,
+            total_rows: None,
+            sql_query: None,
+            sql_file_path: None,
         });
     }
 
@@ -2446,7 +2456,8 @@ async fn rag_search(
     // 4.2 处理 tabular 结果: 根据上下文预算动态选择策略
     let mut tabular_context = String::new();
     let mut sql_direct_answer: Option<String> = None;
-    // tabular markdown fallback 的预算上限（占总 budget 的 70%，留 30% 给 text）
+    let mut sql_pagination: Option<(usize, String, String)> = None; // (total_rows, sql, file_path)
+                                                                    // tabular markdown fallback 的预算上限（占总 budget 的 70%，留 30% 给 text）
     let mut tabular_budget: usize = {
         let config = load_config(&app);
         let budget = compute_context_budget(&config);
@@ -2528,7 +2539,25 @@ async fn rag_search(
                                 &table_row_counts,
                             ) {
                                 println!("[rag_search] Auto-SQL (no LLM): {}", auto_sql);
-                                match engine.execute_multi_step(&auto_sql) {
+                                // 先查总行数
+                                let total_rows = engine
+                                    .execute_sql(&format!(
+                                        "SELECT COUNT(*) FROM ({}) AS _t",
+                                        auto_sql
+                                    ))
+                                    .ok()
+                                    .and_then(|r| {
+                                        r.rows.first().and_then(|row| {
+                                            row.first().and_then(|v| v.parse::<usize>().ok())
+                                        })
+                                    })
+                                    .unwrap_or(0);
+
+                                // 只取前 20 行（第一页）
+                                let page_size = 20;
+                                let paged_sql =
+                                    format!("{} LIMIT {} OFFSET 0", auto_sql, page_size);
+                                match engine.execute_multi_step(&paged_sql) {
                                     Ok(result) => {
                                         let ctx = knot_excel::ResultSummarizer::process(&result);
                                         let fname = file_path
@@ -2536,14 +2565,21 @@ async fn rag_search(
                                             .unwrap_or_default()
                                             .to_string_lossy();
                                         let mut answer = format!(
-                                            "**{}** 查询结果（{} 行）\n\n",
-                                            fname, result.row_count
+                                            "**{}** 查询结果（共 {} 行，显示第 1-{} 行）\n\n",
+                                            fname,
+                                            total_rows,
+                                            result.row_count.min(total_rows)
                                         );
                                         answer.push_str(&ctx.to_prompt_text());
                                         sql_direct_answer = Some(answer);
+                                        sql_pagination = Some((
+                                            total_rows,
+                                            auto_sql.clone(),
+                                            res.file_path.clone(),
+                                        ));
                                         println!(
-                                            "[rag_search] Auto-SQL success: {} rows",
-                                            result.row_count
+                                            "[rag_search] Auto-SQL success: {} total, showing first {} rows",
+                                            total_rows, result.row_count
                                         );
                                         continue;
                                     }
@@ -2648,22 +2684,43 @@ async fn rag_search(
 
                                         match engine.execute_multi_step(&sql) {
                                             Ok(result) => {
-                                                let ctx =
-                                                    knot_excel::ResultSummarizer::process(&result);
+                                                let total_rows = result.row_count;
+                                                // 如果超过 20 行，重新用 LIMIT 取第一页
+                                                let page_size = 20;
+                                                let (display_result, display_sql) =
+                                                    if total_rows > page_size {
+                                                        let paged = format!(
+                                                            "{} LIMIT {} OFFSET 0",
+                                                            sql, page_size
+                                                        );
+                                                        match engine.execute_multi_step(&paged) {
+                                                            Ok(r) => (r, paged),
+                                                            Err(_) => (result.clone(), sql.clone()),
+                                                        }
+                                                    } else {
+                                                        (result.clone(), sql.clone())
+                                                    };
+                                                let ctx = knot_excel::ResultSummarizer::process(
+                                                    &display_result,
+                                                );
                                                 let fname = file_path
                                                     .file_name()
                                                     .unwrap_or_default()
                                                     .to_string_lossy();
-                                                // SQL 结果直接返回前端，不走 LLM
                                                 let mut answer = format!(
-                                                    "**{}** 查询结果（{} 行）\n\n**SQL:** `{}`\n\n",
-                                                    fname, result.row_count, result.sql
+                                                    "**{}** 查询结果（共 {} 行，显示第 1-{} 行）\n\n",
+                                                    fname, total_rows, display_result.row_count.min(total_rows)
                                                 );
                                                 answer.push_str(&ctx.to_prompt_text());
                                                 sql_direct_answer = Some(answer);
+                                                sql_pagination = Some((
+                                                    total_rows,
+                                                    sql.clone(),
+                                                    res.file_path.clone(),
+                                                ));
                                                 println!(
-                                                    "[rag_search] SQL success (cached, direct): {} rows",
-                                                    result.row_count
+                                                    "[rag_search] SQL success (cached, direct): {} total, showing {}",
+                                                    total_rows, display_result.row_count
                                                 );
                                             }
                                             Err(e) => {
@@ -3142,6 +3199,101 @@ async fn rag_search(
         sources: display_sources,
         context: context_str,
         direct_answer: sql_direct_answer,
+        total_rows: sql_pagination.as_ref().map(|p| p.0),
+        sql_query: sql_pagination.as_ref().map(|p| p.1.clone()),
+        sql_file_path: sql_pagination.as_ref().map(|p| p.2.clone()),
+    })
+}
+
+/// 分页查询：前端翻页时调用，直接执行 SQL + LIMIT/OFFSET
+#[derive(serde::Serialize)]
+struct SqlPageResponse {
+    /// Markdown 表格内容
+    content: String,
+    /// 当前页码（1-based）
+    page: usize,
+    /// 每页行数
+    page_size: usize,
+    /// 总行数
+    total_rows: usize,
+    /// 总页数
+    total_pages: usize,
+}
+
+#[tauri::command]
+async fn sql_page_query(
+    app: tauri::AppHandle,
+    file_path: String,
+    sql: String,
+    page: usize,
+    page_size: Option<usize>,
+) -> Result<SqlPageResponse, String> {
+    let page = page.max(1);
+    let page_size = page_size.unwrap_or(20).min(200);
+    let offset = (page - 1) * page_size;
+
+    println!(
+        "[sql_page_query] file={}, page={}, page_size={}, offset={}",
+        file_path, page, page_size, offset
+    );
+
+    let index_base_dir = {
+        let config = load_config(&app);
+        let data_dir = config.data_dir.clone().unwrap_or_default();
+        get_index_base_dir(&app, &data_dir)
+    };
+    let cache_path = index_base_dir.join("knot_excel_cache.duckdb");
+
+    let cache = knot_excel::ExcelCache::new(cache_path.to_str().unwrap_or_default())
+        .map_err(|e| format!("DuckDB open failed: {}", e))?;
+    let engine = cache
+        .get_query_engine(&file_path)
+        .map_err(|e| format!("Query engine failed: {}", e))?;
+
+    // 查总行数
+    let total_rows = engine
+        .execute_sql(&format!("SELECT COUNT(*) FROM ({}) AS _t", sql))
+        .ok()
+        .and_then(|r| {
+            r.rows
+                .first()
+                .and_then(|row| row.first().and_then(|v| v.parse::<usize>().ok()))
+        })
+        .unwrap_or(0);
+
+    let total_pages = (total_rows + page_size - 1) / page_size.max(1);
+
+    // 分页查询
+    let paged_sql = format!("{} LIMIT {} OFFSET {}", sql, page_size, offset);
+    let result = engine
+        .execute_multi_step(&paged_sql)
+        .map_err(|e| format!("SQL failed: {}", e))?;
+
+    let ctx = knot_excel::ResultSummarizer::process(&result);
+    let fname = std::path::Path::new(&file_path)
+        .file_name()
+        .unwrap_or_default()
+        .to_string_lossy();
+
+    let start_row = offset + 1;
+    let end_row = (offset + result.row_count).min(total_rows);
+    let mut content = format!(
+        "**{}** 查询结果（共 {} 行，显示第 {}-{} 行）\n\n",
+        fname, total_rows, start_row, end_row
+    );
+    content.push_str(&ctx.to_prompt_text());
+
+    println!(
+        "[sql_page_query] Page {}/{}, rows {}-{}/{}",
+        page, total_pages, start_row, end_row, total_rows
+    );
+
+    Ok(SqlPageResponse {
+        content,
+        page,
+        page_size,
+        total_rows,
+        total_pages,
     })
 }
 

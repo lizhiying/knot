@@ -61,6 +61,47 @@
         showCursor: false,
     });
 
+    // SQL 分页状态
+    let sqlPagination = $state(null);
+
+    async function goToPage(page) {
+        if (!sqlPagination || page < 1 || page > sqlPagination.totalPages)
+            return;
+        insightState = {
+            ...insightState,
+            status: `加载第 ${page} 页...`,
+            isThinking: true,
+        };
+        try {
+            const result = await invoke("sql_page_query", {
+                filePath: sqlPagination.filePath,
+                sql: sqlPagination.sqlQuery,
+                page: page,
+                pageSize: sqlPagination.pageSize,
+            });
+            insightState = {
+                status: `第 ${page}/${result.total_pages} 页`,
+                statusType: "complete",
+                isThinking: false,
+                content: result.content,
+                showCursor: false,
+            };
+            sqlPagination = {
+                ...sqlPagination,
+                currentPage: page,
+                totalPages: result.total_pages,
+                totalRows: result.total_rows,
+            };
+        } catch (e) {
+            console.error("[Spotlight] Page query failed:", e);
+            insightState = {
+                ...insightState,
+                status: "Error",
+                isThinking: false,
+            };
+        }
+    }
+
     // Mock 数据
     const MOCK_DATA = {
         results: [
@@ -210,6 +251,20 @@
                     content: searchResponse.direct_answer,
                     showCursor: false,
                 };
+
+                // 保存分页元数据
+                if (searchResponse.total_rows && searchResponse.sql_query) {
+                    sqlPagination = {
+                        sqlQuery: searchResponse.sql_query,
+                        filePath: searchResponse.sql_file_path,
+                        totalRows: searchResponse.total_rows,
+                        currentPage: 1,
+                        pageSize: 20,
+                        totalPages: Math.ceil(searchResponse.total_rows / 20),
+                    };
+                } else {
+                    sqlPagination = null;
+                }
                 return;
             }
 
@@ -501,6 +556,8 @@
                         {highlightedCardId}
                         onHighlightCard={handleHighlightCard}
                         onUnhighlightCard={handleUnhighlightCard}
+                        {sqlPagination}
+                        onGoToPage={goToPage}
                     />
                 </div>
             {:else if navigation.view === VIEW_DOC_PARSER}
