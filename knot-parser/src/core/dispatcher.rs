@@ -322,6 +322,7 @@ mod tests {
             pdf_vision_api_url: None,
             pdf_vision_model: None,
             pdf_page_indices: None,
+            pause_flag: None,
         };
 
         dispatcher.inject_summaries(&mut root, &config).await;
@@ -361,6 +362,7 @@ mod tests {
             pdf_vision_api_url: None,
             pdf_vision_model: None,
             pdf_page_indices: None,
+            pause_flag: None,
         };
 
         dispatcher.inject_embeddings(&mut root, &config).await;
