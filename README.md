@@ -1,4 +1,95 @@
-# Knot
+<div align="right">
+  <a href="#english">English</a> | <a href="#简体中文">简体中文</a>
+</div>
+
+---
+
+<h1 id="english">Knot</h1>
+
+Knot is a localized, privacy-first desktop AI assistant (similar to macOS Spotlight), featuring a powerful built-in RAG (Retrieval-Augmented Generation) system. It can deeply parse, semantically search, and intelligently interact with various local documents. The project is primarily built with Rust and Tauri, focusing on high performance and data privacy security.
+
+## 📦 Project Modules
+
+Knot's codebase uses a modular Workspace structure, divided into several core projects by function:
+
+### 🖥️ knot-app (Desktop Application)
+Knot's main program entry, a cross-platform desktop client built with Tauri v2.
+- **Frontend**: Developed with Svelte 5 + Vite, providing a smooth, modern User Interface (UI).
+- **Backend (Rust)**: Handles system-level interactions, local model calls (ONNX Runtime integration), and communication with LLM background processes (such as Llama.cpp Sidecar).
+
+### 🧠 knot-core (Core RAG Engine)
+Knot's core logic layer, responsible for combining document parsing results with AI search capabilities.
+- Manages underlying storage and retrieval systems: integrates `LanceDB` (Vector Database) and `Tantivy` (Full-text Search Engine) to achieve Hybrid Search.
+- Contains text Chunking, Tokenization (Jieba, ICU paragraph segmentation), and core logic for interacting with Embedding models.
+
+### 🔄 knot-parser (Document Parsing Dispatcher)
+A unified document parsing facade, serving as the scheduling center for other format-specific parsers.
+- Aggregates support for PDF, Excel, Markdown, and Office documents (such as docx, pptx, etc.).
+- Provides a unified interface to the upper layer, converting unstructured documents into Knot's standard hierarchical semantic tree (PageNode Tree).
+
+### 📄 knot-pdf (Advanced PDF Parser)
+A Rust-native offline PDF parser built specifically for RAG scenarios.
+- Supports conventional text extraction while featuring rich built-in Computer Vision (CV) and Deep Learning extension capabilities.
+- Supports integration with PDFium rendering, OCR engines (Tesseract, ONNX-based PaddleOCR), Layout Analysis models (Layout Model), and Formula Recognition models (Formula Model), precisely restoring complex PDF document layouts.
+
+### 📊 knot-excel (Spreadsheet Parser)
+A parsing module focused on Excel structured data.
+- High-performance reading of `.xlsx` and other spreadsheet files based on `calamine`.
+- Optional `DuckDB` integration: supports querying and processing complex spreadsheet data via SQL, ideal for data-intensive knowledge Q&A scenarios.
+
+### 📝 knot-markdown (Markdown Parser)
+A semantic Markdown parsing tool.
+- Parses Markdown text into an Abstract Syntax Tree based on `pulldown-cmark`.
+- Automatically builds semantic Heading Trees based on heading levels, preserving the original context structure of the document to significantly improve RAG retrieval quality.
+
+## 🛠️ Technology Stack
+
+- **Core Programming Language**: Rust
+- **Desktop Application Framework**: Tauri v2
+- **Frontend Technologies**: Svelte 5, Vite, JavaScript/TypeScript
+- **Local AI Inference**: ONNX Runtime (for Embedding and Layout Analysis), Llama.cpp (for Large Language Model Inference)
+- **Database Components**: LanceDB (Vector Storage), Tantivy (Inverted Index Search), DuckDB (Table Querying), SQLite (Metadata Storage)
+
+## 🚀 Build and Run
+
+Ensure you have the Rust (Cargo) and Node.js environments installed on your system.
+
+### Build the entire Workspace
+```bash
+cargo build --release
+```
+
+### Run Tauri Desktop Application (Development Mode)
+```bash
+cd knot-app
+npm install
+npm run tauri dev
+```
+
+### Run specific module tests
+```bash
+cargo test -p knot-pdf
+cargo test -p knot-core
+```
+
+## 💻 Development and Testing Environment
+
+The current project is primarily developed and extensively tested in the following environment:
+- **Hardware**: Apple Silicon (Mac M1, etc.)
+- **OS**: macOS
+
+## 📧 Contact
+
+If you have any suggestions, questions, or wish to collaborate, feel free to contact via email:
+- **Email**: [timdoctli@gmail.com](mailto:timdoctli@gmail.com)
+
+## 📄 License
+
+This project is open-sourced under the [MIT License](LICENSE).
+
+---
+
+<h1 id="简体中文">Knot</h1>
 
 Knot 是一个专注于本地化、隐私优先的桌面 AI 助手（类似于 macOS 的 Spotlight），内置了强大的 RAG（检索增强生成）系统，能够对各类本地文档进行深度解析、语义搜索和智能交互。项目主要基于 Rust 和 Tauri 构建，主打高性能与数据隐私安全。
 
@@ -65,3 +156,18 @@ npm run tauri dev
 cargo test -p knot-pdf
 cargo test -p knot-core
 ```
+
+## 💻 开发与测试环境
+
+当前项目主要在以下环境进行开发和充分测试：
+- **硬件**: Apple Silicon (Mac M1 等)
+- **操作系统**: macOS
+
+## 📧 联系方式
+
+如果有任何建议、问题或合作交流，欢迎通过邮件联系：
+- **Email**: [timdoctli@gmail.com](mailto:timdoctli@gmail.com)
+
+## 📄 协议 (License)
+
+本项目采用 [MIT License](LICENSE) 开源协议。
