@@ -51,6 +51,10 @@ fn get_models_dir(app: &tauri::AppHandle) -> PathBuf {
     resolve_resource(app, "models", 2)
 }
 
+fn get_core_models_dir(app: &tauri::AppHandle) -> PathBuf {
+    resolve_resource(app, "core-models", 2)
+}
+
 fn get_bin_dir(app: &tauri::AppHandle) -> PathBuf {
     resolve_resource(app, "bin", 1)
 }
@@ -405,7 +409,8 @@ fn main() {
             // 异步加载 Embedding Engine
             let embedding_clone = embedding.clone();
             let thread_safe_clone = thread_safe_embedding.clone();
-            let embedding_model_path = models_dir.join("bge-small-zh-v1.5.onnx");
+            let core_models_dir = get_core_models_dir(&app_handle);
+            let embedding_model_path = core_models_dir.join("bge-small-zh-v1.5.onnx");
             std::thread::spawn(move || {
                 println!(
                     "[Engine] Loading embedding model from {:?}...",

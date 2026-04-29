@@ -43,8 +43,8 @@
     ],
     "resources": [
       "../bin/**/*",
-      "../../models/bge-small-zh-v1.5.onnx",
-      "../../models/bge-small-zh-v1.5-tokenizer.json",
+      "../../core-models/bge-small-zh-v1.5.onnx",
+      "../../core-models/bge-small-zh-v1.5-tokenizer.json",
       "../stopwords.txt"
     ]
   }
