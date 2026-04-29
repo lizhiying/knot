@@ -1,11 +1,5 @@
 UI: Knot RAG Spotlight
 
-这是一份针对 **Knot RAG Spotlight** 界面的 UI 需求文档（PRD）和设计规范。
-
-设计核心理念：**“沉浸式检索，透明化引用”**。既要像 macOS Spotlight 一样轻快，又要能承载 RAG 复杂的“生成内容 + 证据来源”的双重展示需求。
-
----
-
 # Knot Spotlight UI 需求文档 (Design Spec)
 
 ## 1. 整体布局与视觉风格 (Visual & Layout)

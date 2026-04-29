@@ -18,6 +18,7 @@ dist/
 /knot-app/src-tauri/gen/
 
 # Models (Large binary files)
+/models
 models/*
 !models/.keep
 
