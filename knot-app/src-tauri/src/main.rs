@@ -2113,6 +2113,16 @@ struct RagSearchResponse {
     sql_query: Option<String>,
     /// 分页元数据：文件路径（用于翻页时定位 DuckDB）
     sql_file_path: Option<String>,
+    
+    /// 当检索出多张表并需要用户选择时的状态信号
+    status: Option<String>,
+    candidate_tables: Option<Vec<CandidateTable>>,
+}
+
+#[derive(serde::Serialize, Clone)]
+struct CandidateTable {
+    file_path: String,
+    file_name: String,
 }
 
 /// 将 DataBlock 注入为 Markdown 表格到 context（最多 50 行）
@@ -2232,6 +2242,8 @@ async fn rag_search(
             total_rows: None,
             sql_query: None,
             sql_file_path: None,
+            status: None,
+            candidate_tables: None,
         });
     }
 
@@ -2441,6 +2453,39 @@ async fn rag_search(
         .iter()
         .filter(|r| r.doc_type == "tabular")
         .collect();
+
+    // === 多表降噪拦截 ===
+    if file_path.is_none() {
+        let mut unique_tables = std::collections::HashSet::new();
+        let mut candidate_tables = Vec::new();
+        for t in &tabular_results {
+            if unique_tables.insert(t.file_path.clone()) {
+                let file_name = std::path::Path::new(&t.file_path)
+                    .file_name()
+                    .unwrap_or_default()
+                    .to_string_lossy()
+                    .into_owned();
+                candidate_tables.push(CandidateTable {
+                    file_path: t.file_path.clone(),
+                    file_name,
+                });
+            }
+        }
+
+        if candidate_tables.len() > 1 {
+            println!("[rag_search] Intercepted: found {} candidate tables", candidate_tables.len());
+            return Ok(RagSearchResponse {
+                sources: vec![],
+                context: String::new(),
+                direct_answer: None,
+                total_rows: None,
+                sql_query: None,
+                sql_file_path: None,
+                status: Some("pending_table_selection".to_string()),
+                candidate_tables: Some(candidate_tables),
+            });
+        }
+    }
 
     let has_tabular = !tabular_results.is_empty();
     let has_text = !text_results.is_empty();
@@ -2662,7 +2707,7 @@ async fn rag_search(
                                 use knot_parser::LlmProvider;
                                 let sql_start = std::time::Instant::now();
                                 let sql_gen_result = tokio::time::timeout(
-                                    std::time::Duration::from_secs(30),
+                                    std::time::Duration::from_secs(5), // Reduced from 30s to 5s to fail fast
                                     llm_client.generate_content(&sql_prompt),
                                 )
                                 .await;
@@ -3101,7 +3146,7 @@ async fn rag_search(
 
     // 4.4 Text 结果正常处理
     let mut all_results_for_display: Vec<_> = if has_tabular && has_text {
-        // 混合场景: 合并 text 和 tabular 结果，按分数排序
+        // 混合场景: 直接合并 text 和 tabular 结果，不再调用 LLM 过滤相关性（避免30秒+延迟）
         text_results
             .iter()
             .take(4)
@@ -3202,6 +3247,8 @@ async fn rag_search(
         total_rows: sql_pagination.as_ref().map(|p| p.0),
         sql_query: sql_pagination.as_ref().map(|p| p.1.clone()),
         sql_file_path: sql_pagination.as_ref().map(|p| p.2.clone()),
+        status: Some("ready".to_string()),
+        candidate_tables: None,
     })
 }
 

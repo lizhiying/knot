@@ -151,7 +151,7 @@
 
     let currentGenerationId = 0; // 用于追踪当前生成轮次
 
-    async function handleSearch(query) {
+    async function handleSearch(query, specificFilePath = null) {
         if (!query.trim()) return;
 
         // 无条件取消旧的生成（后端用 generation_id 确保幂等安全）
@@ -186,15 +186,16 @@
             showCursor: false,
         };
         searchResults = [];
+        sqlPagination = null; // Reset pagination state on new search
 
         let searchContext = ""; // 保存上下文供 LLM 生成使用
 
         try {
             // 调用 rag_search（快速返回）
-            console.log("[Spotlight] Invoking rag_search:", query);
+            console.log("[Spotlight] Invoking rag_search:", query, "with path:", specificFilePath);
             const searchResponse = await invoke("rag_search", {
                 query: query,
-                filePath: null,
+                filePath: specificFilePath,
             });
 
             // 如果在搜索期间用户又发起了新搜索，丢弃本次结果
@@ -220,6 +221,27 @@
             searchContext = searchResponse.context;
             isSearching = false; // 关闭左侧骨架屏
             isLoading = false;
+
+            // === 多个结构化表格截停 ===
+            if (searchResponse.status === "pending_table_selection" && searchResponse.candidate_tables) {
+                console.log("[Spotlight] Pending table selection intercept.");
+                const totalDuration = ((performance.now() - searchStartTime) / 1000).toFixed(1);
+                
+                // Let's create an actionable HTML string that renders the candidate list.
+                // Or better yet, pass the data directly into insightState and handle it in AiInsight.
+                insightState = {
+                    status: `Multiple Tables Intercept (${totalDuration}s)`,
+                    statusType: "complete",
+                    isThinking: false,
+                    content: "未响应查询", // Actually we use UI for this, maybe special field
+                    showCursor: false,
+                    candidateTables: searchResponse.candidate_tables,
+                    onSelectTable: (path) => {
+                        handleSearch(query, path);
+                    }
+                };
+                return;
+            }
 
             // 检查是否有搜索结果
             if (searchResults.length === 0 || !searchContext.trim()) {

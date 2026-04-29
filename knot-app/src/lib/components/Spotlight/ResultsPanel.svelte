@@ -41,6 +41,8 @@
             showCursor={insightState.showCursor}
             {sqlPagination}
             {onGoToPage}
+            candidateTables={insightState.candidateTables}
+            onSelectTable={insightState.onSelectTable}
         />
     </div>
 {:else}

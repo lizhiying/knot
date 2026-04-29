@@ -18,6 +18,8 @@
         showCursor = false,
         sqlPagination = null,
         onGoToPage = () => {},
+        candidateTables = null,
+        onSelectTable = () => {},
     } = $props();
 
     // 状态点颜色
@@ -92,6 +94,30 @@
                 use:sortableTables
             >
                 {@html htmlContent}
+            </div>
+        {/if}
+
+        <!-- 候选表选择器 (多表拦截) -->
+        {#if candidateTables && candidateTables.length > 0}
+            <div class="mt-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm">
+                <div class="text-sm font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px] text-amber-500">alt_route</span>
+                    找到了多个相关表格，请明确选择一个：
+                </div>
+                <div class="flex flex-col gap-2">
+                    {#each candidateTables as table}
+                        <button 
+                            class="flex items-center justify-between p-3 rounded-lg border border-[var(--border-color)] hover:border-[var(--accent-primary)] hover:bg-[var(--bg-hover)] transition-all text-left group"
+                            onclick={() => onSelectTable(table.file_path)}
+                        >
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <span class="material-symbols-outlined tracking-wider text-[#10b981] opacity-90">table_chart</span>
+                                <span class="text-sm flex-1 truncate">{table.file_name}</span>
+                            </div>
+                            <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-100 transition-opacity text-[var(--accent-primary)] transform group-hover:translate-x-1 duration-200">arrow_forward</span>
+                        </button>
+                    {/each}
+                </div>
             </div>
         {/if}
 
